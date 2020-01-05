@@ -1195,9 +1195,12 @@ async def dlevel(message,gs):
                             await m.edit(content=str(bot.get_emoji(653161518212448266))+textto("levelup-notify",message.author).format(message.author.mention,gs["levels"][str(message.author.id)]["level"]))
                         except:
                             pass
-                    if gs["reward"].get(str(gs["levels"][str(message.author.id)]["level"]),None):
-                        rl = message.guild.get_role(gs["reward"][str(gs["levels"][str(message.author.id)]["level"])])
-                        await message.author.add_roles(rl)
+                    try:
+                        if gs["reward"].get(str(gs["levels"][str(message.author.id)]["level"]),None):
+                            rl = message.guild.get_role(gs["reward"][str(gs["levels"][str(message.author.id)]["level"])])
+                            await message.author.add_roles(rl)
+                    except:
+                        pass
                 cursor.execute("UPDATE guilds SET levels = ? WHERE id = ?", (gs["levels"],message.guild.id))
 
 @bot.command()
@@ -1685,16 +1688,18 @@ async def globaldel(ctx,gmid:int,gchn:str):
 
 @bot.command()
 async def viewgban(ctx):
+    cursor.execute("select * from users where id=?",(ctx.author.id,))
+    upf = cursor.fetchone()
     cursor.execute("select * from users")
-    upf = cursor.fetchall()
+    pf = cursor.fetchall()
     if upf["gmod"]:
         async with ctx.message.channel.typing():
             blist = []
-            for i in upf:
+            for i in pf:
                 if i["gban"] == True:
                     bu = await bot.fetch_user(i["id"])
                     blist.append(f"ユーザー名:{bu},表示名:{i['gnick']},id:{i['id']}")
-            embed=discord.Embed(title=f"banされたユーザーの一覧({len(blist)}名)",description="```\n{0}```".format('\n'.join(blist)),color=ec)
+            embed=discord.Embed(title=f"banされたユーザーの一覧({len(blist)}名)",description="```{0}```".format('\n'.join(blist)),color=ec)
         await ctx.send(embed=embed)
 
 @bot.command(aliases=["一定時間削除"])
