@@ -15,3 +15,5 @@ weather.png
 氷河.png
 musicfile/
 .vscode/
+__pycache__/
+imgs/

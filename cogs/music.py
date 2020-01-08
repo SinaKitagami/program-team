@@ -2,7 +2,7 @@
 
 import asyncio
 import discord
-from discord.ext import tasks,commands
+from discord.ext import commands
 
 from youtube_dl import YoutubeDL
 import youtube_dl
@@ -13,9 +13,6 @@ from apiclient.discovery import build
 from apiclient.errors import HttpError
 from oauth2client.tools import argparser
 import re
-
-#tokens
-import config
 
 """
 上のモジュールをインストールすること！
@@ -57,7 +54,7 @@ setA = {
     'default_search': 'auto',
     'source_address': '0.0.0.0'  # ipv6 addresses cause issues sometimes
 }
-GAPI_TOKEN = config.GAPI_TOKEN
+
 rt = None
 
 def rt1(self,url,short=False):
@@ -72,7 +69,7 @@ class music(commands.Cog):
 
     def __init__(self,bot):
         self.bot = bot
-        self.youtube = build('youtube', 'v3', developerKey=GAPI_TOKEN)
+        self.youtube = build('youtube', 'v3', developerKey=bot.GAPI_TOKEN)
         self.ytdl = YoutubeDL(ytdlopts)
         self.sydl = YoutubeDL(setA)
         self.music_loop = {}
