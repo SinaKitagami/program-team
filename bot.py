@@ -37,17 +37,17 @@ import m10s_util as ut
 #tokens
 import config
 #cog
-from cogs import music
-from cogs import info
-from cogs import owner
-from cogs import settings
-from cogs import manage
-from cogs import levels
-from cogs import tests
-from cogs import gcoms
-from cogs import search
-from cogs import other
-from cogs import games
+from cogs import m10s_music
+from cogs import m10s_info
+from cogs import m10s_owner
+from cogs import m10s_settings
+from cogs import m10s_manage
+from cogs import m10s_levels
+from cogs import m10s_tests
+from cogs import m10s_gcoms
+from cogs import m10s_search
+from cogs import m10s_other
+from cogs import m10s_games
 
 """import logging
 
@@ -971,17 +971,17 @@ async def on_ready():
     invite_tweet.start()
     now_sina_tweet.start()
     bot.load_extension("jishaku")
-    music.setup(bot)
-    info.setup(bot)
-    owner.setup(bot)
-    settings.setup(bot)
-    manage.setup(bot)
-    levels.setup(bot)
-    tests.setup(bot)
-    gcoms.setup(bot)
-    search.setup(bot)
-    other.setup(bot)
-    games.setup(bot)
+    m10s_music.setup(bot)
+    m10s_info.setup(bot)
+    m10s_owner.setup(bot)
+    m10s_settings.setup(bot)
+    m10s_manage.setup(bot)
+    m10s_levels.setup(bot)
+    m10s_tests.setup(bot)
+    m10s_gcoms.setup(bot)
+    m10s_search.setup(bot)
+    m10s_other.setup(bot)
+    m10s_games.setup(bot)
 
 @bot.event
 async def on_message(message):
