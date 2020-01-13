@@ -3,6 +3,7 @@
 import json
 import sqlite3
 import pickle
+import discord
 
 sqlite3.register_converter('pickle', pickle.loads)
 sqlite3.register_converter('json', json.loads)
@@ -57,3 +58,25 @@ def ondevicon(mem):
     if not str(mem.web_status)=="offline":
         tmp = tmp+"🌐"
     return tmp
+
+def getEmbed(ti,desc,color=int("0x61edff",16),*optiontext):
+    e = discord.Embed(title=ti,description=desc,color=color)
+    nmb = -2
+    while len(optiontext) >= nmb:
+        try:
+            nmb = nmb + 2
+            e.add_field(name=optiontext[nmb],value=optiontext[nmb+1])
+        except IndexError:
+            pass
+    return e
+
+async def opendm(u):
+    dc = u.dm_channel
+    if dc == None:
+        await u.create_dm()
+        dc = u.dm_channel
+    return dc
+
+async def wait_message_return(ctx,stext,sto,tout=60):
+    await sto.send(stext)
+    return await ctx.bot.wait_for('message', check=lambda m: m.author==ctx.author and m.channel==sto,timeout=tout)
