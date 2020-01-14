@@ -6,3 +6,4 @@ musicfile/
 .vscode/
 __pycache__/
 imgs/
+cogtest.py
