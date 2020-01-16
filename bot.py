@@ -48,6 +48,7 @@ from cogs import m10s_gcoms
 from cogs import m10s_search
 from cogs import m10s_other
 from cogs import m10s_games
+from cogs import P143_jyanken
 
 """import logging
 
@@ -55,6 +56,7 @@ logging.basicConfig(level=logging.DEBUG)"""
 
 bot = commands.Bot(command_prefix="s-",status=discord.Status.invisible)
 bot.owner_id = 404243934210949120
+
 
 #トークンたち
 bot.DROP_TOKEN = config.DROP_TOKEN
@@ -89,7 +91,8 @@ rpcs =[
     "アイコン:おあずさん",
     "サーバー数:{0}",
     "ユーザー数:{1}",
-    "作成:mii-10#3110",
+    "作成:チーム☆思惟奈ちゃん",
+    "制作リーダー:mii-10#3110",
     "help:s-help",
     "icon:oaz_n",
     "{0}guilds",
@@ -119,10 +122,8 @@ aglch=None
 
 # gid , oid , invite , PR-text
 bot.partnerg=[
-    (574170788165582849,404243934210949120,"https://discord.gg/xFHW9tE","""このbot作成者、みぃてん☆の公開サーバーです！
-特徴:
-・Boost Level 1
-  128Kbpsのボイスチャット、720P,60fpsのGoLiveストリームなどを行えます。
+    (574170788165582849,404243934210949120,"https://discord.gg/xFHW9tE","""このbot作成者、みぃてん☆のサーバー「みぃてん☆のわいがや広場」です！
+このbot:思惟奈ちゃんのサポートもこのサーバーで行っています。
 ・メンバーと新規参加者の徹底的な分離
   メンバー役職が付与されるまでの間、新規参加者は管理者等のみが見れる場でのみ発言できます。荒らしが来てもそこで報告があれば被害を最小限に抑えることができます。
 ・思惟奈ちゃんによる自動認証
@@ -143,16 +144,14 @@ bot.partnerg=[
 詳しい内容は運営までお問い合わせください、又は以下URLを参照してみてね！
 https://www.rspnet.jp/page_id=618
     """),
-    (648103908170006529,539787492711464960,"https://discord.gg/7P2yVv9","""こちらはYouTubeチャンネル
-きゃらちゃんの部屋の公式サーバーです。
-リスナーたちが気軽に話せるような場所を提供しております。
-是非このサーバーに入ってみませんか？
-たくさんの人たちやBotにより安全なサーバーとなっています。
-またいち早く動画の通知をゲッドできるチャンスです。
-是非入ってくださいね
-また、是非チャンネル登録お願いします！
-YouTubeチャンネルURL:
-https://www.youtube.com/channel/UCPZDqfGwTfWiWhssUArk4ow
+    (648103908170006529,539787492711464960,"https://discord.gg/fhWz4g6","""楽しいからきてね
+要望には出来る限り答えます
+ゲームカテでの情報交換や、botなどのプログラマーの情報交換にも長けています。
+みんなで盛り上げよう！
+最後に
+誰でも歓迎だ！！過去の経歴？知らないなあ！
+怪しい行動をとったら処罰されるのはあれですけど
+ルールを守れば大丈夫だ！
     """),
     (641577651022069771,561723377094754304,"https://discord.gg/4JZQAA8","様々なBotもいたり、バラエティに富んだコーナーもあります！")
 ]
@@ -598,10 +597,13 @@ async def on_member_join(member):
     e.timestamp = member.created_at
     bot.cursor.execute("select * from guilds where id=?",(member.guild.id,))
     gpf = bot.cursor.fetchone()
-    if gpf["sendlog"]:
-        ch = bot.get_channel(gpf["sendlog"])
-        if ch.guild.id == member.guild.id:
-            await ch.send(embed=e)
+    try:
+        if gpf["sendlog"]:
+            ch = bot.get_channel(gpf["sendlog"])
+            if ch.guild.id == member.guild.id:
+                await ch.send(embed=e)
+    except:
+        pass
     e.set_footer(text=member.guild.name,icon_url=member.guild.icon_url_as(static_format="png"))
     e.timestamp = datetime.datetime.now() - rdelta(hours=9)
     await aglch.send(embed=e)
@@ -982,6 +984,7 @@ async def on_ready():
     m10s_search.setup(bot)
     m10s_other.setup(bot)
     m10s_games.setup(bot)
+    P143_jyanken.setup(bot)
 
 @bot.event
 async def on_message(message):
@@ -1232,9 +1235,12 @@ async def help(ctx,rcmd=None):
                                 if sewd in k.replace("h-","")  or sewd in v:
                                     sre.add_field(name=k.replace("h-",""),value=v.replace(sewd,f"**{sewd}**"))
                     await ctx.send(embed=sre)
-        await msg.remove_reaction(bot.get_emoji(653161518195671041),bot.user)
-        await msg.remove_reaction("🔍",bot.user)
-        await msg.remove_reaction(bot.get_emoji(653161518170505216),bot.user)
+        try:
+            await msg.remove_reaction(bot.get_emoji(653161518195671041),bot.user)
+            await msg.remove_reaction("🔍",bot.user)
+            await msg.remove_reaction(bot.get_emoji(653161518170505216),bot.user)
+        except:
+            pass
     else:
         embed = discord.Embed(title=str(rcmd), description=ut.textto(f"h-{str(rcmd)}",ctx.message.author), color=bot.ec)
         if embed.description.startswith("Not found key:") or embed.description.startswith("Not found language:"):
@@ -1246,14 +1252,14 @@ async def help(ctx,rcmd=None):
 
 @bot.event
 async def on_command_error(ctx, error):
-    await ctx.send(f"{error}")
+    #await ctx.send(f"{error}")
     #global DoServercmd
     """if isinstance(error, commands.CommandNotFound):
         if not DoServercmd:
             embed = discord.Embed(title=ut.textto("cmd-error-t",ctx.message.author), description=ut.textto("cmd-notfound-d",ctx.message.author), color=bot.ec)
             DoServercmd = False
             await ctx.send(embed=embed)
-    el
+    el"""
     if isinstance(error,commands.CommandOnCooldown):
         #クールダウン
         embed = discord.Embed(title=ut.textto("cmd-error-t",ctx.message.author), description=ut.textto("cmd-cooldown-d",ctx.message.author).format(str(error.retry_after)[:4]), color=bot.ec)
@@ -1271,14 +1277,14 @@ async def on_command_error(ctx, error):
     else:
         #その他例外
         ch=bot.get_channel(652127085598474242)
-        await ch.send(embed=ut.getEmbed("エラーログ",f"コマンド:`{ctx.command.name}`\n```{str(error)}```",ec,f"サーバー",ctx.guild.name,"実行メンバー",ctx.author.name,"メッセージ内容",ctx.message.content))"""
+        await ch.send(embed=ut.getEmbed("エラーログ",f"コマンド:`{ctx.command.name}`\n```{str(error)}```",ec,f"サーバー",ctx.guild.name,"実行メンバー",ctx.author.name,"メッセージ内容",ctx.message.content))
 
 
 
 @tasks.loop(time=datetime.time(hour=23,minute=0,second=0))
 async def invite_tweet():
     try:
-        twi.statuses.update(status=f"[定期投稿]\nみぃてん☆の公開Discordサーバー:https://discord.gg/GbHq7fz\nみぃてん☆制作、多機能Discordbot思惟奈ちゃん:https://discordapp.com/oauth2/authorize?client_id=462885760043843584&permissions=8&scope=bot\n<この投稿は思惟奈ちゃんより行われました。>")
+        bot.twi.statuses.update(status=f"[定期投稿]\nみぃてん☆の公開Discordサーバー:https://discord.gg/GbHq7fz\nみぃてん☆制作、多機能Discordbot思惟奈ちゃん:https://discordapp.com/oauth2/authorize?client_id=462885760043843584&permissions=8&scope=bot\n<この投稿は思惟奈ちゃんより行われました。>")
     except:
         dc=bot.get_user(404243934210949120)
         await dc.send(f"have error:```{traceback.format_exc(1)}```")
@@ -1286,11 +1292,11 @@ async def invite_tweet():
 @tasks.loop(time=datetime.time(hour=8,minute=0,second=0))
 async def now_sina_tweet():
     try:
-        twi.statuses.update(status=f"[定期投稿]\n思惟奈ちゃんのいるサーバー数:{len(bot.guilds)}\n思惟奈ちゃんの公式サーバー:https://discord.gg/udA3qgZ\n<この投稿は思惟奈ちゃんより行われました。>")
+        bot.twi.statuses.update(status=f"[定期投稿]\n思惟奈ちゃんのいるサーバー数:{len(bot.guilds)}\n思惟奈ちゃんの公式サーバー:https://discord.gg/udA3qgZ\n<この投稿は思惟奈ちゃんより行われました。>")
     except:
         dc=bot.get_user(404243934210949120)
         await dc.send(f"have error:```{traceback.format_exc(1)}```")
-    pr=random.choice(partnerg)
+    pr=random.choice(bot.partnerg)
     if pr[3]!="":
         e=ut.getEmbed("パートナーサーバー紹介",f"{bot.get_guild(pr[0])}\n{pr[3]}\n参加: {pr[2]}")
         bot.cursor.execute("select * from globalchs where name=?",("main",))
@@ -1311,7 +1317,7 @@ async def now_sina_tweet():
 
 
 #通常トークン
-#bot.run(bot.BOT_TOKEN)
+bot.run(bot.BOT_TOKEN)
 
 #テストトークン
-bot.run(bot.BOT_TEST_TOKEN)
+#bot.run(bot.BOT_TEST_TOKEN)

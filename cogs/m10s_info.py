@@ -155,7 +155,7 @@ class info(commands.Cog):
             sevinfo = self.bot.get_guild(int(str(sid)))
         else:
             sevinfo = ctx.message.guild
-        if sevinfo.id in [i[0] for i in partnerg]:
+        if sevinfo.id in [i[0] for i in self.bot.partnerg]:
             ptn="🔗パートナーサーバー:"
         else:
             ptn=""
