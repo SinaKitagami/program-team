@@ -129,7 +129,7 @@ class other(commands.Cog):
     @commands.command(aliases=["フィードバック","開発者にフィードバックを送って"])
     async def feedback(self,ctx,ttl,ctt=None):
         embed = discord.Embed(title=ttl, description=ctt, color=self.bot.ec)
-        fbc = self.bot.get_channel(532497710649966592)
+        fbc = self.bot.get_channel(667361484283707393)
         embed.set_author(name=f"{str(ctx.message.author)}", icon_url=ctx.message.author.avatar_url_as(static_format='png'))
         await fbc.send(embed=embed)
         await ctx.send(ut.textto("feedback-sended",ctx.message.author))
@@ -137,7 +137,7 @@ class other(commands.Cog):
     @commands.command(aliases=["レポート","報告","通報","お知らせ"])
     async def report(self,ctx,ttl,*,ctt=None):
         embed = discord.Embed(title=ttl, description=ctt, color=self.bot.ec)
-        fbc = self.bot.get_channel(564353126770016256)
+        fbc = self.bot.get_channel(667361501924950036)
         embed.set_author(name=f"{str(ctx.message.author)}", icon_url=ctx.message.author.avatar_url_as(static_format='png'))
         await fbc.send(embed=embed)
         await ctx.send(ut.textto("thanks-report",ctx.author))

@@ -155,12 +155,12 @@ class info(commands.Cog):
             sevinfo = self.bot.get_guild(int(str(sid)))
         else:
             sevinfo = ctx.message.guild
-        if sevinfo.id in [i[0] for i in partnerg]:
+        if sevinfo.id in [i[0] for i in self.bot.partnerg]:
             ptn="🔗パートナーサーバー:"
         else:
             ptn=""
         try:
-            embed = discord.Embed(title=ut.textto("serverinfo-name",ctx.message.author), description=sevinfo.name, color=bot.ec)
+            embed = discord.Embed(title=ut.textto("serverinfo-name",ctx.message.author), description=sevinfo.name, color=self.bot.ec)
             if not sevinfo.icon_url == None:
                 embed.set_thumbnail(url=sevinfo.icon_url_as(static_format='png'))
             embed.add_field(name=ut.textto("serverinfo-role",ctx.message.author), value=len(sevinfo.roles))
