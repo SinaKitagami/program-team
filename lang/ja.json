@@ -263,7 +263,7 @@
     "ssm-seeyou":"サーバーから退出したとき",
     "ssm-set":"設定しました！",
     "ssm-not":"不備があります。`s-help setsysmsg`で確認してください！",
-    
+
     "serverinfo-afkch":"afkチャンネル",
     "serverinfo-afktimeout":"afkタイムアウト",
     "ci-None":"なし",
@@ -365,7 +365,7 @@
     "twi-twi":"ツイート",
     "twi-see":"このツイートを見る",
     "twi-error":"取得できませんでした。",
-    
+
     "game1-join-anyone":"ゲームプレイの招待があります！リアクションして参加しましょう！",
     "game1-vs-et":"near21(対人)",
     "game1-vs-ed":"1P:{0}\n2P:{1}\n21に近づけましょう！",
@@ -629,5 +629,7 @@
     "ranklev-outsideg":"サーバー外のユーザー",
     "ranklev-lenover":"表示できてない分あり",
 
-    "playinginfo-custom_status":"カスタムステータス"
+    "playinginfo-custom_status":"カスタムステータス",
+
+    "mee6-notfound":"このサーバーは登録されてないってよ"
 }
