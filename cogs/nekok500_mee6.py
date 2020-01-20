@@ -26,6 +26,6 @@ class MEE6(commands.Cog):
                 for row in js["players"][start:end]:
                     l.append("{0}: {1}Lv {2}/{3}exp".format(ctx.guild.get_member(row["id"]).name if not ctx.guild.get_member(row["id"]) is None else (row["username"] + "#" + row["discriminator"])
                         ,row["level"],row["detailed_xp"][0],row["detailed_xp"][1]))
-                await ctx.send(embed=discord.Embed(title="MEE6 LeaderBoard",description="\n".join(l)),color=0x05FF05)
+                await ctx.send(embed=discord.Embed(title="MEE6 LeaderBoard",description="\n".join(l),color=0x05FF05))
 def setup(bot):
     bot.add_cog(MEE6(bot))
