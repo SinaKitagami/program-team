@@ -49,6 +49,8 @@ from cogs import m10s_search
 from cogs import m10s_other
 from cogs import m10s_games
 from cogs import P143_jyanken
+from cogs import nekok500_mee6
+from cogs import syouma
 
 """import logging
 
@@ -283,7 +285,7 @@ async def globalSend(message):
                     ne = discord.Embed(title="", description="", color=upf["gcolor"])
                     ne.set_author(name=f"{ut.ondevicon(message.author)},ユーザーのID:{str(message.author.id)}")
                     if message.guild.id in [i[0] for i in bot.partnerg]:
-                        ne.set_footer(text=f"🔗(パートナーサーバー):{message.guild.name}(id:{message.guild.id})",icon_url=message.guild.icon_url_as(static_format="png"))
+                        ne.set_footer(text=f"🔗(パートナーサーバー):{message.guild.name}(id:{message.guild.id}),{[i[2] for i in bot.partnerg if i[0]==message.guild.id][0]}",icon_url=message.guild.icon_url_as(static_format="png"))
                     else:
                         ne.set_footer(text=f"{message.guild.name}(id:{message.guild.id})",icon_url=message.guild.icon_url_as(static_format="png"))
                     ne.timestamp = datetime.datetime.now() - rdelta(hours=9)
@@ -951,10 +953,6 @@ async def on_guild_remove(guild):
     dc = await ut.opendm(bot.get_user(404243934210949120))
     await dc.send(f"`{guild.name}`(id:{guild.id})から退出しました。")
 
-@bot.event
-async def on_guild_channel_pins_update(ch,lmtime):
-    if ch.guild.id in [461153681971216384,574170788165582849]:
-        await ch.send(embed=ut.getEmbed("pin-update!","",ec))
 
 @bot.event
 async def on_ready():
@@ -985,6 +983,8 @@ async def on_ready():
     m10s_other.setup(bot)
     m10s_games.setup(bot)
     P143_jyanken.setup(bot)
+    nekok500_mee6.setup(bot)
+    syouma.setup(bot)
 
 @bot.event
 async def on_message(message):
@@ -1269,7 +1269,7 @@ async def on_command_error(ctx, error):
         embed = discord.Embed(title=ut.textto("cmd-error-t",ctx.message.author), description="このコマンドはオーナー専用だってよ", color=bot.ec)
         await ctx.send(embed=embed)
         ch=bot.get_channel(652127085598474242)
-        await ch.send(embed=ut.getEmbed("エラーログ",f"コマンド:`{ctx.command.name}`\n```{str(error)}```",ec,f"サーバー",ctx.guild.name,"実行メンバー",ctx.author.name,"メッセージ内容",ctx.message.content))
+        await ch.send(embed=ut.getEmbed("エラーログ",f"コマンド:`{ctx.command.name}`\n```{str(error)}```",bot.ec,f"サーバー",ctx.guild.name,"実行メンバー",ctx.author.name,"メッセージ内容",ctx.message.content))
     elif isinstance(error,commands.MissingRequiredArgument):
         #引数がないよっ☆
         embed = discord.Embed(title=ut.textto("cmd-error-t",ctx.message.author), description=f"値が渡されていない引数があります！\n引数を見直してください！", color=bot.ec)
@@ -1277,7 +1277,7 @@ async def on_command_error(ctx, error):
     else:
         #その他例外
         ch=bot.get_channel(652127085598474242)
-        await ch.send(embed=ut.getEmbed("エラーログ",f"コマンド:`{ctx.command.name}`\n```{str(error)}```",ec,f"サーバー",ctx.guild.name,"実行メンバー",ctx.author.name,"メッセージ内容",ctx.message.content))
+        await ch.send(embed=ut.getEmbed("エラーログ",f"コマンド:`{ctx.command.name}`\n```{str(error)}```",bot.ec,f"サーバー",ctx.guild.name,"実行メンバー",ctx.author.name,"メッセージ内容",ctx.message.content))
 
 
 

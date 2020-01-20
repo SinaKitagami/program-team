@@ -1,10 +1,14 @@
 import discord,aiohttp
 from discord.ext import commands
 
+import m10s_util as ut
+
 class MEE6(commands.Cog):
     def __init__(self,bot):
         self.bot = bot
-        self.session = aiohttp.ClientSession(loop=self.loop)
+        self.bot.session = aiohttp.ClientSession(loop=bot.loop)
+
+
     @commands.command()
     @commands.guild_only()
     @commands.cooldown(1,5,commands.BucketType.guild)
@@ -14,7 +18,7 @@ class MEE6(commands.Cog):
             js = await resp.json()
             if "status_code" in js:
                 if js["status_code"] == 404:
-                    await ctx.send(embed=discord.Embed(ut.textto("mee6-notfound")))
+                    await ctx.send(embed=discord.Embed(title=ut.textto("cmd-error-t",ctx.author),description=ut.textto("mee6-notfound",ctx.author)))
                     return
 
             else:
