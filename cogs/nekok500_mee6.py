@@ -12,7 +12,7 @@ class MEE6(commands.Cog):
     @commands.command()
     @commands.guild_only()
     @commands.cooldown(1,5,commands.BucketType.guild)
-    async def levels(self,ctx,start=1,end=0):
+    async def levels(self,ctx,start=1,end=10):
         start -= 1
         async with self.bot.session.get("https://mee6.xyz/api/plugins/levels/leaderboard/{0}".format(ctx.guild.id)) as resp:
             js = await resp.json()

@@ -51,8 +51,10 @@ class info(commands.Cog):
             except:
                 await ctx.send(ut.textto("aui-othere",ctx.author).format(traceback.format_exc()))
             else:
+                if u.id in self.bot.team:
+                    ptn=",(🌠チーム☆思惟奈ちゃん)"
                 if u.id in [i[1] for i in self.bot.partnerg]:
-                    ptn=":🔗パートナーサーバーオーナー"
+                    ptn=ptn+",(🔗パートナーサーバーオーナー)"
                 else:
                     ptn=""
                 e = discord.Embed(title=f"{ut.textto('aui-uinfo',ctx.author)}{ptn}",color=self.bot.ec)
@@ -76,8 +78,10 @@ class info(commands.Cog):
         else:
             info = mus
         async with ctx.message.channel.typing(): 
+            if info.id in self.bot.team:
+                ptn=",(🌠チーム☆思惟奈ちゃん)"
             if info.id in [i[1] for i in self.bot.partnerg]:
-                ptn="🔗パートナーサーバーオーナー:"
+                ptn=ptn+",(🔗パートナーサーバーオーナー)"
             else:
                 ptn=""
             if ctx.guild.owner == info:
