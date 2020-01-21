@@ -59,6 +59,7 @@ logging.basicConfig(level=logging.DEBUG)"""
 bot = commands.Bot(command_prefix="s-",status=discord.Status.invisible)
 bot.owner_id = 404243934210949120
 
+bot.team = (235734600356331520, 333900730228539393, 365423990749003778, 394358022681395200, 404243934210949120, 415526420115095554, 431805523969441803, 449867036558884866, 455284639108431873, 462765491325501445, 471988147820036106, 539787492711464960, 561000119495819290, 586157827400400907, 594058726902595596, 607645717623996426, 618085816425512970, 631786733511376916, 657214718410489869, 662322152665776138)
 
 #トークンたち
 bot.DROP_TOKEN = config.DROP_TOKEN
@@ -144,7 +145,7 @@ bot.partnerg=[
 このサーバでは主に マインクラフトサーバへ参加することができたり、自由に雑談・チャットや音楽を自管理botを含めて複数人で別々の音楽が聞くことができます！
 
 詳しい内容は運営までお問い合わせください、又は以下URLを参照してみてね！
-https://www.rspnet.jp/page_id=618
+https://www.rspnet.jp/?page_id=618
     """),
     (648103908170006529,539787492711464960,"https://discord.gg/fhWz4g6","""楽しいからきてね
 要望には出来る限り答えます
@@ -296,6 +297,8 @@ async def globalSend(message):
                     spicon = ""
                     if message.author.id == 404243934210949120:
                         spicon = spicon + "🌈"
+                    if message.author.id in bot.team:
+                        spicon = spicon + "🌠"
                     if message.author.bot:
                         spicon = spicon + "⚙"
                     if upf["sinapartner"]:
@@ -610,24 +613,37 @@ async def on_member_join(member):
     e.timestamp = datetime.datetime.now() - rdelta(hours=9)
     await aglch.send(embed=e)
     #他サーバーでのban通知
+    isgban = False
+    bot.cursor.execute("select * from users where id=?",(ctx.author.id,))
+    upf = bot.cursor.fetchone()
     bunotif = 0
-    for g in bot.guilds:
-        
-        try:
-            tmp = await g.bans()
-        except:
-            continue
-        banulist = [i.user.id for i in tmp]
-        if member.id in banulist:
-            bunotif = bunotif + 1
-    if bunotif == 0:
+    if member.id in bot.team:
         for ch in member.guild.channels:
             if ch.name == "sina-user-check":
-                await ch.send(embed=discord.Embed(title=f"{member}の安全性評価",description=f"そのユーザーは、思惟奈ちゃんのいるサーバーでは、banされていません。"))
+                await ch.send(embed=discord.Embed(title=f"{member}の安全性評価",description=f"そのユーザーは、チーム☆思惟奈ちゃんのメンバーです。"))
+    elif upf["gban"] == 1:
+        for ch in member.guild.channels:
+            if ch.name == "sina-user-check":
+                await ch.send(embed=discord.Embed(title=f"{member}の安全性評価",description=f"そのユーザーは、思惟奈ちゃんグローバルチャットbanを受けています。\n何らかの事情があってこうなっていますので十分に注意してください。"))
+
     else:
-        for ch in member.guild.channels:
-            if ch.name == "sina-user-check":
-                await ch.send(embed=discord.Embed(title=f"{member}の安全性評価",description=f"そのユーザーは、思惟奈ちゃんのいる{bunotif}のサーバーでbanされています。注意してください。"))
+        for g in bot.guilds:
+            
+            try:
+                tmp = await g.bans()
+            except:
+                continue
+            banulist = [i.user.id for i in tmp]
+            if member.id in banulist:
+                bunotif = bunotif + 1
+        if bunotif == 0:
+            for ch in member.guild.channels:
+                if ch.name == "sina-user-check":
+                    await ch.send(embed=discord.Embed(title=f"{member}の安全性評価",description=f"そのユーザーは、思惟奈ちゃんのいるサーバーでは、banされていません。"))
+        else:
+            for ch in member.guild.channels:
+                if ch.name == "sina-user-check":
+                    await ch.send(embed=discord.Embed(title=f"{member}の安全性評価",description=f"そのユーザーは、思惟奈ちゃんのいる{bunotif}のサーバーでbanされています。注意してください。"))
 
 
 @bot.event
@@ -1034,7 +1050,7 @@ async def domsg(message):
     ctx = await bot.get_context(message)
     try:
         if ctx.command:
-            if ctx.command.name in gs["lockcom"] and not ctx.author.guild_permissions.administrator:
+            if ctx.command.name in gs["lockcom"] and not ctx.author.guild_permissions.administrator and ctx.author.id != 404243934210949120:
                 await ctx.send(ut.textto("comlock-locked",ctx.author))
             else:
                 await bot.process_commands(message)
