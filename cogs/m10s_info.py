@@ -51,7 +51,7 @@ class info(commands.Cog):
             except:
                 await ctx.send(ut.textto("aui-othere",ctx.author).format(traceback.format_exc()))
             else:
-                if u.id in self.bot.team:
+                if u.id in self.bot.team_sina:
                     ptn=",(🌠チーム☆思惟奈ちゃん)"
                 if u.id in [i[1] for i in self.bot.partnerg]:
                     ptn=ptn+",(🔗パートナーサーバーオーナー)"
@@ -71,14 +71,13 @@ class info(commands.Cog):
 
     @commands.command(aliases=["ユーザー情報","ユーザーの情報を教えて"])
     async def userinfo(self,ctx, mus:commands.MemberConverter=None):
-
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
         if mus == None:
             info = ctx.message.author
         else:
             info = mus
         async with ctx.message.channel.typing(): 
-            if info.id in self.bot.team:
+            if info.id in self.bot.team_sina:
                 ptn=",(🌠チーム☆思惟奈ちゃん)"
             if info.id in [i[1] for i in self.bot.partnerg]:
                 ptn=ptn+",(🔗パートナーサーバーオーナー)"
@@ -101,8 +100,8 @@ class info(commands.Cog):
             embed.add_field(name=ut.textto("userinfo-joinserver",ctx.message.author), value=info.joined_at)
             if not info.activity == None:
                 try:
-                    if info.activity.name == "Custom Status":
-                        embed.add_field(name=ut.textto("userinfo-nowplaying",ctx.message.author), value=f'{info.activity.state}')
+                    if info.activity.type == discord.ActivityType.custom:
+                        embed.add_field(name=ut.textto("userinfo-nowplaying",ctx.message.author), value=info.activity)
                     else:
                         embed.add_field(name=ut.textto("userinfo-nowplaying",ctx.message.author), value=f'{info.activity.name}')
                 except:
@@ -444,14 +443,10 @@ class info(commands.Cog):
                     activName=ut.textto("playinginfo-listening",ctx.message.author).format(anactivity.name)
                 elif anactivity.type ==  discord.ActivityType.streaming:
                     activName=ut.textto("playinginfo-streaming",ctx.message.author)+anactivity.name
+                elif anactivity.type ==  discord.ActivityType.custom:
+                    activName=ut.textto("playinginfo-custom_status",ctx.message.author)
                 else:
-                    try:
-                        if anactivity.name == "Custom Status":
-                            activName=ut.textto("playinginfo-custom_status",ctx.message.author)
-                        else:
-                            activName=ut.textto("playinginfo-unknown",ctx.message.author)+anactivity.name
-                    except:
-                        activName=ut.textto("playinginfo-unknown",ctx.message.author)+anactivity.name
+                    activName=ut.textto("playinginfo-unknown",ctx.message.author)+anactivity.name
                 embed = discord.Embed(title=ut.textto("playinginfo-doing",ctx.message.author), description=activName, color=info.color)
                 activ=anactivity
                 embed.set_author(name=info.display_name, icon_url=info.avatar_url_as(static_format='png'))
@@ -476,6 +471,8 @@ class info(commands.Cog):
                         embed.add_field(name=ut.textto("playinginfo-do",ctx.message.author), value=activ.datails)
                     except:
                         pass
+                elif anactivity.type==discord.ActivityType.custom:
+                    embed.add_field(name=ut.textto("playinginfo-det",ctx.message.author), value=anactivity.name)
                 else:
                     try:
                         vl = ""
