@@ -59,7 +59,7 @@ logging.basicConfig(level=logging.DEBUG)"""
 bot = commands.Bot(command_prefix="s-",status=discord.Status.invisible)
 bot.owner_id = 404243934210949120
 
-bot.team = (235734600356331520, 333900730228539393, 365423990749003778, 394358022681395200, 404243934210949120, 415526420115095554, 431805523969441803, 449867036558884866, 455284639108431873, 462765491325501445, 471988147820036106, 539787492711464960, 561000119495819290, 586157827400400907, 594058726902595596, 607645717623996426, 618085816425512970, 631786733511376916, 657214718410489869, 662322152665776138)
+bot.team_sina = (235734600356331520, 333900730228539393, 365423990749003778, 394358022681395200, 404243934210949120, 415526420115095554, 431805523969441803, 449867036558884866, 455284639108431873, 462765491325501445, 471988147820036106, 539787492711464960, 561000119495819290, 586157827400400907, 594058726902595596, 607645717623996426, 618085816425512970, 631786733511376916, 657214718410489869, 662322152665776138)
 
 #トークンたち
 bot.DROP_TOKEN = config.DROP_TOKEN
@@ -294,10 +294,14 @@ async def globalSend(message):
                     embed.set_footer(text=f"{message.guild.name}(id:{message.guild.id})",icon_url=message.guild.icon_url_as(static_format="png"))
                     if not message.application == None:
                         embed.add_field(name=message.application["name"]+"へのRPC招待", value="RPC招待はグローバル送信できません。")
+                    
                     spicon = ""
-                    if message.author.id == 404243934210949120:
+
+                    if message.author.id == 404243934210949120:  ##みぃてん☆
                         spicon = spicon + "🌈"
-                    if message.author.id in bot.team:
+                    if message.author.id == 539787492711464960:  ##きゃらちゃんさん
+                        spicon = spicon + "❤"
+                    if message.author.id in bot.team_sina:  ##チーム☆思惟奈ちゃん
                         spicon = spicon + "🌠"
                     if message.author.bot:
                         spicon = spicon + "⚙"
@@ -313,6 +317,7 @@ async def globalSend(message):
                         spicon = spicon + "🌟"
                     if spicon == "":
                         spicon = "👤"
+                    
                     embed.set_author(name=f"{upf['gnick']}({spicon}):{str(message.author.id)}", icon_url=message.author.avatar_url_as(static_format="png"))
                     if not message.attachments == []:
                         embed.set_image(url=message.attachments[0].url)
@@ -969,6 +974,42 @@ async def on_guild_remove(guild):
     dc = await ut.opendm(bot.get_user(404243934210949120))
     await dc.send(f"`{guild.name}`(id:{guild.id})から退出しました。")
 
+@bot.event
+async def on_invite_create(invite):
+    e=discord.Embed(title="サーバー招待の作成",color=bot.ec)
+    e.add_field(name="作成ユーザー",value=str(invite.inviter))
+    e.add_field(name="使用可能回数",value=str(invite.max_uses))
+    e.add_field(name="使用可能時間",value=str(invite.max_age))
+    e.add_field(name="チャンネル",value=str(invite.channel.mention))
+    e.add_field(name="コード",value=str(invite.code))
+    e.timestamp = datetime.datetime.now() - rdelta(hours=9)
+    bot.cursor.execute("select * from guilds where id=?",(invite.guild.id,))
+    gpf = bot.cursor.fetchone()
+    if gpf["sendlog"]:
+        ch = bot.get_channel(gpf["sendlog"])
+        if ch.guild.id == invite.guild.id:
+            await ch.send(embed=e)
+    e.set_footer(text=invite.guild.name,icon_url=invite.guild.icon_url_as(static_format="png"))
+    e.timestamp = datetime.datetime.now() - rdelta(hours=9)
+    await aglch.send(embed=e)
+
+
+@bot.event
+async def on_invite_delete(invite):
+    e=discord.Embed(title="サーバー招待の削除",color=bot.ec)
+    e.add_field(name="作成ユーザー",value=str(invite.inviter))
+    e.add_field(name="チャンネル",value=str(invite.channel.mention))
+    e.add_field(name="コード",value=str(invite.code))
+    e.timestamp = datetime.datetime.now() - rdelta(hours=9)
+    bot.cursor.execute("select * from guilds where id=?",(invite.guild.id,))
+    gpf = bot.cursor.fetchone()
+    if gpf["sendlog"]:
+        ch = bot.get_channel(gpf["sendlog"])
+        if ch.guild.id == invite.guild.id:
+            await ch.send(embed=e)
+    e.set_footer(text=invite.guild.name,icon_url=invite.guild.icon_url_as(static_format="png"))
+    e.timestamp = datetime.datetime.now() - rdelta(hours=9)
+    await aglch.send(embed=e)
 
 @bot.event
 async def on_ready():
@@ -984,8 +1025,8 @@ async def on_ready():
         pass
     aglch = bot.get_channel(659706303521751072)
     cRPC.start()
-    invite_tweet.start()
-    now_sina_tweet.start()
+    """invite_tweet.start()
+    now_sina_tweet.start()"""
     bot.load_extension("jishaku")
     m10s_music.setup(bot)
     m10s_info.setup(bot)
@@ -1295,7 +1336,7 @@ async def on_command_error(ctx, error):
         ch=bot.get_channel(652127085598474242)
         await ch.send(embed=ut.getEmbed("エラーログ",f"コマンド:`{ctx.command.name}`\n```{str(error)}```",bot.ec,f"サーバー",ctx.guild.name,"実行メンバー",ctx.author.name,"メッセージ内容",ctx.message.content))
 
-
+"""
 
 @tasks.loop(time=datetime.time(hour=23,minute=0,second=0))
 async def invite_tweet():
@@ -1331,9 +1372,10 @@ async def now_sina_tweet():
             except:
                 pass
 
+"""
 
 #通常トークン
-bot.run(bot.BOT_TOKEN)
+#bot.run(bot.BOT_TOKEN)
 
 #テストトークン
-#bot.run(bot.BOT_TEST_TOKEN)
+bot.run(bot.BOT_TEST_TOKEN)
