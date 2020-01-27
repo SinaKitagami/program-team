@@ -51,12 +51,11 @@ class info(commands.Cog):
             except:
                 await ctx.send(ut.textto("aui-othere",ctx.author).format(traceback.format_exc()))
             else:
+                ptn=""
                 if u.id in self.bot.team_sina:
                     ptn=",(🌠チーム☆思惟奈ちゃん)"
                 if u.id in [i[1] for i in self.bot.partnerg]:
                     ptn=ptn+",(🔗パートナーサーバーオーナー)"
-                else:
-                    ptn=""
                 e = discord.Embed(title=f"{ut.textto('aui-uinfo',ctx.author)}{ptn}",color=self.bot.ec)
                 e.add_field(name=ut.textto("aui-name",ctx.author),value=u.name)
                 e.add_field(name=ut.textto("aui-id",ctx.author),value=u.id)
@@ -77,16 +76,16 @@ class info(commands.Cog):
         else:
             info = mus
         async with ctx.message.channel.typing(): 
+            ptn=""
             if info.id in self.bot.team_sina:
                 ptn=",(🌠チーム☆思惟奈ちゃん)"
             if info.id in [i[1] for i in self.bot.partnerg]:
                 ptn=ptn+",(🔗パートナーサーバーオーナー)"
-            else:
-                ptn=""
             if ctx.guild.owner == info:
-                embed = discord.Embed(title=ut.textto("userinfo-name",ctx.message.author), description=f"{ptn}{info.name} - {ut.ondevicon(info)} - {ut.textto('userinfo-owner',ctx.message.author)}", color=info.color)
+                embed = discord.Embed(title="ユーザー情報", description=f"{ptn} - {ut.textto('userinfo-owner',ctx.message.author)}", color=info.color)
             else:
-                embed = discord.Embed(title=ut.textto("userinfo-name",ctx.message.author), description=f"{ptn}{info.name} - {ut.ondevicon(info)}", color=info.color)
+                embed = discord.Embed(title="ユーザー情報", description=ptn, color=info.color)
+            embed.add_field(name=ut.textto("userinfo-name",ctx.message.author),value=f"{info.name} - {ut.ondevicon(info)}")
             try:
                 if not info.premium_since is None:
                     embed.add_field(name=ut.textto("userinfo-guildbooster",ctx.message.author), value=f"since {info.premium_since}")
