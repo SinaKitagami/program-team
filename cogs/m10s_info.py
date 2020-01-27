@@ -472,7 +472,7 @@ class info(commands.Cog):
                     except:
                         pass
                 elif anactivity.type==discord.ActivityType.custom:
-                    embed.add_field(name=ut.textto("playinginfo-det",ctx.message.author), value=anactivity.name)
+                    embed.add_field(name=ut.textto("playinginfo-det",ctx.message.author), value=str(anactivity))
                 else:
                     try:
                         vl = ""
@@ -670,8 +670,9 @@ class info(commands.Cog):
             except:
                 await mp.edit(embed=discord.Embed(title=ut.textto("ginfo-anyerror-title",ctx.author),description=ut.textto("ginfo-anyerror-desc",ctx.author).format(traceback.format_exc(0)),color=self.bot.ec))
 
-
-
+    @commands.command(name="team_sina-chan")
+    async def view_teammember(self,ctx):
+        await ctx.send(embed=ut.getEmbed("チーム☆思惟奈ちゃん","\n".join([self.bot.get_user(i).name for i in self.bot.team_sina])))
 
 def setup(bot):
     bot.add_cog(info(bot))
