@@ -11,7 +11,7 @@ class Symmetry(commands.Cog):
     def __init__(self,bot):
         self.bot = bot
 
-    @commands.command(name="pass")
+    @commands.command(name="symmetry")
     async def symmetry(self,ctx):
         await ctx.send("シンメトリーにしたい画像をアップしてください↓")
         global mescheck
