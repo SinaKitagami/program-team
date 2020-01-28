@@ -143,7 +143,7 @@ class other(commands.Cog):
         await ctx.send(ut.textto("thanks-report",ctx.author))
 
     @commands.command(aliases=["ステータス","あなたの情報を教えて"])
-    async def status(self,ctx):
+    async def botinfo(self,ctx):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
         embed = discord.Embed(title=ut.textto("status-inserver",ctx.message.author), description=f"{len(self.bot.guilds)}", color=self.bot.ec)
         embed.add_field(name=ut.textto("status-prefix",ctx.message.author), value="s-")
@@ -151,6 +151,9 @@ class other(commands.Cog):
         embed.add_field(name=ut.textto("status-ver",ctx.message.author), value=platform.python_version())
         embed.add_field(name=ut.textto("status-pros",ctx.message.author), value=platform.processor())
         embed.add_field(name=ut.textto("status-os",ctx.message.author), value=f"{platform.system()} {platform.release()}({platform.version()})")
+        embed.add_field(name="全ユーザー数",value=len(self.bot.users))
+        embed.add_field(name="全チャンネル",value=len([i for i in self.bot.get_all_channels()]))
+        embed.add_field(name="思惟奈ちゃんをほかのサーバーに！",value="https://discordapp.com/api/oauth2/authorize?client_id=462885760043843584&permissions=8&scope=bot")
         await ctx.send(embed=embed)
 
     @commands.command()
