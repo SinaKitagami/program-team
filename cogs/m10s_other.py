@@ -298,7 +298,7 @@ class other(commands.Cog):
             await ctx.send(ut.textto("cannot-run",ctx.author))
             return
 
-        tl=bot.tl
+        tl=self.bot.tl
         dc = await ut.opendm(ctx.author)
         askmd=await dc.send(embed=ut.getEmbed("テキスト暗号・複合","暗号化する場合は🔒を、復号する場合は🔓を押してください。"))
         await askmd.add_reaction('🔒')
