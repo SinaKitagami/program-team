@@ -26,6 +26,21 @@ def textto(k:str,user):
             return f[k]
         except:
             return f"Not found key:`{k}`"
+    elif isinstance(user,discord.Guild):
+        cursor.execute("select * from guilds where id=?",(user.guild.id,))
+        gpf = cursor.fetchone()
+        lang = gpf["lang"]
+        if lang is None:
+            lang = "ja"
+        try:
+            with open(f"lang/{lang}.json","r",encoding="utf-8") as j:
+                f = json.load(j)
+        except:
+            return f"Not found language:`{lang}`(key:`{k}`)"
+        try:
+            return f[k]
+        except:
+            return f"Not found key:`{k}`"
     else:
         cursor.execute("select * from users where id=?",(user.id,))
         upf = cursor.fetchone()

@@ -65,7 +65,7 @@ class other(commands.Cog):
     @commands.command()
     async def rq(self,ctx):
 
-        await ctx.send(f"{ctx.author.mention}"+ut.textto("IllQ",ctx.author)+f"\n{random.choice(self.bot.cmdqest)}")
+        await ctx.send(f"{ctx.author.mention}"+ut.textto("IllQ",ctx.author)+f"\n{random.choice(ut.textto("comqest",ctx.author))}")
 
     @commands.command(name="Af")
     async def a_01(self,ctx):
@@ -387,7 +387,7 @@ class other(commands.Cog):
                 gl.append(ogl)
                 ogl=[]
                 tmp = "hoge"
-            gtxt = "\n".join([f"{'と'.join(m)}" for m in gl])
+            gtxt = "\n".join([f"{'、'.join(m)}" for m in gl])
             ng = ",".join(ml)
             await ctx.send(embed=discord.Embed(title=ut.textto("rg-title",ctx.author),description=ut.textto("rg-desc",ctx.author).format(gtxt,ng), color=self.bot.ec))
         else:
