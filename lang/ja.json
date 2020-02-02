@@ -428,7 +428,7 @@
     "help-13-t":"特定のチャンネルに送信できるもの",
     "help-13-d":"`sina-user-check`メンバー参加時に、ほかサーバーでのban状況を送信します。管理者のみが見れるようにすることを推奨します。",
     "help-14-t":"グローバルチャットの名称前アイコン",
-    "help-14-d":"🌈:製作者\n⚙:ボット\n💠:思惟奈ちゃんパートナー\n🔗パートナーサーバーオーナー\n🔧:グローバルチャットモデレーター\n🌟:スターユーザー(気まぐれでつける)\n🔔:アルファテスター(一部機能の先行体験)",
+    "help-14-d":"🌠:チーム☆思惟奈ちゃんメンバー\n🌈:製作者\n⚙:ボット\n💠:思惟奈ちゃんパートナー\n🔗パートナーサーバーオーナー\n🔧:グローバルチャットモデレーター\n🌟:スターユーザー(気まぐれでつける)\n🔔:アルファテスター(一部機能の先行体験)",
 
     "h-notfound":"その名前のコマンドはありません。",
     "h-owner":"updated 更新情報\nchangenick 名前 ニックネーム変更\nglobalrole id role グローバルの@後の変更\nglobalban id bool 使用禁止の変更\ncu 終了\nchangeRPC text プレイ中の変更\ninfoglobal グローバルチャットへのお知らせ投稿\ndmember id/name メンバー検索\ndguild id (使えない)\nev,aev eval系\n`s-globalmod`,`s-globalstar`,`s-globalpartner`(id bool)プロファイル書き換え",
@@ -631,5 +631,62 @@
 
     "playinginfo-custom_status":"カスタムステータス",
 
-    "mee6-notfound":"このサーバーは登録されてないってよ"
+    "tmp-":"区切り",
+    "mee6-notfound":"このサーバーは登録されてないってよ",
+
+    "comqest":[
+        "好きな食べ物は何ですか？",
+        "好きな曲は何ですか？",
+        "明日世界が終わるとしたら何をしますか？",
+        "好きな人がいたとしたらどんな一言をかけたいですか？",
+        "お勧めの本はなんですか？",
+        "行ってみたい場所はどこですか？",
+        "特技は何ですか？",
+        "人から依頼されたとき、事情を考えて断れる？断れない？",
+        "好きな人は?(公開処刑、もちろん、答えなくてもいいけど",
+        "一番欲しいものは？"
+    ],
+
+    "hash-nsfw":"ハッシュタグ投稿\nNSFWチャンネルの投稿につき、コンテンツは隠されています。",
+    "hash-from":"投稿元チャンネル",
+    "hash-chmention":"メンション:",
+    "hash-chname":"名前:",
+    "hash-link":"この投稿を見る",
+
+    "only-mii-10":"このコマンドは、オーナー専用です。",
+    "pls-arg":"引数が不足しています！引数を見直してください！",
+
+    "team_sina-chan":"🌠チーム☆思惟奈ちゃん",
+    "partner_guild_o":"🔗パートナーサーバーオーナー",
+    "partner_guild":"🔗パートナーサーバー",
+
+    "uinfo-title":"ユーザー情報",
+
+    "cinvite-title":"サーバー招待分析",
+    "cinvite-from":"{0}による招待",
+    "cinvite-memcount":"メンバー数:",
+    "cinvite-onmemcount":"オンラインメンバー数:",
+    "cinvite-ch":"招待チャンネル",
+    "cinvite-tmp":"一時リンク?",
+    "cinvite-deleted":"取り消された招待?",
+    "cinvite-link":"リンク",
+    "cinvite-createdat":"作成日時",
+
+    "ucheck-title":"{0}の安全性評価",
+    "ucheck-not_ban":"そのユーザーは、思惟奈ちゃんのいるサーバーではBANされていません。",
+    "ucheck-ban":"そのユーザーは、思惟奈ちゃんのいる{0}個のサーバーでBANされています。",
+
+    "topic-is-none":"トピックはありません。",
+    "spotify-local":"ローカルファイルの再生",
+    "spotify-cantlisten-wu":"一緒に聞くことは出来ません。",
+    "ginfo-invitesp":"招待の背景画像",
+    "ginfo-invitesp-pos":"下に表示",
+    "ginfo-banner":"サーバーバナー",
+    "ginfo-banner-pos":"右上に表示",
+    "ginfo-chlist":"チャンネル一覧",
+    "ginfo-nocate":"カテゴリーなし",
+    "ginfo-use-invite":"使用された回数",
+    "ginfo-created-invite":"作成者"
+
+
 }

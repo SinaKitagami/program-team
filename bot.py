@@ -51,6 +51,7 @@ from cogs import m10s_games
 from cogs import P143_jyanken
 from cogs import nekok500_mee6
 from cogs import syouma
+from cogs import pf9_symmentry
 
 """import logging
 
@@ -108,18 +109,6 @@ bot.twi = Twitter(auth=OAuth(bot.T_Acs_Token,bot.T_Acs_SToken,bot.T_API_key,bot.
 bot.ec = 0x42bcf4
 Donotif = False
 bot.StartTime = datetime.datetime.now() - rdelta(hours=9)
-bot.cmdqest = [
-    "好きな食べ物は何ですか？",
-    "好きな曲は何ですか？",
-    "明日世界が終わるとしたら何をしますか？",
-    "好きな人がいたとしたらどんな一言をかけたいですか？",
-    "お勧めの本はなんですか？",
-    "行ってみたい場所はどこですか？",
-    "特技は何ですか？",
-    "人から依頼されたとき、事情を考えて断れる？断れない？",
-    "好きな人は?(公開処刑、もちろん、答えなくてもいいけど",
-    "一番欲しいものは？",
-]
 
 aglch=None
 
@@ -523,6 +512,7 @@ async def nga(m,r):
     },topic=str(m.id))
     await tch.send(f"""{m.mention}さん！みぃてん☆の公開サーバー(以下「このサーバー」)にようこそ！
 あなたは{r}が理由で、試験運用中の自動認証が行われませんでした。
+思惟奈ちゃん関連以外のチャンネルの利用には認証が必要です。
 まずはルールを確認してください!
 https://gist.github.com/apple502j/1a81b1a95253609f0c67ecb74f38754b
 その後、そのことを報告してください。その後に決定されるまでに、いくつか質問する場合があります。また、あなたの方の質問も、この場を使って行ってください。
@@ -568,7 +558,7 @@ async def on_member_join(member):
                         await member.add_roles(mrole)
                         ch = await ut.opendm(member)
                         try:
-                            await ch.send(f"""{member.mention}さん！みぃてん☆の公開サーバー(以下「このサーバー」)にようこそ！
+                            await ch.send(f"""{member.mention}さん！みぃてん☆のわいがや広場にようこそ！
     あなたは、いくつかの条件を満たしているため、自動的に役職が付与されましたので、サーバーで、ゆっくり過ごされて行ってください。
     ですが、使用前にまずはルールを確認してください!
     https://gist.github.com/apple502j/1a81b1a95253609f0c67ecb74f38754b
@@ -576,7 +566,7 @@ async def on_member_join(member):
                             """)
                         except:
                             ch = member.guild.get_channel(574494906287128577)
-                            await ch.send(f"""{member.mention}さん！みぃてん☆の公開サーバー(以下「このサーバー」)にようこそ！
+                            await ch.send(f"""{member.mention}さん！みぃてん☆のわいがや広場にようこそ！
     あなたは、いくつかの条件を満たしているため、自動的に役職が付与されましたので、サーバーで、ゆっくり過ごされて行ってください。
     ですが、使用前にまずはルールを確認してください!
     https://gist.github.com/apple502j/1a81b1a95253609f0c67ecb74f38754b
@@ -1042,6 +1032,7 @@ async def on_ready():
     P143_jyanken.setup(bot)
     nekok500_mee6.setup(bot)
     syouma.setup(bot)
+    pf9_symmentry.setup(bot)
 
 @bot.event
 async def on_message(message):
@@ -1168,14 +1159,14 @@ async def gahash(message,gs):
             for sch in menchan:
                 if sch.id in ch:
                     if message.channel.is_nsfw():
-                        embed = discord.Embed(title="", description=f"ハッシュタグ投稿\nNSFWチャンネルの投稿につき、コンテンツは隠されています。", color=message.author.color)
-                        embed.add_field(name="投稿元チャンネル", value=f"メンション:{message.channel.mention}\n名前:{message.channel.name}")
-                        embed.add_field(name="この投稿を見る(see the post)", value=message.jump_url)
+                        embed = discord.Embed(title="", description=ut.textto("hash-nsfw",message.guild) color=message.author.color)
+                        embed.add_field(name=ut.textto("hash-from",message.guild), value=f"{ut.textto("hash-chmention",message.guild)}{message.channel.mention}\n{ut.textto("hash-chname",message.guild)}{message.channel.name}")
+                        embed.add_field(name=ut.textto("hash-link",message.guild), value=message.jump_url)
                         embed.set_author(name=message.author.display_name, icon_url=message.author.avatar_url_as(static_format='png'))
                     else:
                         embed = discord.Embed(title="", description=message.content, color=message.author.color)
-                        embed.add_field(name="投稿元チャンネル", value=f"メンション:{message.channel.mention}\n名前:{message.channel.name}")
-                        embed.add_field(name="この投稿を見る(see the post)", value=message.jump_url)
+                        embed.add_field(name=ut.textto("hash-from",message.guild), value=f"{ut.textto("hash-chmention",message.guild)}{message.channel.mention}\n{ut.textto("hash-chname",message.guild)}{message.channel.name}")
+                        embed.add_field(name=ut.textto("hash-link",message.guild), value=message.jump_url)
                         embed.set_author(name=message.author.display_name, icon_url=message.author.avatar_url_as(static_format='png'))
                         if not message.attachments == [] and (not message.attachments[0].is_spoiler()):
                             embed.set_image(url=message.attachments[0].url)
@@ -1323,13 +1314,13 @@ async def on_command_error(ctx, error):
         await ctx.send(embed=embed)
     elif isinstance(error,commands.NotOwner):
         #オーナー専用コマンド
-        embed = discord.Embed(title=ut.textto("cmd-error-t",ctx.message.author), description="このコマンドはオーナー専用だってよ", color=bot.ec)
+        embed = discord.Embed(title=ut.textto("cmd-error-t",ctx.message.author), description=ut.textto("only-mii-10",ctx.message.author), color=bot.ec)
         await ctx.send(embed=embed)
         ch=bot.get_channel(652127085598474242)
         await ch.send(embed=ut.getEmbed("エラーログ",f"コマンド:`{ctx.command.name}`\n```{str(error)}```",bot.ec,f"サーバー",ctx.guild.name,"実行メンバー",ctx.author.name,"メッセージ内容",ctx.message.content))
     elif isinstance(error,commands.MissingRequiredArgument):
         #引数がないよっ☆
-        embed = discord.Embed(title=ut.textto("cmd-error-t",ctx.message.author), description=f"値が渡されていない引数があります！\n引数を見直してください！", color=bot.ec)
+        embed = discord.Embed(title=ut.textto("cmd-error-t",ctx.message.author), description=ut.textto("pls-arg",ctx.message.author), color=bot.ec)
         await ctx.send(embed=embed)
     else:
         #その他例外

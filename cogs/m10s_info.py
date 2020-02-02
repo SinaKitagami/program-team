@@ -53,9 +53,9 @@ class info(commands.Cog):
             else:
                 ptn=""
                 if u.id in self.bot.team_sina:
-                    ptn=",(🌠チーム☆思惟奈ちゃん)"
+                    ptn=f",({ut.textto("team_sina-chan",ctx.author)})"
                 if u.id in [i[1] for i in self.bot.partnerg]:
-                    ptn=ptn+",(🔗パートナーサーバーオーナー)"
+                    ptn=ptn+f",({ut.textto("partner_guild_o",ctx.author)})"
                 e = discord.Embed(title=f"{ut.textto('aui-uinfo',ctx.author)}{ptn}",color=self.bot.ec)
                 e.add_field(name=ut.textto("aui-name",ctx.author),value=u.name)
                 e.add_field(name=ut.textto("aui-id",ctx.author),value=u.id)
@@ -78,13 +78,13 @@ class info(commands.Cog):
         async with ctx.message.channel.typing(): 
             ptn=""
             if info.id in self.bot.team_sina:
-                ptn=",(🌠チーム☆思惟奈ちゃん)"
+                ptn=f",({ut.textto("team_sina-chan",ctx.author)})"
             if info.id in [i[1] for i in self.bot.partnerg]:
-                ptn=ptn+",(🔗パートナーサーバーオーナー)"
+                ptn=ptn+f",({ut.textto("partner_guild_o",ctx.author)})"
             if ctx.guild.owner == info:
-                embed = discord.Embed(title="ユーザー情報", description=f"{ptn} - {ut.textto('userinfo-owner',ctx.message.author)}", color=info.color)
+                embed = discord.Embed(title=ut.textto("uinfo-title",ctx.author), description=f"{ptn} - {ut.textto('userinfo-owner',ctx.message.author)}", color=info.color)
             else:
-                embed = discord.Embed(title="ユーザー情報", description=ptn, color=info.color)
+                embed = discord.Embed(title=ut.textto("uinfo-title",ctx.author), description=ptn, color=info.color)
             embed.add_field(name=ut.textto("userinfo-name",ctx.message.author),value=f"{info.name} - {ut.ondevicon(info)}")
             try:
                 if not info.premium_since is None:
@@ -121,14 +121,14 @@ class info(commands.Cog):
     @commands.command()
     async def cinvite(self,ctx,ivt:str):
         i = await self.bot.fetch_invite(ivt)
-        e=discord.Embed(title="サーバー招待の分析",desctiption=f"{str(i.inviter)}による招待",color=self.bot.ec)
+        e=discord.Embed(title=ut.textto("cinvite-title",ctx.author),desctiption=ut.textto("cinvite-from",ctx.author).format(str(i.inviter)),color=self.bot.ec)
         e.set_author(name=f"{i.guild.name}({i.guild.id})",icon_url=i.guild.icon_url_as(format="png"))
-        e.add_field(name="メンバー数",value=f"全{i.approximate_member_count}名\nオンラインメンバー{i.approximate_presence_count}名")
-        e.add_field(name="招待チャンネル",value=f"{i.channel.name}({i.channel.type})")
-        e.add_field(name="一時リンク?",value=str(i.temporary))
-        e.add_field(name="取り消された招待?",value=str(i.revoked))
-        e.add_field(name="リンク",value=i.url,inline=False)
-        e.set_footer(text="招待の作成日時")
+        e.add_field(name=ut.textto("cinvite-memcount",ctx.author),value=f"{i.approximate_member_count}\n({ut.textto("cinvite-onmemcount",ctx.author)}{i.approximate_presence_count})")
+        e.add_field(name=ut.textto("cinvite-ch",ctx.author),value=f"{i.channel.name}({i.channel.type})")
+        e.add_field(name=ut.textto("cinvite-tmp",ctx.author),value=str(i.temporary))
+        e.add_field(name=ut.textto("cinvite-deleted",ctx.author),value=str(i.revoked))
+        e.add_field(name=ut.textto("cinvite-link",ctx.author),value=i.url,inline=False)
+        e.set_footer(text=ut.textto("cinvite-createdat",ctx.author))
         e.timestamp = i.created_at or discord.Embed.Empty
         await ctx.send(embed=e)
 
@@ -158,7 +158,7 @@ class info(commands.Cog):
         else:
             sevinfo = ctx.message.guild
         if sevinfo.id in [i[0] for i in self.bot.partnerg]:
-            ptn="🔗パートナーサーバー:"
+            ptn=f"{ut.textto("partner_guild",ctx.author)}:"
         else:
             ptn=""
         try:
@@ -232,9 +232,9 @@ class info(commands.Cog):
             if member.id in banulist:
                 bunotif = bunotif + 1
         if bunotif == 0:
-            await ctx.send(embed=discord.Embed(title=f"{member}の安全性評価",description=f"そのユーザーは、思惟奈ちゃんのいるサーバーでは、banされていません。"))
+            await ctx.send(embed=discord.Embed(title=ut.textto("ucheck-title",ctx.author).format(member),description=ut.textto("ucheck-not_ban",ctx.author)))
         else:
-            await ctx.send(embed=discord.Embed(title=f"{member}の安全性評価",description=f"そのユーザーは、思惟奈ちゃんのいる{bunotif}のサーバーでbanされています。注意してください。"))
+            await ctx.send(embed=discord.Embed(title=ut.textto("ucheck-title",ctx.author).format(member),description=ut.textto("ucheck-not_ban",ctx.author).format(bunotif)))
 
     @commands.command(aliases=["次のボイスチャンネルのURLを教えて"])
     async def vcurl(self,ctx,vch:commands.VoiceChannelConverter=None):
@@ -257,7 +257,7 @@ class info(commands.Cog):
 
             embed.add_field(name=ut.textto("ci-type",ctx.message.author),value=ut.textto("ci-text",ctx.message.author))
 
-            embed.add_field(name=ut.textto("ci-topic",ctx.message.author),value=ch.topic or "トピックはありません")
+            embed.add_field(name=ut.textto("ci-topic",ctx.message.author),value=ch.topic or ut.textto("topic-is-none",ctx.author))
 
             embed.add_field(name=ut.textto("ci-slow",ctx.message.author),value=str(ch.slowmode_delay).replace("0",ut.textto("ci-None",ctx.message.author)))
 
@@ -458,7 +458,7 @@ class info(commands.Cog):
                         #embed.add_field(name="経過時間", value=str(activ.duration.seconds/60)+str(activ.duration.seconds%60))
                         embed.set_thumbnail(url=activ.album_cover_url)
                     except AttributeError:
-                        embed.add_field(name="ローカルファイルの再生中", value="一緒に聞くことはできません！")
+                        embed.add_field(name=ut.textto("spotify-local",ctx.author), value=ut.textto("spotify-cantlisten-wu",ctx.author))
                         embed.add_field(name=ut.textto("playinginfo-title",ctx.message.author), value=activ.details)
                         embed.add_field(name=ut.textto("playinginfo-artist",ctx.message.author), value=activ.state)
                 elif anactivity.type==discord.ActivityType.streaming:
@@ -489,7 +489,7 @@ class info(commands.Cog):
     @commands.command(name="serverinfo")
     async def ginfo(self,ctx):
         if ctx.guild.id in [i[0] for i in self.bot.partnerg]:
-            ptn="🔗パートナーサーバー:"
+            ptn=f"{ut.textto("partner_guild",ctx.author)}:"
         else:
             ptn=""
         page = 0
@@ -509,10 +509,10 @@ class info(commands.Cog):
         else:
             e.add_field(name=ut.textto("ginfo-defnotif",ctx.author),value=ut.textto("ginfo-omention",ctx.author))
         if "INVITE_SPLASH" in ctx.guild.features:
-            e.add_field(name="招待のスプラッシュ画像",value="下に表示")
+            e.add_field(name=ut.textto("ginfo-invitesp",ctx.author),value=ut.textto("ginfo-invitesp-pos",ctx.author))
             e.set_image(url=ctx.guild.splash_url_as(format="png"))
         if "BANNER" in ctx.guild.features:
-            e.add_field(name="サーバーバナー",value="右上に表示")
+            e.add_field(name=ut.textto("ginfo-banner",ctx.author),value=ut.textto("ginfo-banner-pos",ctx.author))
             e.set_thumbnail(url=ctx.guild.banner_url_as(format="png"))
         mp = await ctx.send(embed=e)
         await mp.add_reaction(self.bot.get_emoji(653161518195671041))
@@ -555,10 +555,10 @@ class info(commands.Cog):
                     else:
                         e.add_field(name=ut.textto("ginfo-defnotif",ctx.author),value=ut.textto("ginfo-omention",ctx.author))
                     if "INVITE_SPLASH" in ctx.guild.features:
-                        e.add_field(name="招待のスプラッシュ画像",value="下に表示")
+                        e.add_field(name=ut.textto("ginfo-invitesp",ctx.author),value=ut.textto("ginfo-invitesp-pos",ctx.author))
                         e.set_image(url=ctx.guild.splash_url_as(format="png"))
                     if "BANNER" in ctx.guild.features:
-                        e.add_field(name="サーバーバナー",value="右上に表示")
+                        e.add_field(name=ut.textto("ginfo-banner",ctx.author),value=ut.textto("ginfo-banner-pos",ctx.author))
                         e.set_thumbnail(url=ctx.guild.banner_url_as(format="png"))
                     await mp.edit(embed=e)
                 elif page == 1:
@@ -634,8 +634,8 @@ class info(commands.Cog):
                             vi = "NF_VInvite"
                         #invites
                         vil = ut.textto("ginfo-strlenover",ctx.author)
-                        if len("\n".join([f"{i.code},利用数:{i.uses}/{i.max_uses},作成者:{i.inviter}" for i in await ctx.guild.invites()])) <= 1023:
-                            vil = "\n".join([f"{i.code},利用数:{i.uses}/{i.max_uses},作成者:{i.inviter}" for i in await ctx.guild.invites()]).replace(vi,f"{self.bot.get_emoji(653161518103265291)}{vi}")
+                        if len("\n".join([f"{i.code},{ut.textto("ginfo-use-invite",)}:{i.uses}/{i.max_uses},{ut.textto("ginfo-created-invite",)}:{i.inviter}" for i in await ctx.guild.invites()])) <= 1023:
+                            vil = "\n".join([f"{i.code},{ut.textto("ginfo-use-invite",)}:{i.uses}/{i.max_uses},{ut.textto("ginfo-created-invite",)}:{i.inviter}" for i in await ctx.guild.invites()]).replace(vi,f"{self.bot.get_emoji(653161518103265291)}{vi}")
                         await mp.edit(embed=discord.Embed(title=ut.textto("ginfo-invites",ctx.author),description=vil,color=self.bot.ec))
                     else:
                         await mp.edit(embed=discord.Embed(title=ut.textto("ginfo-invites",ctx.author),description=ut.textto("ginfo-cantview",ctx.author),color=self.bot.ec))
@@ -653,10 +653,10 @@ class info(commands.Cog):
                         await mp.edit(embed=discord.Embed(title=ut.textto("ginfo-banneduser",ctx.author),description=ut.textto("ginfo-cantview",ctx.author),color=self.bot.ec))
                 elif page == 10:
                     #サーバーのチャンネル
-                    e =discord.Embed(title="チャンネル一覧",color=self.bot.ec)
+                    e =discord.Embed(title=ut.textto("ginfo-chlist",ctx.author),color=self.bot.ec)
                     for mct,mch in ctx.guild.by_category():
                         chs="\n".join([i.name for i in mch])
-                        e.add_field(name=str(mct).replace("None","カテゴリーなし"),value=f"```{chs}```",inline=True)
+                        e.add_field(name=str(mct).replace("None",ut.textto("ginfo-nocate",)),value=f"```{chs}```",inline=True)
                     await mp.edit(embed=e)
                 elif page == 11:
                     self.bot.cursor.execute("select * from guilds where id=?",(ctx.guild.id,))
@@ -671,7 +671,7 @@ class info(commands.Cog):
 
     @commands.command(name="team_sina-chan")
     async def view_teammember(self,ctx):
-        await ctx.send(embed=ut.getEmbed("チーム☆思惟奈ちゃん","\n".join([self.bot.get_user(i).name for i in self.bot.team_sina])))
+        await ctx.send(embed=ut.getEmbed(ut.textto("team_sina-chan",ctx.author),"\n".join([self.bot.get_user(i).name for i in self.bot.team_sina])))
 
 def setup(bot):
     bot.add_cog(info(bot))
