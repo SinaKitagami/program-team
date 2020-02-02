@@ -51,7 +51,7 @@ from cogs import m10s_games
 from cogs import P143_jyanken
 from cogs import nekok500_mee6
 from cogs import syouma
-from cogs import pf9_symmentry
+from cogs import pf9_symmetry
 
 """import logging
 
@@ -609,7 +609,7 @@ async def on_member_join(member):
     await aglch.send(embed=e)
     #他サーバーでのban通知
     isgban = False
-    bot.cursor.execute("select * from users where id=?",(ctx.author.id,))
+    bot.cursor.execute("select * from users where id=?",(member.id,))
     upf = bot.cursor.fetchone()
     bunotif = 0
     if member.id in bot.team_sina:
@@ -1032,7 +1032,7 @@ async def on_ready():
     P143_jyanken.setup(bot)
     nekok500_mee6.setup(bot)
     syouma.setup(bot)
-    pf9_symmentry.setup(bot)
+    pf9_symmetry.setup(bot)
 
 @bot.event
 async def on_message(message):
@@ -1135,7 +1135,7 @@ async def gahash(message,gs):
             es = message.embeds
             sed=[]
             for e in es:
-                e.color = ec
+                e.color = bot.ec
                 e.title = f'💠{str(e.title).replace("Embed.Empty","防災情報")}'
                 sed.append(e)
             for chid in chs["ids"]:
@@ -1159,13 +1159,13 @@ async def gahash(message,gs):
             for sch in menchan:
                 if sch.id in ch:
                     if message.channel.is_nsfw():
-                        embed = discord.Embed(title="", description=ut.textto("hash-nsfw",message.guild) color=message.author.color)
-                        embed.add_field(name=ut.textto("hash-from",message.guild), value=f"{ut.textto("hash-chmention",message.guild)}{message.channel.mention}\n{ut.textto("hash-chname",message.guild)}{message.channel.name}")
-                        embed.add_field(name=ut.textto("hash-link",message.guild), value=message.jump_url)
+                        embed = discord.Embed(title="", description=ut.textto("hash-nsfw",message.guild),color=message.author.color)
+                        embed.add_field(name=ut.textto("hash-from",message.guild),value=f'{ut.textto("hash-chmention",message.guild)}:{message.channel.mention}\n{ut.textto("hash-chname",message.guild)}:{message.channel.name}')
+                        embed.add_field(name=ut.textto("hash-link",message.guild),value=message.jump_url)
                         embed.set_author(name=message.author.display_name, icon_url=message.author.avatar_url_as(static_format='png'))
                     else:
                         embed = discord.Embed(title="", description=message.content, color=message.author.color)
-                        embed.add_field(name=ut.textto("hash-from",message.guild), value=f"{ut.textto("hash-chmention",message.guild)}{message.channel.mention}\n{ut.textto("hash-chname",message.guild)}{message.channel.name}")
+                        embed.add_field(name=ut.textto("hash-from",message.guild),value=f'{ut.textto("hash-chmention",message.guild)}:{message.channel.mention}\n{ut.textto("hash-chname",message.guild)}:{message.channel.name}')
                         embed.add_field(name=ut.textto("hash-link",message.guild), value=message.jump_url)
                         embed.set_author(name=message.author.display_name, icon_url=message.author.avatar_url_as(static_format='png'))
                         if not message.attachments == [] and (not message.attachments[0].is_spoiler()):

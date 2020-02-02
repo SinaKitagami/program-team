@@ -53,9 +53,9 @@ class info(commands.Cog):
             else:
                 ptn=""
                 if u.id in self.bot.team_sina:
-                    ptn=f",({ut.textto("team_sina-chan",ctx.author)})"
+                    ptn=f',({ut.textto("team_sina-chan",ctx.author)})'
                 if u.id in [i[1] for i in self.bot.partnerg]:
-                    ptn=ptn+f",({ut.textto("partner_guild_o",ctx.author)})"
+                    ptn=ptn+f',({ut.textto("partner_guild_o",ctx.author)})'
                 e = discord.Embed(title=f"{ut.textto('aui-uinfo',ctx.author)}{ptn}",color=self.bot.ec)
                 e.add_field(name=ut.textto("aui-name",ctx.author),value=u.name)
                 e.add_field(name=ut.textto("aui-id",ctx.author),value=u.id)
@@ -78,9 +78,9 @@ class info(commands.Cog):
         async with ctx.message.channel.typing(): 
             ptn=""
             if info.id in self.bot.team_sina:
-                ptn=f",({ut.textto("team_sina-chan",ctx.author)})"
+                ptn=f',({ut.textto("team_sina-chan",ctx.author)})'
             if info.id in [i[1] for i in self.bot.partnerg]:
-                ptn=ptn+f",({ut.textto("partner_guild_o",ctx.author)})"
+                ptn=ptn+f',({ut.textto("partner_guild_o",ctx.author)})'
             if ctx.guild.owner == info:
                 embed = discord.Embed(title=ut.textto("uinfo-title",ctx.author), description=f"{ptn} - {ut.textto('userinfo-owner',ctx.message.author)}", color=info.color)
             else:
@@ -122,8 +122,8 @@ class info(commands.Cog):
     async def cinvite(self,ctx,ivt:str):
         i = await self.bot.fetch_invite(ivt)
         e=discord.Embed(title=ut.textto("cinvite-title",ctx.author),desctiption=ut.textto("cinvite-from",ctx.author).format(str(i.inviter)),color=self.bot.ec)
-        e.set_author(name=f"{i.guild.name}({i.guild.id})",icon_url=i.guild.icon_url_as(format="png"))
-        e.add_field(name=ut.textto("cinvite-memcount",ctx.author),value=f"{i.approximate_member_count}\n({ut.textto("cinvite-onmemcount",ctx.author)}{i.approximate_presence_count})")
+        e.set_author(name=f'{i.guild.name}({i.guild.id})',icon_url=i.guild.icon_url_as(format="png"))
+        e.add_field(name=ut.textto("cinvite-memcount",ctx.author),value=f'{i.approximate_member_count}\n({ut.textto("cinvite-onmemcount",ctx.author)}{i.approximate_presence_count})')
         e.add_field(name=ut.textto("cinvite-ch",ctx.author),value=f"{i.channel.name}({i.channel.type})")
         e.add_field(name=ut.textto("cinvite-tmp",ctx.author),value=str(i.temporary))
         e.add_field(name=ut.textto("cinvite-deleted",ctx.author),value=str(i.revoked))
@@ -158,7 +158,7 @@ class info(commands.Cog):
         else:
             sevinfo = ctx.message.guild
         if sevinfo.id in [i[0] for i in self.bot.partnerg]:
-            ptn=f"{ut.textto("partner_guild",ctx.author)}:"
+            ptn=f'{ut.textto("partner_guild",ctx.author)}:'
         else:
             ptn=""
         try:
@@ -489,7 +489,7 @@ class info(commands.Cog):
     @commands.command(name="serverinfo")
     async def ginfo(self,ctx):
         if ctx.guild.id in [i[0] for i in self.bot.partnerg]:
-            ptn=f"{ut.textto("partner_guild",ctx.author)}:"
+            ptn=f'{ut.textto("partner_guild",ctx.author)}:'
         else:
             ptn=""
         page = 0
@@ -634,8 +634,8 @@ class info(commands.Cog):
                             vi = "NF_VInvite"
                         #invites
                         vil = ut.textto("ginfo-strlenover",ctx.author)
-                        if len("\n".join([f"{i.code},{ut.textto("ginfo-use-invite",)}:{i.uses}/{i.max_uses},{ut.textto("ginfo-created-invite",)}:{i.inviter}" for i in await ctx.guild.invites()])) <= 1023:
-                            vil = "\n".join([f"{i.code},{ut.textto("ginfo-use-invite",)}:{i.uses}/{i.max_uses},{ut.textto("ginfo-created-invite",)}:{i.inviter}" for i in await ctx.guild.invites()]).replace(vi,f"{self.bot.get_emoji(653161518103265291)}{vi}")
+                        if len("\n".join([f'{i.code},{ut.textto("ginfo-use-invite",)}:{i.uses}/{i.max_uses},{ut.textto("ginfo-created-invite",)}:{i.inviter}' for i in await ctx.guild.invites()])) <= 1023:
+                            vil = "\n".join([f'{i.code},{ut.textto("ginfo-use-invite",)}:{i.uses}/{i.max_uses},{ut.textto("ginfo-created-invite",)}:{i.inviter}' for i in await ctx.guild.invites()]).replace(vi,f"{self.bot.get_emoji(653161518103265291)}{vi}")
                         await mp.edit(embed=discord.Embed(title=ut.textto("ginfo-invites",ctx.author),description=vil,color=self.bot.ec))
                     else:
                         await mp.edit(embed=discord.Embed(title=ut.textto("ginfo-invites",ctx.author),description=ut.textto("ginfo-cantview",ctx.author),color=self.bot.ec))
