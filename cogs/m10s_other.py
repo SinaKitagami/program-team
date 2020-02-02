@@ -65,7 +65,7 @@ class other(commands.Cog):
     @commands.command()
     async def rq(self,ctx):
 
-        await ctx.send(f"{ctx.author.mention}"+ut.textto("IllQ",ctx.author)+f"\n{random.choice(ut.textto("comqest",ctx.author))}")
+        await ctx.send(f"{ctx.author.mention}"+ut.textto("IllQ",ctx.author)+f'\n{random.choice(ut.textto("comqest",ctx.author))}')
 
     @commands.command(name="Af")
     async def a_01(self,ctx):
