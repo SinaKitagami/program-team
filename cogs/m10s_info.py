@@ -68,7 +68,7 @@ class info(commands.Cog):
         else:
             await ctx.send(ut.textto("aui-nid",ctx.author))
 
-    @commands.command(aliases=["ユーザー情報","ユーザーの情報を教えて"])
+    @commands.command(aliases=["ui","ユーザー情報","ユーザーの情報を教えて"])
     async def userinfo(self,ctx, mus:commands.MemberConverter=None):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
         if mus == None:
@@ -109,7 +109,7 @@ class info(commands.Cog):
             for r in info.roles:
                 hasroles = hasroles + f"{r.mention},"
             embed.add_field(name=ut.textto("userinfo-roles",ctx.message.author), value=hasroles)
-            embed.add_field(name="guild permissions",value=f"`{'`,`'.join([i[0] for i in list(info.guild_permissions) if i[1]])}`")
+            embed.add_field(name=ut.textto("userinfo-guildper",ctx.author),value=f"`{'`,`'.join([ut.textto(f'p-{i[0]}',ctx.author) for i in list(info.guild_permissions) if i[1]])}`")
             if not info.avatar_url == None:
                 embed.set_thumbnail(url=info.avatar_url_as(static_format='png'))
                 embed.add_field(name=ut.textto("userinfo-iconurl",ctx.message.author),value=info.avatar_url_as(static_format='png'))
@@ -383,7 +383,7 @@ class info(commands.Cog):
             hasper = ""
             for pn,bl in iter(role.permissions):
                 if bl:
-                    hasper = hasper + f"`{pn}`,"
+                    hasper = hasper + f"`{ut.textto(f'p-{pn}',ctx.author)}`,"
             embed.add_field(name=ut.textto("roleinfo-hasper",ctx.message.author), value=hasper)
             embed.add_field(name=ut.textto("roleinfo-created",ctx.message.author), value=role.created_at)
 

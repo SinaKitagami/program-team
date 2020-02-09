@@ -27,8 +27,11 @@ def textto(k:str,user):
         except:
             return f"Not found key:`{k}`"
     elif isinstance(user,discord.Guild):
-        cursor.execute("select * from guilds where id=?",(user.guild.id,))
-        gpf = cursor.fetchone()
+        try:
+            cursor.execute("select * from guilds where id=?",(user.guild.id,))
+            gpf = cursor.fetchone()
+        except:
+            gpf={"lang":None}
         lang = gpf["lang"]
         if lang is None:
             lang = "ja"

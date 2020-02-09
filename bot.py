@@ -73,6 +73,9 @@ bot.T_API_SKey = config.T_API_SKey
 bot.T_Acs_Token = config.T_Acs_Token
 bot.T_Acs_SToken = config.T_Acs_SToken
 
+#test
+postcount={}
+
 sqlite3.register_converter('pickle', pickle.loads)
 sqlite3.register_converter('json', json.loads)
 sqlite3.register_adapter(dict, json.dumps)
@@ -510,12 +513,15 @@ async def nga(m,r):
         subadmins:discord.PermissionOverwrite(read_messages=True,send_messages=True),
         giverole:discord.PermissionOverwrite(read_messages=True,send_messages=True)
     },topic=str(m.id))
-    await tch.send(f"""{m.mention}さん！みぃてん☆の公開サーバー(以下「このサーバー」)にようこそ！
-あなたは{r}が理由で、試験運用中の自動認証が行われませんでした。
-思惟奈ちゃん関連以外のチャンネルの利用には認証が必要です。
+    await tch.send(f"""{m.mention}さん！みぃてん☆のわいがや広場にようこそ！
+あなたは{r}が理由で、思惟奈ちゃんによる自動認証が行われませんでした。
+思惟奈ちゃんに関するお問い合わせ等の方は`思惟奈ちゃん`カテゴリー内のチャンネルをご利用ください。
+
+その他のチャンネルを使う際には、メンバー役職が必要です。
 まずはルールを確認してください!
 https://gist.github.com/apple502j/1a81b1a95253609f0c67ecb74f38754b
-その後、そのことを報告してください。その後に決定されるまでに、いくつか質問する場合があります。また、あなたの方の質問も、この場を使って行ってください。
+その後、そのことを報告してください。
+みぃてん☆
     """)
 
 @bot.event
@@ -551,15 +557,16 @@ async def on_member_join(member):
                     await nga(member,"思惟奈ちゃんとの共通のほかサーバーでのban")
                     pass
                 else:
-                    if datetime.datetime.now() - rdelta(hours=9) - rdelta(days=7) < member.created_at:
-                        await nga(member,"アカウントの作成から7日経過していないこと")
+                    if datetime.datetime.now() - rdelta(hours=9) - rdelta(days=4) < member.created_at:
+                        await nga(member,"アカウントの作成から4日経過していないこと")
                         pass
                     else:
                         await member.add_roles(mrole)
                         ch = await ut.opendm(member)
                         try:
                             await ch.send(f"""{member.mention}さん！みぃてん☆のわいがや広場にようこそ！
-    あなたは、いくつかの条件を満たしているため、自動的に役職が付与されましたので、サーバーで、ゆっくり過ごされて行ってください。
+    思惟奈ちゃん関連の用事の方は`思惟奈ちゃん`カテゴリー内のチャンネルをご利用ください。
+    また、あなたは、いくつかの条件を満たしているため、自動的にメンバー役職が付与されましたので、サーバーで、ゆっくり過ごされて行ってください。
     ですが、使用前にまずはルールを確認してください!
     https://gist.github.com/apple502j/1a81b1a95253609f0c67ecb74f38754b
     また、必要に応じて通知設定を「すべてのメッセージ」などに変更してください。(デフォルトは「@メンションのみ」です。)
@@ -567,7 +574,8 @@ async def on_member_join(member):
                         except:
                             ch = member.guild.get_channel(574494906287128577)
                             await ch.send(f"""{member.mention}さん！みぃてん☆のわいがや広場にようこそ！
-    あなたは、いくつかの条件を満たしているため、自動的に役職が付与されましたので、サーバーで、ゆっくり過ごされて行ってください。
+    思惟奈ちゃん関連の用事の方は`思惟奈ちゃん`カテゴリー内のチャンネルをご利用ください。
+    また、あなたは、いくつかの条件を満たしているため、自動的にメンバー役職が付与されましたので、サーバーで、ゆっくり過ごされて行ってください。
     ですが、使用前にまずはルールを確認してください!
     https://gist.github.com/apple502j/1a81b1a95253609f0c67ecb74f38754b
     また、必要に応じて通知設定を「すべてのメッセージ」などに変更してください。(デフォルトは「@メンションのみ」です。)
@@ -576,7 +584,7 @@ async def on_member_join(member):
                         for c in schs:
                             
                             sch = bot.get_channel(c)
-                            await sch.send(embed=ut.getEmbed("自動認証(試験運用中)完了のお知らせ",f"{member.mention}さんが自動認証を済ませました。"))
+                            await sch.send(embed=ut.getEmbed("自動認証完了のお知らせ",f"{member.mention}さんが自動認証を済ませました。"))
     else:
         try:
             bot.cursor.execute("select * from guilds where id=?",(member.guild.id,))
@@ -616,11 +624,10 @@ async def on_member_join(member):
         for ch in member.guild.channels:
             if ch.name == "sina-user-check":
                 await ch.send(embed=discord.Embed(title=f"{member}の安全性評価",description=f"そのユーザーは、チーム☆思惟奈ちゃんのメンバーです。"))
-    elif upf["gban"] == 1:
+    elif upf and upf["gban"] == 1:
         for ch in member.guild.channels:
             if ch.name == "sina-user-check":
                 await ch.send(embed=discord.Embed(title=f"{member}の安全性評価",description=f"そのユーザーは、思惟奈ちゃんグローバルチャットbanを受けています。\n何らかの事情があってこうなっていますので十分に注意してください。"))
-
     else:
         for g in bot.guilds:
             
@@ -923,7 +930,7 @@ async def on_member_ban(g, user):
     bl=await guild.audit_logs(limit=1,action=discord.AuditLogAction.ban).flatten()
     e=discord.Embed(title="ユーザーのban",color=bot.ec)
     e.add_field(name="ユーザー名",value=str(user))
-    e.add_field(name="(テスト)実行者",value=str(bl[0].user))
+    e.add_field(name="実行者",value=str(bl[0].user))
     #e.set_footer(text=f"{g.name}/{g.id}")
     e.timestamp = datetime.datetime.now() - rdelta(hours=9)
     bot.cursor.execute("select * from guilds where id=?",(g.id,))
@@ -1036,6 +1043,10 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
+    if postcount.get(str(message.guild.id),None) is None:
+        postcount[str(message.guild.id)] = 1
+    else:
+        postcount[str(message.guild.id)] += 1
     if isinstance(message.channel,discord.DMChannel):
         return
     if message.author.id==bot.user.id:
@@ -1047,7 +1058,6 @@ async def on_message(message):
         asyncio.ensure_future(globalSend(message)),
     ]
     await asyncio.gather(*tks)
-
 
 async def domsg(message):
     global DoServercmd
@@ -1074,9 +1084,9 @@ async def domsg(message):
     bot.cursor.execute("select * from guilds where id=?",(message.guild.id,))
     gs = bot.cursor.fetchone()
 
-
     tks=[asyncio.ensure_future(dlevel(message,gs)),asyncio.ensure_future(gahash(message,gs)),asyncio.ensure_future(runsercmd(message,gs,pf))]
     await asyncio.gather(*tks)
+
     tpf=["s-"]+pf["prefix"]+gs["prefix"]
     bot.command_prefix = tpf 
     ctx = await bot.get_context(message)
@@ -1090,6 +1100,7 @@ async def domsg(message):
         sys.exit()
     except Exception:
         print(traceback.format_exc(0))
+
 
 async def runsercmd(message,gs,pf):
     #servercmd
@@ -1218,6 +1229,16 @@ async def dlevel(message,gs):
                         pass
                 bot.cursor.execute("UPDATE guilds SET levels = ? WHERE id = ?", (gs["levels"],message.guild.id))
 
+@commands.is_owner()
+@bot.command()
+async def ldb(ctx,name):
+    bot.cursor.execute(f"select * from {name}")
+    sddb = bot.cursor.fetchall()
+    await ctx.send(f"{len(sddb)}")
+
+@bot.command()
+async def vpc(ctx):
+    await ctx.send(embed=ut.getEmbed("post count",str([f"{k}:{v}" for k,v in postcount.items()])))
 
 bot.remove_command('help')
 

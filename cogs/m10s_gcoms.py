@@ -233,7 +233,7 @@ class gcoms(commands.Cog):
                     except:
                         self.bot.cursor.execute("INSERT INTO globalchs(name,ids) VALUES(?,?)",(name,[ctx.channel.id]))
                 else:
-                    db.execute("UPDATE globalchs SET ids = ? WHERE name = ?", (chs["ids"]+[ctx.channel.id],name))
+                    self.bot.cursor.execute("UPDATE globalchs SET ids = ? WHERE name = ?", (chs["ids"]+[ctx.channel.id],name))
                 await ctx.channel.create_webhook(name="sina_global",avatar=None)
                 if dnf:
                     embed = discord.Embed(title=f"{self.bot.get_emoji(653161518174699541)}グローバルチャット接続通知", description=f'{ctx.guild.name}の{ctx.channel.name}が`{name}`に接続しました。')
