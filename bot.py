@@ -566,7 +566,7 @@ async def on_member_join(member):
                         try:
                             await ch.send(f"""{member.mention}さん！みぃてん☆のわいがや広場にようこそ！
     思惟奈ちゃん関連の用事の方は`思惟奈ちゃん`カテゴリー内のチャンネルをご利用ください。
-    また、あなたは、いくつかの条件を満たしているため、自動的にメンバー役職が付与されましたので、サーバーで、ゆっくり過ごされて行ってください。
+    また、あなたは、いくつかの条件を満たしているため、自動的にメンバー役職が付与されましたので、サーバーで、ゆっくり過ごされてください。
     ですが、使用前にまずはルールを確認してください!
     https://gist.github.com/apple502j/1a81b1a95253609f0c67ecb74f38754b
     また、必要に応じて通知設定を「すべてのメッセージ」などに変更してください。(デフォルトは「@メンションのみ」です。)
@@ -575,7 +575,7 @@ async def on_member_join(member):
                             ch = member.guild.get_channel(574494906287128577)
                             await ch.send(f"""{member.mention}さん！みぃてん☆のわいがや広場にようこそ！
     思惟奈ちゃん関連の用事の方は`思惟奈ちゃん`カテゴリー内のチャンネルをご利用ください。
-    また、あなたは、いくつかの条件を満たしているため、自動的にメンバー役職が付与されましたので、サーバーで、ゆっくり過ごされて行ってください。
+    また、あなたは、いくつかの条件を満たしているため、自動的にメンバー役職が付与されましたので、サーバーで、ゆっくり過ごされてください。
     ですが、使用前にまずはルールを確認してください!
     https://gist.github.com/apple502j/1a81b1a95253609f0c67ecb74f38754b
     また、必要に応じて通知設定を「すべてのメッセージ」などに変更してください。(デフォルトは「@メンションのみ」です。)
@@ -1011,6 +1011,7 @@ async def on_invite_delete(invite):
 @bot.event
 async def on_ready():
     global aglch
+    global pmsgc
     print('ログインしました。')
     print(bot.user.name)
     print(bot.user.id)
@@ -1021,6 +1022,7 @@ async def on_ready():
     except:
         pass
     aglch = bot.get_channel(659706303521751072)
+    pmsgc=bot.get_channel(676371380111015946)
     cRPC.start()
     """invite_tweet.start()
     now_sina_tweet.start()"""
@@ -1043,46 +1045,49 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
-    if postcount.get(str(message.guild.id),None) is None:
-        postcount[str(message.guild.id)] = 1
-    else:
-        postcount[str(message.guild.id)] += 1
     if isinstance(message.channel,discord.DMChannel):
         return
     if message.author.id==bot.user.id:
         return
+    if postcount.get(str(message.guild.id),None) is None:
+        postcount[str(message.guild.id)] = 1
+    else:
+        postcount[str(message.guild.id)] += 1
     #db.files_download_to_file( "guildsetting.json" , "/guildsetting.json" )
     #db.files_download_to_file( "profiles.json" , "/profiles.json" )
     tks=[
-        asyncio.ensure_future(domsg(message)),
-        asyncio.ensure_future(globalSend(message)),
+        domsg(message),
+        globalSend(message),
     ]
     await asyncio.gather(*tks)
+    #await domsg(message)
+    #await globalSend(message)
+
 
 async def domsg(message):
     global DoServercmd
     bot.cursor.execute("select * from users where id=?",(message.author.id,))
-    upf = bot.cursor.fetchone()
-    if not upf:
+    pf = bot.cursor.fetchone()
+    if not pf:
         bot.cursor.execute("INSERT INTO users(id,prefix,gpoint,memo,levcard,onnotif,lang,accounts,sinapartner,gban,gnick,gcolor,gmod,gstar,galpha,gbanhist) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (message.author.id,[],0,{},"m@ji☆",[],None,[],0,0,message.author.name,0,0,0,0,"なし"))
         try:
             dc=await ut.opendm(message.author)
             await dc.send(f"{bot.get_emoji(653161518153596950)}あなたの思惟奈ちゃんユーザープロファイルを作成しました！いくつかの項目はコマンドを使って書き換えることができます。詳しくはヘルプ(`s-help`)をご覧ください。\n以前からの利用者へ:様々な設定がリセットされています。再設定をお願いします。また、不具合がありましたら`mii-10#3110`にお願いします。")
         except:
             pass
-    bot.cursor.execute("select * from users where id=?",(message.author.id,))
-    pf = bot.cursor.fetchone()
+        bot.cursor.execute("select * from users where id=?",(message.author.id,))
+        pf = bot.cursor.fetchone()
 
     bot.cursor.execute("select * from guilds where id=?",(message.guild.id,))
-    gpf = bot.cursor.fetchone()
-    if not gpf:
+    gs = bot.cursor.fetchone()
+    if not gs:
         bot.cursor.execute("INSERT INTO guilds(id,levels,commands,hash,levelupsendto,reward,jltasks,lockcom,sendlog,prefix,lang) VALUES(?,?,?,?,?,?,?,?,?,?,?)", (message.guild.id,{},{},[],None,{},{},[],None,[],None))
         try:
             await message.channel.send(f"{bot.get_emoji(653161518153596950)}このサーバーの思惟奈ちゃんサーバープロファイルを作成しました！いくつかの項目はコマンドを使って書き換えることができます。詳しくはヘルプ(`s-help`)をご覧ください。\n以前からの利用者へ:様々な設定がリセットされています。再設定をお願いします。また、不具合がありましたら`mii-10#3110`にお願いします。")
         except:
             pass
-    bot.cursor.execute("select * from guilds where id=?",(message.guild.id,))
-    gs = bot.cursor.fetchone()
+        bot.cursor.execute("select * from guilds where id=?",(message.guild.id,))
+        gs = bot.cursor.fetchone()
 
     tks=[asyncio.ensure_future(dlevel(message,gs)),asyncio.ensure_future(gahash(message,gs)),asyncio.ensure_future(runsercmd(message,gs,pf))]
     await asyncio.gather(*tks)

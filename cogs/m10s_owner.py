@@ -73,9 +73,26 @@ class owner(commands.Cog):
     async def aev(self,ctx,*,cmd):
         try:
             await eval(cmd)
+            await ctx.message.add_reaction(self.bot.get_emoji(653161518103265291))
         except:
             await ctx.send(embed=discord.Embed(title="awaitEvalエラー",description=traceback.format_exc(0)))
     
+    @commands.command()
+    @commands.is_owner()
+    async def eval(self,ctx,*,cmd):
+        await ctx.message.add_reaction(self.bot.get_emoji(653161518346534912))
+        kg="\n"
+        txt=f'async def evdf(ctx,bot):{kg}{kg.join([f" {i}" for i in cmd.replace("```py","").replace("```","").split(kg)])}'
+        try:
+            exec(txt)
+            await eval("evdf(ctx,self.bot)")
+            await ctx.message.remove_reaction(self.bot.get_emoji(653161518346534912),self.bot.user)
+            await ctx.message.add_reaction(self.bot.get_emoji(653161518103265291))
+        except:
+            await ctx.message.remove_reaction(self.bot.get_emoji(653161518346534912),self.bot.user)
+            await ctx.message.add_reaction("❌")
+            await ctx.author.send(embed=discord.Embed(title="eval's Error",description=f"```{traceback.format_exc(3)}```",color=self.bot.ec))
+
     @commands.command()
     @commands.is_owner()
     async def dmember(self,ctx,*,mus=None):
