@@ -147,7 +147,7 @@ class other(commands.Cog):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
         embed = discord.Embed(title=ut.textto("status-inserver",ctx.message.author), description=f"{len(self.bot.guilds)}", color=self.bot.ec)
         embed.add_field(name=ut.textto("status-prefix",ctx.message.author), value="s-")
-        embed.add_field(name=ut.textto("status-starttime",ctx.message.author), value=self.bot.StartTime)
+        embed.add_field(name=ut.textto("status-starttime",ctx.message.author), value=self.bot.StartTime.strftime('%Y年%m月%d日 %H時%M分%S秒'))
         embed.add_field(name=ut.textto("status-ver",ctx.message.author), value=platform.python_version())
         embed.add_field(name=ut.textto("status-pros",ctx.message.author), value=platform.processor())
         embed.add_field(name=ut.textto("status-os",ctx.message.author), value=f"{platform.system()} {platform.release()}({platform.version()})")

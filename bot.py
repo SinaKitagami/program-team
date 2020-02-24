@@ -126,7 +126,7 @@ bot.partnerg=[
 ・相互リンクサーバー
   あなたのサーバーをPR!いくつかの条件を満たすことで相互リンクサーバーになれます。思惟奈ちゃんのパートナーサーバーも兼ねていて、思惟奈ちゃんグローバルチャットにもPR文が流れるようになります！
     """),
-    (560434525277126656,404243934210949120,"非公開",""),
+    (560434525277126656,404243934210949120,"思惟奈ちゃんのサポート→https://discord.gg/xFHW9tE",""),
     (606583146112352258,452586320053927942,"https://discord.gg/NTU3mar","""ゆったり　まったりしたサーバーを目指しています!!
 みなさんのおこしを　おまちしております!!
 カラオケのアプリを使ったチャンネルもありますよ!!
@@ -148,7 +148,49 @@ https://www.rspnet.jp/?page_id=618
 怪しい行動をとったら処罰されるのはあれですけど
 ルールを守れば大丈夫だ！
     """),
-    (641577651022069771,561723377094754304,"https://discord.gg/4JZQAA8","様々なBotもいたり、バラエティに富んだコーナーもあります！")
+    (641577651022069771,561723377094754304,"https://discord.gg/4JZQAA8","様々なBotもいたり、バラエティに富んだコーナーもあります！"),
+    (657350234812317739,577117246414127105,"https://discord.gg/C275YDa","""〜次の時代のNext Standard〜
+
+　せと雑　〜Seto City Freetalk Community〜
+
+・沢山の運営による安心の運営体制
+サーバーに入りたてのあなたもよく利用してくれれば運営になれるチャンスが！？
+
+・毎週行うボイチャ定例会
+他サーバーでは不定期で行うボイスチャットを定例化する事でより様々の人と関われる！
+
+・豊富なトークチャンネル
+定番ゲームからマニア向けネタ、もちろん雑談まで様々なトークチャンネルを導入！無ければ自分で作っちゃおう！
+
+・話題に困った時に！ニュースチャンネル！
+総合ニュースから災害情報、パソコン情報にネット上のエンタメニュースまで！更には道の駅やサービスエリア情報も！
+
+・不必要なBOTを導入せず、わかりやすいサーバーに生まれ変わりました！
+
+⭐️圧倒的なメンバー不足でついにサーバー閉鎖の危機！？
+
+興味を持った方は今すぐ参加してみよう！
+    """),
+    (665434747589230612,657564650996760598,"https://discord.gg/8PcwVGA","""君、今暇じゃないかい？
+だったらゲーム愛好会へ行こう‼︎
+
+🗨 豊富なグローバルチャット
+　様々なグローバルチャットを導入しております
+
+🎮 いろんなDiscordゲーム
+　ポケモンからRPGまで　様々なゲームがあります
+
+🔗 提携サーバー
+　随時募集中‼︎
+    """),
+    (549541481183051798,431805523969441803,"https://discord.gg/EQT3Cxn","""> __Poteto143の雑談所__
+・主にScratcherが多く、それ以外の人は少数ですが、気楽に話が出来ます
+・個人制作のBotを導入できます(審査あり)
+・自由に話題を決められる「フリーカテゴリ」があります
+・活動状態次第では運営になれます
+
+興味を持った方はぜひお越し下さい～
+    """)
 ]
 
 #初回ロード
@@ -259,8 +301,6 @@ async def globalSend(message):
         if len(message.mentions) >= 5:
             await repomsg(message,"5以上のメンション")
             return
-        if message.webhook_id:
-            return
         if message.author.id == bot.user.id: 
             return
         bot.cursor.execute("select * from users where id=?",(message.author.id,))
@@ -275,7 +315,24 @@ async def globalSend(message):
                 await message.remove_reaction("❌",bot.user)
             else:
                 try:
-                    ne = discord.Embed(title="", description="", color=upf["gcolor"])
+                    if upf["sinapartner"] and message.author.activity:
+                        if message.author.activity.type == discord.ActivityType.playing:
+                            ne = discord.Embed(title="", description=f"{message.author.activity.name}をプレイしています。", color=upf["gcolor"])
+                        elif message.author.activity.type == discord.ActivityType.watching:
+                            ne = discord.Embed(title="", description=f"{message.author.activity.name}を視聴しています。", color=upf["gcolor"])
+                        elif message.author.activity.type == discord.ActivityType.listening:
+                            if message.author.activity.name =="Spotify":
+                                ne = discord.Embed(title="", description=f"Spotifyで[{message.author.activity.title}](https://open.spotify.com/track/{message.author.activity.track_id})を聞いています。", color=upf["gcolor"])
+                            else:
+                                ne = discord.Embed(title="", description=f"{message.author.activity.name}を聞いています。", color=upf["gcolor"])
+                        elif message.author.activity.type ==  discord.ActivityType.streaming:
+                            ne = discord.Embed(title="", description=f"{message.author.activity.name}を配信しています。", color=upf["gcolor"])
+                        elif message.author.activity.type ==  discord.ActivityType.custom:
+                            ne = discord.Embed(title="", description=f"{message.author.activity.name}", color=upf["gcolor"])
+                        else:
+                            ne = discord.Embed(title="", description="", color=upf["gcolor"])
+                    else:
+                        ne = discord.Embed(title="", description="", color=upf["gcolor"])
                     ne.set_author(name=f"{ut.ondevicon(message.author)},ユーザーのID:{str(message.author.id)}")
                     if message.guild.id in [i[0] for i in bot.partnerg]:
                         ne.set_footer(text=f"🔗(パートナーサーバー):{message.guild.name}(id:{message.guild.id}),{[i[2] for i in bot.partnerg if i[0]==message.guild.id][0]}",icon_url=message.guild.icon_url_as(static_format="png"))
@@ -298,7 +355,7 @@ async def globalSend(message):
                     if message.author.bot:
                         spicon = spicon + "⚙"
                     if upf["sinapartner"]:
-                        spicon = spicon + "💠"
+                        spicon = spicon + "💠" ##認証済みユーザー
                     if message.author.id in [i[1] for i in bot.partnerg]:
                         spicon = spicon + "🔗"
                     if upf["gmod"]:
@@ -516,6 +573,7 @@ async def nga(m,r):
     await tch.send(f"""{m.mention}さん！みぃてん☆のわいがや広場にようこそ！
 あなたは{r}が理由で、思惟奈ちゃんによる自動認証が行われませんでした。
 思惟奈ちゃんに関するお問い合わせ等の方は`思惟奈ちゃん`カテゴリー内のチャンネルをご利用ください。
+不明点等ございましたら、このチャンネルをご利用ください。
 
 その他のチャンネルを使う際には、メンバー役職が必要です。
 まずはルールを確認してください!
@@ -730,6 +788,29 @@ async def on_guild_role_delete(role):
 
 @bot.event
 async def on_message_edit(before, after):
+    if after.channel.id == 611117238464020490:
+        if after.embeds and before.content==after.content:
+            bot.cursor.execute("select * from globalchs where name=?",("防災情報",))
+            chs = bot.cursor.fetchone()
+            es = after.embeds
+            sed=[]
+            for e in es:
+                e.color = bot.ec
+                e.title = f'💠{str(e.title).replace("Embed.Empty","防災情報")}'
+                sed.append(e)
+            for chid in chs["ids"]:
+                try:
+                    ch = bot.get_channel(chid)
+                    for wh in await ch.webhooks():
+                        try:
+                            if wh.name == "sina_global":
+                                await wh.send(embeds=sed)
+                                await asyncio.sleep(0.2)
+                                break
+                        except:
+                            continue
+                except:
+                    pass
     if not after.author.bot:
         if before.content != after.content:
             e=discord.Embed(title="メッセージの編集",color=bot.ec)
@@ -1011,16 +1092,10 @@ async def on_invite_delete(invite):
 @bot.event
 async def on_ready():
     global aglch
-    global pmsgc
     print('ログインしました。')
     print(bot.user.name)
     print(bot.user.id)
     print('------------------')
-    try:
-        ch = bot.get_channel(595526013031546890)
-        await ch.send(f"{bot.get_emoji(653161518531215390)}起動完了！")
-    except:
-        pass
     aglch = bot.get_channel(659706303521751072)
     pmsgc=bot.get_channel(676371380111015946)
     cRPC.start()
@@ -1042,10 +1117,17 @@ async def on_ready():
     nekok500_mee6.setup(bot)
     syouma.setup(bot)
     pf9_symmetry.setup(bot)
+    try:
+        ch = bot.get_channel(595526013031546890)
+        await ch.send(f"{bot.get_emoji(653161518531215390)}on_ready!")
+    except:
+        pass
 
 @bot.event
 async def on_message(message):
     if isinstance(message.channel,discord.DMChannel):
+        return
+    if message.webhook_id:
         return
     if message.author.id==bot.user.id:
         return
@@ -1083,7 +1165,7 @@ async def domsg(message):
     if not gs:
         bot.cursor.execute("INSERT INTO guilds(id,levels,commands,hash,levelupsendto,reward,jltasks,lockcom,sendlog,prefix,lang) VALUES(?,?,?,?,?,?,?,?,?,?,?)", (message.guild.id,{},{},[],None,{},{},[],None,[],None))
         try:
-            await message.channel.send(f"{bot.get_emoji(653161518153596950)}このサーバーの思惟奈ちゃんサーバープロファイルを作成しました！いくつかの項目はコマンドを使って書き換えることができます。詳しくはヘルプ(`s-help`)をご覧ください。\n以前からの利用者へ:様々な設定がリセットされています。再設定をお願いします。また、不具合がありましたら`mii-10#3110`にお願いします。")
+            await message.channel.send(f"{bot.get_emoji(653161518153596950)}このサーバーの思惟奈ちゃんサーバープロファイルを作成しました！いくつかの項目はコマンドを使って書き換えることができます。詳しくはヘルプ(`s-help`)をご覧ください。\n以前からの利用者へ:様々な設定がリセットされています。再設定をお願いします。また、不具合がありましたら`mii-10#3110`にお願いします。\n思惟奈ちゃんのお知らせは`s-rnotify [チャンネルid(省略可能)]`で、コマンド等の豆知識は`s-rtopic [チャンネルid(省略可能)]`で受信する設定にできます。(Webhook管理権限が必要です。)")
         except:
             pass
         bot.cursor.execute("select * from guilds where id=?",(message.guild.id,))
@@ -1144,29 +1226,6 @@ async def runsercmd(message,gs,pf):
                 pass
 
 async def gahash(message,gs):
-    if message.channel.id == 611117238464020490:
-        if message.embeds:
-            bot.cursor.execute("select * from globalchs where name=?",("防災情報",))
-            chs = bot.cursor.fetchone()
-            es = message.embeds
-            sed=[]
-            for e in es:
-                e.color = bot.ec
-                e.title = f'💠{str(e.title).replace("Embed.Empty","防災情報")}'
-                sed.append(e)
-            for chid in chs["ids"]:
-                try:
-                    ch = bot.get_channel(chid)
-                    for wh in await ch.webhooks():
-                        try:
-                            if wh.name == "sina_global":
-                                await wh.send(embeds=sed)
-                                await asyncio.sleep(0.2)
-                                break
-                        except:
-                            continue
-                except:
-                    pass
     #hash
     if not "hash" in gs["lockcom"]:
         ch=gs["hash"]
@@ -1241,9 +1300,44 @@ async def ldb(ctx,name):
     sddb = bot.cursor.fetchall()
     await ctx.send(f"{len(sddb)}")
 
+@commands.is_owner()
+@bot.command()
+async def mentdb(ctx):
+    bot.cursor.execute(f"select * from users")
+    sddb = bot.cursor.fetchall()
+    async with ctx.channel.typing():
+        for ctt in sddb:
+            if not (ctt["id"] in [i.id for i in bot.users]):
+                bot.cursor.execute(f"delete from users where id = {ctt['id']}")
+    await ctx.send("完了しました☆")
+
+
 @bot.command()
 async def vpc(ctx):
     await ctx.send(embed=ut.getEmbed("post count",str([f"{k}:{v}" for k,v in postcount.items()])))
+
+@bot.command()
+async def rnotify(ctx,ch:int=None):
+    if ctx.author.guild_permissions.administrator or ctx.author.id == 404243934210949120:
+        tchid = ch or ctx.channel.id
+        tch =  bot.get_channel(tchid)
+        fch = bot.get_channel(667351221106901042)
+        await fch.follow(destination=tch)
+        await ctx.send("フォローが完了しました。")
+    else:
+        await ctx.send("サーバー管理者である必要があります。")
+
+@bot.command()
+async def rtopic(ctx,ch:int=None):
+    if ctx.author.guild_permissions.administrator or ctx.author.id == 404243934210949120:
+        tchid = ch or ctx.channel.id
+        tch =  bot.get_channel(tchid)
+        fch = bot.get_channel(677862542298710037)
+        await fch.follow(destination=tch)
+        await ctx.send("フォローが完了しました。")
+    else:
+        await ctx.send("サーバー管理者である必要があります。")
+
 
 bot.remove_command('help')
 

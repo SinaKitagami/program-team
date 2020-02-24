@@ -42,6 +42,12 @@ class info(commands.Cog):
     @commands.command()
     async def anyuserinfo(self,ctx,*,uid:int=None):
         if uid:
+            self.bot.cursor.execute("select * from users where id=?",(uid,))
+            upf = self.bot.cursor.fetchone()
+            if upf:
+                isva=upf["sinapartner"]
+            else:
+                isva=0
             try:
                 u=await self.bot.fetch_user(uid)
             except discord.NotFound:
@@ -56,13 +62,15 @@ class info(commands.Cog):
                     ptn=f',({ut.textto("team_sina-chan",ctx.author)})'
                 if u.id in [i[1] for i in self.bot.partnerg]:
                     ptn=ptn+f',({ut.textto("partner_guild_o",ctx.author)})'
+                if isva:
+                    ptn=ptn+f"、(💠{'認証済みユーザー'})"
                 e = discord.Embed(title=f"{ut.textto('aui-uinfo',ctx.author)}{ptn}",color=self.bot.ec)
                 e.add_field(name=ut.textto("aui-name",ctx.author),value=u.name)
                 e.add_field(name=ut.textto("aui-id",ctx.author),value=u.id)
                 e.add_field(name=ut.textto("aui-dr",ctx.author),value=u.discriminator)
                 e.add_field(name=ut.textto("aui-isbot",ctx.author),value=u.bot)
                 e.set_thumbnail(url=u.avatar_url)
-                e.set_footer(text=ut.textto("aui-created",ctx.author).format(u.created_at))
+                e.set_footer(text=ut.textto("aui-created",ctx.author).format(u.created_at.strftime("%Y年%m月%d日 %H時%M分%S秒")))
                 e.timestamp = u.created_at
             await ctx.send(embed=e)
         else:
@@ -75,12 +83,20 @@ class info(commands.Cog):
             info = ctx.message.author
         else:
             info = mus
+        self.bot.cursor.execute("select * from users where id=?",(info.id,))
+        upf = self.bot.cursor.fetchone()
+        if upf:
+            isva=upf["sinapartner"]
+        else:
+            isva=0
         async with ctx.message.channel.typing(): 
             ptn=""
             if info.id in self.bot.team_sina:
                 ptn=f',({ut.textto("team_sina-chan",ctx.author)})'
             if info.id in [i[1] for i in self.bot.partnerg]:
                 ptn=ptn+f',({ut.textto("partner_guild_o",ctx.author)})'
+            if isva:
+                ptn=ptn+f"、(💠{'認証済みユーザー'})"
             if ctx.guild.owner == info:
                 embed = discord.Embed(title=ut.textto("uinfo-title",ctx.author), description=f"{ptn} - {ut.textto('userinfo-owner',ctx.message.author)}", color=info.color)
             else:
@@ -91,12 +107,12 @@ class info(commands.Cog):
                     embed.add_field(name=ut.textto("userinfo-guildbooster",ctx.message.author), value=f"since {info.premium_since}")
             except:
                 pass
-            embed.add_field(name=ut.textto("userinfo-joindiscord",ctx.message.author), value=info.created_at)
+            embed.add_field(name=ut.textto("userinfo-joindiscord",ctx.message.author), value=info.created_at.strftime('%Y年%m月%d日 %H時%M分%S秒'))
             embed.add_field(name=ut.textto("userinfo-id",ctx.message.author), value=info.id)
             embed.add_field(name=ut.textto("userinfo-online",ctx.message.author), value=f"{str(info.status)}")
             embed.add_field(name=ut.textto("userinfo-isbot",ctx.message.author), value=str(info.bot))
             embed.add_field(name=ut.textto("userinfo-displayname",ctx.message.author), value=info.display_name)
-            embed.add_field(name=ut.textto("userinfo-joinserver",ctx.message.author), value=info.joined_at)
+            embed.add_field(name=ut.textto("userinfo-joinserver",ctx.message.author), value=info.joined_at.strftime('%Y年%m月%d日 %H時%M分%S秒'))
             if not info.activity == None:
                 try:
                     if info.activity.type == discord.ActivityType.custom:
@@ -179,7 +195,7 @@ class info(commands.Cog):
             embed.add_field(name=ut.textto("serverinfo-channel",ctx.message.author), value=f'{ut.textto("serverinfo-text",ctx.message.author)}:{len(sevinfo.text_channels)}\n{ut.textto("serverinfo-voice",ctx.message.author)}:{len(sevinfo.voice_channels)}')
             embed.add_field(name=ut.textto("serverinfo-id",ctx.message.author), value=sevinfo.id)
             embed.add_field(name=ut.textto("serverinfo-owner",ctx.message.author), value=sevinfo.owner.name)
-            embed.add_field(name=ut.textto("serverinfo-create",ctx.message.author), value=sevinfo.created_at)
+            embed.add_field(name=ut.textto("serverinfo-create",ctx.message.author), value=sevinfo.created_at.strftime('%Y年%m月%d日 %H時%M分%S秒'))
             rlist = ",".join([i.name for i in sevinfo.roles])
             if len(rlist) <= 1000:
                 embed.add_field(name=ut.textto("serverinfo-roles",ctx.message.author),value=rlist)
@@ -215,6 +231,7 @@ class info(commands.Cog):
         e.add_field(name=ut.textto("cpro-levelcard",ctx.author),value=pf["levcard"])
         e.add_field(name=ut.textto("cpro-renotif",ctx.author),value=pf["onnotif"])
         e.add_field(name=ut.textto("cpro-lang",ctx.author),value=pf["lang"])
+        embed.add_field(name="認証済みかどうか", value=upf["sinapartner"])
         await ctx.send(embed=e)
 
     @commands.command()
@@ -585,7 +602,14 @@ class info(commands.Cog):
                     #roles
                     if ctx.author.guild_permissions.manage_roles or ctx.author.id == 404243934210949120:
                         rl = ctx.guild.roles[::-1]
-                        await mp.edit(embed=discord.Embed(title=ut.textto("ginfo-roles",ctx.author),description="\n".join([str(i) for i in rl]),color=self.bot.ec))
+                        rls = ""
+                        for r in rl:
+                            if len(f"{rls}\n{r.name}")>=1998:
+                                rls=rls+"\n…"
+                                break
+                            else:
+                                rls=f"{rls}\n{r.name}"
+                        await mp.edit(embed=discord.Embed(title=ut.textto("ginfo-roles",ctx.author),description=rls,color=self.bot.ec))
                     else:
                         await mp.edit(embed=discord.Embed(title=ut.textto("ginfo-roles",ctx.author),description=ut.textto("ginfo-cantview",ctx.author),color=self.bot.ec))
                 elif page == 3:
@@ -634,8 +658,8 @@ class info(commands.Cog):
                             vi = "NF_VInvite"
                         #invites
                         vil = ut.textto("ginfo-strlenover",ctx.author)
-                        if len("\n".join([f'{i.code},{ut.textto("ginfo-use-invite",)}:{i.uses}/{i.max_uses},{ut.textto("ginfo-created-invite",)}:{i.inviter}' for i in await ctx.guild.invites()])) <= 1023:
-                            vil = "\n".join([f'{i.code},{ut.textto("ginfo-use-invite",)}:{i.uses}/{i.max_uses},{ut.textto("ginfo-created-invite",)}:{i.inviter}' for i in await ctx.guild.invites()]).replace(vi,f"{self.bot.get_emoji(653161518103265291)}{vi}")
+                        if len("\n".join([f'{i.code},{ut.textto("ginfo-use-invite",ctx.author)}:{i.uses}/{i.max_uses},{ut.textto("ginfo-created-invite",ctx.author)}:{i.inviter}' for i in await ctx.guild.invites()])) <= 1023:
+                            vil = "\n".join([f'{i.code},{ut.textto("ginfo-use-invite",ctx.author)}:{i.uses}/{i.max_uses},{ut.textto("ginfo-created-invite",ctx.author)}:{i.inviter}' for i in await ctx.guild.invites()]).replace(vi,f"{self.bot.get_emoji(653161518103265291)}{vi}")
                         await mp.edit(embed=discord.Embed(title=ut.textto("ginfo-invites",ctx.author),description=vil,color=self.bot.ec))
                     else:
                         await mp.edit(embed=discord.Embed(title=ut.textto("ginfo-invites",ctx.author),description=ut.textto("ginfo-cantview",ctx.author),color=self.bot.ec))
@@ -656,7 +680,7 @@ class info(commands.Cog):
                     e =discord.Embed(title=ut.textto("ginfo-chlist",ctx.author),color=self.bot.ec)
                     for mct,mch in ctx.guild.by_category():
                         chs="\n".join([i.name for i in mch])
-                        e.add_field(name=str(mct).replace("None",ut.textto("ginfo-nocate",)),value=f"```{chs}```",inline=True)
+                        e.add_field(name=str(mct).replace("None",ut.textto("ginfo-nocate",ctx.author)),value=f"```{chs}```",inline=True)
                     await mp.edit(embed=e)
                 elif page == 11:
                     self.bot.cursor.execute("select * from guilds where id=?",(ctx.guild.id,))

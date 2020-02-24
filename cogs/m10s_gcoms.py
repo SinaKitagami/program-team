@@ -95,13 +95,13 @@ class gcoms(commands.Cog):
             await ctx.send("そのグローバルチャンネルはありません。")
 
     @commands.command(aliases=["グローバルチャットの色を変える"])
-    async def globalcolor(ctx,color='0x000000'):
+    async def globalcolor(self,ctx,color='0x000000'):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
         self.bot.cursor.execute("UPDATE users SET gcolor = ? WHERE id = ?", (int(color,16),ctx.author.id))
         await ctx.send(ut.textto("global-color-changed",ctx.message.author))
 
     @commands.command(aliases=["グローバルチャットのニックネームを変える"])
-    async def globalnick(ctx,nick):
+    async def globalnick(self,ctx,nick):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
         if 1<len(nick)<29:
             self.bot.cursor.execute("UPDATE users SET gnick = ? WHERE id = ?", (nick,ctx.author.id))
@@ -111,7 +111,7 @@ class gcoms(commands.Cog):
 
 
     @commands.command(aliases=["グローバルチャットのステータス","グローバルチャットのステータスを見せて"])
-    async def gprofile(ctx,uid:int=None):
+    async def gprofile(self,ctx,uid:int=None):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
         if uid==None:
             cid = ctx.author.id
@@ -126,11 +126,10 @@ class gcoms(commands.Cog):
         embed.add_field(name="gmod", value=upf["gmod"])
         embed.add_field(name="tester", value=upf["galpha"])
         embed.add_field(name="star", value=upf["gstar"])
-        embed.add_field(name="partner", value=upf["sinapartner"])
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def globalban(self,ctx,uid:int,ban:bool=True,rea="なし"):
+    async def gchatban(self,ctx,uid:int,ban:bool=True,rea="なし"):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
         self.bot.cursor.execute("select * from users where id=?",(ctx.author.id,))
         upf = self.bot.cursor.fetchone()
@@ -156,10 +155,10 @@ class gcoms(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
-    async def globalpartner(self,ctx,uid,bl:bool=True):
+    async def userv(self,ctx,uid,bl:bool=True):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
         self.bot.cursor.execute("UPDATE users SET sinapartner = ? WHERE id = ?", (int(bl),uid))
-        await ctx.send(f"グローバルパートナーを{str(bl)}にしました。")
+        await ctx.send(f"該当ユーザーの認証状態を{str(bl)}にしました。")
 
 
     @commands.command()

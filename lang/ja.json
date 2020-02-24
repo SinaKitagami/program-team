@@ -428,11 +428,11 @@
     "help-13-t":"特定のチャンネルに送信できるもの",
     "help-13-d":"`sina-user-check`メンバー参加時に、ほかサーバーでのban状況を送信します。管理者のみが見れるようにすることを推奨します。",
     "help-14-t":"グローバルチャットの名称前アイコン",
-    "help-14-d":"🌠:チーム☆思惟奈ちゃんメンバー\n🌈:製作者\n⚙:ボット\n💠:思惟奈ちゃんパートナー\n🔗パートナーサーバーオーナー\n🔧:グローバルチャットモデレーター\n🌟:スターユーザー(気まぐれでつける)\n🔔:アルファテスター(一部機能の先行体験)",
+    "help-14-d":"🌠:チーム☆思惟奈ちゃんメンバー\n🌈:製作者\n⚙:ボット\n💠:認証済みユーザー\n🔗パートナーサーバーオーナー\n🔧:グローバルチャットモデレーター\n🌟:スターユーザー(気まぐれでつける)\n🔔:アルファテスター(一部機能の先行体験)",
 
     "h-notfound":"その名前のコマンドはありません。",
-    "h-owner":"updated 更新情報\nchangenick 名前 ニックネーム変更\nglobalrole id role グローバルの@後の変更\nglobalban id bool 使用禁止の変更\ncu 終了\nchangeRPC text プレイ中の変更\ninfoglobal グローバルチャットへのお知らせ投稿\ndmember id/name メンバー検索\ndguild id (使えない)\nev,aev eval系\n`s-globalmod`,`s-globalstar`,`s-globalpartner`(id bool)プロファイル書き換え",
-    "h-gmod":"`s-globaldel [ID] [Global Channel's name]`そのidのコンテンツのグローバルチャットでの投稿を削除します。\n`s-viewgban`グローバルチャットをbanされているユーザー一覧を表示します。\n`s-globalban [ユーザーid] [True/False]`banの切り替え\n`s-globaltester [id] [bool]`:テスト機能の有効状態を切り替えます。",
+    "h-owner":"updated 更新情報\nchangenick 名前 ニックネーム変更\nglobalrole id role グローバルの@後の変更\ngchatban id bool 使用禁止の変更\ncu 終了\nchangeRPC text プレイ中の変更\ninfoglobal グローバルチャットへのお知らせ投稿\ndmember id/name メンバー検索\ndguild id (使えない)\nev,aev eval系\n`s-globalmod`,`s-globalstar`,`s-userv`(id bool)プロファイル書き換え",
+    "h-gmod":"`s-globaldel [ID] [Global Channel's name]`そのidのコンテンツのグローバルチャットでの投稿を削除します。\n`s-viewgban`グローバルチャットをbanされているユーザー一覧を表示します。\n`s-gchatban [ユーザーid] [True/False]`banの切り替え\n`s-globaltester [id] [bool]`:テスト機能の有効状態を切り替えます。",
     "h-randomint":"`s-randomint [回数]`:1から6までの乱数を[回数]回いうからね。\n`s-randomint [数字1] [数字2]`:[数字1]から[数字2]までの乱数を1回いうからね。\n`s-randomint [数字1] [数字2] [回数]`:[数字1]から[数字2]までの乱数を[回数]回いうからね。",
     "h-fortune":"`s-fortune`\nおみくじです。大凶~大吉です。",
     "h-scranotif":"`s-scranotif [ユーザー名]`\nユーザー名のScratchユーザーの通知数を返すよ。",
@@ -573,7 +573,7 @@
     "q-error":"何らかの不備で、アンケートの作成に失敗しました。",
     "IllQ":"質問しますね！",
     "comlock-unknown":"`add`か`del`か`view`で指定してください。",
-    "comlock-view":"制限されているコマンド、機能一覧(実際には働かないものも含む):",
+    "comlock-view":"制限されているコマンド、機能一覧(実際には働かないものも含む):{0}",
 
     "fish-get":"あなたは{0}をつったってよ。\nゲームポイント{1}を入手したよ！",
 
@@ -706,7 +706,7 @@
     "p-embed_links":"リンク等の埋め込み",
     "p-attach_files":"ファイルの添付",
     "p-read_message_history":"メッセージ履歴の閲覧",
-    "p-mention_everyone":"全員宛てメンションの使用",
+    "p-mention_everyone":"全員宛てメンションの使用とすべての役職へのメンション",
     "p-external_emojis":"外部サーバーの絵文字の使用",
     "p-view_guild_insights":"サーバーインサイトを見る",
     "p-connect":"ボイスチャンネルへの接続",
