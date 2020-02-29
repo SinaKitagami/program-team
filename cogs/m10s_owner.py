@@ -78,8 +78,8 @@ class owner(commands.Cog):
             await ctx.send(embed=discord.Embed(title="awaitEvalエラー",description=traceback.format_exc(0)))
     
     @commands.command()
+    @commands.is_owner()
     async def eval(self,ctx,*,cmd):
-        if ctx.author.id in self.bot.team_sina:
             await ctx.message.add_reaction(self.bot.get_emoji(653161518346534912))
             kg="\n"
             txt=f'async def evdf(ctx,bot):{kg}{kg.join([f" {i}" for i in cmd.replace("```py","").replace("```","").split(kg)])}'
@@ -92,6 +92,58 @@ class owner(commands.Cog):
                 await ctx.message.remove_reaction(self.bot.get_emoji(653161518346534912),self.bot.user)
                 await ctx.message.add_reaction("❌")
                 await ctx.author.send(embed=discord.Embed(title="eval's Error",description=f"```{traceback.format_exc(3)}```",color=self.bot.ec))
+
+    @commands.command()
+    @commands.is_owner()
+    async def inserver(self,ctx):
+        guilds = self.bot.guilds
+        gcount = len(guilds)-1
+        page=0
+
+        embed=discord.Embed(title="サーバー情報",description=f"{guilds[page].name}(id:`{guilds[page].id}`)",color=self.bot.ec)
+        embed.add_field(name="サーバー人数",value=f"{guilds[page].member_count}人")
+        embed.add_field(name="ブースト状態",value=f"{guilds[page].premium_tier}レベル({guilds[page].premium_subscription_count}ブースト)")
+        embed.add_field(name="チャンネル状況",value=f"テキスト:{len(guilds[page].text_channels)}\nボイス:{len(guilds[page].voice_channels)}\nカテゴリー:{len(guilds[page].categories)}")
+        embed.add_field(name="サーバー作成日時",value=f"{guilds[page].created_at.strftime('%Y年%m月%d日 %H時%M分%S秒')}")
+        embed.add_field(name="思惟奈ちゃん導入日時",value=f"{guilds[page].me.joined_at.strftime('%Y年%m月%d日 %H時%M分%S秒')}")
+        embed.add_field(name="オーナー",value=f"{guilds[page].owner}")
+        embed.set_thumbnail(url=guilds[page].icon_url_as(static_format="png"))
+        embed.set_footer(text=f"{page+1}/{gcount+1}")
+
+        msg = await ctx.send(embed=embed)
+        await msg.add_reaction(self.bot.get_emoji(653161518195671041))
+        await msg.add_reaction(self.bot.get_emoji(653161518170505216))
+        while True:
+            try:
+                r, u = await self.bot.wait_for("reaction_add", check=lambda r,u: r.message.id==msg.id and u.id == ctx.message.author.id,timeout=30)
+            except:
+                break
+            try:
+                await msg.remove_reaction(r,u)
+            except:
+                pass
+            if str(r) == str(self.bot.get_emoji(653161518170505216)):
+                if page == gcount:
+                    page = 0
+                else:
+                    page = page + 1
+                
+            elif str(r) == str(self.bot.get_emoji(653161518195671041)):
+                if page == 0:
+                    page = gcount
+                else:
+                    page = page - 1
+            
+            embed=discord.Embed(title="サーバー情報",description=f"{guilds[page].name}(id:`{guilds[page].id}`)",color=self.bot.ec)
+            embed.add_field(name="サーバー人数",value=f"{guilds[page].member_count}人")
+            embed.add_field(name="ブースト状態",value=f"{guilds[page].premium_tier}レベル({guilds[page].premium_subscription_count}ブースト)")
+            embed.add_field(name="チャンネル状況",value=f"テキスト:{len(guilds[page].text_channels)}\nボイス:{len(guilds[page].voice_channels)}\nカテゴリー:{len(guilds[page].categories)}")
+            embed.add_field(name="サーバー作成日時",value=f"{guilds[page].created_at.strftime('%Y年%m月%d日 %H時%M分%S秒')}")
+            embed.add_field(name="思惟奈ちゃん導入日時",value=f"{guilds[page].me.joined_at.strftime('%Y年%m月%d日 %H時%M分%S秒')}")
+            embed.add_field(name="オーナー",value=f"{guilds[page].owner}")
+            embed.set_thumbnail(url=guilds[page].icon_url_as(static_format="png"))
+            embed.set_footer(text=f"{page+1}/{gcount+1}")
+            await msg.edit(embed=embed)
 
     @commands.command()
     @commands.is_owner()

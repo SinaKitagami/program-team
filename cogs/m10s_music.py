@@ -14,6 +14,9 @@ from apiclient.errors import HttpError
 from oauth2client.tools import argparser
 import re
 
+import os
+import shutil
+
 """
 上のモジュールをインストールすること！
 
@@ -71,6 +74,7 @@ class music(commands.Cog):
         self.sydl = YoutubeDL(setA)
         self.music_loop = {}
         self.music_q = {}
+        self.mpanel={}
         self.smusic = False
 
 
@@ -92,6 +96,7 @@ class music(commands.Cog):
             try:
                 self.music_loop[str(ctx.guild.id)] = None
                 self.music_q[str(ctx.guild.id)].clear()
+                self.mpanel[str(ctx.guild.id)] = None
             except KeyError:
                 pass
             finally:
@@ -100,7 +105,13 @@ class music(commands.Cog):
                 except:
                     await ctx.send("VC切断が正常に完了しませんでした。")
         else:
-            await ctx.send("あなたが接続中のVCが見当たらないね。")     
+            await ctx.send("あなたが接続中のVCが見当たらないね。")    
+        try:
+            if self.bot.voice_clients == []:
+                shutil.rmtree("musicfile/")
+                os.makedirs('musicfile/', exist_ok=True)
+        except:
+            pass 
 
     @commands.command(aliases=["p"])
     async def play(self,ctx,*,text):
@@ -173,6 +184,7 @@ class music(commands.Cog):
                         except:
                             await ctx.send(f"キューに曲を追加しました。:{in_q[0]['video_title']}など")
                         self.music_q[str(ctx.guild.id)] = self.music_q[str(ctx.guild.id)]+[in_q]
+                        await self.panel_update(ctx)
                 else:
                     try:
                         t1 = threading.Thread(target=rt1,args=[self,url])
@@ -201,6 +213,7 @@ class music(commands.Cog):
                     else:
                         await ctx.send(f"キューに曲を追加しました。:{in_q['video_title']}")
                         self.music_q[str(ctx.guild.id)] = self.music_q[str(ctx.guild.id)]+[in_q]
+                        await self.panel_update(ctx)
             elif log["extractor"] == "niconico":
                 try:
                     t1 = threading.Thread(target=rt1,args=[self,url])
@@ -229,6 +242,7 @@ class music(commands.Cog):
                 else:
                     await ctx.send(f"キューに曲を追加しました。:{in_q['video_title']}")
                     self.music_q[str(ctx.guild.id)] = self.music_q[str(ctx.guild.id)]+[in_q]
+                    await self.panel_update(ctx)
             elif log["extractor"].startswith("soundcloud"):
                 if log.get("_type",None) == "playlist":
                     m = await ctx.send("プレイリストから曲を読み込みます。しばらくお待ちください…。")
@@ -267,6 +281,7 @@ class music(commands.Cog):
                         except:
                             await ctx.send(f"キューに曲を追加しました。:{in_q[0]['video_title']}など")
                         self.music_q[str(ctx.guild.id)] = self.music_q[str(ctx.guild.id)]+[in_q]
+                        await self.panel_update(ctx)
                 else:
                     try:
                         t1 = threading.Thread(target=rt1,args=[self,url])
@@ -295,9 +310,9 @@ class music(commands.Cog):
                     else:
                         await ctx.send(f"キューに曲を追加しました。:{in_q['video_title']}")
                         self.music_q[str(ctx.guild.id)] = self.music_q[str(ctx.guild.id)]+[in_q]
+                        await self.panel_update(ctx)
         else:
             await ctx.send("あなたが接続中のVCが見当たらないね。")
-
 
     @commands.command(aliases=["np"])
     async def playingmusic(self,ctx):
@@ -329,6 +344,7 @@ class music(commands.Cog):
             else:
                 self.music_loop[str(ctx.guild.id)] = torf
                 await ctx.send(f"きりかえました。\n今のキューのループ状態:{self.music_loop[str(ctx.guild.id)]}")
+                await self.panel_update(ctx)
 
     @commands.command(aliases=["pass"])
     async def skip(self,ctx):
@@ -338,19 +354,36 @@ class music(commands.Cog):
             tmp_q = self.music_q[str(ctx.guild.id)]
             tmp_q.pop(0)
             self.music_q[str(ctx.guild.id)] = []
+            await self.mpanel[str(ctx.guild.id)].delete()
+            self.mpanel[str(ctx.guild.id)]=None
             ctx.voice_client.stop()
             await ctx.send("曲をスキップしました。")
             self.music_q[str(ctx.guild.id)] = tmp_q
-            self.bot.loop.create_task(self.play_music_q(ctx,v))
+            self.bot.loop.create_task(self.play_music_q(ctx,v,self.music_loop[str(ctx.guild.id)]))
 
     @commands.command(aliases=["vol"])
     async def chvol(self,ctx,vol:float):
         if ctx.author.voice and ctx.voice_client.is_playing():
             ctx.voice_client.source.volume = vol/100.0
             await ctx.send("ボリュームを調節しました。")
+            await self.panel_update(ctx)
 
-    async def play_music_q(self,ctx,vol=1.0):
-        self.smusic = False
+
+    async def play_music_q(self,ctx,vol=1.0,loop=False):
+        ebd=discord.Embed(title="思惟奈ちゃん-ミュージック操作パネル",color=self.bot.ec)
+        ebd.add_field(name="再生中の曲:",value="未読み込み")
+        ebd.add_field(name="次の曲:",value="未読み込み")
+        ebd.add_field(name="ループ:",value="未読み込み")
+        ebd.add_field(name="ボリューム:",value="未読み込み")
+        m=await ctx.send(embed=ebd)
+        await m.add_reaction("⏹")
+        await m.add_reaction("⏭")
+        await m.add_reaction("🔁")
+        await m.add_reaction("🔼")
+        await m.add_reaction("🔽")
+        await m.add_reaction("⬇")
+        self.mpanel[str(ctx.guild.id)]=m
+        self.smusic = loop
         while not self.music_q[str(ctx.guild.id)] == []:
             try:
                 v = ctx.voice_client.source.volume
@@ -363,6 +396,7 @@ class music(commands.Cog):
                     ctx.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(f'musicfile/{self.music_q[str(ctx.guild.id)][0]["video_id"]}'),volume=vol))
                 except AttributeError:
                     ctx.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(f'musicfile/{self.music_q[str(ctx.guild.id)][0]["video_id"]}'),volume=1.0))
+            await self.panel_update(ctx)
             while ctx.voice_client.is_playing():
                 await asyncio.sleep(1)
             if self.smusic:
@@ -370,6 +404,79 @@ class music(commands.Cog):
             if self.music_loop[str(ctx.guild.id)]:
                 self.music_q[str(ctx.guild.id)] = self.music_q[str(ctx.guild.id)] + [self.music_q[str(ctx.guild.id)][0]]
             self.music_q[str(ctx.guild.id)].pop(0)
+
+    @commands.command()
+    async def pupdate(self,ctx):
+        await self.panel_update(ctx)
+
+    async def panel_update(self,ctx):
+        ebd=discord.Embed(title="思惟奈ちゃん-ミュージック操作パネル",description=f"キューの曲数:{len(self.music_q[str(ctx.guild.id)])}曲\nリアクションで操作でき、そのたびに操作パネルが更新されます。\n⏹:ストップ,⏭:スキップ,🔁:ループ切替,🔼:ボリュームを上げる,🔽:ボリュームを下げる,⬇:パネルを下に持ってくる",color=self.bot.ec)
+        ebd.add_field(name="再生中の曲:",value=f"[{self.music_q[str(ctx.guild.id)][0]['video_title']}]({self.music_q[str(ctx.guild.id)][0]['video_url']})(from {self.music_q[str(ctx.guild.id)][0]['video_source']})")
+        if len(self.music_q[str(ctx.guild.id)])>1:
+            ebd.add_field(name="次の曲:",value=f"[{self.music_q[str(ctx.guild.id)][1]['video_title']}]({self.music_q[str(ctx.guild.id)][0]['video_url']})(from {self.music_q[str(ctx.guild.id)][1]['video_source']})")
+        elif self.music_loop[str(ctx.guild.id)]:
+            ebd.add_field(name="次の曲:",value=f"[{self.music_q[str(ctx.guild.id)][0]['video_title']}]({self.music_q[str(ctx.guild.id)][0]['video_url']})(from {self.music_q[str(ctx.guild.id)][0]['video_source']})(スキップでキューから削除され、再生が止まります。)")
+        else:
+            ebd.add_field(name="次の曲:",value=f"再生終了")
+        ebd.add_field(name="ループ:",value=self.music_loop[str(ctx.guild.id)])
+        try:
+            ebd.add_field(name="ボリューム:",value=ctx.voice_client.source.volume*100)
+        except:
+            ebd.add_field(name="ボリューム:",value="現在アクセス不可")
+        ebd.set_thumbnail(url=self.music_q[str(ctx.guild.id)][0]["video_thumbnail"])
+        await self.mpanel[str(ctx.guild.id)].edit(embed=ebd)
+
+    @commands.Cog.listener()
+    async def on_reaction_add(self,r, u):
+        if self.mpanel.get(str(u.guild.id),None) is None:
+            return
+        if u.id != r.message.guild.me.id and self.mpanel[str(u.guild.id)].id == r.message.id:
+            try:
+                await r.message.remove_reaction(r,u)
+            except:
+                pass
+            msg = r.message
+            msg.author = u
+            ctx=await self.bot.get_context(msg)
+            if str(r.emoji) == "⏹":
+                await ctx.invoke(self.bot.get_command("stop"))
+            elif str(r.emoji) == "⏭":
+                await ctx.invoke(self.bot.get_command("skip"))
+            elif str(r.emoji) == "🔁":
+                if self.music_loop[str(u.guild.id)]:
+                    await ctx.invoke(self.bot.get_command("loop_q"),False)
+                else:
+                    await ctx.invoke(self.bot.get_command("loop_q"),True)
+            elif str(r.emoji) == "🔼":
+                await ctx.invoke(self.bot.get_command("chvol"),ctx.voice_client.source.volume*100+10)
+            elif str(r.emoji) == "🔽":
+                await ctx.invoke(self.bot.get_command("chvol"),ctx.voice_client.source.volume*100-10)
+            elif str(r.emoji) == "⬇":
+                op = self.mpanel[str(u.guild.id)]
+                self.mpanel[str(u.guild.id)] = await r.message.channel.send(embed=self.mpanel[str(u.guild.id)].embeds[0])
+                await op.delete()
+                m=self.mpanel[str(u.guild.id)]
+                await m.add_reaction("⏹")
+                await m.add_reaction("⏭")
+                await m.add_reaction("🔁")
+                await m.add_reaction("🔼")
+                await m.add_reaction("🔽")
+                await m.add_reaction("⬇")
+
+    @commands.Cog.listener()
+    async def on_voice_state_update(self,member, before, after):
+        try:
+            if [i for i in member.guild.me.voice.channel.members if not i.bot]==[]:
+                await member.guild.voice_client.disconnect()
+        except:
+            pass
+        try:
+            if self.bot.voice_clients == []:
+                shutil.rmtree("musicfile/")
+                os.makedirs('musicfile/', exist_ok=True)
+        except:
+            pass
+
 
 
 def setup(bot):

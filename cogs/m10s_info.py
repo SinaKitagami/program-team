@@ -697,5 +697,18 @@ class info(commands.Cog):
     async def view_teammember(self,ctx):
         await ctx.send(embed=ut.getEmbed(ut.textto("team_sina-chan",ctx.author),"\n".join([self.bot.get_user(i).name for i in self.bot.team_sina])))
 
+    @commands.command()
+    async def vusers(self,ctx):
+        self.bot.cursor.execute("select * from users")
+        pf = self.bot.cursor.fetchall()
+        async with ctx.message.channel.typing():
+            vlist = []
+            for i in pf:
+                if i["sinapartner"] == True:
+                    bu = await self.bot.fetch_user(i["id"])
+                    vlist.append(f"ユーザー名:{bu},id:{i['id']}")
+            embed=discord.Embed(title=f"認証済みユーザー一覧({len(vlist)}名)",description="```{0}```".format('\n'.join(vlist)),color=self.bot.ec)
+        await ctx.send(embed=embed)
+
 def setup(bot):
     bot.add_cog(info(bot))
