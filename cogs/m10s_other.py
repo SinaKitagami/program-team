@@ -160,7 +160,7 @@ class other(commands.Cog):
     @commands.cooldown(1, 5, type=commands.BucketType.user)
     async def rettext(self,ctx,*,te):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.clean_content )
-        await ctx.send(te)
+        await ctx.send(te.replace("@everyone","`@everyone`").replace("@here","`@here`"))
         await ctx.message.delete()
 
     @commands.command()
