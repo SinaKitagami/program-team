@@ -43,7 +43,7 @@ class other(commands.Cog):
     @commands.command(name="sina-guild",aliases=["思惟奈ちゃん公式サーバー","思惟奈ちゃんのサーバーに行きたい"])
     async def sinaguild(self,ctx):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
-        await ctx.send("https://discord.gg/udA3qgZ")
+        await ctx.send("https://discord.gg/xFHW9tE")
 
     @commands.command()
     async def mas(self,ctx,*,text):
@@ -160,7 +160,7 @@ class other(commands.Cog):
     @commands.cooldown(1, 5, type=commands.BucketType.user)
     async def rettext(self,ctx,*,te):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.clean_content )
-        await ctx.send(te.replace("@everyone","`@everyone`").replace("@here","`@here`"))
+        await ctx.send(te.replace("@everyone","everyone").replace("@here","here"))
         await ctx.message.delete()
 
     @commands.command()

@@ -91,7 +91,7 @@ bot.cursor.execute("CREATE TABLE IF NOT EXISTS globaldates(id integer PRIMARY KE
 DoServercmd = False
 gprofilever = "v1.0.1"
 wikipedia.set_lang('ja')
-mwc = wikidata.client.Client()
+bot.mwc = wikidata.client.Client()
 rpcct = 0
 rpcs =[
     "ヘルプ:s-help",
@@ -279,7 +279,7 @@ async def globalSend(message):
                     if message.author.bot:
                         spicon = spicon + "⚙"
                     if upf["sinapartner"]:
-                        spicon = spicon + "💠" ##認証済みユーザー
+                        spicon = spicon + "💠" ##認証済みアカウント
                     if message.author.id in [i[1] for i in bot.partnerg]:
                         spicon = spicon + "🔗"
                     if upf["gmod"]:
@@ -1327,6 +1327,83 @@ async def help(ctx,rcmd=None):
             await ctx.send(embed=embed)
 
 
+@bot.command()
+async def thelp(ctx,rcmd=None):
+    #ヘルプ内容
+    if rcmd == None:
+        page = 1
+        embed = discord.Embed(title=ut.textto("help-1-t",ctx.message.author), description=ut.textto("help-1-d",ctx.message.author), color=bot.ec)
+        embed.set_footer(text=f"page:{page}")
+        msg = await ctx.send(embed=embed)
+        await msg.add_reaction(bot.get_emoji(653161518195671041))
+        await msg.add_reaction(bot.get_emoji(653161518170505216))
+        await msg.add_reaction("🔍")
+        while True:
+            try:
+                r, u = await bot.wait_for("reaction_add", check=lambda r,u: r.message.id==msg.id and u.id == ctx.message.author.id,timeout=30)
+            except:
+                break
+            try:
+                await msg.remove_reaction(r,u)
+            except:
+                pass
+            if str(r) == str(bot.get_emoji(653161518170505216)):
+                if page == 16:
+                    page = 1
+                else:
+                    page = page + 1
+                embed = discord.Embed(title=ut.textto(f"help-{page}-t",ctx.message.author), description=ut.textto(f"help-{page}-d",ctx.message.author), color=bot.ec)
+                embed.set_footer(text=f"page:{page}")
+                await msg.edit(embed=embed)
+            elif str(r) == str(bot.get_emoji(653161518195671041)):
+                if page == 1:
+                    page = 16
+                else:
+                    page = page - 1
+                embed = discord.Embed(title=ut.textto(f"help-{page}-t",ctx.message.author), description=ut.textto(f"help-{page}-d",ctx.message.author), color=bot.ec)
+                embed.set_footer(text=f"page:{page}")
+                await msg.edit(embed=embed)
+            elif str(r) == "🔍":
+                await msg.remove_reaction(bot.get_emoji(653161518195671041),bot.user)
+                await msg.remove_reaction("🔍",bot.user)
+                await msg.remove_reaction(bot.get_emoji(653161518170505216),bot.user)
+                qm = await ctx.send(ut.textto("help-s-send",ctx.author))
+                try:
+                    msg = await bot.wait_for('message', check=lambda m: m.author==ctx.author and m.channel==ctx.channel,timeout=60)
+                    sewd = msg.content
+                except asyncio.TimeoutError:
+                    pass
+                else:
+                    try:
+                        await msg.delete()
+                        await qm.delete()
+                    except:
+                        pass
+                    async with ctx.message.channel.typing():
+                        lang = ut.textto("language",ctx.author)
+                        with open(f"lang/{lang}.json","r",encoding="utf-8") as j:
+                            f = json.load(j)
+                        sre = discord.Embed(title=ut.textto("help-s-ret-title",ctx.author),description=ut.textto("help-s-ret-desc",ctx.author).format(sewd),color=bot.ec)
+                        for k,v in f.items():
+                            if k.startswith("nh-"):
+                                if sewd in k.replace("nh-","")  or sewd in str(v):
+                                    sre.add_field(name=k.replace("nh-",""),value=f"詳細を見るには`s-help {k.replace('nh-','')}`と送信")
+                    await ctx.send(embed=sre)
+        try:
+            await msg.remove_reaction(bot.get_emoji(653161518195671041),bot.user)
+            await msg.remove_reaction("🔍",bot.user)
+            await msg.remove_reaction(bot.get_emoji(653161518170505216),bot.user)
+        except:
+            pass
+    else:
+        dcmd = ut.textto(f"nh-{str(rcmd)}",ctx.message.author)
+        if str(dcmd).startswith("Not found "):
+            await ctx.send(ut.textto("h-notfound",ctx.message.author))
+        else:
+            embed = ut.getEmbed(dcmd[0],dcmd[1],bot.ec,*dcmd[2:])
+            await ctx.send(embed=embed)
+
+
 
 @bot.event
 async def on_command_error(ctx, error):
@@ -1396,7 +1473,7 @@ async def now_sina_tweet():
 """
 
 #通常トークン
-bot.run(bot.BOT_TOKEN)
+#bot.run(bot.BOT_TOKEN)
 
 #テストトークン
-#bot.run(bot.BOT_TEST_TOKEN)
+bot.run(bot.BOT_TEST_TOKEN)

@@ -83,7 +83,7 @@ class gcoms(commands.Cog):
     async def gchinfo(self,ctx,name="main"):
         self.bot.cursor.execute("select * from globalchs where name = ?",(name,))
         chs = self.bot.cursor.fetchone()
-        if chs["ids"]:
+        if chs:
             retchs = ""
             for ch in chs["ids"]:
                 try:
@@ -126,16 +126,33 @@ class gcoms(commands.Cog):
         embed.add_field(name="gmod", value=upf["gmod"])
         embed.add_field(name="tester", value=upf["galpha"])
         embed.add_field(name="star", value=upf["gstar"])
+        if upf["gban"]:
+            embed.add_field(name="reason of ban",value=upf["gbanhist"])
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def gchatban(self,ctx,uid:int,ban:bool=True,rea="なし"):
+    async def gchatban(self,ctx,uid:int,ban:bool=True,*,rea="なし"):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
         self.bot.cursor.execute("select * from users where id=?",(ctx.author.id,))
         upf = self.bot.cursor.fetchone()
-        if upf["gmod"] == True:
-            self.bot.cursor.execute("UPDATE users SET gban = ? WHERE id = ?", (int(ban),uid))
-            await ctx.send(f"ban状態を{str(ban)}にしました。")
+        try:
+            bui=await self.bot.fetch_user(uid)
+        except:
+            await ctx.send("そのIDをもつユーザーがいません！")
+        else:
+            if upf["gmod"] == True:
+                self.bot.cursor.execute("select * from users where id=?",(uid,))
+                bpf = self.bot.cursor.fetchone()
+                if bpf:
+                    self.bot.cursor.execute("UPDATE users SET gban = ? WHERE id = ?", (int(ban),uid))
+                    self.bot.cursor.execute("UPDATE users SET gbanhist = ? WHERE id = ?", (rea,uid))
+                    await ctx.send(f"ban状態を{str(ban)}にしました。")
+                elif bui:
+                    self.bot.cursor.execute("INSERT INTO users(id,prefix,gpoint,memo,levcard,onnotif,lang,accounts,sinapartner,gban,gnick,gcolor,gmod,gstar,galpha,gbanhist) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (bui.id,[],0,{},"m@ji☆",[],None,[],0,1,bui.author.name,0,0,0,0,rea))
+                    await ctx.send(f"プロファイルを作成し、ban状態を{str(ban)}にしました。")
+                else:
+                    await ctx.send("これが呼び出されることは、ありえないっ！")
+
 
     @commands.command()
     async def globaltester(self,ctx,uid,bl:bool=True):
@@ -288,7 +305,7 @@ class gcoms(commands.Cog):
                 for i in pf:
                     if i["gban"] == True:
                         bu = await self.bot.fetch_user(i["id"])
-                        blist.append(f"ユーザー名:{bu},表示名:{i['gnick']},id:{i['id']}")
+                        blist.append(f"ユーザー名:{bu},表示名:{i['gnick']},id:{i['id']},理由:{i['gbanhist']}")
                 embed=discord.Embed(title=f"banされたユーザーの一覧({len(blist)}名)",description="```{0}```".format('\n'.join(blist)),color=self.bot.ec)
             await ctx.send(embed=embed)
 

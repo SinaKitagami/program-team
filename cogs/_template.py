@@ -24,7 +24,7 @@ class ClassName(commands.Cog):
         self.bot = bot
 
     @commands.command(name="pass")
-    async def command(self,ctx,aegs):
+    async def command(self,ctx,args):
         pass
 
     @commands.Cog.listener()
