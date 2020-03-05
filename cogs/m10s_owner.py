@@ -178,7 +178,7 @@ class owner(commands.Cog):
                 embed.add_field(name=ut.textto("userinfo-isbot",ctx.message.author), value=str(info.bot))
                 embed.add_field(name=ut.textto("userinfo-displayname",ctx.message.author), value=info.display_name)
                 embed.add_field(name=ut.textto("userinfo-joinserver",ctx.message.author), value=info.joined_at)
-                embed.add_field(name="サーバー", value=info.name)
+                embed.set_footer(text=f"サーバー:{info.guild.name}({info.guild.id})")
                 if not info.activity == None:
                     try:
                         embed.add_field(name=ut.textto("userinfo-nowplaying",ctx.message.author), value=f'{info.activity.name}')
@@ -210,29 +210,12 @@ class owner(commands.Cog):
                         if cid in ch["ids"]:
                             clt=ch["ids"]
                             clt.remove(cid)
-                            db.execute("UPDATE globalchs SET ids = ? WHERE name = ?", (clt,ch["name"]))
+                            self.bot.cursor.execute("UPDATE globalchs SET ids = ? WHERE name = ?", (clt,ch["name"]))
                             break
                 except:
                     pass
         await ctx.send("強制切断できてるか確認してねー")
 
-    
-    @commands.command()
-    @commands.is_owner()
-    async def test_of_twipost(self,ctx,text):
-        try:
-            twi.statuses.update(status=text)
-        except:
-            await ctx.send(f"```{traceback.format_exc(2)}```")
-
-    @commands.command()
-    @commands.is_owner()
-    async def changeRPC(self,ctx,text=None):
-        if text==None:
-            await self.bot.change_presence(activity=discord.Game(name=f'ヘルプ:"s-help"|起動時サバ数:{len(self.bot.guilds)}|アイコン:まじすたさん'))
-        else:
-            await self.bot.change_presence(activity=discord.Game(name=text))
-        await ctx.send("変更しました。")
 
     @commands.command()
     @commands.is_owner()
@@ -252,6 +235,34 @@ class owner(commands.Cog):
             await ctx.send("私のニックネームをデフォルトの名前に変更したよ。")
         else:
             await ctx.send("私のニックネームを"+name+"に変更したよ。")
+
+    @commands.command()
+    @commands.is_owner()
+    async def guserft(self,ctx,*,nandt):
+        lt=[f"{str(m)}({m.id})" for m in self.bot.users if nandt in str(m)]
+        if lt:
+            t="\n".join(lt)
+            await ctx.send(embed=ut.getEmbed(f"{str(nandt)}に一致するユーザー",f"```{t}```"))
+        else:
+            await ctx.send(embed=ut.getEmbed("","一致ユーザーなし"))
+
+    @commands.command()
+    @commands.is_owner()
+    async def mutual_guilds(self,ctx,user:commands.converter.UserConverter):
+        mg=[]
+        for g in self.bot.guilds:
+            if g.get_member(user.id):
+                mg+=[f"{g.name}({g.id})"]
+        if mg:
+            t="\n".join(mg)
+            e=discord.Embed(description=f"```{t}```",color=self.bot.ec)
+            e.set_author(name=f"思惟奈ちゃんと{user}の共通サーバー")
+            await ctx.send(embed=e)
+        else:
+            e=discord.Embed(description="なし",color=self.bot.ec)
+            e.set_author(name=f"思惟奈ちゃんと{user}の共通サーバー")
+            await ctx.send(embed=e)
+
 
 
 def setup(bot):

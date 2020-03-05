@@ -42,6 +42,9 @@ class settings(commands.Cog):
 
     @commands.command()
     async def userprefix(self,ctx,mode="view",ipf=""):
+        if ipf=="@everyone" or ipf=="@here":
+            await ctx.send("その文字列はprefixとして使えません。")
+            return
         self.bot.cursor.execute("select * from users where id=?",(ctx.author.id,))
         upf = self.bot.cursor.fetchone()
         if mode=="view":
@@ -75,6 +78,9 @@ class settings(commands.Cog):
 
     @commands.command()
     async def guildprefix(self,ctx,mode="view",ipf=""):
+        if ipf=="@everyone" or ipf=="@here":
+            await ctx.send("その文字列はprefixとして使えません。")
+            return
         self.bot.cursor.execute("select * from guilds where id=?",(ctx.guild.id,))
         gs = self.bot.cursor.fetchone()
         if mode=="view":

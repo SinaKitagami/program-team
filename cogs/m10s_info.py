@@ -63,7 +63,7 @@ class info(commands.Cog):
                 if u.id in [i[1] for i in self.bot.partnerg]:
                     ptn=ptn+f',({ut.textto("partner_guild_o",ctx.author)})'
                 if isva:
-                    ptn=ptn+f"、(💠{'認証済みユーザー'})"
+                    ptn=ptn+f"、(💠{'認証済みアカウント'})"
                 e = discord.Embed(title=f"{ut.textto('aui-uinfo',ctx.author)}{ptn}",color=self.bot.ec)
                 e.add_field(name=ut.textto("aui-name",ctx.author),value=u.name)
                 e.add_field(name=ut.textto("aui-id",ctx.author),value=u.id)
@@ -96,7 +96,7 @@ class info(commands.Cog):
             if info.id in [i[1] for i in self.bot.partnerg]:
                 ptn=ptn+f',({ut.textto("partner_guild_o",ctx.author)})'
             if isva:
-                ptn=ptn+f"、(💠{'認証済みユーザー'})"
+                ptn=ptn+f"、(💠{'認証済みアカウント'})"
             if ctx.guild.owner == info:
                 embed = discord.Embed(title=ut.textto("uinfo-title",ctx.author), description=f"{ptn} - {ut.textto('userinfo-owner',ctx.message.author)}", color=info.color)
             else:
@@ -231,7 +231,7 @@ class info(commands.Cog):
         e.add_field(name=ut.textto("cpro-levelcard",ctx.author),value=pf["levcard"])
         e.add_field(name=ut.textto("cpro-renotif",ctx.author),value=pf["onnotif"])
         e.add_field(name=ut.textto("cpro-lang",ctx.author),value=pf["lang"])
-        embed.add_field(name="認証済みかどうか", value=upf["sinapartner"])
+        e.add_field(name="認証済みかどうか", value=pf["sinapartner"])
         await ctx.send(embed=e)
 
     @commands.command()
@@ -707,7 +707,7 @@ class info(commands.Cog):
                 if i["sinapartner"] == True:
                     bu = await self.bot.fetch_user(i["id"])
                     vlist.append(f"ユーザー名:{bu},id:{i['id']}")
-            embed=discord.Embed(title=f"認証済みユーザー一覧({len(vlist)}名)",description="```{0}```".format('\n'.join(vlist)),color=self.bot.ec)
+            embed=discord.Embed(title=f"認証済みアカウント一覧({len(vlist)}名)",description="```{0}```".format('\n'.join(vlist)),color=self.bot.ec)
         await ctx.send(embed=embed)
 
 def setup(bot):

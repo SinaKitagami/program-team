@@ -149,7 +149,7 @@ class search(commands.Cog):
                 str1 = ctx.message.content.replace("s-gwd ", "")
                 sid = requests.get("https://www.wikidata.org/w/api.php?action=wbsearchentities&search="+str1+"&language=en&format=json").json()["search"][0]["id"]
                 purl = requests.get("https://www.wikidata.org/w/api.php?action=wbsearchentities&search="+str1+"&language=en&format=json").json()["search"][0]["concepturi"]
-                sret = mwc.get(sid, load=True).attributes["claims"]["P569"][0]["mainsnak"]["datavalue"]["value"]["time"]
+                sret = self.bot.mwc.get(sid, load=True).attributes["claims"]["P569"][0]["mainsnak"]["datavalue"]["value"]["time"]
                 vsd = sret.replace("+","")
                 vsd = vsd.replace("-","/")
                 vsd = vsd.replace("T00:00:00Z","")

@@ -43,7 +43,7 @@ class other(commands.Cog):
     @commands.command(name="sina-guild",aliases=["思惟奈ちゃん公式サーバー","思惟奈ちゃんのサーバーに行きたい"])
     async def sinaguild(self,ctx):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
-        await ctx.send("https://discord.gg/udA3qgZ")
+        await ctx.send("https://discord.gg/xFHW9tE")
 
     @commands.command()
     async def mas(self,ctx,*,text):
@@ -156,35 +156,11 @@ class other(commands.Cog):
         embed.add_field(name="思惟奈ちゃんをほかのサーバーに！",value="https://discordapp.com/api/oauth2/authorize?client_id=462885760043843584&permissions=8&scope=bot")
         await ctx.send(embed=embed)
 
-    @commands.command()
-    async def sendto(self,ctx,cid):
-        print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
-        try:
-            ch = self.bot.get_channel(int(cid))
-            if ch == None:
-                await ctx.send(ut.textto("sendto-notfound",ctx.message.author))
-            else:
-                ctt = ctx.message.content.replace("s-sendto "+cid+" ","")
-                embed = discord.Embed(title=ctt, description=ctx.message.guild.name.replace("第三・十勝チャット Japan(beta)","某サバ")+f"、{ctx.message.channel.name}より", color=ctx.message.author.color)
-                embed.set_author(name=str(ctx.message.author), icon_url=ctx.message.author.avatar_url)
-                sdctx = await ch.send(embed=embed)
-                await ctx.send("以下の文面を送信しました。\n"+str(ctx.message.author)+":"+ctt)
-                await ctx.message.delete()
-                """await sdctx.add_reaction('💬')
-                await asyncio.sleep(0.5)
-                re = await self.bot.wait_for("reaction_add", check=lambda r,u: str(r.emoji) == "💬" and r.message.id==sdctx.id)
-                ck = await ctx.send("返信したい人がいるよ、チャンネルIDを送るなら⭕リアクションしてね、")
-                ckr = await self.bot.wait_for("reaction_add", check=lambda r,u: str(r.emoji) == "⭕️" and r.message.id==ck.id)
-                await self.bot.send_message(ch,f"返信用のチャンネルID:{ctx.message.channel.id}")"""
-        except:
-            await ctx.message.delete()
-            await ctx.send(ut.textto("sendto-except",ctx.message.author))
-
     @commands.command(aliases=["rt"])
     @commands.cooldown(1, 5, type=commands.BucketType.user)
     async def rettext(self,ctx,*,te):
-        print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
-        await ctx.send(te)
+        print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.clean_content )
+        await ctx.send(te.replace("@everyone","everyone").replace("@here","here"))
         await ctx.message.delete()
 
     @commands.command()
@@ -217,12 +193,12 @@ class other(commands.Cog):
     @commands.command(aliases=["scratchwikiのurl", "次のページのScratchwikiのURL教えて"])
     async def jscrawiki(self,ctx, un:str):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
-        await ctx.send(ut.textto("jscrawiki-return",ctx.message.author).format(un))
+        await ctx.send(ut.textto("jscrawiki-return",ctx.message.author).format(un.replace("@","@ ")))
 
     @commands.command(aliases=["scratchのユーザーurl", "次のScratchユーザーのURL教えて"])
     async def scrauser(self,ctx, un:str):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
-        await ctx.send(ut.textto("scrauser-return",ctx.message.author).format(un))
+        await ctx.send(ut.textto("scrauser-return",ctx.message.author).format(un.replace("@","@ ")))
 
     @commands.command(name="randomint",liases=["randint", "乱数","次の条件で乱数を作って"])
     async def randomint(self,ctx,*args):
@@ -273,17 +249,17 @@ class other(commands.Cog):
                 if mmj["memo"].get(mn) == None:
                     await ctx.send(ut.textto("memo-r-notfound1",ctx.message.author))
                 else:
-                    await ctx.send(mmj["memo"][mn])
+                    await ctx.send(mmj["memo"][mn].replace("@everyone","everyone").replace("@here","here"))
             else:
                 await ctx.send(ut.textto("memo-r-notfound2",ctx.message.author))
         elif mode == "w":
             if ctt == None:
                 mmj["memo"][mn] = None
             else:
-                mmj["memo"][mn] = ctx.message.content.replace(f's-memo {mode} {mn} ',"")
+                mmj["memo"][mn] = ctx.message.clean_content.replace(f's-memo {mode} {mn} ',"")
             self.bot.cursor.execute("UPDATE users SET memo = ? WHERE id = ?", (mmj["memo"],ctx.author.id))
 
-            await ctx.send(ut.textto("memo-w-write",ctx.message.author).format(str(mn)))
+            await ctx.send(ut.textto("memo-w-write",ctx.message.author).format(str(mn).replace("@everyone","everyone").replace("@here","here")))
         elif mode == "a":
             if mmj["memo"] == {}:
                 await ctx.send(ut.textto("memo-a-notfound",ctx.message.author))

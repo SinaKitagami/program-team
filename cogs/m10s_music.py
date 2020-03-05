@@ -427,17 +427,20 @@ class music(commands.Cog):
         await self.mpanel[str(ctx.guild.id)].edit(embed=ebd)
 
     @commands.Cog.listener()
-    async def on_reaction_add(self,r, u):
-        if self.mpanel.get(str(u.guild.id),None) is None:
+    async def on_raw_reaction_add(self,pr):
+        if self.mpanel.get(str(pr.member.guild.id),None) is None:
             return
-        if u.id != r.message.guild.me.id and self.mpanel[str(u.guild.id)].id == r.message.id:
+        if pr.user_id != pr.member.guild.me.id and self.mpanel[str(pr.guild_id)].id == pr.message_id:
+            ch=self.bot.get_channel(pr.channel_id)
+            msg = await ch.fetch_message(pr.message_id)
             try:
-                await r.message.remove_reaction(r,u)
+                await msg.remove_reaction(pr.emoji,pr.member)
             except:
                 pass
-            msg = r.message
-            msg.author = u
+            msg.author = pr.member
             ctx=await self.bot.get_context(msg)
+            r=pr
+            u=pr.member
             if str(r.emoji) == "⏹":
                 await ctx.invoke(self.bot.get_command("stop"))
             elif str(r.emoji) == "⏭":
@@ -448,12 +451,12 @@ class music(commands.Cog):
                 else:
                     await ctx.invoke(self.bot.get_command("loop_q"),True)
             elif str(r.emoji) == "🔼":
-                await ctx.invoke(self.bot.get_command("chvol"),ctx.voice_client.source.volume*100+10)
+                await ctx.invoke(self.bot.get_command("chvol"),int(ctx.voice_client.source.volume*100+10))
             elif str(r.emoji) == "🔽":
-                await ctx.invoke(self.bot.get_command("chvol"),ctx.voice_client.source.volume*100-10)
+                await ctx.invoke(self.bot.get_command("chvol"),int(ctx.voice_client.source.volume*100-10))
             elif str(r.emoji) == "⬇":
                 op = self.mpanel[str(u.guild.id)]
-                self.mpanel[str(u.guild.id)] = await r.message.channel.send(embed=self.mpanel[str(u.guild.id)].embeds[0])
+                self.mpanel[str(u.guild.id)] = await msg.channel.send(embed=self.mpanel[str(u.guild.id)].embeds[0])
                 await op.delete()
                 m=self.mpanel[str(u.guild.id)]
                 await m.add_reaction("⏹")
