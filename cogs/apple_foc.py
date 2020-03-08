@@ -27,6 +27,7 @@ class AppleFOCCog(commands.Cog):
             return self.guild_throttle[member_id].use()
         else:
             self.guild_throttle[member_id] = self.bot.apple_util.create_throttle(1, 60)
+            self.guild_throttle[member_id].use()
             return True
 
     def is_offline(self, member):
