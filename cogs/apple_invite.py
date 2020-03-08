@@ -66,6 +66,7 @@ class AppleInviteCog(commands.Cog):
             self.bot.get_guild(g["id"])
             for g
             in self.db.execute("SELECT id FROM guilds WHERE sendlog IS NOT NULL").fetchall()
+            if self.bot.get_guild(g["id"])
         ]
         touched_invites = set()
         for guild in guilds:
