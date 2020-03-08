@@ -15,7 +15,7 @@ class RateLimiter(object):
         _upd = time.time()
         if self._last_updated + self.per > _upd:
             self._last_updated = _upd
-            self._token_left = rate
+            self._token_left = self.rate
             return True
         if self._token_left > 0:
             self._token_left -= 1
