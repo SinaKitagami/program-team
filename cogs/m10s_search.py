@@ -280,7 +280,7 @@ class search(commands.Cog):
                 return
             except:
                 pass
-            try:
+            """try:
                 for g in self.bot.guilds:
                     for ch in g.text_channels:
                         try:
@@ -292,8 +292,8 @@ class search(commands.Cog):
                         finally:
                             await asyncio.sleep(0.5)
             except:
-                pass
-            await ctx.send(embed=ut.getEmbed("そのidでは見つかりませんでした。",""))
+                pass"""
+            await ctx.send(embed=ut.getEmbed("そのidでは見つかりませんでした。","(現在メッセージidの検索は無効化されています。)"))
 
 
 

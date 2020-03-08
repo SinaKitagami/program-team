@@ -202,7 +202,7 @@ class games(commands.Cog):
         gp = random.randint(1,3)
         self.bot.cursor.execute("select * from users where id=?",(ctx.author.id,))
         upf = self.bot.cursor.fetchone()
-        self.bot.cursor.execute("UPDATE users SET gpoint = ? WHERE id = ?", (upf["gp"]+gp,ctx.author.id))
+        self.bot.cursor.execute("UPDATE users SET gpoint = ? WHERE id = ?", (upf["gpoint"]+gp,ctx.author.id))
         await ctx.send(embed=ut.getEmbed("fish",ut.textto("fish-get",ctx.author).format(fs,gp)))
 
 
