@@ -52,6 +52,7 @@ from cogs import P143_jyanken
 from cogs import nekok500_mee6
 from cogs import syouma
 from cogs import pf9_symmetry
+from cogs import apple_foc
 
 """import logging
 
@@ -87,6 +88,8 @@ bot.cursor.execute("CREATE TABLE IF NOT EXISTS users(id integer PRIMARY KEY NOT 
 bot.cursor.execute("CREATE TABLE IF NOT EXISTS guilds(id integer PRIMARY KEY NOT NULL,levels json,commands json,hash pickle,levelupsendto integer,reward json,jltasks json,lockcom pickle,sendlog integer,prefix pickle,lang text)")
 bot.cursor.execute("CREATE TABLE IF NOT EXISTS globalchs(name text PRIMARY KEY NOT NULL,ids pickle)")
 bot.cursor.execute("CREATE TABLE IF NOT EXISTS globaldates(id integer PRIMARY KEY NOT NULL,content text,allid pickle,aid integer,gid integer,timestamp text)")
+bot.cursor.execute("CREATE TABLE IF NOT EXISTS invites(id text PRIMARY KEY NOT NULL, guild_id int NOT NULL, uses integer, inviter_id integer NOT NULL);")
+
 
 DoServercmd = False
 gprofilever = "v1.0.1"
@@ -183,7 +186,7 @@ async def repomsg(msg,rs):
 async def gsended(message,ch,embed):
     try:
         tmp = await ch.send(embed=embed)
-        
+
         if not message.embeds[0] == None:
             await ch.send(embed=message.embeds[0])
         return tmp.id
@@ -225,7 +228,7 @@ async def globalSend(message):
         if len(message.mentions) >= 5:
             await repomsg(message,"5以上のメンション")
             return
-        if message.author.id == bot.user.id: 
+        if message.author.id == bot.user.id:
             return
         bot.cursor.execute("select * from users where id=?",(message.author.id,))
         upf = bot.cursor.fetchone()
@@ -267,7 +270,7 @@ async def globalSend(message):
                     embed.set_footer(text=f"{message.guild.name}(id:{message.guild.id})",icon_url=message.guild.icon_url_as(static_format="png"))
                     if not message.application == None:
                         embed.add_field(name=message.application["name"]+"へのRPC招待", value="RPC招待はグローバル送信できません。")
-                    
+
                     spicon = ""
 
                     if message.author.id == 404243934210949120:  ##みぃてん☆
@@ -290,7 +293,7 @@ async def globalSend(message):
                         spicon = spicon + "🌟"
                     if spicon == "":
                         spicon = "👤"
-                    
+
                     embed.set_author(name=f"{upf['gnick']}({spicon}):{str(message.author.id)}", icon_url=message.author.avatar_url_as(static_format="png"))
                     if not message.attachments == []:
                         embed.set_image(url=message.attachments[0].url)
@@ -379,7 +382,7 @@ async def globalSend(message):
                     await message.remove_reaction(bot.get_emoji(653161518346534912),bot.user)
                 except:
                     pass
-            bot.cursor.execute("INSERT INTO globaldates(id,content,allid,aid,gid,timestamp) VALUES(?,?,?,?,?,?)", (int(time.time())+random.randint(1,30),message.clean_content,mids+[message.id],message.author.id,message.guild.id,str(message.created_at)))        
+            bot.cursor.execute("INSERT INTO globaldates(id,content,allid,aid,gid,timestamp) VALUES(?,?,?,?,?,?)", (int(time.time())+random.randint(1,30),message.clean_content,mids+[message.id],message.author.id,message.guild.id,str(message.created_at)))
             await message.add_reaction(bot.get_emoji(653161518195539975))
             await asyncio.sleep(5)
             await message.remove_reaction(bot.get_emoji(653161518195539975),bot.user)
@@ -467,7 +470,7 @@ async def on_member_update(b,a):
 
 async def nga(m,r):
     ch=m.guild.get_channel(631875590307446814)
-    
+
     admins = m.guild.get_role(574494236951707668)
     tmpadmins = m.guild.get_role(583952666317684756)
     subadmins = m.guild.get_role(579283058394660864)
@@ -499,7 +502,7 @@ async def on_member_join(member):
             await member.add_roles(member.guild.get_role(574494559946539009))
         else:
             uich = bot.get_channel(633651383353999370)
-            
+
             e= discord.Embed(title=f"参加メンバー{member}について",color=bot.ec)
             e.add_field(name="共通サーバー数",value=len([g for g in bot.guilds if g.get_member(member.id)]))
             e.add_field(name="ID",value=member.id)
@@ -507,13 +510,13 @@ async def on_member_join(member):
             e.timestamp=member.created_at
             await uich.send(embed=e)
             mrole = member.guild.get_role(574494088837988352)
-            
+
             bunotif = 0
             if len([g for g in bot.guilds if g.get_member(member.id)]) == 1:
                 await nga(member,"思惟奈ちゃんとの共通のサーバーがほかにないこと")
             else:
                 for g in bot.guilds:
-                    
+
                     try:
                         tmp = await g.bans()
                     except:
@@ -550,7 +553,7 @@ async def on_member_join(member):
                             """)
                         schs=[631815290044284938,574494906287128577]
                         for c in schs:
-                            
+
                             sch = bot.get_channel(c)
                             await sch.send(embed=ut.getEmbed("自動認証完了のお知らせ",f"{member.mention}さんが自動認証を済ませました。"))
     else:
@@ -598,7 +601,7 @@ async def on_member_join(member):
                 await ch.send(embed=discord.Embed(title=f"{member}の安全性評価",description=f"そのユーザーは、思惟奈ちゃんグローバルチャットbanを受けています。\n何らかの事情があってこうなっていますので十分に注意してください。"))
     else:
         for g in bot.guilds:
-            
+
             try:
                 tmp = await g.bans()
             except:
@@ -735,7 +738,7 @@ async def on_message_edit(before, after):
             if gpf["sendlog"]:
                 ch = bot.get_channel(gpf["sendlog"])
                 if ch.guild.id == after.guild.id:
-                    await ch.send(embed=e) 
+                    await ch.send(embed=e)
             e.set_footer(text=after.guild.name,icon_url=after.guild.icon_url_as(static_format="png"))
             e.timestamp = datetime.datetime.now() - rdelta(hours=9)
             await aglch.send(embed=e)
@@ -854,7 +857,7 @@ async def on_guild_channel_update(b, a):
         if gpf["sendlog"]:
             ch = bot.get_channel(gpf["sendlog"])
             if ch.guild.id == a.guild.id:
-                await ch.send(embed=e)    
+                await ch.send(embed=e)
         e.set_footer(text=a.guild.name,icon_url=a.guild.icon_url_as(static_format="png"))
         e.timestamp = datetime.datetime.now() - rdelta(hours=9)
         await aglch.send(embed=e)
@@ -1085,7 +1088,7 @@ async def domsg(message):
     await asyncio.gather(*tks)
 
     tpf=["s-"]+pf["prefix"]+gs["prefix"]
-    bot.command_prefix = tpf 
+    bot.command_prefix = tpf
     ctx = await bot.get_context(message)
     try:
         if ctx.command:
@@ -1102,7 +1105,7 @@ async def domsg(message):
 async def runsercmd(message,gs,pf):
     #servercmd
     if not "scom" in gs["lockcom"]:
-        if not message.author.id == bot.user.id and message.webhook_id is None: 
+        if not message.author.id == bot.user.id and message.webhook_id is None:
             tpf=pf["prefix"]+gs["prefix"]
             tpf.append("s-")
             try:
@@ -1156,7 +1159,7 @@ async def gahash(message,gs):
                         if not message.attachments == [] and (not message.attachments[0].is_spoiler()):
                             embed.set_image(url=message.attachments[0].url)
                     await sch.send(embed=embed)
-    
+
 
 async def dlevel(message,gs):
     if "clevel" in gs["lockcom"]:
@@ -1471,6 +1474,10 @@ async def now_sina_tweet():
                 pass
 
 """
+
+from cogs import apple_invite
+apple_invite.setup(bot)
+apple_foc.setup(bot)
 
 #通常トークン
 #bot.run(bot.BOT_TOKEN)
