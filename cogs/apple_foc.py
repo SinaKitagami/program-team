@@ -34,7 +34,7 @@ class AppleFOCCog(commands.Cog):
         return member.status is discord.Status.offline
 
     async def send(self, member, logc):
-        e = discord.Embed(title="オフライン隠し", description=member.mention, timestamp=datetime.datetime.utcnow())
+        e = discord.Embed(title="オンライン隠し", description=member.mention, timestamp=datetime.datetime.utcnow())
         await logc.send(embed=e)
 
     async def run(self, member):
