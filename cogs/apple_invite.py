@@ -81,7 +81,7 @@ class AppleInviteCog(commands.Cog):
             invites = await guild.invites()
             touched_invites |= set(i.code for i in invites)
             for invite in invites:
-                if self.db.execute("SELECT id FROM invites WHERE id = ?", (invite.code)).fetchone():
+                if self.db.execute("SELECT id FROM invites WHERE id = ?", (invite.code,)).fetchone():
                     # invite exists, updating
                     self.db.execute("UPDATE invites SET uses = ? WHERE id = ?", (invite.uses, invite.code))
                 else:
