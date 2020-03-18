@@ -61,7 +61,7 @@ logging.basicConfig(level=logging.DEBUG)"""
 bot = commands.Bot(command_prefix="s-",status=discord.Status.invisible)
 bot.owner_id = 404243934210949120
 
-bot.team_sina = (235734600356331520, 333900730228539393, 365423990749003778, 394358022681395200, 404243934210949120, 415526420115095554, 431805523969441803, 449867036558884866, 455284639108431873, 462765491325501445, 471988147820036106, 539787492711464960, 561000119495819290, 586157827400400907, 594058726902595596, 607645717623996426, 618085816425512970, 631786733511376916, 657214718410489869, 662322152665776138,430934448779821059)
+bot.team_sina = (235734600356331520, 333900730228539393, 365423990749003778, 394358022681395200, 404243934210949120, 415526420115095554, 431805523969441803, 449867036558884866, 455284639108431873, 462765491325501445, 539787492711464960, 561000119495819290, 586157827400400907, 594058726902595596, 607645717623996426, 618085816425512970, 631786733511376916, 657214718410489869, 662322152665776138,430934448779821059, 584008752005513216, 398412979067944961)
 
 #トークンたち
 bot.DROP_TOKEN = config.DROP_TOKEN
@@ -532,7 +532,8 @@ async def on_member_join(member):
                         await nga(member,"アカウントの作成から4日経過していないこと")
                         pass
                     else:
-                        await member.add_roles(mrole)
+                        await nga(member,"本来認証していますが、現在は認証止めていること")
+                        '''await member.add_roles(mrole)
                         ch = await ut.opendm(member)
                         try:
                             await ch.send(f"""{member.mention}さん！みぃてん☆のわいがや広場にようこそ！
@@ -555,7 +556,7 @@ async def on_member_join(member):
                         for c in schs:
 
                             sch = bot.get_channel(c)
-                            await sch.send(embed=ut.getEmbed("自動認証完了のお知らせ",f"{member.mention}さんが自動認証を済ませました。"))
+                            await sch.send(embed=ut.getEmbed("自動認証完了のお知らせ",f"{member.mention}さんが自動認証を済ませました。"))'''
     else:
         try:
             bot.cursor.execute("select * from guilds where id=?",(member.guild.id,))
