@@ -248,12 +248,16 @@ class owner(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
-    async def mutual_guilds(self,ctx,user:commands.converter.UserConverter):
+    async def mutual_guilds(self,ctx,uid):
+        user=self.bot.get_user(int(uid))
+        if not user:
+            await ctx.send("適切なユーザーidを入れてください。")
+            return
         mg=[]
         for g in self.bot.guilds:
             if g.get_member(user.id):
                 mg+=[f"{g.name}({g.id})"]
-        if mg:
+        if mg!=[]:
             t="\n".join(mg)
             e=discord.Embed(description=f"```{t}```",color=self.bot.ec)
             e.set_author(name=f"思惟奈ちゃんと{user}の共通サーバー")

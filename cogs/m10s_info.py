@@ -137,7 +137,7 @@ class info(commands.Cog):
     @commands.command()
     async def cinvite(self,ctx,ivt:str):
         i = await self.bot.fetch_invite(ivt)
-        e=discord.Embed(title=ut.textto("cinvite-title",ctx.author),desctiption=ut.textto("cinvite-from",ctx.author).format(str(i.inviter)),color=self.bot.ec)
+        e=discord.Embed(title=ut.textto("cinvite-title",ctx.author),description=ut.textto("cinvite-from",ctx.author).format(str(i.inviter)),color=self.bot.ec)
         e.set_author(name=f'{i.guild.name}({i.guild.id})',icon_url=i.guild.icon_url_as(format="png"))
         e.add_field(name=ut.textto("cinvite-memcount",ctx.author),value=f'{i.approximate_member_count}\n({ut.textto("cinvite-onmemcount",ctx.author)}{i.approximate_presence_count})')
         e.add_field(name=ut.textto("cinvite-ch",ctx.author),value=f"{i.channel.name}({i.channel.type})")
@@ -153,7 +153,7 @@ class info(commands.Cog):
 
         if emj==None:
             await ctx.send(ut.textto("einfo-needarg",ctx.author))
-        elif emj.guild == ctx.guild:
+        else:
             embed = discord.Embed(title=emj.name, description=f"id:{emj.id}",color=self.bot.ec)
             embed.add_field(name=ut.textto("einfo-animated",ctx.author), value=emj.animated)
             embed.add_field(name=ut.textto("einfo-manageout",ctx.author), value=emj.managed)
@@ -163,8 +163,6 @@ class info(commands.Cog):
             embed.set_footer(text=ut.textto("einfo-addday",ctx.author))
             embed.timestamp = emj.created_at
             await ctx.send(embed=embed)
-        else:
-            await ctx.send(ut.textto("roleinfo-other",ctx.message.author))
 
     @commands.command(name="dguild")
     async def serverinfo(self,ctx,sid=None):
@@ -501,6 +499,12 @@ class info(commands.Cog):
                         embed.add_field(name=ut.textto("playinginfo-det",ctx.message.author), value=vl)
                     except:
                         pass
+                try:
+                    if anactivity.created_at:
+                        embed.set_footer(text=f"started the activity at")
+                        embed.timestamp=anactivity.created_at
+                except:
+                    print("error:has no created_at?")
                 await ctx.send(embed=embed)
 
     @commands.command(name="serverinfo")
@@ -689,6 +693,8 @@ class info(commands.Cog):
                     e.add_field(name="owner",value=ctx.guild.owner.mention)
                     e.add_field(name="features",value=f"```{','.join(ctx.guild.features)}```")
                     e.add_field(name=ut.textto("ginfo-sinagprofile",ctx.author),value=ut.textto("ginfo-gprodesc",ctx.author).format(gs["reward"],gs["sendlog"],gs["prefix"],gs["lang"],))
+                    if ctx.guild.description:
+                        e.set_footer(text=f"公開サーバーの説明:{ctx.guild.description}")
                     await mp.edit(embed=e)
             except:
                 await mp.edit(embed=discord.Embed(title=ut.textto("ginfo-anyerror-title",ctx.author),description=ut.textto("ginfo-anyerror-desc",ctx.author).format(traceback.format_exc(0)),color=self.bot.ec))

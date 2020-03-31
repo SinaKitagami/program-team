@@ -74,6 +74,7 @@ bot.T_API_SKey = config.T_API_SKey
 bot.T_Acs_Token = config.T_Acs_Token
 bot.T_Acs_SToken = config.T_Acs_SToken
 
+
 #test
 postcount={}
 
@@ -490,7 +491,7 @@ async def nga(m,r):
 
 その他のチャンネルを使う際には、メンバー役職が必要です。
 まずはルールを確認してください!
-https://gist.github.com/apple502j/1a81b1a95253609f0c67ecb74f38754b
+<#574500456471199746> このチャンネルにルールがあります。
 その後、そのことを報告してください。
 みぃてん☆
     """)
@@ -958,13 +959,13 @@ async def on_member_unban(guild, user):
 
 @bot.event
 async def on_guild_join(guild):
-    dc = await ut.opendm(bot.get_user(404243934210949120))
-    await dc.send(f"`{guild.name}`(id:{guild.id})に参加しました。")
+    ch = bot.get_channel(693048937304555529)
+    await ch.send(f"`{guild.name}`(id:{guild.id})に参加しました。")
 
 @bot.event
 async def on_guild_remove(guild):
-    dc = await ut.opendm(bot.get_user(404243934210949120))
-    await dc.send(f"`{guild.name}`(id:{guild.id})から退出しました。")
+    ch = bot.get_channel(693048937304555529)
+    await ch.send(f"`{guild.name}`(id:{guild.id})から退出しました。")
 
 @bot.event
 async def on_invite_create(invite):
@@ -1407,6 +1408,16 @@ async def thelp(ctx,rcmd=None):
             embed = ut.getEmbed(dcmd[0],dcmd[1],bot.ec,*dcmd[2:])
             await ctx.send(embed=embed)
 
+@bot.event
+async def on_command(ctx):
+    ch=bot.get_channel(693048961107230811)
+    e=discord.Embed(title=f"{ctx.command.name}の実行",description=f"実行文:`{ctx.message.clean_content}`",color=bot.ec)
+    e.set_author(name=f"実行者:{str(ctx.author)}({ctx.author.id})",icon_url=ctx.author.avatar_url_as(static_format="png"))
+    e.set_footer(text=f"実行サーバー:{ctx.guild.name}({ctx.guild.id})",icon_url=ctx.guild.icon_url_as(static_format="png"))
+    e.add_field(name="成功したか",value=str(not ctx.command_failed))
+    e.add_field(name="実行チャンネル",value=ctx.channel.name)
+    e.timestamp = ctx.message.created_at
+    await ch.send(embed=e)
 
 
 @bot.event
