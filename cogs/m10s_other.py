@@ -43,7 +43,7 @@ class other(commands.Cog):
     @commands.command(name="sina-guild",aliases=["思惟奈ちゃん公式サーバー","思惟奈ちゃんのサーバーに行きたい"])
     async def sinaguild(self,ctx):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
-        await ctx.send("https://discord.gg/xFHW9tE")
+        await ctx.send("https://discord.gg/vtn2V3v")
 
     @commands.command()
     async def mas(self,ctx,*,text):
@@ -147,7 +147,7 @@ class other(commands.Cog):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
         embed = discord.Embed(title=ut.textto("status-inserver",ctx.message.author), description=f"{len(self.bot.guilds)}", color=self.bot.ec)
         embed.add_field(name=ut.textto("status-prefix",ctx.message.author), value="s-")
-        embed.add_field(name=ut.textto("status-starttime",ctx.message.author), value=self.bot.StartTime.strftime('%Y年%m月%d日 %H時%M分%S秒'))
+        embed.add_field(name=ut.textto("status-starttime",ctx.message.author), value=self.bot.StartTime.strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
         embed.add_field(name=ut.textto("status-ver",ctx.message.author), value=platform.python_version())
         embed.add_field(name=ut.textto("status-pros",ctx.message.author), value=platform.processor())
         embed.add_field(name=ut.textto("status-os",ctx.message.author), value=f"{platform.system()} {platform.release()}({platform.version()})")
@@ -240,7 +240,7 @@ class other(commands.Cog):
         await ctx.send(ut.textto("omikuzi-return",ctx.message.author).format(ut.textto("omikuzi-"+str(rnd),ctx.message.author)))
 
     @commands.command()
-    async def memo(self,ctx,mode="a",mn="def",ctt=None):
+    async def memo(self,ctx,mode="a",mn="def",*,ctt=None):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
         self.bot.cursor.execute("select * from users where id=?",(ctx.author.id,))
         mmj = self.bot.cursor.fetchone()
@@ -256,7 +256,7 @@ class other(commands.Cog):
             if ctt == None:
                 mmj["memo"][mn] = None
             else:
-                mmj["memo"][mn] = ctx.message.clean_content.replace(f's-memo {mode} {mn} ',"")
+                mmj["memo"][mn] = ctt
             self.bot.cursor.execute("UPDATE users SET memo = ? WHERE id = ?", (mmj["memo"],ctx.author.id))
 
             await ctx.send(ut.textto("memo-w-write",ctx.message.author).format(str(mn).replace("@everyone","everyone").replace("@here","here")))

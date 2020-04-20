@@ -233,7 +233,7 @@ class search(commands.Cog):
                 elif isinstance(idis,discord.abc.GuildChannel):
                     await ctx.send(embed=ut.getEmbed("サーバーチャンネル",f"名前:{idis.name}\nサーバー:{idis.guild}"))
                 else:
-                    await ctx.send(embed=ut.getEmbed("その他チャンネル"))
+                    await ctx.send(embed=ut.getEmbed("その他チャンネル",f"名前:{idis.name}"))
                 return
             idis = self.bot.get_guild(id)
             if idis:
@@ -247,12 +247,15 @@ class search(commands.Cog):
                 idis = await self.bot.fetch_user(id)
                 u=idis
                 e = discord.Embed(title="ユーザー",color=self.bot.ec)
+                if u.system:
+                    e.add_field(name="✅システムアカウント",value="このアカウントは、Discordのシステムアカウントであり、安全です。",inline=False)
                 e.add_field(name="名前",value=u.name)
                 e.add_field(name="id",value=u.id)
                 e.add_field(name="ディスクリミネータ",value=u.discriminator)
                 e.add_field(name="botかどうか",value=u.bot)
+
                 e.set_thumbnail(url=u.avatar_url)
-                e.set_footer(text=f"アカウント作成日時(そのままの値:{u.created_at},タイムスタンプ化:")
+                e.set_footer(text=f"アカウント作成日時(そのままの値:{(u.created_at+ rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒')},タイムスタンプ化:")
                 e.timestamp = u.created_at
                 await ctx.send(embed=e)
                 return

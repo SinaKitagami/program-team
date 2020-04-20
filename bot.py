@@ -53,6 +53,8 @@ from cogs import nekok500_mee6
 from cogs import syouma
 from cogs import pf9_symmetry
 from cogs import apple_foc
+from cogs import m10s_gban
+from cogs import m10s_bmail
 
 """import logging
 
@@ -61,7 +63,7 @@ logging.basicConfig(level=logging.DEBUG)"""
 bot = commands.Bot(command_prefix="s-",status=discord.Status.invisible)
 bot.owner_id = 404243934210949120
 
-bot.team_sina = (235734600356331520, 333900730228539393, 365423990749003778, 394358022681395200, 404243934210949120, 415526420115095554, 431805523969441803, 449867036558884866, 455284639108431873, 462765491325501445, 539787492711464960, 561000119495819290, 586157827400400907, 594058726902595596, 607645717623996426, 618085816425512970, 631786733511376916, 657214718410489869, 662322152665776138,430934448779821059, 584008752005513216, 398412979067944961)
+bot.team_sina = config.team_sina
 
 #トークンたち
 bot.DROP_TOKEN = config.DROP_TOKEN
@@ -90,6 +92,8 @@ bot.cursor.execute("CREATE TABLE IF NOT EXISTS guilds(id integer PRIMARY KEY NOT
 bot.cursor.execute("CREATE TABLE IF NOT EXISTS globalchs(name text PRIMARY KEY NOT NULL,ids pickle)")
 bot.cursor.execute("CREATE TABLE IF NOT EXISTS globaldates(id integer PRIMARY KEY NOT NULL,content text,allid pickle,aid integer,gid integer,timestamp text)")
 bot.cursor.execute("CREATE TABLE IF NOT EXISTS invites(id text PRIMARY KEY NOT NULL, guild_id int NOT NULL, uses integer, inviter_id integer NOT NULL);")
+bot.cursor.execute("CREATE TABLE IF NOT EXISTS gban_settings(id integer PRIMARY KEY NOT NULL,chid integer);")
+bot.cursor.execute("CREATE TABLE IF NOT EXISTS gban_dates(id integer PRIMARY KEY NOT NULL,reason text NOT NULL,gban_by id NOT NULL);")
 
 
 DoServercmd = False
@@ -115,11 +119,13 @@ db.users_get_current_account()"""
 bot.twi = Twitter(auth=OAuth(bot.T_Acs_Token,bot.T_Acs_SToken,bot.T_API_key,bot.T_API_SKey))
 bot.ec = 0x42bcf4
 Donotif = False
-bot.StartTime = datetime.datetime.now() - rdelta(hours=9)
+bot.StartTime = datetime.datetime.now()
 
 aglch=None
 
 bot.partnerg=config.pg
+
+bot.features=config.sp_features
 
 #初回ロード
 """db.files_download_to_file( "guildsetting.json" , "/guildsetting.json" )
@@ -182,6 +188,9 @@ async def repomsg(msg,rs):
     e.timestamp=msg.created_at
     e.add_field(name="ブロック理由",value=rs or "なし")
     await ch.send(embed=e)
+    if rs == "全員当てメンション":
+        bot.cursor.execute("UPDATE users SET gban = ? WHERE id = ?", (1,msg.author.id))
+        bot.cursor.execute("UPDATE users SET gbanhist = ? WHERE id = ?", ("全体メンション送信未遂で予防グローバルチャットBAN",msg.author.id))
 
 
 async def gsended(message,ch,embed):
@@ -224,6 +233,9 @@ async def globalSend(message):
         if message.content.startswith("//"):
             return
         if message.mention_everyone:
+            await repomsg(message,"全員当てメンション")
+            return
+        if "@everyone" in message.content or "@here" in message.content:
             await repomsg(message,"全員当てメンション")
             return
         if len(message.mentions) >= 5:
@@ -383,7 +395,7 @@ async def globalSend(message):
                     await message.remove_reaction(bot.get_emoji(653161518346534912),bot.user)
                 except:
                     pass
-            bot.cursor.execute("INSERT INTO globaldates(id,content,allid,aid,gid,timestamp) VALUES(?,?,?,?,?,?)", (int(time.time())+random.randint(1,30),message.clean_content,mids+[message.id],message.author.id,message.guild.id,str(message.created_at)))
+            bot.cursor.execute("INSERT INTO globaldates(id,content,allid,aid,gid,timestamp) VALUES(?,?,?,?,?,?)", (int(time.time())+random.randint(1,30),message.clean_content,mids+[message.id],message.author.id,message.guild.id,str(message.created_at.strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))))
             await message.add_reaction(bot.get_emoji(653161518195539975))
             await asyncio.sleep(5)
             await message.remove_reaction(bot.get_emoji(653161518195539975),bot.user)
@@ -430,9 +442,6 @@ async def on_member_update(b,a):
                 ch = bot.get_channel(gpf["sendlog"])
                 if ch.guild.id == a.guild.id:
                     await ch.send(embed=e)
-            e.set_footer(text=a.guild.name,icon_url=a.guild.icon_url_as(static_format="png"))
-            e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-            await aglch.send(embed=e)
     except:
         pass
     while Donotif:
@@ -574,7 +583,7 @@ async def on_member_join(member):
     e=discord.Embed(title="メンバーの参加",description=f"{len(member.guild.members)}人目のメンバー",color=bot.ec)
     e.add_field(name="参加メンバー",value=member.mention)
     e.add_field(name="そのユーザーのid",value=member.id)
-    e.set_footer(text=f"アカウント作成日時(そのままの値:{member.created_at},タイムスタンプ化:")
+    e.set_footer(text=f"アカウント作成日時(そのままの値:{(member.created_at + rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒')},タイムスタンプ化:")
     e.timestamp = member.created_at
     bot.cursor.execute("select * from guilds where id=?",(member.guild.id,))
     gpf = bot.cursor.fetchone()
@@ -585,9 +594,6 @@ async def on_member_join(member):
                 await ch.send(embed=e)
     except:
         pass
-    e.set_footer(text=member.guild.name,icon_url=member.guild.icon_url_as(static_format="png"))
-    e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-    await aglch.send(embed=e)
     #他サーバーでのban通知
     isgban = False
     bot.cursor.execute("select * from users where id=?",(member.id,))
@@ -649,9 +655,6 @@ async def on_member_remove(member):
         ch = bot.get_channel(gpf["sendlog"])
         if ch.guild.id == member.guild.id:
             await ch.send(embed=e)
-    e.set_footer(text=member.guild.name,icon_url=member.guild.icon_url_as(static_format="png"))
-    e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-    await aglch.send(embed=e)
     """if member.guild.id == 611445741902364672:
         c = bot.get_channel(613629308166209549)
         await c.send(embed=e)"""
@@ -667,9 +670,6 @@ async def on_webhooks_update(channel):
         ch = bot.get_channel(gpf["sendlog"])
         if ch.guild.id == channel.guild.id:
             await ch.send(embed=e)
-    e.set_footer(text=channel.guild.name,icon_url=channel.guild.icon_url_as(static_format="png"))
-    e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-    await aglch.send(embed=e)
 
 @bot.event
 async def on_guild_role_create(role):
@@ -682,9 +682,6 @@ async def on_guild_role_create(role):
         ch = bot.get_channel(gpf["sendlog"])
         if ch.guild.id == role.guild.id:
             await ch.send(embed=e)
-    e.set_footer(text=role.guild.name,icon_url=role.guild.icon_url_as(static_format="png"))
-    e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-    await aglch.send(embed=e)
 
 @bot.event
 async def on_guild_role_delete(role):
@@ -697,9 +694,6 @@ async def on_guild_role_delete(role):
         ch = bot.get_channel(gpf["sendlog"])
         if ch.guild.id == role.guild.id:
             await ch.send(embed=e)
-    e.set_footer(text=role.guild.name,icon_url=role.guild.icon_url_as(static_format="png"))
-    e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-    await aglch.send(embed=e)
 
 @bot.event
 async def on_message_edit(before, after):
@@ -741,9 +735,6 @@ async def on_message_edit(before, after):
                 ch = bot.get_channel(gpf["sendlog"])
                 if ch.guild.id == after.guild.id:
                     await ch.send(embed=e)
-            e.set_footer(text=after.guild.name,icon_url=after.guild.icon_url_as(static_format="png"))
-            e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-            await aglch.send(embed=e)
 
 @bot.event
 async def on_guild_channel_delete(channel):
@@ -757,9 +748,6 @@ async def on_guild_channel_delete(channel):
         ch = bot.get_channel(gpf["sendlog"])
         if ch.guild.id == channel.guild.id:
             await ch.send(embed=e)
-    e.set_footer(text=channel.guild.name,icon_url=channel.guild.icon_url_as(static_format="png"))
-    e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-    await aglch.send(embed=e)
 
 @bot.event
 async def on_reaction_clear(message, reactions):
@@ -773,9 +761,6 @@ async def on_reaction_clear(message, reactions):
         ch = bot.get_channel(gpf["sendlog"])
         if ch.guild.id == message.guild.id:
             await ch.send(embed=e)
-    e.set_footer(text=message.guild.name,icon_url=message.guild.icon_url_as(static_format="png"))
-    e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-    await aglch.send(embed=e)
 
 @bot.event
 async def on_message_delete(message):
@@ -792,9 +777,6 @@ async def on_message_delete(message):
             ch = bot.get_channel(gpf["sendlog"])
             if ch.guild.id == message.guild.id:
                 await ch.send(embed=e)
-        e.set_footer(text=message.guild.name,icon_url=message.guild.icon_url_as(static_format="png"))
-        e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-        await aglch.send(embed=e)
 
 
 @bot.event
@@ -813,9 +795,6 @@ async def on_bulk_message_delete(messages):
         ch = bot.get_channel(gpf["sendlog"])
         if ch.guild.id == messages[0].guild.id:
             await ch.send(embed=e)
-    e.set_footer(text=messages[0].guild.name,icon_url=messages[0].guild.icon_url_as(static_format="png"))
-    e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-    await aglch.send(embed=e)
 
 
 @bot.event
@@ -829,9 +808,6 @@ async def on_guild_channel_create(channel):
         ch = bot.get_channel(gpf["sendlog"])
         if ch.guild.id == channel.guild.id:
             await ch.send(embed=e)
-    e.set_footer(text=channel.guild.name,icon_url=channel.guild.icon_url_as(static_format="png"))
-    e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-    await aglch.send(embed=e)
 
 @bot.event
 async def on_guild_channel_update(b, a):
@@ -848,9 +824,6 @@ async def on_guild_channel_update(b, a):
                 ch = bot.get_channel(gpf["sendlog"])
                 if ch.guild.id == a.guild.id:
                     await ch.send(embed=e)
-            e.set_footer(text=a.guild.name,icon_url=a.guild.icon_url_as(static_format="png"))
-            e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-            await aglch.send(embed=e)
     elif not b.changed_roles == a.changed_roles:
         e.add_field(name="変更内容",value="権限の上書き")
         e.add_field(name="確認:",value="チャンネル設定を見てください。")
@@ -860,9 +833,6 @@ async def on_guild_channel_update(b, a):
             ch = bot.get_channel(gpf["sendlog"])
             if ch.guild.id == a.guild.id:
                 await ch.send(embed=e)
-        e.set_footer(text=a.guild.name,icon_url=a.guild.icon_url_as(static_format="png"))
-        e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-        await aglch.send(embed=e)
     elif isinstance(b,discord.TextChannel):
         if not b.topic == a.topic:
             e.add_field(name="変更内容",value="チャンネルトピック")
@@ -874,9 +844,6 @@ async def on_guild_channel_update(b, a):
                 ch = bot.get_channel(gpf["sendlog"])
                 if ch.guild.id == a.guild.id:
                     await ch.send(embed=e)
-            e.set_footer(text=a.guild.name,icon_url=a.guild.icon_url_as(static_format="png"))
-            e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-            await aglch.send(embed=e)
 
 @bot.event
 async def on_guild_update(b, a):
@@ -892,9 +859,6 @@ async def on_guild_update(b, a):
             ch = bot.get_channel(gpf["sendlog"])
             if ch.guild.id == a.id:
                 await ch.send(embed=e)
-        e.set_footer(text=a.name,icon_url=a.icon_url_as(static_format="png"))
-        e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-        await aglch.send(embed=e)
     elif b.icon != a.icon:
         e.add_field(name="変更内容",value="サーバーアイコン")
         bot.cursor.execute("select * from guilds where id=?",(a.id,))
@@ -903,9 +867,6 @@ async def on_guild_update(b, a):
             ch = bot.get_channel(gpf["sendlog"])
             if ch.guild.id == a.id:
                 await ch.send(embed=e)
-        e.set_footer(text=a.name,icon_url=a.icon_url_as(static_format="png"))
-        e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-        await aglch.send(embed=e)
     elif b.owner.id != a.owner.id:
         e.add_field(name="変更内容",value="サーバー所有者の変更")
         e.add_field(name="変更前",value=b.owner)
@@ -916,9 +877,6 @@ async def on_guild_update(b, a):
             ch = bot.get_channel(gpf["sendlog"])
             if ch.guild.id == a.id:
                 await ch.send(embed=e)
-        e.set_footer(text=a.name,icon_url=a.icon_url_as(static_format="png"))
-        e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-        await aglch.send(embed=e)
 
 @bot.event
 async def on_member_ban(g, user):
@@ -935,12 +893,6 @@ async def on_member_ban(g, user):
         ch = bot.get_channel(gpf["sendlog"])
         if ch.guild.id == g.id:
             await ch.send(embed=e)
-    e.set_footer(text=g.name,icon_url=g.icon_url_as(static_format="png"))
-    e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-    await aglch.send(embed=e)
-    """if g.id == 611445741902364672:
-        c = bot.get_channel(613629308166209549)
-        await c.send(embed=e)"""
 
 @bot.event
 async def on_member_unban(guild, user):
@@ -953,9 +905,6 @@ async def on_member_unban(guild, user):
         ch = bot.get_channel(gpf["sendlog"])
         if ch.guild.id == guild.id:
             await ch.send(embed=e)
-    e.set_footer(text=guild.name,icon_url=guild.icon_url_as(static_format="png"))
-    e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-    await aglch.send(embed=e)
 
 @bot.event
 async def on_guild_join(guild):
@@ -982,9 +931,6 @@ async def on_invite_create(invite):
         ch = bot.get_channel(gpf["sendlog"])
         if ch.guild.id == invite.guild.id:
             await ch.send(embed=e)
-    e.set_footer(text=invite.guild.name,icon_url=invite.guild.icon_url_as(static_format="png"))
-    e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-    await aglch.send(embed=e)
 
 
 @bot.event
@@ -1000,9 +946,6 @@ async def on_invite_delete(invite):
         ch = bot.get_channel(gpf["sendlog"])
         if ch.guild.id == invite.guild.id:
             await ch.send(embed=e)
-    e.set_footer(text=invite.guild.name,icon_url=invite.guild.icon_url_as(static_format="png"))
-    e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-    await aglch.send(embed=e)
 
 @bot.event
 async def on_ready():
@@ -1032,6 +975,8 @@ async def on_ready():
     nekok500_mee6.setup(bot)
     syouma.setup(bot)
     pf9_symmetry.setup(bot)
+    m10s_gban.setup(bot)
+    m10s_bmail.setup(bot)
     try:
         ch = bot.get_channel(595526013031546890)
         await ch.send(f"{bot.get_emoji(653161518531215390)}on_ready!")
@@ -1069,7 +1014,7 @@ async def domsg(message):
         bot.cursor.execute("INSERT INTO users(id,prefix,gpoint,memo,levcard,onnotif,lang,accounts,sinapartner,gban,gnick,gcolor,gmod,gstar,galpha,gbanhist) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (message.author.id,[],0,{},"m@ji☆",[],None,[],0,0,message.author.name,0,0,0,0,"なし"))
         try:
             dc=await ut.opendm(message.author)
-            await dc.send(f"{bot.get_emoji(653161518153596950)}あなたの思惟奈ちゃんユーザープロファイルを作成しました！いくつかの項目はコマンドを使って書き換えることができます。詳しくはヘルプ(`s-help`)をご覧ください。\n以前からの利用者へ:様々な設定がリセットされています。再設定をお願いします。また、不具合がありましたら`mii-10#3110`にお願いします。")
+            await dc.send(f"{bot.get_emoji(653161518153596950)}あなたの思惟奈ちゃんユーザープロファイルを作成しました！いくつかの項目はコマンドを使って書き換えることができます。詳しくはヘルプ(`s-help`)をご覧ください。\nまた、不具合や疑問点などがありましたら`mii-10#3110`にお願いします。")
         except:
             pass
         bot.cursor.execute("select * from users where id=?",(message.author.id,))
@@ -1080,7 +1025,7 @@ async def domsg(message):
     if not gs:
         bot.cursor.execute("INSERT INTO guilds(id,levels,commands,hash,levelupsendto,reward,jltasks,lockcom,sendlog,prefix,lang) VALUES(?,?,?,?,?,?,?,?,?,?,?)", (message.guild.id,{},{},[],None,{},{},[],None,[],None))
         try:
-            await message.channel.send(f"{bot.get_emoji(653161518153596950)}このサーバーの思惟奈ちゃんサーバープロファイルを作成しました！いくつかの項目はコマンドを使って書き換えることができます。詳しくはヘルプ(`s-help`)をご覧ください。\n以前からの利用者へ:様々な設定がリセットされています。再設定をお願いします。また、不具合がありましたら`mii-10#3110`にお願いします。\n思惟奈ちゃんのお知らせは`s-rnotify [チャンネルid(省略可能)]`で、コマンド等の豆知識は`s-rtopic [チャンネルid(省略可能)]`で受信する設定にできます。(Webhook管理権限が必要です。)")
+            await message.channel.send(f"{bot.get_emoji(653161518153596950)}このサーバーの思惟奈ちゃんサーバープロファイルを作成しました！いくつかの項目はコマンドを使って書き換えることができます。詳しくはヘルプ(`s-help`)をご覧ください。\nまた、不具合や疑問点などがありましたら`mii-10#3110`にお願いします。\n思惟奈ちゃんのお知らせは`s-rnotify [チャンネルid(省略可能)]`で、コマンド等の豆知識は`s-rtopic [チャンネルid(省略可能)]`で受信する設定にできます。(Webhook管理権限が必要です。)")
         except:
             pass
         bot.cursor.execute("select * from guilds where id=?",(message.guild.id,))
@@ -1142,6 +1087,8 @@ async def runsercmd(message,gs,pf):
 
 async def gahash(message,gs):
     #hash
+    if "s-noHashSend" in message.channel.topic:
+        return
     if not "hash" in gs["lockcom"]:
         ch=gs["hash"]
         if not ch is []:
@@ -1492,7 +1439,7 @@ apple_invite.setup(bot)
 apple_foc.setup(bot)
 
 #通常トークン
-#bot.run(bot.BOT_TOKEN)
+bot.run(bot.BOT_TOKEN)
 
 #テストトークン
-bot.run(bot.BOT_TEST_TOKEN)
+#bot.run(bot.BOT_TEST_TOKEN)

@@ -65,12 +65,15 @@ class info(commands.Cog):
                 if isva:
                     ptn=ptn+f"、(💠{'認証済みアカウント'})"
                 e = discord.Embed(title=f"{ut.textto('aui-uinfo',ctx.author)}{ptn}",color=self.bot.ec)
+                if u.system:
+                    e.add_field(name="✅システムアカウント",value="このアカウントは、Discordのシステムアカウントであり、安全です。",inline=False)
                 e.add_field(name=ut.textto("aui-name",ctx.author),value=u.name)
                 e.add_field(name=ut.textto("aui-id",ctx.author),value=u.id)
                 e.add_field(name=ut.textto("aui-dr",ctx.author),value=u.discriminator)
                 e.add_field(name=ut.textto("aui-isbot",ctx.author),value=u.bot)
                 e.set_thumbnail(url=u.avatar_url)
-                e.set_footer(text=ut.textto("aui-created",ctx.author).format(u.created_at.strftime("%Y年%m月%d日 %H時%M分%S秒")))
+                tm=(u.created_at + rdelta(hours=9)).strftime("%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}").format(*"年月日時分秒")
+                e.set_footer(text=ut.textto("aui-created",ctx.author).format(tm))
                 e.timestamp = u.created_at
             await ctx.send(embed=e)
         else:
@@ -101,18 +104,20 @@ class info(commands.Cog):
                 embed = discord.Embed(title=ut.textto("uinfo-title",ctx.author), description=f"{ptn} - {ut.textto('userinfo-owner',ctx.message.author)}", color=info.color)
             else:
                 embed = discord.Embed(title=ut.textto("uinfo-title",ctx.author), description=ptn, color=info.color)
+            if info.system:
+                embed.add_field(name="✅システムアカウント",value="このアカウントは、Discordのシステムアカウントであり、安全です。",inline=False)
             embed.add_field(name=ut.textto("userinfo-name",ctx.message.author),value=f"{info.name} - {ut.ondevicon(info)}")
             try:
                 if not info.premium_since is None:
                     embed.add_field(name=ut.textto("userinfo-guildbooster",ctx.message.author), value=f"since {info.premium_since}")
             except:
                 pass
-            embed.add_field(name=ut.textto("userinfo-joindiscord",ctx.message.author), value=info.created_at.strftime('%Y年%m月%d日 %H時%M分%S秒'))
+            embed.add_field(name=ut.textto("userinfo-joindiscord",ctx.message.author), value=(info.created_at+ rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
             embed.add_field(name=ut.textto("userinfo-id",ctx.message.author), value=info.id)
             embed.add_field(name=ut.textto("userinfo-online",ctx.message.author), value=f"{str(info.status)}")
             embed.add_field(name=ut.textto("userinfo-isbot",ctx.message.author), value=str(info.bot))
             embed.add_field(name=ut.textto("userinfo-displayname",ctx.message.author), value=info.display_name)
-            embed.add_field(name=ut.textto("userinfo-joinserver",ctx.message.author), value=info.joined_at.strftime('%Y年%m月%d日 %H時%M分%S秒'))
+            embed.add_field(name=ut.textto("userinfo-joinserver",ctx.message.author), value=(info.joined_at + rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
             if not info.activity == None:
                 try:
                     if info.activity.type == discord.ActivityType.custom:
@@ -131,6 +136,9 @@ class info(commands.Cog):
                 embed.add_field(name=ut.textto("userinfo-iconurl",ctx.message.author),value=info.avatar_url_as(static_format='png'))
             else:
                 embed.set_image(url=info.default_avatar_url_as(static_format='png'))
+            lmsc=ut.get_vmusic(self.bot,info)
+            if lmsc:
+                embed.add_field(name=f"思惟奈ちゃんを使って[{lmsc['name']}]({lmsc['url']} )を聴いています。",value=f"サーバー:{lmsc['guild'].name}")
         await ctx.send(embed=embed)
 
 
@@ -193,7 +201,7 @@ class info(commands.Cog):
             embed.add_field(name=ut.textto("serverinfo-channel",ctx.message.author), value=f'{ut.textto("serverinfo-text",ctx.message.author)}:{len(sevinfo.text_channels)}\n{ut.textto("serverinfo-voice",ctx.message.author)}:{len(sevinfo.voice_channels)}')
             embed.add_field(name=ut.textto("serverinfo-id",ctx.message.author), value=sevinfo.id)
             embed.add_field(name=ut.textto("serverinfo-owner",ctx.message.author), value=sevinfo.owner.name)
-            embed.add_field(name=ut.textto("serverinfo-create",ctx.message.author), value=sevinfo.created_at.strftime('%Y年%m月%d日 %H時%M分%S秒'))
+            embed.add_field(name=ut.textto("serverinfo-create",ctx.message.author), value=(sevinfo.created_at + rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
             rlist = ",".join([i.name for i in sevinfo.roles])
             if len(rlist) <= 1000:
                 embed.add_field(name=ut.textto("serverinfo-roles",ctx.message.author),value=rlist)
@@ -280,7 +288,7 @@ class info(commands.Cog):
 
             embed.add_field(name=ut.textto("ci-cate",ctx.message.author),value=ch.category)
 
-            embed.add_field(name=ut.textto("ci-created",ctx.message.author),value=ch.created_at)
+            embed.add_field(name=ut.textto("ci-created",ctx.message.author),value=(ch.created_at + rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
 
             embed.add_field(name=ut.textto("ci-invitec",ctx.message.author),value=str(len(await ch.invites())).replace("0",ut.textto("ci-None",ctx.message.author)))
 
@@ -303,7 +311,7 @@ class info(commands.Cog):
 
             embed.add_field(name=ut.textto("ci-cate",ctx.message.author),value=ch.category)
 
-            embed.add_field(name=ut.textto("ci-created",ctx.message.author),value=ch.created_at)
+            embed.add_field(name=ut.textto("ci-created",ctx.message.author),value=(ch.created_at + rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
 
             embed.add_field(name=ut.textto("ci-invitec",ctx.message.author),value=str(len(await ch.invites())).replace("0",ut.textto("ci-None",ctx.message.author)))
 
@@ -326,7 +334,7 @@ class info(commands.Cog):
 
             embed.add_field(name=ut.textto("ci-inch",ctx.message.author),value=ic)
 
-            embed.add_field(name=ut.textto("ci-created",ctx.message.author),value=ch.created_at)
+            embed.add_field(name=ut.textto("ci-created",ctx.message.author),value=(ch.created_at + rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
 
             embed.add_field(name=ut.textto("ci-url",ctx.message.author),value=f"[{ut.textto('ci-click',ctx.message.author)}](https://discordapp.com/channels/{ctx.guild.id}/{ch.id})")
 
@@ -377,7 +385,12 @@ class info(commands.Cog):
             embed.add_field(name="ステータス(status)",value=vste)
         except AttributeError:
             await ctx.send(ut.textto("vi-nfch",ctx.message.author))
-        await ctx.send(embed=embed)
+        finally:
+            lmusic=ut.get_vmusic(self.bot,info)
+            if lmusic:
+                if lmusic["guild"].id == ctx.guild.id and info.id in [i.id for i in ctx.voice_client.channel.members]:
+                    embed.add_field(name="ボイスチャットで思惟奈ちゃんを使って音楽を聞いています。",value=f"[{lmusic['name']}]({lmusic['url']} )")
+            await ctx.send(embed=embed)
 
     @commands.command(aliases=["役職情報","次の役職について教えて"])
     async def roleinfo(self,ctx,*,role:commands.RoleConverter=None):
@@ -400,7 +413,7 @@ class info(commands.Cog):
                 if bl:
                     hasper = hasper + f"`{ut.textto(f'p-{pn}',ctx.author)}`,"
             embed.add_field(name=ut.textto("roleinfo-hasper",ctx.message.author), value=hasper)
-            embed.add_field(name=ut.textto("roleinfo-created",ctx.message.author), value=role.created_at)
+            embed.add_field(name=ut.textto("roleinfo-created",ctx.message.author), value=(role.created_at + rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
 
             await ctx.send(embed=embed)
         else:
@@ -418,6 +431,10 @@ class info(commands.Cog):
             info = ctx.message.author
         else:
             info = mus
+        lmsc=ut.get_vmusic(self.bot,info)
+        if lmsc:
+            embed = discord.Embed(title=ut.textto("playinginfo-doing",ctx.message.author), description=f"{lmsc['guild'].name}で、思惟奈ちゃんを使って[{lmsc['name']}]({lmsc['url']} )を聞いています", color=info.color)
+            await ctx.send(embed=embed)
         if info.activity is None:
             if str(info.status) == "offline":
                 embed = discord.Embed(title=ut.textto("playinginfo-doing",ctx.message.author), description=ut.textto("playinginfo-offline",ctx.message.author), color=info.color)
@@ -470,7 +487,9 @@ class info(commands.Cog):
                         embed.add_field(name=ut.textto("playinginfo-artist",ctx.message.author), value=activ.artist)
                         embed.add_field(name=ut.textto("playinginfo-album",ctx.message.author), value=activ.album)
                         embed.add_field(name="URL", value=f"https://open.spotify.com/track/{activ.track_id}")
-                        #embed.add_field(name="経過時間", value=str(activ.duration.seconds/60)+str(activ.duration.seconds%60))
+                        pnow=f"{int((datetime.datetime.utcnow() - activ.start).seconds/60)}:{int((datetime.datetime.utcnow() - activ.start).seconds%60)}"
+                        pml=f"{int(activ.duration.seconds/60)}:{int(activ.duration.seconds%60)}"
+                        embed.add_field(name="経過時間", value=f"{pnow}/{pml}")
                         embed.set_thumbnail(url=activ.album_cover_url)
                     except AttributeError:
                         embed.add_field(name=ut.textto("spotify-local",ctx.author), value=ut.textto("spotify-cantlisten-wu",ctx.author))
@@ -504,7 +523,7 @@ class info(commands.Cog):
                         embed.set_footer(text=f"started the activity at")
                         embed.timestamp=anactivity.created_at
                 except:
-                    print("error:has no created_at?")
+                    pass
                 await ctx.send(embed=embed)
 
     @commands.command(name="serverinfo")
@@ -513,6 +532,7 @@ class info(commands.Cog):
             ptn=f'{ut.textto("partner_guild",ctx.author)}:'
         else:
             ptn=""
+        pmax= 12 if "PUBLIC" in ctx.guild.features else 11
         page = 0
         e =discord.Embed(title=ut.textto("ginfo-ov-title",ctx.author),color=self.bot.ec)
         e.set_author(name=f"{ptn}{ctx.guild.name}",icon_url=ctx.guild.icon_url_as(static_format='png'))
@@ -548,13 +568,13 @@ class info(commands.Cog):
             except:
                 pass
             if str(r) == str(self.bot.get_emoji(653161518170505216)):
-                if page == 11:
+                if page == pmax:
                     page = 0
                 else:
                     page = page + 1
             elif str(r) == str(self.bot.get_emoji(653161518195671041)):
                 if page == 0:
-                    page = 11
+                    page = pmax
                 else:
                     page = page - 1
             try:
@@ -693,8 +713,11 @@ class info(commands.Cog):
                     e.add_field(name="owner",value=ctx.guild.owner.mention)
                     e.add_field(name="features",value=f"```{','.join(ctx.guild.features)}```")
                     e.add_field(name=ut.textto("ginfo-sinagprofile",ctx.author),value=ut.textto("ginfo-gprodesc",ctx.author).format(gs["reward"],gs["sendlog"],gs["prefix"],gs["lang"],))
-                    if ctx.guild.description:
-                        e.set_footer(text=f"公開サーバーの説明:{ctx.guild.description}")
+                    await mp.edit(embed=e)
+                elif page == 12:
+                    e=discord.Embed(title="公開サーバー設定",description=ctx.guild.description or "概要なし",color=self.bot.ec)
+                    e.add_field(name="優先言語",value=ctx.guild.preferred_locale)
+                    e.add_field(name="ルールチャンネル",value=ctx.guild.rules_channel.mention)
                     await mp.edit(embed=e)
             except:
                 await mp.edit(embed=discord.Embed(title=ut.textto("ginfo-anyerror-title",ctx.author),description=ut.textto("ginfo-anyerror-desc",ctx.author).format(traceback.format_exc(0)),color=self.bot.ec))
@@ -715,6 +738,30 @@ class info(commands.Cog):
                     vlist.append(f"ユーザー名:{bu},id:{i['id']}")
             embed=discord.Embed(title=f"認証済みアカウント一覧({len(vlist)}名)",description="```{0}```".format('\n'.join(vlist)),color=self.bot.ec)
         await ctx.send(embed=embed)
+
+    @commands.command()
+    async def mutual_guilds(self,ctx,uid=None):
+        user=self.bot.get_user(int(uid)) or ctx.author
+        if not user:
+            await ctx.send("適切なユーザーidを入れてください。")
+            return
+        mg=[]
+        for g in self.bot.guilds:
+            if g.get_member(user.id):
+                mg+=[f"{g.name}({g.id})"]
+        if mg!=[]:
+            t="\n".join(mg)
+            e=discord.Embed(description=f"```{t}```",color=self.bot.ec)
+            e.set_author(name=f"思惟奈ちゃんと{user}の共通サーバー")
+            await ctx.send(embed=e)
+        else:
+            e=discord.Embed(description="なし",color=self.bot.ec)
+            e.set_author(name=f"思惟奈ちゃんと{user}の共通サーバー")
+            await ctx.send(embed=e)
+
+    @commands.command()
+    async def features(self,ctx):
+        await ctx.author.send(embed=ut.getEmbed("あなたのfeatures","```{}```".format(",".join(self.bot.features.get(ctx.author.id,["(なし)"])))))
 
 def setup(bot):
     bot.add_cog(info(bot))

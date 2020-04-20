@@ -69,13 +69,13 @@ class owner(commands.Cog):
         await self.bot.close()
 
     @commands.command()
-    @commands.is_owner()
     async def aev(self,ctx,*,cmd):
-        try:
-            await eval(cmd)
-            await ctx.message.add_reaction(self.bot.get_emoji(653161518103265291))
-        except:
-            await ctx.send(embed=discord.Embed(title="awaitEvalエラー",description=traceback.format_exc(0)))
+        if "eval" in self.bot.features.get(ctx.author.id,[]):
+            try:
+                await eval(cmd)
+                await ctx.message.add_reaction(self.bot.get_emoji(653161518103265291))
+            except:
+                await ctx.send(embed=discord.Embed(title="awaitEvalエラー",description=traceback.format_exc(0)))
     
     @commands.command()
     @commands.is_owner()
@@ -104,8 +104,8 @@ class owner(commands.Cog):
         embed.add_field(name="サーバー人数",value=f"{guilds[page].member_count}人")
         embed.add_field(name="ブースト状態",value=f"{guilds[page].premium_tier}レベル({guilds[page].premium_subscription_count}ブースト)")
         embed.add_field(name="チャンネル状況",value=f"テキスト:{len(guilds[page].text_channels)}\nボイス:{len(guilds[page].voice_channels)}\nカテゴリー:{len(guilds[page].categories)}")
-        embed.add_field(name="サーバー作成日時",value=f"{guilds[page].created_at.strftime('%Y年%m月%d日 %H時%M分%S秒')}")
-        embed.add_field(name="思惟奈ちゃん導入日時",value=f"{guilds[page].me.joined_at.strftime('%Y年%m月%d日 %H時%M分%S秒')}")
+        embed.add_field(name="サーバー作成日時",value=f"{(guilds[page].created_at+ rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒')}")
+        embed.add_field(name="思惟奈ちゃん導入日時",value=f"{guilds[page].me.joined_at.strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒')}")
         embed.add_field(name="オーナー",value=f"{guilds[page].owner}")
         embed.set_thumbnail(url=guilds[page].icon_url_as(static_format="png"))
         embed.set_footer(text=f"{page+1}/{gcount+1}")
@@ -138,8 +138,8 @@ class owner(commands.Cog):
             embed.add_field(name="サーバー人数",value=f"{guilds[page].member_count}人")
             embed.add_field(name="ブースト状態",value=f"{guilds[page].premium_tier}レベル({guilds[page].premium_subscription_count}ブースト)")
             embed.add_field(name="チャンネル状況",value=f"テキスト:{len(guilds[page].text_channels)}\nボイス:{len(guilds[page].voice_channels)}\nカテゴリー:{len(guilds[page].categories)}")
-            embed.add_field(name="サーバー作成日時",value=f"{guilds[page].created_at.strftime('%Y年%m月%d日 %H時%M分%S秒')}")
-            embed.add_field(name="思惟奈ちゃん導入日時",value=f"{guilds[page].me.joined_at.strftime('%Y年%m月%d日 %H時%M分%S秒')}")
+            embed.add_field(name="サーバー作成日時",value=f"{(guilds[page].created_at+ rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒')}")
+            embed.add_field(name="思惟奈ちゃん導入日時",value=f"{guilds[page].me.joined_at.strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒')}")
             embed.add_field(name="オーナー",value=f"{guilds[page].owner}")
             embed.set_thumbnail(url=guilds[page].icon_url_as(static_format="png"))
             embed.set_footer(text=f"{page+1}/{gcount+1}")
@@ -198,23 +198,25 @@ class owner(commands.Cog):
             await ctx.send("一致するユーザーが、共通サーバーに見つかりませんでした。")
 
     @commands.command()
-    @commands.is_owner()
     async def cuglobal(self,ctx,*cids):
-        self.bot.cursor.execute("select * from globalchs")
-        chs = self.bot.cursor.fetchall()
-        async with ctx.channel.typing():
-            for cid in [int(i) for i in cids]:
-                await asyncio.sleep(0.5)
-                try:
-                    for ch in chs:
-                        if cid in ch["ids"]:
-                            clt=ch["ids"]
-                            clt.remove(cid)
-                            self.bot.cursor.execute("UPDATE globalchs SET ids = ? WHERE name = ?", (clt,ch["name"]))
-                            break
-                except:
-                    pass
-        await ctx.send("強制切断できてるか確認してねー")
+        self.bot.cursor.execute("select * from users where id=?",(ctx.author.id,))
+        upf = self.bot.cursor.fetchone()
+        if upf["gmod"] == True:
+            self.bot.cursor.execute("select * from globalchs")
+            chs = self.bot.cursor.fetchall()
+            async with ctx.channel.typing():
+                for cid in [int(i) for i in cids]:
+                    await asyncio.sleep(0.5)
+                    try:
+                        for ch in chs:
+                            if cid in ch["ids"]:
+                                clt=ch["ids"]
+                                clt.remove(cid)
+                                self.bot.cursor.execute("UPDATE globalchs SET ids = ? WHERE name = ?", (clt,ch["name"]))
+                                break
+                    except:
+                        pass
+            await ctx.send("強制切断できてるか確認してねー")
 
 
     @commands.command()
@@ -245,27 +247,6 @@ class owner(commands.Cog):
             await ctx.send(embed=ut.getEmbed(f"{str(nandt)}に一致するユーザー",f"```{t}```"))
         else:
             await ctx.send(embed=ut.getEmbed("","一致ユーザーなし"))
-
-    @commands.command()
-    @commands.is_owner()
-    async def mutual_guilds(self,ctx,uid):
-        user=self.bot.get_user(int(uid))
-        if not user:
-            await ctx.send("適切なユーザーidを入れてください。")
-            return
-        mg=[]
-        for g in self.bot.guilds:
-            if g.get_member(user.id):
-                mg+=[f"{g.name}({g.id})"]
-        if mg!=[]:
-            t="\n".join(mg)
-            e=discord.Embed(description=f"```{t}```",color=self.bot.ec)
-            e.set_author(name=f"思惟奈ちゃんと{user}の共通サーバー")
-            await ctx.send(embed=e)
-        else:
-            e=discord.Embed(description="なし",color=self.bot.ec)
-            e.set_author(name=f"思惟奈ちゃんと{user}の共通サーバー")
-            await ctx.send(embed=e)
 
 
 

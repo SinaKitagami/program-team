@@ -53,14 +53,16 @@ class gcoms(commands.Cog):
         upf = self.bot.cursor.fetchone()
         if upf["gmod"]:
             self.bot.cursor.execute("select * from users where id=?",(i["aid"],))
+            apf=self.bot.cursor.fetchone()
             u = self.bot.cursor.fetchone()
             g = self.bot.get_guild(post["gid"])
-            await ctx.send(embed=ut.getEmbed("メッセージ内容",post['content'],self.bot.ec,"送信者id:",post['aid'],"送信先",post["allid"],"送信者のプロファイルニックネーム",upf['gnick'],"サーバーid",g.id,"サーバーネーム",g.name))
+            await ctx.send(embed=ut.getEmbed("メッセージ内容",post['content'],self.bot.ec,"送信者id:",post['aid'],"送信先",post["allid"],"送信者のプロファイルニックネーム",apf['gnick'],"サーバーid",g.id,"サーバーネーム",g.name))
         else:
             self.bot.cursor.execute("select * from users where id=?",(i["aid"],))
             u = self.bot.cursor.fetchone()
             g = self.bot.get_guild(post["gid"])
-            await ctx.send(embed=ut.getEmbed("メッセージ内容",post['content'],self.bot.ec,"送信者id:",post['aid'],"送信者のプロファイルニックネーム",upf['gnick']))
+            apf=self.bot.cursor.fetchone()
+            await ctx.send(embed=ut.getEmbed("メッセージ内容",post['content'],self.bot.ec,"送信者id:",post['aid'],"送信者のプロファイルニックネーム",apf['gnick']))
 
     @commands.command(aliases=["オンライン状況","次の人のオンライン状況を教えて"])
     async def isonline(self,ctx,uid:int=None):
@@ -148,7 +150,7 @@ class gcoms(commands.Cog):
                     self.bot.cursor.execute("UPDATE users SET gbanhist = ? WHERE id = ?", (rea,uid))
                     await ctx.send(f"ban状態を{str(ban)}にしました。")
                 elif bui:
-                    self.bot.cursor.execute("INSERT INTO users(id,prefix,gpoint,memo,levcard,onnotif,lang,accounts,sinapartner,gban,gnick,gcolor,gmod,gstar,galpha,gbanhist) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (bui.id,[],0,{},"m@ji☆",[],None,[],0,1,bui.author.name,0,0,0,0,rea))
+                    self.bot.cursor.execute("INSERT INTO users(id,prefix,gpoint,memo,levcard,onnotif,lang,accounts,sinapartner,gban,gnick,gcolor,gmod,gstar,galpha,gbanhist) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (bui.id,[],0,{},"m@ji☆",[],None,[],0,1,bui.name,0,0,0,0,rea))
                     await ctx.send(f"プロファイルを作成し、ban状態を{str(ban)}にしました。")
                 else:
                     await ctx.send("これが呼び出されることは、ありえないっ！")
@@ -179,11 +181,13 @@ class gcoms(commands.Cog):
 
 
     @commands.command()
-    @commands.is_owner()
     async def globalstar(self,ctx,uid,bl:bool=True):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
-        self.bot.cursor.execute("UPDATE users SET gstar = ? WHERE id = ?", (int(bl),uid))
-        await ctx.send(f"スターユーザーを{str(bl)}にしました。")
+        self.bot.cursor.execute("select * from users where id=?",(ctx.author.id,))
+        upf = self.bot.cursor.fetchone()
+        if upf["gmod"] == True:
+            self.bot.cursor.execute("UPDATE users SET gstar = ? WHERE id = ?", (int(bl),uid))
+            await ctx.send(f"スターユーザーを{str(bl)}にしました。")
 
     @commands.command()
     async def globalguide(self,ctx):
