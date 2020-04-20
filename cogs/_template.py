@@ -16,6 +16,8 @@ await ut.opendm(Member/User)
     DMチャンネルを返します。DMチャンネルが存在しないなんてことでは困らせません。
 await wait_message_return(ctx,質問するテキスト,←の送信先,待つ時間):
     入力待ちの簡略化。タイムアウトの例外キャッチを忘れずに
+ut.get_vmusic(bot,member)
+    思惟奈ちゃんの音楽再生機能でそのメンバーがきいている曲を返します。
 """
 
 class ClassName(commands.Cog):

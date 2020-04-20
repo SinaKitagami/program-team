@@ -74,16 +74,14 @@ class music(commands.Cog):
     async def join_(self,ctx):
         if ctx.author.voice:
             if ctx.voice_client:
-                await ctx.send(f"now,I'm connecting {ctx.voice_client.channel.name}!")
+                await ctx.send(f"{ctx.voice_client.channel.name}に接続しました。")
             else:
                 try:
                     await ctx.author.voice.channel.connect()
                 except asyncio.TimeoutError:
-                    await ctx.send("I got a responce:Time out!")
-                except discord.ClientException:
-                    await ctx.send("I got a responce:Client Exception!")
+                    await ctx.send("接続のタイムアウト！")
         else:
-            await ctx.send("I can't find a voice channel that you are join now.")
+            await ctx.send("あなたがボイスチャンネルに接続していません！")
 
     @commands.command(name="stop",aliases=["leave"])
     async def stop_(self,ctx):
@@ -93,13 +91,30 @@ class music(commands.Cog):
                 self.bot.mp[str(ctx.guild.id)]=None
                 self.bot.lp[str(ctx.guild.id)]=None
                 await ctx.voice_client.disconnect()
+                await ctx.send("切断しました。")
+
+    @commands.command(name="pause")
+    async def pause_(self,ctx):
+        if ctx.voice_client and ctx.author.voice:
+            ctx.voice_client.pause()
+            await ctx.send("一時停止しました。ボイスチャットを出ても構いません。")
+            await self.panel_update(ctx)
+
 
     @commands.command(name="play",aliases=["p"])
-    async def play_(self,ctx,*,text:str):
+    async def play_(self,ctx,*,text:str=""):
         if not ctx.voice_client:
             await ctx.invoke(self.bot.get_command("join"))
             if not ctx.voice_client:
                 return
+        if ctx.voice_client.is_paused():
+            await ctx.send("再生を再開しました。")
+            ctx.voice_client.resume()
+            await self.panel_update(ctx)
+            return
+        if text=="":
+            await ctx.send("URL/曲名が未指定です。また、現在リアクションからの追加はできません。")
+            return
         async with ctx.typing():
             if text.startswith("http://") or text.startswith("https://"):
                 vurl=text
@@ -154,6 +169,8 @@ class music(commands.Cog):
             ebd.add_field(name="ループ:",value="未読み込み")
             ebd.add_field(name="ボリューム:",value="未読み込み")
             m=await ctx.send(embed=ebd)
+            await m.add_reaction("▶")
+            await m.add_reaction("⏸")
             await m.add_reaction("⏹")
             await m.add_reaction("⏭")
             await m.add_reaction("🔁")
@@ -161,6 +178,8 @@ class music(commands.Cog):
             await m.add_reaction("🔽")
             await m.add_reaction("⬇")
             self.bot.mp[str(ctx.guild.id)]=m
+            try:await m.pin()
+            except:pass
         while self.bot.qu[str(ctx.guild.id)]:
             try:
                 v = ctx.voice_client.source.volume
@@ -171,7 +190,7 @@ class music(commands.Cog):
             else:
                 ctx.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(f'musicfile/{self.bot.qu[str(ctx.guild.id)][0]["video_id"]}'),volume=vl))
             await self.panel_update(ctx)
-            while ctx.voice_client.is_playing():
+            while ctx.voice_client.is_playing() or ctx.voice_client.is_paused():
                 await asyncio.sleep(1)
             if self.bot.lp[str(ctx.guild.id)]:
                 self.bot.qu[str(ctx.guild.id)] = self.bot.qu[str(ctx.guild.id)] + [self.bot.qu[str(ctx.guild.id)][0]]
@@ -210,8 +229,8 @@ class music(commands.Cog):
             pls=[self.bot.qu[str(ctx.guild.id)][5*i:5*(i+1)] for i in range(int(len(self.bot.qu[str(ctx.guild.id)])/5)+1)]
             e=discord.Embed(title="キューの中身",description=f"全{len(self.bot.qu[str(ctx.guild.id)])}曲")
             for i in pls[page]:
-                e.add_field(name=i["video_title"],value=f'[動画]]({i["video_url"]})/[アップロードチャンネル]({i["video_up_url"]})\nソース:{i["video_source"]}')
-            e.set_footer(text=f"page:{page+1}/{len(pls)+1}")
+                e.add_field(name=i["video_title"],value=f'[動画]({i["video_url"]})/[アップロードチャンネル]({i["video_up_url"]})\nソース:{i["video_source"]}')
+            e.set_footer(text=f"page:{page+1}/{len(pls)}")
             msg = await ctx.send(embed=e)
             await msg.add_reaction(self.bot.get_emoji(653161518195671041))#←
             await msg.add_reaction(self.bot.get_emoji(653161518170505216))#→
@@ -258,7 +277,9 @@ class music(commands.Cog):
         await self.panel_update(ctx)
 
     async def panel_update(self,ctx):
-        ebd=discord.Embed(title="思惟奈ちゃん-ミュージック操作パネル",description=f"キューの曲数:{len(self.bot.qu[str(ctx.guild.id)])}曲\nリアクションで操作でき、そのたびに操作パネルが更新されます。\n⏹:ストップ,⏭:スキップ,🔁:ループ切替,🔼:ボリュームを上げる,🔽:ボリュームを下げる,⬇:パネルを下に持ってくる",color=self.bot.ec)
+        ebd=discord.Embed(title="思惟奈ちゃん-ミュージック操作パネル",description=f"キューの曲数:{len(self.bot.qu[str(ctx.guild.id)])}曲\nリアクションで操作でき、そのたびに操作パネルが更新されます。\n▶:(一時停止中)再生の再開,⏸:(再生中)一時停止,⏹:ストップ,⏭:スキップ,🔁:ループ切替,🔼:ボリュームを上げる,🔽:ボリュームを下げる,⬇:パネルを下に持ってくる",color=self.bot.ec)
+        if ctx.voice_client.is_paused():
+            ebd.add_field(name="現在一時停止中",value="再開には`s-play`か▶リアクション",inline=False)
         ebd.add_field(name="再生中の曲:",value=f"[{self.bot.qu[str(ctx.guild.id)][0]['video_title']}]({self.bot.qu[str(ctx.guild.id)][0]['video_url']})(from {self.bot.qu[str(ctx.guild.id)][0]['video_source']})")
         if len(self.bot.qu[str(ctx.guild.id)])>1:
             ebd.add_field(name="次の曲:",value=f"[{self.bot.qu[str(ctx.guild.id)][1]['video_title']}]({self.bot.qu[str(ctx.guild.id)][0]['video_url']})(from {self.bot.qu[str(ctx.guild.id)][1]['video_source']})")
@@ -289,7 +310,11 @@ class music(commands.Cog):
             ctx=await self.bot.get_context(msg)
             r=pr
             u=pr.member
-            if str(r.emoji) == "⏹":
+            if str(r.emoji) == "▶":
+                await ctx.invoke(self.bot.get_command("play"))
+            elif str(r.emoji) == "⏸":
+                await ctx.invoke(self.bot.get_command("pause"))
+            elif str(r.emoji) == "⏹":
                 await ctx.invoke(self.bot.get_command("stop"))
             elif str(r.emoji) == "⏭":
                 await ctx.invoke(self.bot.get_command("skip"))
@@ -307,6 +332,8 @@ class music(commands.Cog):
                 self.bot.mp[str(u.guild.id)] = await msg.channel.send(embed=self.bot.mp[str(u.guild.id)].embeds[0])
                 await op.delete()
                 m=self.bot.mp[str(u.guild.id)]
+                await m.add_reaction("▶")
+                await m.add_reaction("⏸")
                 await m.add_reaction("⏹")
                 await m.add_reaction("⏭")
                 await m.add_reaction("🔁")
@@ -317,7 +344,7 @@ class music(commands.Cog):
     @commands.Cog.listener()
     async def on_voice_state_update(self,member, before, after):
         try:
-            if [i for i in member.guild.me.voice.channel.members if not i.bot]==[]:
+            if not member.guild.voice_client.is_paused() and [i for i in member.guild.me.voice.channel.members if not i.bot]==[]:
                 self.bot.qu[str(member.guild.id)]=None
                 self.bot.mp[str(member.guild.id)]=None
                 self.bot.lp[str(member.guild.id)]=None

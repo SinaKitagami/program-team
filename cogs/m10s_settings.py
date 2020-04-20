@@ -233,7 +233,7 @@ class settings(commands.Cog):
                 mmj["commands"][name]={}
                 mmj["commands"][name]["mode"]="one"
                 mmj["commands"][name]["rep"]=rep
-                mmj["commands"][name]["createdBy"]=ctx.author.name
+                mmj["commands"][name]["createdBy"]=ctx.author.id
                 mmj["commands"][name]["guide"]=guide
             elif msg.content == "random":
                 await dc.send(ut.textto("scmd-add-guide2",ctx.message.author))
@@ -257,7 +257,7 @@ class settings(commands.Cog):
                 mmj["commands"][name]={}
                 mmj["commands"][name]["mode"]="random"
                 mmj["commands"][name]["rep"]=rep
-                mmj["commands"][name]["createdBy"]=ctx.author.name
+                mmj["commands"][name]["createdBy"]=ctx.author.id
                 mmj["commands"][name]["guide"]=guide
             elif msg.content == "role":
                 if ctx.author.permissions_in(ctx.channel).manage_guild == True and ctx.author.permissions_in(ctx.channel).manage_roles == True or ctx.author.id == 404243934210949120:
@@ -270,7 +270,7 @@ class settings(commands.Cog):
                     mmj["commands"][name]={}
                     mmj["commands"][name]["mode"]="role"
                     mmj["commands"][name]["rep"]=rep
-                    mmj["commands"][name]["createdBy"]=ctx.author.name
+                    mmj["commands"][name]["createdBy"]=ctx.author.id
                     mmj["commands"][name]["guide"]=guide
                 else:
                     await ctx.send(ut.textto("need-manage",ctx.author))
@@ -286,7 +286,10 @@ class settings(commands.Cog):
             elif mmj["commands"].get(name) is None:
                 await ctx.send(ut.textto("scmd-help-notfound",ctx.message.author))
             else:
-                await ctx.send(ut.textto("scmd-help-title",ctx.message.author).format(name,mmj["commands"][name]['createdBy'],mmj["commands"][name]['guide']))
+                if isinstance(mmj["commands"][name]['createdBy'],int):
+                    await ctx.send(ut.textto("scmd-help-title",ctx.message.author).format(name,await bot.fetch_user(mmj["commands"][name]['createdBy']),mmj["commands"][name]['guide']))
+                else:
+                    await ctx.send(ut.textto("scmd-help-title",ctx.message.author).format(name,mmj["commands"][name]['createdBy'],mmj["commands"][name]['guide']))
         elif mode == "all":
             if mmj["commands"] == []:
                 await ctx.send(ut.textto("scmd-all-notfound",ctx.message.author))

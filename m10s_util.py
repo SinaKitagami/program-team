@@ -98,3 +98,25 @@ async def opendm(u):
 async def wait_message_return(ctx,stext,sto,tout=60):
     await sto.send(stext)
     return await ctx.bot.wait_for('message', check=lambda m: m.author==ctx.author and m.channel==sto,timeout=tout)
+
+def get_vmusic(bot,member):
+    mg=None
+    mn=None
+    for v in bot.voice_clients:
+        vm_m = [i for i in v.channel.members if i.id == member.id]
+        if not vm_m==[]:
+            try:
+                mg=v.guild
+                mn=bot.qu.get(str(v.guild.id),[])[0]
+                break
+            except:
+                pass
+    if mg and mn:
+        return {
+            "name":mn["video_title"],
+            "url":mn["video_url"],
+            "guild":mg
+        }
+    else:
+        return None
+
