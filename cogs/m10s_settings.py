@@ -164,7 +164,7 @@ class settings(commands.Cog):
             await ctx.send(ut.textto("comlock-unknown",ctx.author))
 
     @commands.command()
-    async def setsysmsg(self,ctx,mode="check",when="welcome",to="sysch",content=None):
+    async def setsysmsg(self,ctx,mode="check",when="welcome",to="sysch",*,content=None):
         self.bot.cursor.execute("select * from guilds where id=?",(ctx.guild.id,))
         msgs = self.bot.cursor.fetchone()
         sm = msgs["jltasks"]
@@ -349,16 +349,20 @@ class settings(commands.Cog):
         await ctx.send(ut.textto("changed",ctx.author))
 
     @commands.command()
-    async def levelreward(self,ctx,lv:int,rl:commands.RoleConverter=None):
-        rid = rl.id
+    async def levelreward(self,ctx,lv:int,rl=None):
         if not(ctx.author.permissions_in(ctx.channel).manage_guild == True and ctx.author.permissions_in(ctx.channel).manage_roles == True or ctx.author.id == 404243934210949120):
             await ctx.send(ut.textto("need-admin",ctx.author))
             return
         self.bot.cursor.execute("select * from guilds where id=?",(ctx.guild.id,))
         gs = self.bot.cursor.fetchone()
-        if rid is None:
+        if rl is None:
             del gs["reward"][str(lv)]
         else:
+            try:
+                grl=commands.RoleConverter.convert(ctx,rl)
+            except:
+                await ctx.send("有効な役職IDを指定してください。")
+            rid = grl.id
             gs["reward"][str(lv)] = rid
         self.bot.cursor.execute("UPDATE guilds SET reward = ? WHERE id = ?", (gs["reward"],ctx.guild.id))
         await ctx.send(ut.textto("changed",ctx.author))

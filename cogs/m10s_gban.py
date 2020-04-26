@@ -48,7 +48,7 @@ class m10s_gban(commands.Cog):
                         by=ctx.author
                         if g:
                             try:
-                                await g.ban(u)
+                                await g.ban(u,reason=f"思惟奈ちゃんグローバルBAN:{reason}(実行者:{by}({by.id}))")
                             except:
                                 if ch:
                                     await ch.send(embed=ut.getEmbed("グローバルBANに基づく、BANの試行",f"{u}({u.id})は、`{reason}`として思惟奈ちゃんのグローバルBANを受けています。\nBANしようとしましたが、権限不足等の理由でBANできませんでした。\nグローバルBAN実行者:{by}({by.id})"))
@@ -111,7 +111,7 @@ class m10s_gban(commands.Cog):
             ch = g.get_channel(gs["chid"])
             if g:
                 try:
-                    await g.ban(u)
+                    await g.ban(u,reason=f"思惟奈ちゃんグローバルBAN:{gbaninfo['reason']}(実行者:{by}({by.id}))")
                 except:
                     await ch.send(embed=ut.getEmbed("グローバルBANに基づく、BANの試行",f"{u}({u.id})は、`{gbaninfo['reason']}`として思惟奈ちゃんのグローバルBANを受けています。\nBANしようとしましたが、権限不足等の理由でBANできませんでした。\nグローバルBAN実行者:{by}({by.id})"))
                 finally:

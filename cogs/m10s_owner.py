@@ -78,8 +78,8 @@ class owner(commands.Cog):
                 await ctx.send(embed=discord.Embed(title="awaitEvalエラー",description=traceback.format_exc(0)))
     
     @commands.command()
-    @commands.is_owner()
     async def eval(self,ctx,*,cmd):
+        if "eval" in self.bot.features.get(ctx.author.id,[]):
             await ctx.message.add_reaction(self.bot.get_emoji(653161518346534912))
             kg="\n"
             txt=f'async def evdf(ctx,bot):{kg}{kg.join([f" {i}" for i in cmd.replace("```py","").replace("```","").split(kg)])}'

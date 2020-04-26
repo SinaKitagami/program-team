@@ -55,6 +55,7 @@ from cogs import pf9_symmetry
 from cogs import apple_foc
 from cogs import m10s_gban
 from cogs import m10s_bmail
+from cogs import m10s_auth_wiz
 
 """import logging
 
@@ -94,6 +95,18 @@ bot.cursor.execute("CREATE TABLE IF NOT EXISTS globaldates(id integer PRIMARY KE
 bot.cursor.execute("CREATE TABLE IF NOT EXISTS invites(id text PRIMARY KEY NOT NULL, guild_id int NOT NULL, uses integer, inviter_id integer NOT NULL);")
 bot.cursor.execute("CREATE TABLE IF NOT EXISTS gban_settings(id integer PRIMARY KEY NOT NULL,chid integer);")
 bot.cursor.execute("CREATE TABLE IF NOT EXISTS gban_dates(id integer PRIMARY KEY NOT NULL,reason text NOT NULL,gban_by id NOT NULL);")
+
+bot.cursor.execute("CREATE TABLE IF NOT EXISTS welcome_auth(id integer PRIMARY KEY NOT NULL,category integer,use integer NOT NULL,can_view pickle NOT NULL,next_reaction NOT NULL,au_w pickle NOT NULL,give_role integer NOT NULL);")
+
+"""
+au_w:[
+        {
+            "reactions":["str" or "id"(0-19)],
+            "give_role"[None or id(int)],
+            "text":str""
+        },...
+    ]
+"""
 
 
 DoServercmd = False
@@ -908,8 +921,12 @@ async def on_member_unban(guild, user):
 
 @bot.event
 async def on_guild_join(guild):
+    e=discord.Embed(title=f"思惟奈ちゃんが{guild.name}に参加したよ！",description=f"id:{guild.id}",color=bot.ec)
+    e.add_field(name="サーバー作成日時",value=f"{(guild.created_at+ rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒')}")
+    e.add_field(name="メンバー数",value=f"{len([i for i in guild.members if not i.bot])}ユーザー、{len([i for i in guild.members if i.bot])}bot")
+    e.add_field(name="チャンネル数",value=f"テキスト:{len(guild.text_channels)}\nボイス:{len(guild.voice_channels)}\nカテゴリー{len(guild.categories)}")
     ch = bot.get_channel(693048937304555529)
-    await ch.send(f"`{guild.name}`(id:{guild.id})に参加しました。")
+    await ch.send(embed=e)
 
 @bot.event
 async def on_guild_remove(guild):
@@ -977,6 +994,7 @@ async def on_ready():
     pf9_symmetry.setup(bot)
     m10s_gban.setup(bot)
     m10s_bmail.setup(bot)
+    m10s_auth_wiz.setup(bot)
     try:
         ch = bot.get_channel(595526013031546890)
         await ch.send(f"{bot.get_emoji(653161518531215390)}on_ready!")
@@ -985,6 +1003,8 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
+    if "cu:on_msg" in bot.features.get(message.author.id,[]):
+        return
     if isinstance(message.channel,discord.DMChannel):
         return
     if message.webhook_id:
@@ -1087,7 +1107,7 @@ async def runsercmd(message,gs,pf):
 
 async def gahash(message,gs):
     #hash
-    if "s-noHashSend" in message.channel.topic:
+    if "s-noHashSend" in (message.channel.topic or ""):
         return
     if not "hash" in gs["lockcom"]:
         ch=gs["hash"]
@@ -1203,9 +1223,9 @@ async def rtopic(ctx,ch:int=None):
 
 bot.remove_command('help')
 
-@bot.command(aliases=["ヘルプ","できること見せて"])
-async def help(ctx,rcmd=None):
-    #ヘルプ内容
+@bot.command()
+async def ehelp(ctx,rcmd=None):
+    #英語ヘルプ用
     if rcmd == None:
         page = 1
         embed = discord.Embed(title=ut.textto("help-1-t",ctx.message.author), description=ut.textto("help-1-d",ctx.message.author), color=bot.ec)
@@ -1280,7 +1300,7 @@ async def help(ctx,rcmd=None):
 
 
 @bot.command()
-async def thelp(ctx,rcmd=None):
+async def help(ctx,rcmd=None):
     #ヘルプ内容
     if rcmd == None:
         page = 1

@@ -487,8 +487,10 @@ class info(commands.Cog):
                         embed.add_field(name=ut.textto("playinginfo-artist",ctx.message.author), value=activ.artist)
                         embed.add_field(name=ut.textto("playinginfo-album",ctx.message.author), value=activ.album)
                         embed.add_field(name="URL", value=f"https://open.spotify.com/track/{activ.track_id}")
-                        pnow=f"{int((datetime.datetime.utcnow() - activ.start).seconds/60)}:{int((datetime.datetime.utcnow() - activ.start).seconds%60)}"
-                        pml=f"{int(activ.duration.seconds/60)}:{int(activ.duration.seconds%60)}"
+                        tmp=str(int((datetime.datetime.utcnow() - activ.start).seconds%60))
+                        pnow=f"{int((datetime.datetime.utcnow() - activ.start).seconds/60)}:{tmp if len(tmp)==2 else f'0{tmp}'}"
+                        tmp=str(int(activ.duration.seconds%60))
+                        pml=f"{int(activ.duration.seconds/60)}:{tmp if len(tmp)==2 else f'0{tmp}'}"
                         embed.add_field(name="経過時間", value=f"{pnow}/{pml}")
                         embed.set_thumbnail(url=activ.album_cover_url)
                     except AttributeError:
@@ -741,10 +743,10 @@ class info(commands.Cog):
 
     @commands.command()
     async def mutual_guilds(self,ctx,uid=None):
-        user=self.bot.get_user(int(uid)) or ctx.author
-        if not user:
-            await ctx.send("適切なユーザーidを入れてください。")
-            return
+        try:
+            user=await self.bot.fetch_user(int(uid))
+        except:
+            user = ctx.author
         mg=[]
         for g in self.bot.guilds:
             if g.get_member(user.id):
