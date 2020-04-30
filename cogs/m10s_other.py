@@ -29,6 +29,7 @@ import os
 import shutil
 import pytz
 import sqlite3
+import psutil
 
 from operator import itemgetter
 
@@ -145,12 +146,18 @@ class other(commands.Cog):
     @commands.command(aliases=["ステータス","あなたの情報を教えて"])
     async def botinfo(self,ctx):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
+        mem = psutil.virtual_memory()
+        allmem=str(mem.total/1000000000)[0:3]
+        used=str(mem.used/1000000000)[0:3]
+        ava=str(mem.available/1000000000)[0:3]
+        memparcent=mem.percent
         embed = discord.Embed(title=ut.textto("status-inserver",ctx.message.author), description=f"{len(self.bot.guilds)}", color=self.bot.ec)
         embed.add_field(name=ut.textto("status-prefix",ctx.message.author), value="s-")
         embed.add_field(name=ut.textto("status-starttime",ctx.message.author), value=self.bot.StartTime.strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
         embed.add_field(name=ut.textto("status-ver",ctx.message.author), value=platform.python_version())
         embed.add_field(name=ut.textto("status-pros",ctx.message.author), value=platform.processor())
         embed.add_field(name=ut.textto("status-os",ctx.message.author), value=f"{platform.system()} {platform.release()}({platform.version()})")
+        embed.add_field(name="メモリ", value=f"全てのメモリ容量:{allmem}GB\n使用量:{used}GB({memparcent}%)\n空き容量{ava}GB({100-memparcent}%)")
         embed.add_field(name="全ユーザー数",value=len(self.bot.users))
         embed.add_field(name="全チャンネル",value=len([i for i in self.bot.get_all_channels()]))
         embed.add_field(name="思惟奈ちゃんをほかのサーバーに！",value="https://discordapp.com/api/oauth2/authorize?client_id=462885760043843584&permissions=8&scope=bot")
