@@ -387,8 +387,24 @@ class other(commands.Cog):
         startt = time.time()
         mes = await ctx.send("please wait")
         await mes.edit(content=str(round(time.time()-startt,3)*1000)+"ms")
-
-
+    
+    @commands.command()
+    async def reboot(self,ctx):
+        if self.bot.features.get(ctx.author.id,[]) == "reboot":
+            e = discord.Embed(title="再起動", description="", color=self.bot.color)
+            try:
+                e.add_field(name="成功", value="Botを再起動します。")
+                await ctx.send(embed=e)
+                await self.bot.logout()
+                os.system("screen sudo python3.7 bot.py")
+                return
+            except:
+                er = discord.Embed(title="再起動", description=None, color=self.bot.color)
+                er.add_field(name="失敗", value="Botを再起動できませんでした。")
+                await ctx.send(embed=e)
+                return
+        else:
+            await ctx.send("チーム☆思惟奈ちゃんで再起動の権限を持っているユーザー向けの機能です。")
 
 def setup(bot):
     bot.add_cog(other(bot))
