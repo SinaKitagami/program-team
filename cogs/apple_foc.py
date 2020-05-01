@@ -38,12 +38,12 @@ class AppleFOCCog(commands.Cog):
         await logc.send(embed=e)
 
     async def run(self, member):
-        if member.bot:
+        if member.bot or not self.is_offline(member):
             return
         logc = self.get_log_channel(member.guild.id)
         if not logc:
             return
-        if self.is_offline(member) and self.should_check(member):
+        if self.should_check(member):
             await self.send(member, logc)
 
     @commands.Cog.listener()
