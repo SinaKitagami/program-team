@@ -1,37 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import discord
-from discord.ext import commands,tasks
+from discord.ext import commands
 import json
-from collections import OrderedDict
 import random
-import requests
-import urllib.request
 from apiclient.discovery import build
-from apiclient.errors import HttpError
-from oauth2client.tools import argparser
 import wikipedia
-import wikidata.client
-from PIL import Image, ImageDraw, ImageFont
 import time
 import asyncio
-import dropbox
-import datetime
-import pickle
-import sys
-import platform
-import re
-from twitter import *
 from dateutil.relativedelta import relativedelta as rdelta
-import traceback
-import threading
-import os
-import shutil
-import pytz
-import sqlite3
-
-from operator import itemgetter
-
 
 import m10s_util as ut
 
@@ -57,8 +34,7 @@ class search(commands.Cog):
         try:
             async with ctx.message.channel.typing():
                 url = f'https://scratch.mit.edu/accounts/check_username/{un}'
-                response = urllib.request.urlopen(url)
-                content = json.loads(response.read().decode('utf8'))
+                content = await self.bot.apple_util.get_as_json(url)
                 print(content)
             await ctx.send(embed=discord.Embed(title=f"Scratchでのユーザー名:\'{content[0]['username']}\'の使用可能状態",description=f"{content[0]['msg']}({content[0]['msg'].replace('username exists','存在するため使用不可').replace('bad username','検閲により使用不可').replace('invalid username','無効なユーザー名').replace('valid username','使用可能')})"))
         except:
@@ -88,7 +64,7 @@ class search(commands.Cog):
     async def jwp(self,ctx):
         try:
             async with ctx.message.channel.typing():
-                wd = ctx.message.content.replace("s-jwp ", "")  
+                wd = ctx.message.content.replace("s-jwp ", "")
                 sw = wikipedia.search(wd, results=1)
                 sw1 = sw[0].replace(" ", "_")
                 sr = wikipedia.page(sw1)
@@ -115,26 +91,25 @@ class search(commands.Cog):
         if ctx.channel.permissions_for(ctx.guild.me).attach_files == True:
             try:
                 async with ctx.message.channel.typing():
-                    r = requests.get("http://www.jma.go.jp/jp/yoho/images/000_telop_today.png", stream=True)
-                    if r.status_code == 200:
-                        with open("imgs/weather.png", 'wb') as f:
-                            f.write(r.content)
-                        await ctx.send(file=discord.File("imgs/weather.png"))
-                        await ctx.send(ut.textto("jpwt-credit",ctx.message.author))
+                    content = await self.bot.apple_util.get_as_binary("http://www.jma.go.jp/jp/yoho/images/000_telop_today.png")
+                    with open("imgs/weather.png", 'wb') as f:
+                        f.write(content)
+                    await ctx.send(file=discord.File("imgs/weather.png"))
+                    await ctx.send(ut.textto("jpwt-credit",ctx.message.author))
             except:
                 await ctx.send(ut.textto("jpwt-error",ctx.message.author))
         else:
             try:
                 await ctx.send(embed=discord.Embed(title=ut.textto("dhaveper",ctx.message.author),description=ut.textto("per-sendfile",ctx.message.author)))
             except:
-                    await ctx.send(f"{ut.textto('dhaveper',ctx.message.author)}\n{ut.textto('per-sendfile',ctx.message.author)}")           
+                    await ctx.send(f"{ut.textto('dhaveper',ctx.message.author)}\n{ut.textto('per-sendfile',ctx.message.author)}")
 
 
     @commands.command(aliases=["ニュース","ニュースを見せて"])
     @commands.cooldown(1, 15, type=commands.BucketType.user)
     async def news(self,ctx):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
-        content = requests.get('https://newsapi.org/v2/top-headlines?country=jp&pagesize=5&apiKey='+self.bot.NAPI_TOKEN).json()
+        content = await self.bot.apple_util.get_as_json('https://newsapi.org/v2/top-headlines?country=jp&pagesize=5&apiKey='+self.bot.NAPI_TOKEN)
         for i in range(int(content["totalResults"]) - 1):
             await ctx.send(content['articles'][i]["url"])
 
@@ -147,8 +122,10 @@ class search(commands.Cog):
         try:
             async with ctx.message.channel.typing():
                 str1 = ctx.message.content.replace("s-gwd ", "")
-                sid = requests.get("https://www.wikidata.org/w/api.php?action=wbsearchentities&search="+str1+"&language=en&format=json").json()["search"][0]["id"]
-                purl = requests.get("https://www.wikidata.org/w/api.php?action=wbsearchentities&search="+str1+"&language=en&format=json").json()["search"][0]["concepturi"]
+                sjson = await self.bot.apple_util.get_as_json("https://www.wikidata.org/w/api.php?action=wbsearchentities&search="+str1+"&language=en&format=json")
+                sid = sjson["search"][0]["id"]
+                purjson = await self.bot.apple_util.get_as_json("https://www.wikidata.org/w/api.php?action=wbsearchentities&search="+str1+"&language=en&format=json")
+                purl = purjson["search"][0]["concepturi"]
                 sret = self.bot.mwc.get(sid, load=True).attributes["claims"]["P569"][0]["mainsnak"]["datavalue"]["value"]["time"]
                 vsd = sret.replace("+","")
                 vsd = vsd.replace("-","/")
@@ -161,7 +138,7 @@ class search(commands.Cog):
     @commands.cooldown(1, 80)
     async def gupd(self,ctx):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
-        content = requests.get('https://ja.scratch-wiki.info/w/api.php?action=query&list=recentchanges&rcprop=title|timestamp|user|comment|flags|sizes&format=json').json()
+        content = await self.bot.apple_util.get_as_json('https://ja.scratch-wiki.info/w/api.php?action=query&list=recentchanges&rcprop=title|timestamp|user|comment|flags|sizes&format=json')
         await ctx.send(ut.textto("gupd-send",ctx.message.author))
         for i in range(5):
             try:
@@ -193,9 +170,9 @@ class search(commands.Cog):
                 type='video'
                 ).execute()
                 id = search_response['items'][0]['id']['videoId']
-                await ctx.send(ut.textto("youtube-found",ctx.message.author).format(id))        
+                await ctx.send(ut.textto("youtube-found",ctx.message.author).format(id))
         except:
-            await ctx.send(ut.textto("youtube-notfound",ctx.message.author))  
+            await ctx.send(ut.textto("youtube-notfound",ctx.message.author))
 
     @commands.command(name="scranotif",aliases=["snotify", "Scratchの通知","Scratchの通知を調べて"])
     @commands.cooldown(1, 5, type=commands.BucketType.user)
@@ -205,8 +182,7 @@ class search(commands.Cog):
         try:
             async with ctx.message.channel.typing():
                 url = 'https://api.scratch.mit.edu/users/'+un+'/messages/count'
-                response = urllib.request.urlopen(url)
-                content = json.loads(response.read().decode('utf8'))
+                content = await self.bot.apple_util.get_as_json(url)
                 await ctx.send(ut.textto("scranotif-notify",ctx.message.author).format(un,str(content['count'])))
         except:
             await ctx.send(ut.textto("scranotif-badrequest",ctx.message.author))

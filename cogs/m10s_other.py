@@ -1,37 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import discord
-from discord.ext import commands,tasks
-import json
-from collections import OrderedDict
+from discord.ext import commands
 import random
-import requests
-import urllib.request
-from apiclient.discovery import build
-from apiclient.errors import HttpError
-from oauth2client.tools import argparser
-import wikipedia
-import wikidata.client
-from PIL import Image, ImageDraw, ImageFont
 import time
 import asyncio
-import dropbox
-import datetime
-import pickle
-import sys
 import platform
 import re
-from twitter import *
-from dateutil.relativedelta import relativedelta as rdelta
-import traceback
-import threading
-import os
-import shutil
-import pytz
-import sqlite3
 import psutil
-
-from operator import itemgetter
 
 import m10s_util as ut
 

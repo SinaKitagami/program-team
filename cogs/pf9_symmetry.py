@@ -3,9 +3,7 @@
 import discord
 from discord.ext import commands
 import asyncio
-from PIL import Image, ImageDraw,ImageFont,ImageFilter,ImageOps
-import requests
-import numpy as np
+from PIL import Image, ImageOps
 class Symmetry(commands.Cog):
 
     def __init__(self,bot):

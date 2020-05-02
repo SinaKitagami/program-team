@@ -6,8 +6,6 @@ import m10s_util as ut
 class MEE6(commands.Cog):
     def __init__(self,bot):
         self.bot = bot
-        self.bot.session = aiohttp.ClientSession(loop=bot.loop)
-
 
     @commands.command()
     @commands.guild_only()

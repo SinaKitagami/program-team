@@ -1,0 +1,19 @@
+# core
+discord.py>=1.3.0
+aiohttp
+
+# utils
+dateutil
+psutil
+beautifulsoup4
+pytz
+
+# media
+Pillow
+youtube_dl
+
+# deprecate those
+apiclient
+wikipedia
+wikidata
+twitter

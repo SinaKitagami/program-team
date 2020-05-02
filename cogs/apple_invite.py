@@ -7,8 +7,6 @@ class AppleInviteCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.db = bot.cursor
-        if not hasattr(self.bot, "apple_util"):
-            self.bot.apple_util = AppleUtil(bot)
         self._lock = False
 
     def get_log_channel(self, guild_id):
