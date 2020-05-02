@@ -44,6 +44,20 @@ class AppleUtil(object):
     def create_throttle(rate, per):
         return RateLimiter(rate, per)
 
+    async def get_as_binary(self, url):
+        async with self.bot.session.get(url) as resp:
+            resp.raise_for_status()
+            return await resp.read()
+
+    async def get_as_json(self, url):
+        async with self.bot.session.get(url) as resp:
+            resp.raise_for_status()
+            return await resp.json()
+
+    async def get_as_text(self, url):
+        async with self.bot.session.get(url) as resp:
+            resp.raise_for_status()
+            return await resp.text()
 
 def setup(bot):
     pass

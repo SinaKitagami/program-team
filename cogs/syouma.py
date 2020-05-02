@@ -7,7 +7,6 @@ import asyncio
 import m10s_util as ut
 from bs4 import BeautifulSoup
 import random
-import requests
 
 """↑様々な便利コマンド詰め合わせ
 ut.textto("キー",Member)
@@ -32,8 +31,8 @@ class syouma(commands.Cog):
     async def tenki(self, msg, address):
         color = random.randint(0x000000, 0xffffff)
         Url = "https://tenki.jp"
-        Req = requests.get(Url + "/search/?keyword=" + address)
-        Soup = BeautifulSoup(Req.text, 'lxml')
+        Req = await self.bot.apple_util.get_as_text(Url + "/search/?keyword=" + address)
+        Soup = BeautifulSoup(Req, 'lxml')
         Sed = Soup.find_all(class_="search-entry-data")
         HrfUrl = None
         for val in Sed:
@@ -44,9 +43,9 @@ class syouma(commands.Cog):
     # 住所からhrefを取得
     # if not(HrfUrl is None):
         await asyncio.sleep(1)  # 一回requestを投げているので1秒待つ
-        Req = requests.get(Url + HrfUrl)
+        Req = await self.bot.apple_util.get_as_text(Url + HrfUrl)
     # print(Req)
-        bsObj = BeautifulSoup(Req.content, "html.parser")
+        bsObj = BeautifulSoup(Req, "html.parser")
         today = bsObj.find(class_="today-weather")
         weather = today.p.string
         temp = today.div.find(class_="date-value-wrap")

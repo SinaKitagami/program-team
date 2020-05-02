@@ -2,7 +2,6 @@
 
 import discord
 from discord.ext import commands
-import requests
 from PIL import Image, ImageDraw, ImageFont
 import asyncio
 
@@ -80,10 +79,7 @@ class levels(commands.Cog):
                     nextl = str(nextl)
                     tonextexp = str(tonextexp)
                     try:
-                        r = requests.get(u.avatar_url_as(static_format="png"), stream=True)
-                        if r.status_code == 200:
-                            with open("imgs/usericon.png", 'wb') as f:
-                                f.write(r.content)
+                        await u.avatar_url_as(static_format="png").save("imgs/usericon.png")
                         dlicon = Image.open('imgs/usericon.png', 'r')
                     except:
                         dlicon = Image.open('imgs/noimg.png', 'r')

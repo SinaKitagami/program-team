@@ -25,6 +25,7 @@ import aiohttp
 
 #textto etc
 import m10s_util as ut
+from apple_util import AppleUtil
 #tokens
 import config
 #cog
@@ -144,6 +145,8 @@ aglch=None
 bot.partnerg=config.pg
 
 bot.features=config.sp_features
+
+bot.apple_util = AppleUtil(bot)
 
 #初回ロード
 """db.files_download_to_file( "guildsetting.json" , "/guildsetting.json" )
