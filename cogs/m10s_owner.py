@@ -1,37 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import discord
-from discord.ext import commands,tasks
-import json
-from collections import OrderedDict
-import random
-import requests
-import urllib.request
-from apiclient.discovery import build
-from apiclient.errors import HttpError
-from oauth2client.tools import argparser
-import wikipedia
-import wikidata.client
-from PIL import Image, ImageDraw, ImageFont
-import time
+from discord.ext import commands
 import asyncio
-import dropbox
-import datetime
-import pickle
-import sys
-import platform
-import re
-from twitter import *
 from dateutil.relativedelta import relativedelta as rdelta
 import traceback
-import threading
-import os
-import shutil
-import pytz
-import sqlite3
-
-from operator import itemgetter
-
 import m10s_util as ut
 
 class owner(commands.Cog):
@@ -76,7 +49,7 @@ class owner(commands.Cog):
                 await ctx.message.add_reaction(self.bot.get_emoji(653161518103265291))
             except:
                 await ctx.send(embed=discord.Embed(title="awaitEvalエラー",description=traceback.format_exc(0)))
-    
+
     @commands.command()
     async def eval(self,ctx,*,cmd):
         if "eval" in self.bot.features.get(ctx.author.id,[]):
@@ -127,13 +100,13 @@ class owner(commands.Cog):
                     page = 0
                 else:
                     page = page + 1
-                
+
             elif str(r) == str(self.bot.get_emoji(653161518195671041)):
                 if page == 0:
                     page = gcount
                 else:
                     page = page - 1
-            
+
             embed=discord.Embed(title="サーバー情報",description=f"{guilds[page].name}(id:`{guilds[page].id}`)",color=self.bot.ec)
             embed.add_field(name="サーバー人数",value=f"{guilds[page].member_count}人")
             embed.add_field(name="ブースト状態",value=f"{guilds[page].premium_tier}レベル({guilds[page].premium_subscription_count}ブースト)")
@@ -167,7 +140,7 @@ class owner(commands.Cog):
                     info = tmp2
                     break
         if info:
-            async with ctx.message.channel.typing(): 
+            async with ctx.message.channel.typing():
                 if ctx.guild.owner == info:
                     embed = discord.Embed(title=ut.textto("userinfo-name",ctx.message.author), description=f"{info.name} - {ut.ondevicon(info)} - {ut.textto('userinfo-owner',ctx.message.author)}", color=info.color)
                 else:

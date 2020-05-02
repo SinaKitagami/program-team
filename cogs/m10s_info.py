@@ -1,36 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import discord
-from discord.ext import commands,tasks
-import json
-from collections import OrderedDict
-import random
-import requests
-import urllib.request
-from apiclient.discovery import build
-from apiclient.errors import HttpError
-from oauth2client.tools import argparser
-import wikipedia
-import wikidata.client
-from PIL import Image, ImageDraw, ImageFont
-import time
+from discord.ext import commands
 import asyncio
-import dropbox
 import datetime
-import pickle
-import sys
-import platform
-import re
-from twitter import *
 from dateutil.relativedelta import relativedelta as rdelta
 import traceback
-import threading
-import os
-import shutil
-import pytz
-import sqlite3
-
-from operator import itemgetter
 
 import m10s_util as ut
 
@@ -92,7 +67,7 @@ class info(commands.Cog):
             isva=upf["sinapartner"]
         else:
             isva=0
-        async with ctx.message.channel.typing(): 
+        async with ctx.message.channel.typing():
             ptn=""
             if info.id in self.bot.team_sina:
                 ptn=f',({ut.textto("team_sina-chan",ctx.author)})'
@@ -210,7 +185,7 @@ class info(commands.Cog):
                 embed.add_field(name=ut.textto("serverinfo-nitroboost-can-title",ctx.message.author),value=ut.textto(f"serverinfo-nitroboost-can-{sevinfo.premium_tier}",ctx.message.author).format(sevinfo.premium_tier,sevinfo.premium_subscription_count))
             except:
                 pass
-            
+
             if sevinfo.system_channel:
                 embed.add_field(name=ut.textto("serverinfo-sysch",ctx.message.author),value=sevinfo.system_channel)
                 try:
@@ -320,7 +295,7 @@ class info(commands.Cog):
             await ctx.send(embed=embed)
 
         elif isinstance(ch,discord.CategoryChannel):
-            
+
             embed = discord.Embed(title=ch.name, description=f"id:{ch.id}", color=ctx.author.colour)
 
             embed.add_field(name=ut.textto("ci-type",ctx.message.author),value=ut.textto("ci-cate",ctx.message.author))
@@ -691,7 +666,7 @@ class info(commands.Cog):
                         await mp.edit(embed=discord.Embed(title=ut.textto("ginfo-invites",ctx.author),description=ut.textto("ginfo-cantview",ctx.author),color=self.bot.ec))
                 elif page == 9:
                     if ctx.author.guild_permissions.ban_members or ctx.author.id == 404243934210949120:
-                        #ban_user 
+                        #ban_user
                         vbl=ut.textto("ginfo-strlenover",ctx.author)
                         bl = []
                         for i in await ctx.guild.bans():

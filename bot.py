@@ -3,19 +3,12 @@
 import discord
 from discord.ext import commands,tasks
 import json
-from collections import OrderedDict
 import random
-import requests
-import urllib.request
-from apiclient.discovery import build
-from apiclient.errors import HttpError
-from oauth2client.tools import argparser
 import wikipedia
 import wikidata.client
 from PIL import Image, ImageDraw, ImageFont
 import time
 import asyncio
-import dropbox
 import datetime
 import pickle
 import sys
@@ -24,13 +17,11 @@ import re
 from twitter import *
 from dateutil.relativedelta import relativedelta as rdelta
 import traceback
-import threading
 import os
 import shutil
 import pytz
 import sqlite3
-
-from operator import itemgetter
+import aiohttp
 
 #textto etc
 import m10s_util as ut
@@ -97,6 +88,20 @@ bot.cursor.execute("CREATE TABLE IF NOT EXISTS gban_settings(id integer PRIMARY 
 bot.cursor.execute("CREATE TABLE IF NOT EXISTS gban_dates(id integer PRIMARY KEY NOT NULL,reason text NOT NULL,gban_by id NOT NULL);")
 
 bot.cursor.execute("CREATE TABLE IF NOT EXISTS welcome_auth(id integer PRIMARY KEY NOT NULL,category integer,use integer NOT NULL,can_view pickle NOT NULL,next_reaction NOT NULL,au_w pickle NOT NULL,give_role integer NOT NULL);")
+
+bot.session = aiohttp.ClientSession(loop=bot.loop)
+
+bot._default_close = bot.close
+async def close_handler():
+    await bot._default_close()
+    await bot.session.close()
+    try:
+        db.commit()
+    except sqlite3.ProgrammingError:
+        pass
+    else:
+        db.close()
+bot.close = close_handler
 
 """
 au_w:[

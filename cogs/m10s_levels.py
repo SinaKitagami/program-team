@@ -1,34 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import discord
-from discord.ext import commands,tasks
-import json
-from collections import OrderedDict
-import random
+from discord.ext import commands
 import requests
-import urllib.request
-from apiclient.discovery import build
-from apiclient.errors import HttpError
-from oauth2client.tools import argparser
-import wikipedia
-import wikidata.client
 from PIL import Image, ImageDraw, ImageFont
-import time
 import asyncio
-import dropbox
-import datetime
-import pickle
-import sys
-import platform
-import re
-from twitter import *
-from dateutil.relativedelta import relativedelta as rdelta
-import traceback
-import threading
-import os
-import shutil
-import pytz
-import sqlite3
 
 from operator import itemgetter
 
@@ -146,13 +122,13 @@ class levels(commands.Cog):
 
                         dt.text((50, 300), ut.textto("lc-createdby",u).format(cb.replace("m@ji☆","おあず").replace("kazuta123","kazuta246").replace("-a","").replace("-b","").replace("-c","")) , font=fontc, fill='#000000')
 
-                    cv.save("imgs/sina'slevelcard.png", 'PNG') 
+                    cv.save("imgs/sina'slevelcard.png", 'PNG')
                 await ctx.send(file=discord.File("imgs/sina'slevelcard.png"))
         else:
             try:
                 await ctx.send(embed=discord.Embed(title=ut.textto("dhaveper",ctx.author),description=ut.textto("per-sendfile",ctx.author)))
             except:
-                await ctx.send(f"{ut.textto('dhaveper',ctx.author)}\n{ut.textto('per-sendfile',ctx.author)}")           
+                await ctx.send(f"{ut.textto('dhaveper',ctx.author)}\n{ut.textto('per-sendfile',ctx.author)}")
 
 
 

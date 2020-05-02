@@ -1,37 +1,16 @@
 # -*- coding: utf-8 -*-
 
 import discord
-from discord.ext import commands,tasks
+from discord.ext import commands
 import json
-from collections import OrderedDict
 import random
 import requests
 import urllib.request
 from apiclient.discovery import build
-from apiclient.errors import HttpError
-from oauth2client.tools import argparser
 import wikipedia
-import wikidata.client
-from PIL import Image, ImageDraw, ImageFont
 import time
 import asyncio
-import dropbox
-import datetime
-import pickle
-import sys
-import platform
-import re
-from twitter import *
 from dateutil.relativedelta import relativedelta as rdelta
-import traceback
-import threading
-import os
-import shutil
-import pytz
-import sqlite3
-
-from operator import itemgetter
-
 
 import m10s_util as ut
 
@@ -88,7 +67,7 @@ class search(commands.Cog):
     async def jwp(self,ctx):
         try:
             async with ctx.message.channel.typing():
-                wd = ctx.message.content.replace("s-jwp ", "")  
+                wd = ctx.message.content.replace("s-jwp ", "")
                 sw = wikipedia.search(wd, results=1)
                 sw1 = sw[0].replace(" ", "_")
                 sr = wikipedia.page(sw1)
@@ -127,7 +106,7 @@ class search(commands.Cog):
             try:
                 await ctx.send(embed=discord.Embed(title=ut.textto("dhaveper",ctx.message.author),description=ut.textto("per-sendfile",ctx.message.author)))
             except:
-                    await ctx.send(f"{ut.textto('dhaveper',ctx.message.author)}\n{ut.textto('per-sendfile',ctx.message.author)}")           
+                    await ctx.send(f"{ut.textto('dhaveper',ctx.message.author)}\n{ut.textto('per-sendfile',ctx.message.author)}")
 
 
     @commands.command(aliases=["ニュース","ニュースを見せて"])
@@ -193,9 +172,9 @@ class search(commands.Cog):
                 type='video'
                 ).execute()
                 id = search_response['items'][0]['id']['videoId']
-                await ctx.send(ut.textto("youtube-found",ctx.message.author).format(id))        
+                await ctx.send(ut.textto("youtube-found",ctx.message.author).format(id))
         except:
-            await ctx.send(ut.textto("youtube-notfound",ctx.message.author))  
+            await ctx.send(ut.textto("youtube-notfound",ctx.message.author))
 
     @commands.command(name="scranotif",aliases=["snotify", "Scratchの通知","Scratchの通知を調べて"])
     @commands.cooldown(1, 5, type=commands.BucketType.user)

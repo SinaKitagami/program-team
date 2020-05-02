@@ -8,8 +8,7 @@ import m10s_util as ut
 from bs4 import BeautifulSoup
 import random
 import requests
-import time
-import datetime
+
 """↑様々な便利コマンド詰め合わせ
 ut.textto("キー",Member)
     ユーザーの言語設定に基づいてキーのテキストを返す。

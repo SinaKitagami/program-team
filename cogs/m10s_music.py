@@ -5,14 +5,8 @@ import discord
 from discord.ext import commands
 
 from youtube_dl import YoutubeDL
-import youtube_dl
-
-import threading
 
 from apiclient.discovery import build
-from apiclient.errors import HttpError
-from oauth2client.tools import argparser
-import re
 
 import os
 import shutil
@@ -294,7 +288,7 @@ class music(commands.Cog):
             ebd.add_field(name="ボリューム:",value="現在アクセス不可")
         ebd.set_thumbnail(url=self.bot.qu[str(ctx.guild.id)][0]["video_thumbnail"])
         await self.bot.mp[str(ctx.guild.id)].edit(embed=ebd)
-        
+
     @commands.Cog.listener()
     async def on_raw_reaction_add(self,pr):
         if self.bot.mp.get(str(pr.member.guild.id),None) is None:
