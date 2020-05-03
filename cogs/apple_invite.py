@@ -1,8 +1,6 @@
 import discord
 from discord.ext import commands, tasks
 
-from apple_util import AppleUtil
-
 class AppleInviteCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
