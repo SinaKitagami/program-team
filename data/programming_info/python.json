@@ -1,0 +1,16 @@
+{
+    "language": "Python",
+
+    "before_block": ":\n",
+    "indent": "    ",
+    "after_line": "\n",
+    "after_block": "\n",
+
+    "if": "if {0}",
+    "while": "while {0}",
+    "for": "for {0} in {1}",
+    "def": "def {0}({1})",
+
+    "print": "print({0})",
+    "ask": "{0} = input('{1}')"
+}

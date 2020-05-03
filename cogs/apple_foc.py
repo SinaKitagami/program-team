@@ -3,8 +3,6 @@ import datetime
 import discord
 from discord.ext import commands
 
-from apple_util import AppleUtil
-
 class AppleFOCCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot

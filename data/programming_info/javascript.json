@@ -1,0 +1,16 @@
+{
+    "language": "JavaScript",
+
+    "before_block": " {\n",
+    "indent": "    ",
+    "after_line": ";\n",
+    "after_block": "}\n",
+
+    "if": "if ({0})",
+    "while": "while ({0})",
+    "for": "for (const {0} of {1})",
+    "def": "const {0} = ({1}) =>",
+
+    "print": "console.log({0})",
+    "ask": "{0} = prompt('{1}')"
+}
