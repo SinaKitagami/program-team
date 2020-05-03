@@ -147,6 +147,7 @@ bot.partnerg=config.pg
 bot.features=config.sp_features
 
 bot.apple_util = AppleUtil(bot)
+bot.load_extension("cogs.apple_misc")
 
 #初回ロード
 """db.files_download_to_file( "guildsetting.json" , "/guildsetting.json" )

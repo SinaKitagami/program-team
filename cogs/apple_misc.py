@@ -39,3 +39,6 @@ class AppleMiscCog(commands.Cog):
                 indents = lang_def["indent"] * indent_times
                 result += f"{indents}{addition}{suffix}"
             await ctx.send(f"```{result}```")
+
+def setup(bot):
+    bot.add_cog(AppleMiscCog(bot))
