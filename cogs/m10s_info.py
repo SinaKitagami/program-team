@@ -217,7 +217,7 @@ class info(commands.Cog):
 
     @commands.command()
     async def checkmember(self,ctx,member:commands.MemberConverter):
-        if not ut.textto("language",ctx.author)=="ja":
+        if not ctx.user_lang()=="ja":
             await ctx.send(ut.textto("cannot-run",ctx.author))
             return
         bunotif = 0

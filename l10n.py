@@ -66,8 +66,10 @@ class TranslateHandler:
             lang = guild.preferred_locale
         else:
             lang = guild_db["lang"]
+            if lang in self.supported_locales:
+                self._lang_cache[guild.id] = lang
+                return lang
         if lang in self.supported_locales:
-            self._lang_cache[guild.id] = lang
             return lang
         return None
 
@@ -122,3 +124,8 @@ class LocalizedContext(commands.Context):
 
     def l10n_raw(self, lang, key, *args, **kwargs):
         return self.bot.translate_handler.get_raw_translation(lang, key, *args, **kwargs)
+
+    def user_lang(self, user=None):
+        if user is None:
+            user = self.author
+        return self.bot.translate_handler.get_lang_by_user(user)

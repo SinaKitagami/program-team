@@ -1052,7 +1052,7 @@ async def domsg(message):
     bot.cursor.execute("select * from users where id=?",(message.author.id,))
     pf = bot.cursor.fetchone()
     if not pf:
-        bot.cursor.execute("INSERT INTO users(id,prefix,gpoint,memo,levcard,onnotif,lang,accounts,sinapartner,gban,gnick,gcolor,gmod,gstar,galpha,gbanhist) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (message.author.id,[],0,{},"m@ji☆",[],None,[],0,0,message.author.name,0,0,0,0,"なし"))
+        bot.cursor.execute("INSERT INTO users(id,prefix,gpoint,memo,levcard,onnotif,lang,accounts,sinapartner,gban,gnick,gcolor,gmod,gstar,galpha,gbanhist) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (message.author.id,[],0,{},"m@ji☆",[],"ja",[],0,0,message.author.name,0,0,0,0,"なし"))
         try:
             dc=await ut.opendm(message.author)
             await dc.send(f"{bot.get_emoji(653161518153596950)}あなたの思惟奈ちゃんユーザープロファイルを作成しました！いくつかの項目はコマンドを使って書き換えることができます。詳しくはヘルプ(`s-help`)をご覧ください。\nまた、不具合や疑問点などがありましたら`mii-10#3110`にお願いします。")
@@ -1064,7 +1064,8 @@ async def domsg(message):
     bot.cursor.execute("select * from guilds where id=?",(message.guild.id,))
     gs = bot.cursor.fetchone()
     if not gs:
-        bot.cursor.execute("INSERT INTO guilds(id,levels,commands,hash,levelupsendto,reward,jltasks,lockcom,sendlog,prefix,lang) VALUES(?,?,?,?,?,?,?,?,?,?,?)", (message.guild.id,{},{},[],None,{},{},[],None,[],None))
+        guild_lang = bot.translate_handler.get_lang_by_guild(message.guild, False)
+        bot.cursor.execute("INSERT INTO guilds(id,levels,commands,hash,levelupsendto,reward,jltasks,lockcom,sendlog,prefix,lang) VALUES(?,?,?,?,?,?,?,?,?,?,?)", (message.guild.id,{},{},[],None,{},{},[],None,[],guild_lang))
         try:
             await message.channel.send(f"{bot.get_emoji(653161518153596950)}このサーバーの思惟奈ちゃんサーバープロファイルを作成しました！いくつかの項目はコマンドを使って書き換えることができます。詳しくはヘルプ(`s-help`)をご覧ください。\nまた、不具合や疑問点などがありましたら`mii-10#3110`にお願いします。\n思惟奈ちゃんのお知らせは`s-rnotify [チャンネルid(省略可能)]`で、コマンド等の豆知識は`s-rtopic [チャンネルid(省略可能)]`で受信する設定にできます。(Webhook管理権限が必要です。)")
         except:
@@ -1297,7 +1298,7 @@ async def ehelp(ctx,rcmd=None):
                     except:
                         pass
                     async with ctx.message.channel.typing():
-                        lang = ut.textto("language",ctx.author)
+                        lang = ctx.user_lang()
                         with open(f"lang/{lang}.json","r",encoding="utf-8") as j:
                             f = json.load(j)
                         sre = discord.Embed(title=ut.textto("help-s-ret-title",ctx.author),description=ut.textto("help-s-ret-desc",ctx.author).format(sewd),color=bot.ec)
@@ -1373,7 +1374,7 @@ async def help(ctx,rcmd=None):
                     except:
                         pass
                     async with ctx.message.channel.typing():
-                        lang = ut.textto("language",ctx.author)
+                        lang = ctx.user_lang()
                         with open(f"lang/{lang}.json","r",encoding="utf-8") as j:
                             f = json.load(j)
                         sre = discord.Embed(title=ut.textto("help-s-ret-title",ctx.author),description=ut.textto("help-s-ret-desc",ctx.author).format(sewd),color=bot.ec)

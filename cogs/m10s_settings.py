@@ -74,10 +74,11 @@ class settings(commands.Cog):
         self.bot.cursor.execute("select * from guilds where id=?",(ctx.guild.id,))
         gs = self.bot.cursor.fetchone()
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
-        if ut.textto("language",lang).startswith("Not found language:"):
+        if lang not in self.bot.translate_handler.supported_locales:
             await ctx.send(ut.textto("setl-cantuse",ctx.author))
         else:
             self.bot.cursor.execute("UPDATE guilds SET lang = ? WHERE id = ?", (lang,ctx.guild.id))
+            self.bot.translate_handler.update_language_cache(ctx.guild, lang)
             await ctx.send(ut.textto("setl-set",ctx.message.author))
 
     @commands.command()
@@ -103,10 +104,11 @@ class settings(commands.Cog):
     @commands.cooldown(1, 10, type=commands.BucketType.user)
     async def userlang(self,ctx,lang):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
-        if ut.textto("language",lang).startswith("Not found language:"):
+        if lang not in self.bot.translate_handler.supported_locales:
             await ctx.send(ut.textto("setl-cantuse",ctx.author))
         else:
             self.bot.cursor.execute("UPDATE users SET lang = ? WHERE id = ?", (lang,ctx.author.id))
+            self.bot.translate_handler.update_language_cache(ctx.author, lang)
             await ctx.send(ut.textto("setl-set",ctx.message.author))
 
     @commands.command()

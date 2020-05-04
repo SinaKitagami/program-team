@@ -46,7 +46,7 @@ class other(commands.Cog):
 
     @commands.command(name="Af")
     async def a_01(self,ctx):
-        if not ut.textto("language",ctx.author)=="ja":
+        if not ctx.user_lang()=="ja":
             await ctx.send(ut.textto("cannot-run",ctx.author))
             return
 
@@ -150,7 +150,7 @@ class other(commands.Cog):
     @commands.cooldown(1, 5, type=commands.BucketType.user)
     async def eatit(self,ctx,it):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
-        if ut.textto("language",ctx.author)=="ja":
+        if ctx.user_lang()=="ja":
             if ut.textto(f"eat-{it}",ctx.message.author).startswith("Not found key:"):
                 await ctx.send(ut.textto("eat-?",ctx.message.author))
             else:
@@ -253,7 +253,7 @@ class other(commands.Cog):
 
     @commands.command(name="textlocker")
     async def textlocker(self,ctx):
-        if not ut.textto("language",ctx.author) == "ja":
+        if not ctx.user_lang() == "ja":
             await ctx.send(ut.textto("cannot-run",ctx.author))
             return
 

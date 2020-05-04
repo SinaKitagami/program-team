@@ -26,7 +26,7 @@ class search(commands.Cog):
     @commands.command(name="checkscrauname")
     @commands.cooldown(1, 5, type=commands.BucketType.user)
     async def scrauname(self, ctx, un:str):
-        if not ut.textto("language",ctx.author)=="ja":
+        if not ctx.user_lang()=="ja":
             await ctx.send(ut.textto("cannot-run",ctx.author))
             return
 
@@ -190,7 +190,7 @@ class search(commands.Cog):
     @commands.command()
     @commands.cooldown(2, 10, type=commands.BucketType.user)
     async def wid(self,ctx,inid):
-        if not ut.textto("language",ctx.author) == "ja":
+        if not ctx.user_lang() == "ja":
             await ctx.send(ut.textto("cannot-run",ctx.author))
             return
 

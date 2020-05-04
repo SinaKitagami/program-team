@@ -122,7 +122,7 @@ class gcoms(commands.Cog):
                     self.bot.cursor.execute("UPDATE users SET gbanhist = ? WHERE id = ?", (rea,uid))
                     await ctx.send(f"ban状態を{str(ban)}にしました。")
                 elif bui:
-                    self.bot.cursor.execute("INSERT INTO users(id,prefix,gpoint,memo,levcard,onnotif,lang,accounts,sinapartner,gban,gnick,gcolor,gmod,gstar,galpha,gbanhist) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (bui.id,[],0,{},"m@ji☆",[],None,[],0,1,bui.name,0,0,0,0,rea))
+                    self.bot.cursor.execute("INSERT INTO users(id,prefix,gpoint,memo,levcard,onnotif,lang,accounts,sinapartner,gban,gnick,gcolor,gmod,gstar,galpha,gbanhist) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (bui.id,[],0,{},"m@ji☆",[],"ja",[],0,1,bui.name,0,0,0,0,rea))
                     await ctx.send(f"プロファイルを作成し、ban状態を{str(ban)}にしました。")
                 else:
                     await ctx.send("これが呼び出されることは、ありえないっ！")
