@@ -13,11 +13,15 @@ db = sqlite3.connect("sina_datas.db",detect_types=sqlite3.PARSE_DECLTYPES, isola
 db.row_factory = sqlite3.Row
 cursor = db.cursor()
 
+# todo: zh-Hans
+LANG_CODE = {"ch-TW", "en", "ja"}
 
 def textto(k:str,user):
     if type(user) == str:
         lang = user
         try:
+            if lang not in LANG_CODE:
+                raise ValueError("invalid lang")
             with open(f"lang/{lang}.json","r",encoding="utf-8") as j:
                 f = json.load(j)
         except:
@@ -33,7 +37,7 @@ def textto(k:str,user):
         except:
             gpf={"lang":None}
         lang = gpf["lang"]
-        if lang is None:
+        if lang not in LANG_CODE:
             lang = "ja"
         try:
             with open(f"lang/{lang}.json","r",encoding="utf-8") as j:
@@ -55,7 +59,7 @@ def textto(k:str,user):
         lang = upf["lang"]
         if lang is None:
             lang = gpf["lang"]
-        if lang is None:
+        if lang not in LANG_CODE:
             lang = "ja"
         try:
             with open(f"lang/{lang}.json","r",encoding="utf-8") as j:
@@ -119,4 +123,3 @@ def get_vmusic(bot,member):
         }
     else:
         return None
-
