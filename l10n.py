@@ -1,5 +1,6 @@
 import os
 import discord
+from discord.ext import commands
 
 LOCALES = [lang[:-5] for lang in os.listdir("lang") if lang.endswith(".json")]
 
@@ -108,3 +109,16 @@ class TranslateHandler:
         elif isinstance(target, discord.Guild):
             return self.get_guild_translation_for(target, key, *args, **kwargs)
         return self.get_raw_translation(target, key, *args, **kwargs)
+
+class LocalizedContext(commands.Context):
+    def _(self, user, key, *args, **kwargs):
+        return self.bot.translate_handler.get_translation_for(user, key, *args, **kwargs)
+
+    def l10n_guild(self, guild, key, *args, **kwargs):
+        return self.bot.translate_handler.get_guild_translation_for(guild, key, *args, **kwargs)
+
+    def l10n_any(self, target, key, *args, **kwargs):
+        return self.bot.translate_handler.get_any_translation(target, key, *args, **kwargs)
+
+    def l10n_raw(self, lang, key, *args, **kwargs):
+        return self.bot.translate_handler.get_raw_translation(lang, key, *args, **kwargs)

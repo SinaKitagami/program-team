@@ -26,6 +26,7 @@ import aiohttp
 #textto etc
 import m10s_util as ut
 from apple_util import AppleUtil
+from l10n import TranslateHandler, LocalizedContext
 #tokens
 import config
 #cog
@@ -103,6 +104,17 @@ async def close_handler():
     else:
         db.close()
 bot.close = close_handler
+
+bot.translate_handler = TranslateHandler(bot, ["en", "ja"])
+bot._get_context = bot.get_context
+async def get_context(msg, cls=LocalizedContext):
+    return await bot._get_context(msg, cls=cls)
+bot.get_context = get_context
+
+bot._ = bot.translate_handler.get_translation_for
+bot.l10n_guild = bot.translate_handler.get_guild_translation_for
+bot.l10n_any = bot.translate_handler.get_any_translation
+bot.l10n_raw = bot.translate_handler.get_raw_translation
 
 """
 au_w:[
