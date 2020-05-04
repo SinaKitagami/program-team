@@ -31,13 +31,14 @@ class AppleMiscCog(commands.Cog):
                     indent_times -= 1
                     suffix = lang_def["after_block"]
                 elif line[0] in BLOCKS:
-                    indent_times += 1
                     suffix = lang_def["before_block"]
                     addition = lang_def[line[0]].format(*line[1:])
                 else:
                     addition = lang_def[line[0]].format(*line[1:])
                 indents = lang_def["indent"] * indent_times
                 result += f"{indents}{addition}{suffix}"
+                if line[0] in BLOCKS:
+                    indent_times += 1
             await ctx.send(f"```{result}```")
 
 def setup(bot):
