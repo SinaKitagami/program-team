@@ -20,7 +20,7 @@ class search(commands.Cog):
 
     @commands.command()
     async def getby(self,ctx,k:str):
-        await ctx.send(embed=ut.getEmbed("",ut.textto(k,ctx.author)))
+        await ctx.send(embed=ut.getEmbed("",ctx._(k)))
 
 
     @commands.command(name="checkscrauname")

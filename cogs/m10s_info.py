@@ -105,7 +105,7 @@ class info(commands.Cog):
             for r in info.roles:
                 hasroles = hasroles + f"{r.mention},"
             embed.add_field(name=ctx._("userinfo-roles"), value=hasroles)
-            embed.add_field(name=ctx._("userinfo-guildper"),value=f"`{'`,`'.join([ut.textto(f'p-{i[0]}',ctx.author) for i in list(info.guild_permissions) if i[1]])}`")
+            embed.add_field(name=ctx._("userinfo-guildper"),value=f"`{'`,`'.join([ctx._(f'p-{i[0]}') for i in list(info.guild_permissions) if i[1]])}`")
             if not info.avatar_url == None:
                 embed.set_thumbnail(url=info.avatar_url_as(static_format='png'))
                 embed.add_field(name=ctx._("userinfo-iconurl"),value=info.avatar_url_as(static_format='png'))
@@ -182,7 +182,7 @@ class info(commands.Cog):
                 embed.add_field(name=ctx._("serverinfo-roles"),value=rlist)
             try:
                 embed.add_field(name=ctx._("serverinfo-nitroboost"),value=ctx._("serverinfo-nitroboost-val").format(sevinfo.premium_tier))
-                embed.add_field(name=ctx._("serverinfo-nitroboost-can-title"),value=ut.textto(f"serverinfo-nitroboost-can-{sevinfo.premium_tier}",ctx.message.author).format(sevinfo.premium_tier,sevinfo.premium_subscription_count))
+                embed.add_field(name=ctx._("serverinfo-nitroboost-can-title"),value=ctx._(f"serverinfo-nitroboost-can-{sevinfo.premium_tier}").format(sevinfo.premium_tier,sevinfo.premium_subscription_count))
             except:
                 pass
 
@@ -386,7 +386,7 @@ class info(commands.Cog):
             hasper = ""
             for pn,bl in iter(role.permissions):
                 if bl:
-                    hasper = hasper + f"`{ut.textto(f'p-{pn}',ctx.author)}`,"
+                    hasper = hasper + f"`{ctx._(f'p-{pn}')}`,"
             embed.add_field(name=ctx._("roleinfo-hasper"), value=hasper)
             embed.add_field(name=ctx._("roleinfo-created"), value=(role.created_at + rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
 
@@ -642,7 +642,7 @@ class info(commands.Cog):
                 elif page == 6:
                     #Nitro server boost
                     e = discord.Embed(title=str(self.bot.get_emoji(653161518971617281))+"Nitro Server Boost",description=f"Level:{ctx.guild.premium_tier}\n({ctx.guild.premium_subscription_count})",color=self.bot.ec)
-                    e.add_field(name=ctx._("ginfo-bst-add"),value=ut.textto(f"ginfo-blev{ctx.guild.premium_tier}",ctx.author))
+                    e.add_field(name=ctx._("ginfo-bst-add"),value=ctx._(f"ginfo-blev{ctx.guild.premium_tier}"))
                     await mp.edit(embed=e)
                 elif page == 7:
                     #member

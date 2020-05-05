@@ -151,10 +151,10 @@ class other(commands.Cog):
     async def eatit(self,ctx,it):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
         if ctx.user_lang()=="ja":
-            if ut.textto(f"eat-{it}",ctx.message.author).startswith("Not found key:"):
+            if ctx._(f"eat-{it}") == "":
                 await ctx.send(ctx._("eat-?"))
             else:
-                await ctx.send(ut.textto(f"eat-{it}",ctx.message.author))
+                await ctx.send(ctx._(f"eat-{it}"))
         else:
             await ctx.send(ctx._("cannot-run"))
 
@@ -220,7 +220,7 @@ class other(commands.Cog):
     async def fortune(self,ctx):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
         rnd = random.randint(0, 6)
-        await ctx.send(ctx._("omikuzi-return").format(ut.textto("omikuzi-"+str(rnd),ctx.message.author)))
+        await ctx.send(ctx._("omikuzi-return").format(ctx._("omikuzi-"+str(rnd))))
 
     @commands.command()
     async def memo(self,ctx,mode="a",mn="def",*,ctt=None):

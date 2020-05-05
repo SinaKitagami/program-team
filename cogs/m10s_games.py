@@ -121,8 +121,8 @@ class games(commands.Cog):
                     u2_dm = await ut.opendm(u2)
                     u2_card = 0
                     u2_pass = False
-                    e1 = discord.Embed(title=ut.textto("game1-vs-et",u1),description=ut.textto("game1-vs-ed",u1).format(str(u1),str(u2)),color=self.bot.ec)
-                    e2 = discord.Embed(title=ut.textto("game1-vs-et",u2),description=ut.textto("game1-vs-ed",u2).format(str(u1),str(u2)),color=self.bot.ec)
+                    e1 = discord.Embed(title=ctx._("game1-vs-et"),description=ctx._("game1-vs-ed",str(u1),str(u2)),color=self.bot.ec)
+                    e2 = discord.Embed(title=ctx.l10n(u2,"game1-vs-et"),description=ctx.l10n(u2,"game1-vs-ed",str(u1),str(u2)),color=self.bot.ec)
                     await u1_dm.send(embed=e1)
                     await u2_dm.send(embed=e2)
                     while not(u1_pass and u2_pass):

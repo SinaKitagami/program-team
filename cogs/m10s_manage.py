@@ -180,7 +180,7 @@ class manage(commands.Cog):
             else:
                 await ctx.send(ctx._("mem-banned"))
         else:
-            await ctx.send(ut.textto("mem-don'thasper",ctx.message.author))
+            await ctx.send(ctx._("mem-don'thasper"))
 
 
 
@@ -198,7 +198,7 @@ class manage(commands.Cog):
             else:
                 await ctx.send(ctx._("mem-kicked"))
         else:
-            await ctx.send(ut.textto("mem-don'thasper",ctx.message.author))
+            await ctx.send(ctx._("mem-don'thasper"))
 
     @commands.command(aliases=["ピン留め切替","次のメッセージをピン留めして"])
     async def pin(self,ctx,mid:int):

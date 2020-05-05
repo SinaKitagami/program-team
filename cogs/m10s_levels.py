@@ -100,23 +100,23 @@ class levels(commands.Cog):
                     if cb=="kazuta123-a" or cb=="kazuta123-b" or cb=="kazuta123-c" or cb=="tomohiro0405":
                         dt.text((300, 60), u.display_name[0:10] +etc, font=fonta, fill='#ffffff')
 
-                        dt.text((50, 110), ut.textto("lc-level",u)+str(level[str(u.id)]['level']) , font=fontb, fill='#ffffff')
+                        dt.text((50, 110), ctx.l10n(u,"lc-level")+str(level[str(u.id)]['level']) , font=fontb, fill='#ffffff')
 
-                        dt.text((50, 170), ut.textto("lc-exp",u) + str(level[str(u.id)]['exp'])+"/"+nextl , font=fonta, fill='#ffffff')
+                        dt.text((50, 170), ctx.l10n(u,"lc-exp") + str(level[str(u.id)]['exp'])+"/"+nextl , font=fonta, fill='#ffffff')
 
-                        dt.text((50, 210), ut.textto("lc-next",u)+tonextexp , font=fontc, fill='#ffffff')
+                        dt.text((50, 210), ctx.l10n(u,"lc-next")+tonextexp , font=fontc, fill='#ffffff')
 
-                        dt.text((50, 300), ut.textto("lc-createdby",u).format(cb.replace("m@ji☆","おあず").replace("kazuta123","kazuta246").replace("-a","").replace("-b","").replace("-c","")) , font=fontc, fill='#ffffff')
+                        dt.text((50, 300), ctx.l10n("lc-createdby").format(cb.replace("m@ji☆","おあず").replace("kazuta123","kazuta246").replace("-a","").replace("-b","").replace("-c","")) , font=fontc, fill='#ffffff')
                     else:
                         dt.text((300, 60), u.display_name[0:10] +etc, font=fonta, fill='#000000')
 
-                        dt.text((50, 110), ut.textto("lc-level",u)+str(level[str(u.id)]['level']) , font=fontb, fill='#000000')
+                        dt.text((50, 110), ctx.l10n(u,"lc-level")+str(level[str(u.id)]['level']) , font=fontb, fill='#000000')
 
-                        dt.text((50, 170), ut.textto("lc-exp",u) + str(level[str(u.id)]['exp'])+"/"+nextl , font=fonta, fill='#000000')
+                        dt.text((50, 170), ctx.l10n(u,"lc-exp") + str(level[str(u.id)]['exp'])+"/"+nextl , font=fonta, fill='#000000')
 
-                        dt.text((50, 210), ut.textto("lc-next",u)+tonextexp , font=fontc, fill='#000000')
+                        dt.text((50, 210), ctx.l10n(u,"lc-next")+tonextexp , font=fontc, fill='#000000')
 
-                        dt.text((50, 300), ut.textto("lc-createdby",u).format(cb.replace("m@ji☆","おあず").replace("kazuta123","kazuta246").replace("-a","").replace("-b","").replace("-c","")) , font=fontc, fill='#000000')
+                        dt.text((50, 300), ctx.l10n(u,"lc-createdby").format(cb.replace("m@ji☆","おあず").replace("kazuta123","kazuta246").replace("-a","").replace("-b","").replace("-c","")) , font=fontc, fill='#000000')
 
                     cv.save("imgs/sina'slevelcard.png", 'PNG')
                 await ctx.send(file=discord.File("imgs/sina'slevelcard.png"))
