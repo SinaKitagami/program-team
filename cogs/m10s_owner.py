@@ -142,28 +142,28 @@ class owner(commands.Cog):
         if info:
             async with ctx.message.channel.typing():
                 if ctx.guild.owner == info:
-                    embed = discord.Embed(title=ut.textto("userinfo-name",ctx.message.author), description=f"{info.name} - {ut.ondevicon(info)} - {ut.textto('userinfo-owner',ctx.message.author)}", color=info.color)
+                    embed = discord.Embed(title=ctx._("userinfo-name"), description=f"{info.name} - {ut.ondevicon(info)} - {ctx._('userinfo-owner')}", color=info.color)
                 else:
-                    embed = discord.Embed(title=ut.textto("userinfo-name",ctx.message.author), description=f"{info.name} - {ut.ondevicon(info)}", color=info.color)
-                embed.add_field(name=ut.textto("userinfo-joindiscord",ctx.message.author), value=info.created_at)
-                embed.add_field(name=ut.textto("userinfo-id",ctx.message.author), value=info.id)
-                embed.add_field(name=ut.textto("userinfo-online",ctx.message.author), value=f"{str(info.status)}")
-                embed.add_field(name=ut.textto("userinfo-isbot",ctx.message.author), value=str(info.bot))
-                embed.add_field(name=ut.textto("userinfo-displayname",ctx.message.author), value=info.display_name)
-                embed.add_field(name=ut.textto("userinfo-joinserver",ctx.message.author), value=info.joined_at)
+                    embed = discord.Embed(title=ctx._("userinfo-name"), description=f"{info.name} - {ut.ondevicon(info)}", color=info.color)
+                embed.add_field(name=ctx._("userinfo-joindiscord"), value=info.created_at)
+                embed.add_field(name=ctx._("userinfo-id"), value=info.id)
+                embed.add_field(name=ctx._("userinfo-online"), value=f"{str(info.status)}")
+                embed.add_field(name=ctx._("userinfo-isbot"), value=str(info.bot))
+                embed.add_field(name=ctx._("userinfo-displayname"), value=info.display_name)
+                embed.add_field(name=ctx._("userinfo-joinserver"), value=info.joined_at)
                 embed.set_footer(text=f"サーバー:{info.guild.name}({info.guild.id})")
                 if not info.activity == None:
                     try:
-                        embed.add_field(name=ut.textto("userinfo-nowplaying",ctx.message.author), value=f'{info.activity.name}')
+                        embed.add_field(name=ctx._("userinfo-nowplaying"), value=f'{info.activity.name}')
                     except:
-                        embed.add_field(name=ut.textto("userinfo-nowplaying",ctx.message.author), value=info.activity)
+                        embed.add_field(name=ctx._("userinfo-nowplaying"), value=info.activity)
                 hasroles = ""
                 for r in info.roles:
                     hasroles = hasroles + f"{r.mention},"
-                embed.add_field(name=ut.textto("userinfo-roles",ctx.message.author), value=hasroles)
+                embed.add_field(name=ctx._("userinfo-roles"), value=hasroles)
                 if not info.avatar_url == None:
                     embed.set_thumbnail(url=info.avatar_url_as(static_format='png'))
-                    embed.add_field(name=ut.textto("userinfo-iconurl",ctx.message.author),value=info.avatar_url_as(static_format='png'))
+                    embed.add_field(name=ctx._("userinfo-iconurl"),value=info.avatar_url_as(static_format='png'))
                 else:
                     embed.set_image(url=info.default_avatar_url_as(static_format='png'))
             await ctx.send(embed=embed)

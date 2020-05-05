@@ -6,8 +6,6 @@ import asyncio
 
 import m10s_util as ut
 """↑様々な便利コマンド詰め合わせ
-ut.textto("キー",Member)
-    ユーザーの言語設定に基づいてキーのテキストを返す。
 ut.ondevicon(Member)
     オンライン状況に基づくデバイスアイコンテキストを返す。
 ut.getEmbed(title,description,color,(name,value)...)

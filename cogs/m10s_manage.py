@@ -154,7 +154,7 @@ class manage(commands.Cog):
     async def cemojiorole(self,ctx,name,*rlis):
         ig = await ctx.message.attachments[0].read()
         await ctx.guild.create_custom_emoji(name=name,image=ig,roles=[ctx.guild.get_role(int(i)) for i in rlis])
-        await ctx.send(ut.textto("created-text",ctx.author))
+        await ctx.send(ctx._("created-text"))
 
     @commands.command()
     async def delm(self,ctx, ctxid):
@@ -176,11 +176,11 @@ class manage(commands.Cog):
                 bmem = await self.bot.fetch_user(mem)
                 await ctx.guild.ban(bmem,delete_message_days=dmd,reason=rs)
             except:
-                await ctx.send(ut.textto("mem-up",ctx.message.author))
+                await ctx.send(ctx._("mem-up"))
             else:
-                await ctx.send(ut.textto("mem-banned",ctx.message.author))
+                await ctx.send(ctx._("mem-banned"))
         else:
-            await ctx.send(ut.textto("mem-don'thasper",ctx.message.author))
+            await ctx.send(ctx._("mem-don'thasper"))
 
 
 
@@ -194,21 +194,21 @@ class manage(commands.Cog):
             try:
                 await mem.kick()
             except:
-                await ctx.send(ut.textto("mem-up",ctx.message.author))
+                await ctx.send(ctx._("mem-up"))
             else:
-                await ctx.send(ut.textto("mem-kicked",ctx.message.author))
+                await ctx.send(ctx._("mem-kicked"))
         else:
-            await ctx.send(ut.textto("mem-don'thasper",ctx.message.author))
+            await ctx.send(ctx._("mem-don'thasper"))
 
     @commands.command(aliases=["ピン留め切替","次のメッセージをピン留めして"])
     async def pin(self,ctx,mid:int):
         msg = await ctx.message.channel.fetch_message(mid)
         if msg.pinned:
             await msg.unpin()
-            await ctx.send(ut.textto("pin-unpinned",ctx.message.author))
+            await ctx.send(ctx._("pin-unpinned"))
         else:
             await msg.pin()
-            await ctx.send(ut.textto("pin-pinned",ctx.message.author))
+            await ctx.send(ctx._("pin-pinned"))
 
     @commands.command(aliases=["メッセージ一括削除","次の件数分、メッセージを消して"])
     @commands.cooldown(1, 15, type=commands.BucketType.guild)
@@ -219,7 +219,7 @@ class manage(commands.Cog):
                 dmc = ctx.message
                 await dmc.delete()
                 dr=await dmc.channel.purge(limit=int(msgcount))
-                await ctx.send(ut.textto("delmsgs-del",ctx.message.author).format(len(dr)))
+                await ctx.send(ctx._("delmsgs-del",len(dr)))
 
     @commands.command()
     async def Wecall(self,ctx, us=None, name=None):
@@ -228,22 +228,22 @@ class manage(commands.Cog):
         if not us == None and not name == None:
             if not ctx.message.mentions[0].id == ctx.author.id:
                 if ctx.message.mentions[0].bot == False:
-                    ok = await ctx.send(ut.textto("Wecall-areyouok",ctx.message.author).format(ctx.message.mentions[0].mention,ctx.message.author.mention,name))
+                    ok = await ctx.send(ctx._("Wecall-areyouok",ctx.message.mentions[0].mention,ctx.message.author.mention,name))
                     await ok.add_reaction('⭕')
                     await ok.add_reaction('❌')
                     reaction, user = await self.bot.wait_for("reaction_add", check=lambda r,u: r.message.id==ok.id and u.id == ctx.message.mentions[0].id)
                     if str(reaction.emoji) == "⭕":
                         try:
                             await ctx.message.mentions[0].edit(nick=name)
-                            await ctx.send(ut.textto("Wecall-changed",ctx.message.author))
+                            await ctx.send(ctx._("Wecall-changed"))
                         except:
-                            await ctx.send(ut.textto("Wecall-notchanged1",ctx.message.author))
+                            await ctx.send(ctx._("Wecall-notchanged1"))
                     else:
-                        await ctx.send(ut.textto("Wecall-notchanged2",ctx.message.author))
+                        await ctx.send(ctx._("Wecall-notchanged2"))
                 else:
-                    await ctx.send(ut.textto("Wecall-bot",ctx.message.author))
+                    await ctx.send(ctx._("Wecall-bot"))
             else:
-                await ctx.send(ut.textto("Wecall-not",ctx.message.author))
+                await ctx.send(ctx._("Wecall-not"))
 
 
 def setup(bot):

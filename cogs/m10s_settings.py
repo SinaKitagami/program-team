@@ -23,7 +23,7 @@ class settings(commands.Cog):
         elif mode=="set":
             spf = upf["prefix"]+[ipf]
             self.bot.cursor.execute("UPDATE users SET prefix = ? WHERE id = ?", (spf,ctx.author.id))
-            await ctx.send(ut.textto("upf-add",ctx.author).format(ipf))
+            await ctx.send(ctx._("upf-add",ipf))
         elif mode=="del":
             spf = upf["prefix"]
             spf.remove(ipf)
@@ -40,10 +40,10 @@ class settings(commands.Cog):
         dor = self.bot.cursor.fetchone()
         if dor["levels"][str(ctx.author.id)]["dlu"]:
             dor["levels"][str(ctx.author.id)]["dlu"] = False
-            await ctx.send(ut.textto("sLu-off",ctx.message.author))
+            await ctx.send(ctx._("sLu-off"))
         else:
             dor["levels"][str(ctx.author.id)]["dlu"] = True
-            await ctx.send(ut.textto("sLu-on",ctx.message.author))
+            await ctx.send(ctx._("sLu-on"))
         self.bot.cursor.execute("UPDATE guilds SET levels = ? WHERE id = ?", (dor["levels"],ctx.guild.id))
 
 
@@ -59,7 +59,7 @@ class settings(commands.Cog):
         elif mode=="set":
             spf = gs["prefix"]+[ipf]
             self.bot.cursor.execute("UPDATE guilds SET prefix = ? WHERE id = ?", (spf,ctx.guild.id))
-            await ctx.send(ut.textto("upf-add",ctx.author).format(ipf))
+            await ctx.send(ctx._("upf-add",ipf))
         elif mode=="del":
             spf = gs["prefix"]
             spf.remove(ipf)
@@ -74,11 +74,12 @@ class settings(commands.Cog):
         self.bot.cursor.execute("select * from guilds where id=?",(ctx.guild.id,))
         gs = self.bot.cursor.fetchone()
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
-        if ut.textto("language",lang).startswith("Not found language:"):
-            await ctx.send(ut.textto("setl-cantuse",ctx.author))
+        if lang not in self.bot.translate_handler.supported_locales:
+            await ctx.send(ctx._("setl-cantuse"))
         else:
             self.bot.cursor.execute("UPDATE guilds SET lang = ? WHERE id = ?", (lang,ctx.guild.id))
-            await ctx.send(ut.textto("setl-set",ctx.message.author))
+            self.bot.translate_handler.update_language_cache(ctx.guild, lang)
+            await ctx.send(ctx._("setl-set"))
 
     @commands.command()
     async def sendlogto(self,ctx,to=None):
@@ -103,11 +104,12 @@ class settings(commands.Cog):
     @commands.cooldown(1, 10, type=commands.BucketType.user)
     async def userlang(self,ctx,lang):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
-        if ut.textto("language",lang).startswith("Not found language:"):
-            await ctx.send(ut.textto("setl-cantuse",ctx.author))
+        if lang not in self.bot.translate_handler.supported_locales:
+            await ctx.send(ctx._("setl-cantuse"))
         else:
             self.bot.cursor.execute("UPDATE users SET lang = ? WHERE id = ?", (lang,ctx.author.id))
-            await ctx.send(ut.textto("setl-set",ctx.message.author))
+            self.bot.translate_handler.update_language_cache(ctx.author, lang)
+            await ctx.send(ctx._("setl-set"))
 
     @commands.command()
     async def comlock(self,ctx,do="view",comname=""):
@@ -115,24 +117,24 @@ class settings(commands.Cog):
         gs = self.bot.cursor.fetchone()
         if do =="add":
             if not (ctx.author.guild_permissions.administrator or ctx.author.id == 404243934210949120):
-                await ctx.send(ut.textto("need-admin",ctx.author))
+                await ctx.send(ctx._("need-admin"))
                 return
             if not comname in gs["lockcom"]:
                 gs["lockcom"].append(comname)
                 self.bot.cursor.execute("UPDATE guilds SET lockcom = ? WHERE id = ?", (gs["lockcom"],ctx.guild.id))
-            await ctx.send(ut.textto("upf-add",ctx.author).format(comname))
+            await ctx.send(ctx._("upf-add",comname))
         elif do =="del":
             if not (ctx.author.guild_permissions.administrator or ctx.author.id == 404243934210949120):
-                await ctx.send(ut.textto("need-admin",ctx.author))
+                await ctx.send(ctx._("need-admin"))
                 return
             if comname in gs["lockcom"]:
                 gs["lockcom"].remove(comname)
                 self.bot.cursor.execute("UPDATE guilds SET lockcom = ? WHERE id = ?", (gs["lockcom"],ctx.guild.id))
-            await ctx.send(ut.textto("deleted-text",ctx.author))
+            await ctx.send(ctx._("deleted-text"))
         elif do =="view":
-            await ctx.send(ut.textto("comlock-view",ctx.author).format(str(gs["lockcom"])))
+            await ctx.send(ctx._("comlock-view",str(gs["lockcom"])))
         else:
-            await ctx.send(ut.textto("comlock-unknown",ctx.author))
+            await ctx.send(ctx._("comlock-unknown"))
 
     @commands.command()
     async def setsysmsg(self,ctx,mode="check",when="welcome",to="sysch",*,content=None):
@@ -140,13 +142,13 @@ class settings(commands.Cog):
         msgs = self.bot.cursor.fetchone()
         sm = msgs["jltasks"]
         if mode == "check":
-            embed = discord.Embed(title=ut.textto("ssm-sendcontent",ctx.message.author), description=ctx.guild.name, color=self.bot.ec)
+            embed = discord.Embed(title=ctx._("ssm-sendcontent"), description=ctx.guild.name, color=self.bot.ec)
             try:
-                embed.add_field(name=ut.textto("ssm-welcome",ctx.message.author), value=f'{sm["welcome"].get("content")}({ut.textto("ssm-sendto",ctx.message.author)}):{sm["welcome"].get("sendto")})')
+                embed.add_field(name=ctx._("ssm-welcome"), value=f'{sm["welcome"].get("content")}({ctx._("ssm-sendto")}):{sm["welcome"].get("sendto")})')
             except:
                 pass
             try:
-                embed.add_field(name=ut.textto("ssm-seeyou",ctx.message.author), value=f'{sm["cu"].get("content")}({ut.textto("ssm-sendto",ctx.message.author)}:{sm["cu"].get("sendto")})')
+                embed.add_field(name=ctx._("ssm-seeyou"), value=f'{sm["cu"].get("content")}({ctx._("ssm-sendto")}:{sm["cu"].get("sendto")})')
             except:
                 pass
             await ctx.send(embed=embed)
@@ -157,11 +159,11 @@ class settings(commands.Cog):
                     msgs["jltasks"][when]["content"] = content
                     msgs["jltasks"][when]["sendto"] = to
                     self.bot.cursor.execute("UPDATE guilds SET jltasks = ? WHERE id = ?", (msgs["jltasks"],ctx.guild.id))
-                    await ctx.send(ut.textto("ssm-set",ctx.message.author))
+                    await ctx.send(ctx._("ssm-set"))
                 except:
-                    await ctx.send(ut.textto("ssm-not",ctx.message.author))
+                    await ctx.send(ctx._("ssm-not"))
             else:
-                await ctx.send(ut.textto("need-admin",ctx.author))
+                await ctx.send(ctx._("need-admin"))
 
 
     @commands.command(aliases=["サーバーコマンド","次の条件でサーバーコマンドを開く"])
@@ -172,7 +174,7 @@ class settings(commands.Cog):
         if mode == "add":
             if not mmj["commands"].get(name,None) is None:
                 if not(ctx.author.permissions_in(ctx.channel).manage_guild == True and ctx.author.permissions_in(ctx.channel).manage_roles == True or ctx.author.id == 404243934210949120):
-                    await ctx.send(ut.textto("need-manage",ctx.author))
+                    await ctx.send(ctx._("need-manage"))
                     return
             dc = ctx.author.dm_channel
             if dc == None:
@@ -185,20 +187,20 @@ class settings(commands.Cog):
             for e in emojis:
                 se = se + [str(e)]
 
-            await dc.send(ut.textto("scmd-add-guide1",ctx.message.author))
+            await dc.send(ctx._("scmd-add-guide1"))
 
             def check(m):
                 return m.channel == dc and m.author == ctx.author
 
             msg = await self.bot.wait_for('message', check=check)
             if msg.content =="one":
-                await dc.send(ut.textto("scmd-add-guide2",ctx.message.author))
+                await dc.send(ctx._("scmd-add-guide2"))
                 mes = await self.bot.wait_for('message', check=check)
                 guide=mes.content
                 try:
-                    await dc.send(ut.textto("scmd-add-guide3-a",ctx.message.author).format(ut.textto("scmd-guide-emoji",ctx.message.author),str(se)))
+                    await dc.send(ctx._("scmd-add-guide3-a",ctx._("scmd-guide-emoji"),str(se)))
                 except:
-                    await dc.send(ut.textto("scmd-add-guide3-a",ctx.message.author).format(ut.textto("scmd-guide-emoji",ctx.message.author),"(絵文字が多すぎて表示できません！)"))
+                    await dc.send(ctx._("scmd-add-guide3-a",ctx._("scmd-guide-emoji"),"(絵文字が多すぎて表示できません！)"))
                 mg=await self.bot.wait_for('message', check=check)
                 rep = mg.clean_content.format(se)
                 mmj["commands"][name]={}
@@ -207,13 +209,13 @@ class settings(commands.Cog):
                 mmj["commands"][name]["createdBy"]=ctx.author.id
                 mmj["commands"][name]["guide"]=guide
             elif msg.content == "random":
-                await dc.send(ut.textto("scmd-add-guide2",ctx.message.author))
+                await dc.send(ctx._("scmd-add-guide2"))
                 mes = await self.bot.wait_for('message', check=check)
                 guide=mes.content
                 try:
-                    await dc.send(ut.textto("scmd-add-guide3-a",ctx.message.author).format(ut.textto("scmd-guide-emoji",ctx.message.author),str(se)))
+                    await dc.send(ctx._("scmd-add-guide3-a",ctx._("scmd-guide-emoji"),str(se)))
                 except:
-                    await dc.send(ut.textto("scmd-add-guide3-a",ctx.message.author).format(ut.textto("scmd-guide-emoji",ctx.message.author),"(絵文字が多すぎて表示できません！)"))
+                    await dc.send(ctx._("scmd-add-guide3-a",ctx._("scmd-guide-emoji"),"(絵文字が多すぎて表示できません！)"))
                 rep = []
                 while True:
                     mg=await self.bot.wait_for('message', check=check)
@@ -222,9 +224,9 @@ class settings(commands.Cog):
                     else:
                         rep = rep + [mg.clean_content.format(se)]
                         try:
-                            await dc.send(ut.textto("scmd-add-guide3-b",ctx.message.author).format(ut.textto("scmd-guide-emoji",ctx.message.author),str(se)))
+                            await dc.send(ctx._("scmd-add-guide3-b",ctx._("scmd-guide-emoji"),str(se)))
                         except:
-                            await dc.send(ut.textto("scmd-add-guide3-b",ctx.message.author).format(ut.textto("scmd-guide-emoji",ctx.message.author),"(絵文字が多すぎて表示できません！)"))
+                            await dc.send(ctx._("scmd-add-guide3-b",ctx._("scmd-guide-emoji"),"(絵文字が多すぎて表示できません！)"))
                 mmj["commands"][name]={}
                 mmj["commands"][name]["mode"]="random"
                 mmj["commands"][name]["rep"]=rep
@@ -232,10 +234,10 @@ class settings(commands.Cog):
                 mmj["commands"][name]["guide"]=guide
             elif msg.content == "role":
                 if ctx.author.permissions_in(ctx.channel).manage_guild == True and ctx.author.permissions_in(ctx.channel).manage_roles == True or ctx.author.id == 404243934210949120:
-                    await dc.send(ut.textto("scmd-add-guide2",ctx.message.author))
+                    await dc.send(ctx._("scmd-add-guide2"))
                     mes = await self.bot.wait_for('message', check=check)
                     guide=mes.content
-                    await dc.send(ut.textto("scmd-add-guide3-c",ctx.message.author).format(ut.textto("scmd-guide-emoji",ctx.message.author),str(se)))
+                    await dc.send(ctx._("scmd-add-guide3-c",ctx._("scmd-guide-emoji"),str(se)))
                     mg=await self.bot.wait_for('message', check=check)
                     rep = int(mg.clean_content)
                     mmj["commands"][name]={}
@@ -244,38 +246,38 @@ class settings(commands.Cog):
                     mmj["commands"][name]["createdBy"]=ctx.author.id
                     mmj["commands"][name]["guide"]=guide
                 else:
-                    await ctx.send(ut.textto("need-manage",ctx.author))
+                    await ctx.send(ctx._("need-manage"))
                     return
             else:
-                await dc.send(ut.textto("scmd-add-not",ctx.message.author))
+                await dc.send(ctx._("scmd-add-not"))
                 return
             self.bot.cursor.execute("UPDATE guilds SET commands = ? WHERE id = ?", (mmj["commands"],ctx.guild.id))
-            await ctx.send(ut.textto("scmd-add-fin",ctx.message.author))
+            await ctx.send(ctx._("scmd-add-fin"))
         elif mode == "help":
             if mmj["commands"] == {}:
-                await ctx.send(ut.textto("scmd-all-notfound",ctx.message.author))
+                await ctx.send(ctx._("scmd-all-notfound"))
             elif mmj["commands"].get(name) is None:
-                await ctx.send(ut.textto("scmd-help-notfound",ctx.message.author))
+                await ctx.send(ctx._("scmd-help-notfound"))
             else:
                 if isinstance(mmj["commands"][name]['createdBy'],int):
-                    await ctx.send(ut.textto("scmd-help-title",ctx.message.author).format(name,await bot.fetch_user(mmj["commands"][name]['createdBy']),mmj["commands"][name]['guide']))
+                    await ctx.send(ctx._("scmd-help-title",name,await bot.fetch_user(mmj["commands"][name]['createdBy']),mmj["commands"][name]['guide']))
                 else:
-                    await ctx.send(ut.textto("scmd-help-title",ctx.message.author).format(name,mmj["commands"][name]['createdBy'],mmj["commands"][name]['guide']))
+                    await ctx.send(ctx._("scmd-help-title",name,mmj["commands"][name]['createdBy'],mmj["commands"][name]['guide']))
         elif mode == "all":
             if mmj["commands"] == []:
-                await ctx.send(ut.textto("scmd-all-notfound",ctx.message.author))
+                await ctx.send(ctx._("scmd-all-notfound"))
             else:
-                await ctx.send(str(mmj["commands"].keys()).replace("dict_keys(",ut.textto("scmd-all-list",ctx.message.author)).replace(")",""))
+                await ctx.send(str(mmj["commands"].keys()).replace("dict_keys(",ctx._("scmd-all-list")).replace(")",""))
         elif mode == "del":
             if ctx.author.permissions_in(ctx.channel).manage_guild == True and ctx.author.permissions_in(ctx.channel).manage_roles == True or ctx.author.id == 404243934210949120:
                 if not mmj["commands"] == None:
                     del mmj["commands"][name]
-                await ctx.send(ut.textto("scmd-del",ctx.message.author))
+                await ctx.send(ctx._("scmd-del"))
                 self.bot.cursor.execute("UPDATE guilds SET commands = ? WHERE id = ?", (mmj["commands"],ctx.guild.id))
             else:
-                await ctx.send(ut.textto("need-manage",ctx.author))
+                await ctx.send(ctx._("need-manage"))
         else:
-            await ctx.send(ut.textto("scmd-except",ctx.message.author))
+            await ctx.send(ctx._("scmd-except"))
 
     @commands.command()
     async def hash(self,ctx):
@@ -284,13 +286,13 @@ class settings(commands.Cog):
         hc = d["hash"]
         if hc == None:
             d["hash"]=[ctx.channel.id]
-            await ctx.send(ut.textto("hash-connect",ctx.message.author))
+            await ctx.send(ctx._("hash-connect"))
         elif ctx.channel.id in hc:
             d["hash"].remove(ctx.channel.id)
-            await ctx.send(ut.textto("hash-disconnect",ctx.message.author))
+            await ctx.send(ctx._("hash-disconnect"))
         else:
             d["hash"].append(ctx.channel.id)
-            await ctx.send(ut.textto("hash-connect",ctx.message.author))
+            await ctx.send(ctx._("hash-connect"))
         self.bot.cursor.execute("UPDATE guilds SET hash = ? WHERE id = ?", (d["hash"],ctx.guild.id))
 
     @commands.command(aliases=["オンライン通知"])
@@ -300,13 +302,13 @@ class settings(commands.Cog):
         if mode=='add':
             upf["onnotif"].append(uid)
             self.bot.cursor.execute("UPDATE users SET onnotif = ? WHERE id = ?", (upf["onnotif"],ctx.author.id))
-            await ctx.send(ut.textto("onnotif-set",ctx.message.author))
+            await ctx.send(ctx._("onnotif-set"))
         elif mode =='del':
             upf["onnotif"].remove(uid)
             self.bot.cursor.execute("UPDATE users SET onnotif = ? WHERE id = ?", (upf["onnotif"],ctx.author.id))
-            await ctx.send(ut.textto("onnotif-stop",ctx.message.author))
+            await ctx.send(ctx._("onnotif-stop"))
         else:
-            await ctx.send(ut.textto("onnotif-error",ctx.message.author))
+            await ctx.send(ctx._("onnotif-error"))
         self.bot.cursor.execute("select * from users where id=?",(ctx.author.id,))
         upf = self.bot.cursor.fetchone()
         await ctx.send(f"upf:{upf['onnotif']}")
@@ -317,12 +319,12 @@ class settings(commands.Cog):
             self.bot.cursor.execute("UPDATE guilds SET levelupsendto = ? WHERE id = ?", ("here",ctx.guild.id))
         else:
             self.bot.cursor.execute("UPDATE guilds SET levelupsendto = ? WHERE id = ?", (int(to),ctx.guild.id))
-        await ctx.send(ut.textto("changed",ctx.author))
+        await ctx.send(ctx._("changed"))
 
     @commands.command()
     async def levelreward(self,ctx,lv:int,rl=None):
         if not(ctx.author.permissions_in(ctx.channel).manage_guild == True and ctx.author.permissions_in(ctx.channel).manage_roles == True or ctx.author.id == 404243934210949120):
-            await ctx.send(ut.textto("need-admin",ctx.author))
+            await ctx.send(ctx._("need-admin"))
             return
         self.bot.cursor.execute("select * from guilds where id=?",(ctx.guild.id,))
         gs = self.bot.cursor.fetchone()
@@ -336,7 +338,7 @@ class settings(commands.Cog):
             rid = grl.id
             gs["reward"][str(lv)] = rid
         self.bot.cursor.execute("UPDATE guilds SET reward = ? WHERE id = ?", (gs["reward"],ctx.guild.id))
-        await ctx.send(ut.textto("changed",ctx.author))
+        await ctx.send(ctx._("changed"))
 
 
 

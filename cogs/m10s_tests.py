@@ -74,9 +74,9 @@ class tests(commands.Cog):
                                 pass
                 await ctx.send("完了しました。")
             else:
-                await ctx.send(ut.textto("need-admin",ctx.author))
+                await ctx.send(ctx._("need-admin"))
         except:
-            await ctx.send(embed=ut.getEmbed(ut.textto("ginfo-anyerror-title",ctx.author),ut.textto("ginfo-anyerror-title",ctx.author).format(traceback.format_exc(0))))
+            await ctx.send(embed=ut.getEmbed(ctx._("ginfo-anyerror-title"),ctx._("ginfo-anyerror-title",traceback.format_exc(0))))
 
 
 

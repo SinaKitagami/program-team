@@ -49,9 +49,9 @@ class gcoms(commands.Cog):
                 if not u == None:
                     break
         if not u == None:
-            await ctx.send(ut.textto("ison-now",ctx.message.author).format(u.name,str(u.status)))
+            await ctx.send(ctx._("ison-now",u.name,str(u.status)))
         else:
-            await ctx.send(ut.textto("ison-notfound",ctx.message.author))
+            await ctx.send(ctx._("ison-notfound"))
 
     @commands.command()
     async def gchinfo(self,ctx,name="main"):
@@ -72,14 +72,14 @@ class gcoms(commands.Cog):
     async def globalcolor(self,ctx,color='0x000000'):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
         self.bot.cursor.execute("UPDATE users SET gcolor = ? WHERE id = ?", (int(color,16),ctx.author.id))
-        await ctx.send(ut.textto("global-color-changed",ctx.message.author))
+        await ctx.send(ctx._("global-color-changed"))
 
     @commands.command(aliases=["グローバルチャットのニックネームを変える"])
     async def globalnick(self,ctx,nick):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
         if 1<len(nick)<29:
             self.bot.cursor.execute("UPDATE users SET gnick = ? WHERE id = ?", (nick,ctx.author.id))
-            await ctx.send(ut.textto("global-nick-changed",ctx.message.author))
+            await ctx.send(ctx._("global-nick-changed"))
         else:
             await ctx.send("名前の長さは2文字以上28文字以下にしてください。")
 
@@ -93,7 +93,7 @@ class gcoms(commands.Cog):
             cid = uid
         self.bot.cursor.execute("select * from users where id=?",(cid,))
         upf = self.bot.cursor.fetchone()
-        embed = discord.Embed(title=ut.textto("global-status-title",ctx.message.author).format(cid), description="", color=upf["gcolor"])
+        embed = discord.Embed(title=ctx._("global-status-title",cid), description="", color=upf["gcolor"])
         embed.add_field(name="banned", value=upf["gban"])
         embed.add_field(name="nick", value=upf["gnick"])
         embed.add_field(name="color", value=str(upf["gcolor"]))
@@ -122,7 +122,7 @@ class gcoms(commands.Cog):
                     self.bot.cursor.execute("UPDATE users SET gbanhist = ? WHERE id = ?", (rea,uid))
                     await ctx.send(f"ban状態を{str(ban)}にしました。")
                 elif bui:
-                    self.bot.cursor.execute("INSERT INTO users(id,prefix,gpoint,memo,levcard,onnotif,lang,accounts,sinapartner,gban,gnick,gcolor,gmod,gstar,galpha,gbanhist) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (bui.id,[],0,{},"m@ji☆",[],None,[],0,1,bui.name,0,0,0,0,rea))
+                    self.bot.cursor.execute("INSERT INTO users(id,prefix,gpoint,memo,levcard,onnotif,lang,accounts,sinapartner,gban,gnick,gcolor,gmod,gstar,galpha,gbanhist) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (bui.id,[],0,{},"m@ji☆",[],"ja",[],0,1,bui.name,0,0,0,0,rea))
                     await ctx.send(f"プロファイルを作成し、ban状態を{str(ban)}にしました。")
                 else:
                     await ctx.send("これが呼び出されることは、ありえないっ！")
@@ -182,7 +182,7 @@ class gcoms(commands.Cog):
                                 if wh.name == "sina_global":
                                     wh.delete()
                             self.bot.cursor.execute("UPDATE globalchs SET ids = ? WHERE name = ?", (ch["ids"],ch["name"]))
-                            await ctx.send(ut.textto("global-disconnect",ctx.message.author))
+                            await ctx.send(ctx._("global-disconnect"))
                             embed = discord.Embed(title="グローバルチャット切断通知", description=f'{ctx.guild.name}の{ctx.channel.name}が`{ch["name"]}`から切断しました。')
                             for cid in ch["ids"]:
                                 channel=self.bot.get_channel(cid)
