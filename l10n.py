@@ -113,7 +113,10 @@ class TranslateHandler:
         return self.get_raw_translation(target, key, *args, **kwargs)
 
 class LocalizedContext(commands.Context):
-    def _(self, user, key, *args, **kwargs):
+    def _(self, key, *args, **kwargs):
+        return self.bot.translate_handler.get_translation_for(self.author, key, *args, **kwargs)
+
+    def l10n(self, user, key, *args, **kwargs):
         return self.bot.translate_handler.get_translation_for(user, key, *args, **kwargs)
 
     def l10n_guild(self, guild, key, *args, **kwargs):

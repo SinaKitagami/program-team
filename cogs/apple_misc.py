@@ -41,5 +41,10 @@ class AppleMiscCog(commands.Cog):
                     indent_times += 1
             await ctx.send(f"```{result}```")
 
+    @commands.command()
+    @commans.is_owner()
+    async def clear_l10n_cache(self, ctx):
+        self.bot.translate_handler.clean_cache()
+
 def setup(bot):
     bot.add_cog(AppleMiscCog(bot))
