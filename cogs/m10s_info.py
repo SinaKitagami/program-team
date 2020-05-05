@@ -26,33 +26,33 @@ class info(commands.Cog):
             try:
                 u=await self.bot.fetch_user(uid)
             except discord.NotFound:
-                await ctx.send(ut.textto("aui-nf",ctx.author))
+                await ctx.send(ctx._("aui-nf"))
             except discord.HTTPException:
-                await ctx.send(ut.textto("aui-he",ctx.author))
+                await ctx.send(ctx._("aui-he"))
             except:
-                await ctx.send(ut.textto("aui-othere",ctx.author).format(traceback.format_exc()))
+                await ctx.send(ctx._("aui-othere").format(traceback.format_exc()))
             else:
                 ptn=""
                 if u.id in self.bot.team_sina:
-                    ptn=f',({ut.textto("team_sina-chan",ctx.author)})'
+                    ptn=f',({ctx._("team_sina-chan")})'
                 if u.id in [i[1] for i in self.bot.partnerg]:
-                    ptn=ptn+f',({ut.textto("partner_guild_o",ctx.author)})'
+                    ptn=ptn+f',({ctx._("partner_guild_o")})'
                 if isva:
                     ptn=ptn+f"、(💠{'認証済みアカウント'})"
-                e = discord.Embed(title=f"{ut.textto('aui-uinfo',ctx.author)}{ptn}",color=self.bot.ec)
+                e = discord.Embed(title=f"{ctx._('aui-uinfo')}{ptn}",color=self.bot.ec)
                 if u.system:
                     e.add_field(name="✅システムアカウント",value="このアカウントは、Discordのシステムアカウントであり、安全です。",inline=False)
-                e.add_field(name=ut.textto("aui-name",ctx.author),value=u.name)
-                e.add_field(name=ut.textto("aui-id",ctx.author),value=u.id)
-                e.add_field(name=ut.textto("aui-dr",ctx.author),value=u.discriminator)
-                e.add_field(name=ut.textto("aui-isbot",ctx.author),value=u.bot)
+                e.add_field(name=ctx._("aui-name"),value=u.name)
+                e.add_field(name=ctx._("aui-id"),value=u.id)
+                e.add_field(name=ctx._("aui-dr"),value=u.discriminator)
+                e.add_field(name=ctx._("aui-isbot"),value=u.bot)
                 e.set_thumbnail(url=u.avatar_url)
                 tm=(u.created_at + rdelta(hours=9)).strftime("%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}").format(*"年月日時分秒")
-                e.set_footer(text=ut.textto("aui-created",ctx.author).format(tm))
+                e.set_footer(text=ctx._("aui-created").format(tm))
                 e.timestamp = u.created_at
             await ctx.send(embed=e)
         else:
-            await ctx.send(ut.textto("aui-nid",ctx.author))
+            await ctx.send(ctx._("aui-nid"))
 
     @commands.command(aliases=["ui","ユーザー情報","ユーザーの情報を教えて"])
     async def userinfo(self,ctx, mus:commands.MemberConverter=None):
@@ -70,45 +70,45 @@ class info(commands.Cog):
         async with ctx.message.channel.typing():
             ptn=""
             if info.id in self.bot.team_sina:
-                ptn=f',({ut.textto("team_sina-chan",ctx.author)})'
+                ptn=f',({ctx._("team_sina-chan")})'
             if info.id in [i[1] for i in self.bot.partnerg]:
-                ptn=ptn+f',({ut.textto("partner_guild_o",ctx.author)})'
+                ptn=ptn+f',({ctx._("partner_guild_o")})'
             if isva:
                 ptn=ptn+f"、(💠{'認証済みアカウント'})"
             if ctx.guild.owner == info:
-                embed = discord.Embed(title=ut.textto("uinfo-title",ctx.author), description=f"{ptn} - {ut.textto('userinfo-owner',ctx.message.author)}", color=info.color)
+                embed = discord.Embed(title=ctx._("uinfo-title"), description=f"{ptn} - {ctx._('userinfo-owner')}", color=info.color)
             else:
-                embed = discord.Embed(title=ut.textto("uinfo-title",ctx.author), description=ptn, color=info.color)
+                embed = discord.Embed(title=ctx._("uinfo-title"), description=ptn, color=info.color)
             if info.system:
                 embed.add_field(name="✅システムアカウント",value="このアカウントは、Discordのシステムアカウントであり、安全です。",inline=False)
-            embed.add_field(name=ut.textto("userinfo-name",ctx.message.author),value=f"{info.name} - {ut.ondevicon(info)}")
+            embed.add_field(name=ctx._("userinfo-name"),value=f"{info.name} - {ut.ondevicon(info)}")
             try:
                 if not info.premium_since is None:
-                    embed.add_field(name=ut.textto("userinfo-guildbooster",ctx.message.author), value=f"since {info.premium_since}")
+                    embed.add_field(name=ctx._("userinfo-guildbooster"), value=f"since {info.premium_since}")
             except:
                 pass
-            embed.add_field(name=ut.textto("userinfo-joindiscord",ctx.message.author), value=(info.created_at+ rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
-            embed.add_field(name=ut.textto("userinfo-id",ctx.message.author), value=info.id)
-            embed.add_field(name=ut.textto("userinfo-online",ctx.message.author), value=f"{str(info.status)}")
-            embed.add_field(name=ut.textto("userinfo-isbot",ctx.message.author), value=str(info.bot))
-            embed.add_field(name=ut.textto("userinfo-displayname",ctx.message.author), value=info.display_name)
-            embed.add_field(name=ut.textto("userinfo-joinserver",ctx.message.author), value=(info.joined_at + rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
+            embed.add_field(name=ctx._("userinfo-joindiscord"), value=(info.created_at+ rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
+            embed.add_field(name=ctx._("userinfo-id"), value=info.id)
+            embed.add_field(name=ctx._("userinfo-online"), value=f"{str(info.status)}")
+            embed.add_field(name=ctx._("userinfo-isbot"), value=str(info.bot))
+            embed.add_field(name=ctx._("userinfo-displayname"), value=info.display_name)
+            embed.add_field(name=ctx._("userinfo-joinserver"), value=(info.joined_at + rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
             if not info.activity == None:
                 try:
                     if info.activity.type == discord.ActivityType.custom:
-                        embed.add_field(name=ut.textto("userinfo-nowplaying",ctx.message.author), value=info.activity)
+                        embed.add_field(name=ctx._("userinfo-nowplaying"), value=info.activity)
                     else:
-                        embed.add_field(name=ut.textto("userinfo-nowplaying",ctx.message.author), value=f'{info.activity.name}')
+                        embed.add_field(name=ctx._("userinfo-nowplaying"), value=f'{info.activity.name}')
                 except:
-                    embed.add_field(name=ut.textto("userinfo-nowplaying",ctx.message.author), value=info.activity)
+                    embed.add_field(name=ctx._("userinfo-nowplaying"), value=info.activity)
             hasroles = ""
             for r in info.roles:
                 hasroles = hasroles + f"{r.mention},"
-            embed.add_field(name=ut.textto("userinfo-roles",ctx.message.author), value=hasroles)
-            embed.add_field(name=ut.textto("userinfo-guildper",ctx.author),value=f"`{'`,`'.join([ut.textto(f'p-{i[0]}',ctx.author) for i in list(info.guild_permissions) if i[1]])}`")
+            embed.add_field(name=ctx._("userinfo-roles"), value=hasroles)
+            embed.add_field(name=ctx._("userinfo-guildper"),value=f"`{'`,`'.join([ut.textto(f'p-{i[0]}',ctx.author) for i in list(info.guild_permissions) if i[1]])}`")
             if not info.avatar_url == None:
                 embed.set_thumbnail(url=info.avatar_url_as(static_format='png'))
-                embed.add_field(name=ut.textto("userinfo-iconurl",ctx.message.author),value=info.avatar_url_as(static_format='png'))
+                embed.add_field(name=ctx._("userinfo-iconurl"),value=info.avatar_url_as(static_format='png'))
             else:
                 embed.set_image(url=info.default_avatar_url_as(static_format='png'))
             lmsc=ut.get_vmusic(self.bot,info)
@@ -120,14 +120,14 @@ class info(commands.Cog):
     @commands.command()
     async def cinvite(self,ctx,ivt:str):
         i = await self.bot.fetch_invite(ivt)
-        e=discord.Embed(title=ut.textto("cinvite-title",ctx.author),description=ut.textto("cinvite-from",ctx.author).format(str(i.inviter)),color=self.bot.ec)
+        e=discord.Embed(title=ctx._("cinvite-title"),description=ctx._("cinvite-from").format(str(i.inviter)),color=self.bot.ec)
         e.set_author(name=f'{i.guild.name}({i.guild.id})',icon_url=i.guild.icon_url_as(format="png"))
-        e.add_field(name=ut.textto("cinvite-memcount",ctx.author),value=f'{i.approximate_member_count}\n({ut.textto("cinvite-onmemcount",ctx.author)}{i.approximate_presence_count})')
-        e.add_field(name=ut.textto("cinvite-ch",ctx.author),value=f"{i.channel.name}({i.channel.type})")
-        e.add_field(name=ut.textto("cinvite-tmp",ctx.author),value=str(i.temporary))
-        e.add_field(name=ut.textto("cinvite-deleted",ctx.author),value=str(i.revoked))
-        e.add_field(name=ut.textto("cinvite-link",ctx.author),value=i.url,inline=False)
-        e.set_footer(text=ut.textto("cinvite-createdat",ctx.author))
+        e.add_field(name=ctx._("cinvite-memcount"),value=f'{i.approximate_member_count}\n({ctx._("cinvite-onmemcount")}{i.approximate_presence_count})')
+        e.add_field(name=ctx._("cinvite-ch"),value=f"{i.channel.name}({i.channel.type})")
+        e.add_field(name=ctx._("cinvite-tmp"),value=str(i.temporary))
+        e.add_field(name=ctx._("cinvite-deleted"),value=str(i.revoked))
+        e.add_field(name=ctx._("cinvite-link"),value=i.url,inline=False)
+        e.set_footer(text=ctx._("cinvite-createdat"))
         e.timestamp = i.created_at or discord.Embed.Empty
         await ctx.send(embed=e)
 
@@ -135,15 +135,15 @@ class info(commands.Cog):
     async def emojiinfo(self,ctx,*,emj:commands.EmojiConverter=None):
 
         if emj==None:
-            await ctx.send(ut.textto("einfo-needarg",ctx.author))
+            await ctx.send(ctx._("einfo-needarg"))
         else:
             embed = discord.Embed(title=emj.name, description=f"id:{emj.id}",color=self.bot.ec)
-            embed.add_field(name=ut.textto("einfo-animated",ctx.author), value=emj.animated)
-            embed.add_field(name=ut.textto("einfo-manageout",ctx.author), value=emj.managed)
+            embed.add_field(name=ctx._("einfo-animated"), value=emj.animated)
+            embed.add_field(name=ctx._("einfo-manageout"), value=emj.managed)
             if emj.user:
-                embed.add_field(name=ut.textto("einfo-adduser",ctx.author), value=str(emj.user))
+                embed.add_field(name=ctx._("einfo-adduser"), value=str(emj.user))
             embed.add_field(name="url", value=emj.url)
-            embed.set_footer(text=ut.textto("einfo-addday",ctx.author))
+            embed.set_footer(text=ctx._("einfo-addday"))
             embed.timestamp = emj.created_at
             await ctx.send(embed=embed)
 
@@ -155,16 +155,16 @@ class info(commands.Cog):
         else:
             sevinfo = ctx.message.guild
         if sevinfo.id in [i[0] for i in self.bot.partnerg]:
-            ptn=f'{ut.textto("partner_guild",ctx.author)}:'
+            ptn=f'{ctx._("partner_guild")}:'
         else:
             ptn=""
         try:
-            embed = discord.Embed(title=ut.textto("serverinfo-name",ctx.message.author), description=sevinfo.name, color=self.bot.ec)
+            embed = discord.Embed(title=ctx._("serverinfo-name"), description=sevinfo.name, color=self.bot.ec)
             if not sevinfo.icon_url == None:
                 embed.set_thumbnail(url=sevinfo.icon_url_as(static_format='png'))
-            embed.add_field(name=ut.textto("serverinfo-role",ctx.message.author), value=len(sevinfo.roles))
-            embed.add_field(name=ut.textto("serverinfo-emoji",ctx.message.author), value=len(sevinfo.emojis))
-            embed.add_field(name=ut.textto("serverinfo-country",ctx.message.author), value=str(sevinfo.region))
+            embed.add_field(name=ctx._("serverinfo-role"), value=len(sevinfo.roles))
+            embed.add_field(name=ctx._("serverinfo-emoji"), value=len(sevinfo.emojis))
+            embed.add_field(name=ctx._("serverinfo-country"), value=str(sevinfo.region))
             bm = 0
             ubm = 0
             for m in sevinfo.members:
@@ -172,53 +172,53 @@ class info(commands.Cog):
                     bm = bm + 1
                 else:
                     ubm = ubm + 1
-            embed.add_field(name=ut.textto("serverinfo-member",ctx.message.author), value=f"{len(sevinfo.members)}(bot:{bm}/user:{ubm})")
-            embed.add_field(name=ut.textto("serverinfo-channel",ctx.message.author), value=f'{ut.textto("serverinfo-text",ctx.message.author)}:{len(sevinfo.text_channels)}\n{ut.textto("serverinfo-voice",ctx.message.author)}:{len(sevinfo.voice_channels)}')
-            embed.add_field(name=ut.textto("serverinfo-id",ctx.message.author), value=sevinfo.id)
-            embed.add_field(name=ut.textto("serverinfo-owner",ctx.message.author), value=sevinfo.owner.name)
-            embed.add_field(name=ut.textto("serverinfo-create",ctx.message.author), value=(sevinfo.created_at + rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
+            embed.add_field(name=ctx._("serverinfo-member"), value=f"{len(sevinfo.members)}(bot:{bm}/user:{ubm})")
+            embed.add_field(name=ctx._("serverinfo-channel"), value=f'{ctx._("serverinfo-text")}:{len(sevinfo.text_channels)}\n{ctx._("serverinfo-voice")}:{len(sevinfo.voice_channels)}')
+            embed.add_field(name=ctx._("serverinfo-id"), value=sevinfo.id)
+            embed.add_field(name=ctx._("serverinfo-owner"), value=sevinfo.owner.name)
+            embed.add_field(name=ctx._("serverinfo-create"), value=(sevinfo.created_at + rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
             rlist = ",".join([i.name for i in sevinfo.roles])
             if len(rlist) <= 1000:
-                embed.add_field(name=ut.textto("serverinfo-roles",ctx.message.author),value=rlist)
+                embed.add_field(name=ctx._("serverinfo-roles"),value=rlist)
             try:
-                embed.add_field(name=ut.textto("serverinfo-nitroboost",ctx.message.author),value=ut.textto("serverinfo-nitroboost-val",ctx.message.author).format(sevinfo.premium_tier))
-                embed.add_field(name=ut.textto("serverinfo-nitroboost-can-title",ctx.message.author),value=ut.textto(f"serverinfo-nitroboost-can-{sevinfo.premium_tier}",ctx.message.author).format(sevinfo.premium_tier,sevinfo.premium_subscription_count))
+                embed.add_field(name=ctx._("serverinfo-nitroboost"),value=ctx._("serverinfo-nitroboost-val").format(sevinfo.premium_tier))
+                embed.add_field(name=ctx._("serverinfo-nitroboost-can-title"),value=ut.textto(f"serverinfo-nitroboost-can-{sevinfo.premium_tier}",ctx.message.author).format(sevinfo.premium_tier,sevinfo.premium_subscription_count))
             except:
                 pass
 
             if sevinfo.system_channel:
-                embed.add_field(name=ut.textto("serverinfo-sysch",ctx.message.author),value=sevinfo.system_channel)
+                embed.add_field(name=ctx._("serverinfo-sysch"),value=sevinfo.system_channel)
                 try:
-                    embed.add_field(name=ut.textto("serverinfo-sysch-welcome",ctx.message.author),value=sevinfo.system_channel_flags.join_notifications)
-                    embed.add_field(name=ut.textto("serverinfo-sysch-boost",ctx.message.author),value=sevinfo.system_channel_flags.premium_subscriptions)
+                    embed.add_field(name=ctx._("serverinfo-sysch-welcome"),value=sevinfo.system_channel_flags.join_notifications)
+                    embed.add_field(name=ctx._("serverinfo-sysch-boost"),value=sevinfo.system_channel_flags.premium_subscriptions)
                 except:
                     pass
             if sevinfo.afk_channel:
-                embed.add_field(name=ut.textto("serverinfo-afkch",ctx.message.author),value=sevinfo.afk_channel.name)
-                embed.add_field(name=ut.textto("serverinfo-afktimeout",ctx.message.author),value=str(sevinfo.afk_timeout/60))
+                embed.add_field(name=ctx._("serverinfo-afkch"),value=sevinfo.afk_channel.name)
+                embed.add_field(name=ctx._("serverinfo-afktimeout"),value=str(sevinfo.afk_timeout/60))
             await ctx.send(embed=embed)
         except Exception as e:
             await ctx.send(e)
-            #await ctx.send(ut.textto("serverinfo-except",ctx.message.author))
+            #await ctx.send(ctx._("serverinfo-except"))
 
     @commands.command()
     async def cprofile(self,ctx,usid=None):
         uid = usid or ctx.author.id
         self.bot.cursor.execute("select * from users where id=?",(uid,))
         pf = self.bot.cursor.fetchone()
-        e = discord.Embed(title=ut.textto("cpro-title",ctx.author),description=f"id:{uid}")
+        e = discord.Embed(title=ctx._("cpro-title"),description=f"id:{uid}")
         e.add_field(name="prefix",value=pf["prefix"])
-        e.add_field(name=ut.textto("cpro-gpoint",ctx.author),value=pf["gpoint"])
-        e.add_field(name=ut.textto("cpro-levelcard",ctx.author),value=pf["levcard"])
-        e.add_field(name=ut.textto("cpro-renotif",ctx.author),value=pf["onnotif"])
-        e.add_field(name=ut.textto("cpro-lang",ctx.author),value=pf["lang"])
+        e.add_field(name=ctx._("cpro-gpoint"),value=pf["gpoint"])
+        e.add_field(name=ctx._("cpro-levelcard"),value=pf["levcard"])
+        e.add_field(name=ctx._("cpro-renotif"),value=pf["onnotif"])
+        e.add_field(name=ctx._("cpro-lang"),value=pf["lang"])
         e.add_field(name="認証済みかどうか", value=pf["sinapartner"])
         await ctx.send(embed=e)
 
     @commands.command()
     async def checkmember(self,ctx,member:commands.MemberConverter):
         if not ctx.user_lang()=="ja":
-            await ctx.send(ut.textto("cannot-run",ctx.author))
+            await ctx.send(ctx._("cannot-run"))
             return
         bunotif = 0
         for g in self.bot.guilds:
@@ -230,9 +230,9 @@ class info(commands.Cog):
             if member.id in banulist:
                 bunotif = bunotif + 1
         if bunotif == 0:
-            await ctx.send(embed=discord.Embed(title=ut.textto("ucheck-title",ctx.author).format(member),description=ut.textto("ucheck-not_ban",ctx.author)))
+            await ctx.send(embed=discord.Embed(title=ctx._("ucheck-title").format(member),description=ctx._("ucheck-not_ban")))
         else:
-            await ctx.send(embed=discord.Embed(title=ut.textto("ucheck-title",ctx.author).format(member),description=ut.textto("ucheck-not_ban",ctx.author).format(bunotif)))
+            await ctx.send(embed=discord.Embed(title=ctx._("ucheck-title").format(member),description=ctx._("ucheck-not_ban").format(bunotif)))
 
     @commands.command(aliases=["次のボイスチャンネルのURLを教えて"])
     async def vcurl(self,ctx,vch:commands.VoiceChannelConverter=None):
@@ -253,44 +253,44 @@ class info(commands.Cog):
 
             embed = discord.Embed(title=ch.name, description=f"id:{ch.id}", color=ctx.author.colour)
 
-            embed.add_field(name=ut.textto("ci-type",ctx.message.author),value=ut.textto("ci-text",ctx.message.author))
+            embed.add_field(name=ctx._("ci-type"),value=ctx._("ci-text"))
 
-            embed.add_field(name=ut.textto("ci-topic",ctx.message.author),value=ch.topic or ut.textto("topic-is-none",ctx.author))
+            embed.add_field(name=ctx._("ci-topic"),value=ch.topic or ctx._("topic-is-none"))
 
-            embed.add_field(name=ut.textto("ci-slow",ctx.message.author),value=str(ch.slowmode_delay).replace("0",ut.textto("ci-None",ctx.message.author)))
+            embed.add_field(name=ctx._("ci-slow"),value=str(ch.slowmode_delay).replace("0",ctx._("ci-None")))
 
-            embed.add_field(name=ut.textto("ci-nsfw",ctx.message.author),value=ch.is_nsfw())
+            embed.add_field(name=ctx._("ci-nsfw"),value=ch.is_nsfw())
 
-            embed.add_field(name=ut.textto("ci-cate",ctx.message.author),value=ch.category)
+            embed.add_field(name=ctx._("ci-cate"),value=ch.category)
 
-            embed.add_field(name=ut.textto("ci-created",ctx.message.author),value=(ch.created_at + rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
+            embed.add_field(name=ctx._("ci-created"),value=(ch.created_at + rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
 
-            embed.add_field(name=ut.textto("ci-invitec",ctx.message.author),value=str(len(await ch.invites())).replace("0",ut.textto("ci-None",ctx.message.author)))
+            embed.add_field(name=ctx._("ci-invitec"),value=str(len(await ch.invites())).replace("0",ctx._("ci-None")))
 
-            embed.add_field(name=ut.textto("ci-pinc",ctx.message.author),value=str(len(await ch.pins())).replace("0",ut.textto("ci-None",ctx.message.author)))
+            embed.add_field(name=ctx._("ci-pinc"),value=str(len(await ch.pins())).replace("0",ctx._("ci-None")))
 
-            embed.add_field(name=ut.textto("ci-whc",ctx.message.author),value=str(len(await ch.webhooks())).replace("0",ut.textto("ci-None",ctx.message.author)))
+            embed.add_field(name=ctx._("ci-whc"),value=str(len(await ch.webhooks())).replace("0",ctx._("ci-None")))
 
-            embed.add_field(name=ut.textto("ci-url",ctx.message.author),value=f"[{ut.textto('ci-click',ctx.message.author)}](https://discordapp.com/channels/{ctx.guild.id}/{ch.id})")
+            embed.add_field(name=ctx._("ci-url"),value=f"[{ctx._('ci-click')}](https://discordapp.com/channels/{ctx.guild.id}/{ch.id})")
 
             await ctx.send(embed=embed)
 
         elif isinstance(ch,discord.VoiceChannel):
             embed = discord.Embed(title=ch.name, description=f"id:{ch.id}", color=ctx.author.colour)
 
-            embed.add_field(name=ut.textto("ci-type",ctx.message.author),value=ut.textto("ci-voice",ctx.message.author))
+            embed.add_field(name=ctx._("ci-type"),value=ctx._("ci-voice"))
 
-            embed.add_field(name=ut.textto("ci-bit",ctx.message.author),value=ch.bitrate)
+            embed.add_field(name=ctx._("ci-bit"),value=ch.bitrate)
 
-            embed.add_field(name=ut.textto("ci-limituser",ctx.message.author),value=str(ch.user_limit).replace("0",ut.textto("ci-None",ctx.message.author)))
+            embed.add_field(name=ctx._("ci-limituser"),value=str(ch.user_limit).replace("0",ctx._("ci-None")))
 
-            embed.add_field(name=ut.textto("ci-cate",ctx.message.author),value=ch.category)
+            embed.add_field(name=ctx._("ci-cate"),value=ch.category)
 
-            embed.add_field(name=ut.textto("ci-created",ctx.message.author),value=(ch.created_at + rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
+            embed.add_field(name=ctx._("ci-created"),value=(ch.created_at + rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
 
-            embed.add_field(name=ut.textto("ci-invitec",ctx.message.author),value=str(len(await ch.invites())).replace("0",ut.textto("ci-None",ctx.message.author)))
+            embed.add_field(name=ctx._("ci-invitec"),value=str(len(await ch.invites())).replace("0",ctx._("ci-None")))
 
-            embed.add_field(name=ut.textto("ci-url",ctx.message.author),value=f"[{ut.textto('ci-click',ctx.message.author)}](https://discordapp.com/channels/{ctx.guild.id}/{ch.id})")
+            embed.add_field(name=ctx._("ci-url"),value=f"[{ctx._('ci-click')}](https://discordapp.com/channels/{ctx.guild.id}/{ch.id})")
 
             await ctx.send(embed=embed)
 
@@ -298,24 +298,24 @@ class info(commands.Cog):
 
             embed = discord.Embed(title=ch.name, description=f"id:{ch.id}", color=ctx.author.colour)
 
-            embed.add_field(name=ut.textto("ci-type",ctx.message.author),value=ut.textto("ci-cate",ctx.message.author))
+            embed.add_field(name=ctx._("ci-type"),value=ctx._("ci-cate"))
 
-            embed.add_field(name=ut.textto("ci-nsfw",ctx.message.author),value=ch.is_nsfw())
+            embed.add_field(name=ctx._("ci-nsfw"),value=ch.is_nsfw())
 
             ic = ""
 
             for c in ch.channels:
                 ic = ic + c.mention + ","
 
-            embed.add_field(name=ut.textto("ci-inch",ctx.message.author),value=ic)
+            embed.add_field(name=ctx._("ci-inch"),value=ic)
 
-            embed.add_field(name=ut.textto("ci-created",ctx.message.author),value=(ch.created_at + rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
+            embed.add_field(name=ctx._("ci-created"),value=(ch.created_at + rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
 
-            embed.add_field(name=ut.textto("ci-url",ctx.message.author),value=f"[{ut.textto('ci-click',ctx.message.author)}](https://discordapp.com/channels/{ctx.guild.id}/{ch.id})")
+            embed.add_field(name=ctx._("ci-url"),value=f"[{ctx._('ci-click')}](https://discordapp.com/channels/{ctx.guild.id}/{ch.id})")
 
             await ctx.send(embed=embed)
         else:
-            await ctx.send(ut.textto("ci-notfound",ctx.message.author))
+            await ctx.send(ctx._("ci-notfound"))
 
     @commands.command(aliases=["ボイス情報","音声情報を教えて"])
     async def voiceinfo(self,ctx,mus:commands.MemberConverter=None):
@@ -359,7 +359,7 @@ class info(commands.Cog):
                 vste=vste+str(self.bot.get_emoji(653161518250196992))
             embed.add_field(name="ステータス(status)",value=vste)
         except AttributeError:
-            await ctx.send(ut.textto("vi-nfch",ctx.message.author))
+            await ctx.send(ctx._("vi-nfch"))
         finally:
             lmusic=ut.get_vmusic(self.bot,info)
             if lmusic:
@@ -371,28 +371,28 @@ class info(commands.Cog):
     async def roleinfo(self,ctx,*,role:commands.RoleConverter=None):
 
         if role==None:
-            await ctx.send(ut.textto("roleinfo-howto",ctx.message.author))
+            await ctx.send(ctx._("roleinfo-howto"))
         elif role.guild == ctx.guild:
             embed = discord.Embed(title=role.name, description=f"id:{role.id}", color=role.colour)
-            embed.add_field(name=ut.textto("roleinfo-hoist",ctx.message.author), value=role.hoist)
-            embed.add_field(name=ut.textto("roleinfo-mention",ctx.message.author), value=role.mentionable)
+            embed.add_field(name=ctx._("roleinfo-hoist"), value=role.hoist)
+            embed.add_field(name=ctx._("roleinfo-mention"), value=role.mentionable)
             hasmember=""
             for m in role.members:
                 hasmember = hasmember + f"{m.mention},"
             if not hasmember == "":
-                embed.add_field(name=ut.textto("roleinfo-hasmember",ctx.message.author), value=hasmember)
+                embed.add_field(name=ctx._("roleinfo-hasmember"), value=hasmember)
             else:
-                embed.add_field(name=ut.textto("roleinfo-hasmember",ctx.message.author), value="(None)")
+                embed.add_field(name=ctx._("roleinfo-hasmember"), value="(None)")
             hasper = ""
             for pn,bl in iter(role.permissions):
                 if bl:
                     hasper = hasper + f"`{ut.textto(f'p-{pn}',ctx.author)}`,"
-            embed.add_field(name=ut.textto("roleinfo-hasper",ctx.message.author), value=hasper)
-            embed.add_field(name=ut.textto("roleinfo-created",ctx.message.author), value=(role.created_at + rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
+            embed.add_field(name=ctx._("roleinfo-hasper"), value=hasper)
+            embed.add_field(name=ctx._("roleinfo-created"), value=(role.created_at + rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
 
             await ctx.send(embed=embed)
         else:
-            await ctx.send(ut.textto("roleinfo-other",ctx.message.author))
+            await ctx.send(ctx._("roleinfo-other"))
 
     @commands.command(name="activity",aliases=["アクティビティ","なにしてるか見せて"])
     @commands.cooldown(1, 5, type=commands.BucketType.user)
@@ -408,59 +408,59 @@ class info(commands.Cog):
             info = mus
         lmsc=ut.get_vmusic(self.bot,info)
         if lmsc:
-            embed = discord.Embed(title=ut.textto("playinginfo-doing",ctx.message.author), description=f"{lmsc['guild'].name}で、思惟奈ちゃんを使って[{lmsc['name']}]({lmsc['url']} )を聞いています", color=info.color)
+            embed = discord.Embed(title=ctx._("playinginfo-doing"), description=f"{lmsc['guild'].name}で、思惟奈ちゃんを使って[{lmsc['name']}]({lmsc['url']} )を聞いています", color=info.color)
             await ctx.send(embed=embed)
         if info.activity is None:
             if str(info.status) == "offline":
-                embed = discord.Embed(title=ut.textto("playinginfo-doing",ctx.message.author), description=ut.textto("playinginfo-offline",ctx.message.author), color=info.color)
+                embed = discord.Embed(title=ctx._("playinginfo-doing"), description=ctx._("playinginfo-offline"), color=info.color)
             else:
                 sete =False
                 try:
                     if info.voice.self_stream:
-                        embed = discord.Embed(title=ut.textto("playinginfo-doing",ctx.message.author), description=str(self.bot.get_emoji(653161518250196992))+ut.textto("playinginfo-GoLive",ctx.message.author), color=info.color)
+                        embed = discord.Embed(title=ctx._("playinginfo-doing"), description=str(self.bot.get_emoji(653161518250196992))+ctx._("playinginfo-GoLive"), color=info.color)
                         sete=True
                     elif info.voice.self_video:
-                        embed = discord.Embed(title=ut.textto("playinginfo-doing",ctx.message.author), description=str(self.bot.get_emoji(653161517960658945))+ut.textto("playinginfo-screenshare",ctx.message.author), color=info.color)
+                        embed = discord.Embed(title=ctx._("playinginfo-doing"), description=str(self.bot.get_emoji(653161517960658945))+ctx._("playinginfo-screenshare"), color=info.color)
                         sete=True
                     elif info.voice:
-                        embed = discord.Embed(title=ut.textto("playinginfo-doing",ctx.message.author), description=str(self.bot.get_emoji(653161518082293770))+ut.textto("playinginfo-invc",ctx.message.author), color=info.color)
+                        embed = discord.Embed(title=ctx._("playinginfo-doing"), description=str(self.bot.get_emoji(653161518082293770))+ctx._("playinginfo-invc"), color=info.color)
                         sete=True
                 except:
                     pass
                 if not sete:
                     if info.bot:
-                        embed = discord.Embed(title=ut.textto("playinginfo-doing",ctx.message.author), description=ut.textto("playinginfo-bot",ctx.message.author), color=info.color)
+                        embed = discord.Embed(title=ctx._("playinginfo-doing"), description=ctx._("playinginfo-bot"), color=info.color)
                     elif "🌐"==ut.ondevicon(info):
-                        embed = discord.Embed(title=ut.textto("playinginfo-doing",ctx.message.author), description=ut.textto("playinginfo-onlyWeb",ctx.message.author), color=info.color)
+                        embed = discord.Embed(title=ctx._("playinginfo-doing"), description=ctx._("playinginfo-onlyWeb"), color=info.color)
                     elif "📱"==ut.ondevicon(info):
-                        embed = discord.Embed(title=ut.textto("playinginfo-doing",ctx.message.author), description=ut.textto("playinginfo-onlyPhone",ctx.message.author), color=info.color)
+                        embed = discord.Embed(title=ctx._("playinginfo-doing"), description=ctx._("playinginfo-onlyPhone"), color=info.color)
                     else:
-                        embed = discord.Embed(title=ut.textto("playinginfo-doing",ctx.message.author), description=ut.textto("playinginfo-noActivity",ctx.message.author), color=info.color)
+                        embed = discord.Embed(title=ctx._("playinginfo-doing"), description=ctx._("playinginfo-noActivity"), color=info.color)
             activ=info.activity
             embed.set_author(name=info.display_name, icon_url=info.avatar_url_as(static_format='png'))
             await ctx.send(embed=embed)
         else:
             for anactivity in info.activities:
                 if anactivity.type == discord.ActivityType.playing:
-                    activName=ut.textto("playinginfo-playing",ctx.message.author)+anactivity.name
+                    activName=ctx._("playinginfo-playing")+anactivity.name
                 elif anactivity.type == discord.ActivityType.watching:
-                    activName=ut.textto("playinginfo-watching",ctx.message.author)+anactivity.name
+                    activName=ctx._("playinginfo-watching")+anactivity.name
                 elif anactivity.type == discord.ActivityType.listening:
-                    activName=ut.textto("playinginfo-listening",ctx.message.author).format(anactivity.name)
+                    activName=ctx._("playinginfo-listening").format(anactivity.name)
                 elif anactivity.type ==  discord.ActivityType.streaming:
-                    activName=ut.textto("playinginfo-streaming",ctx.message.author)+anactivity.name
+                    activName=ctx._("playinginfo-streaming")+anactivity.name
                 elif anactivity.type ==  discord.ActivityType.custom:
-                    activName=ut.textto("playinginfo-custom_status",ctx.message.author)
+                    activName=ctx._("playinginfo-custom_status")
                 else:
-                    activName=ut.textto("playinginfo-unknown",ctx.message.author)+anactivity.name
-                embed = discord.Embed(title=ut.textto("playinginfo-doing",ctx.message.author), description=activName, color=info.color)
+                    activName=ctx._("playinginfo-unknown")+anactivity.name
+                embed = discord.Embed(title=ctx._("playinginfo-doing"), description=activName, color=info.color)
                 activ=anactivity
                 embed.set_author(name=info.display_name, icon_url=info.avatar_url_as(static_format='png'))
                 if anactivity.name == "Spotify":
                     try:
-                        embed.add_field(name=ut.textto("playinginfo-title",ctx.message.author), value=activ.title)
-                        embed.add_field(name=ut.textto("playinginfo-artist",ctx.message.author), value=activ.artist)
-                        embed.add_field(name=ut.textto("playinginfo-album",ctx.message.author), value=activ.album)
+                        embed.add_field(name=ctx._("playinginfo-title"), value=activ.title)
+                        embed.add_field(name=ctx._("playinginfo-artist"), value=activ.artist)
+                        embed.add_field(name=ctx._("playinginfo-album"), value=activ.album)
                         embed.add_field(name="URL", value=f"https://open.spotify.com/track/{activ.track_id}")
                         tmp=str(int((datetime.datetime.utcnow() - activ.start).seconds%60))
                         pnow=f"{int((datetime.datetime.utcnow() - activ.start).seconds/60)}:{tmp if len(tmp)==2 else f'0{tmp}'}"
@@ -469,20 +469,20 @@ class info(commands.Cog):
                         embed.add_field(name="経過時間", value=f"{pnow}/{pml}")
                         embed.set_thumbnail(url=activ.album_cover_url)
                     except AttributeError:
-                        embed.add_field(name=ut.textto("spotify-local",ctx.author), value=ut.textto("spotify-cantlisten-wu",ctx.author))
-                        embed.add_field(name=ut.textto("playinginfo-title",ctx.message.author), value=activ.details)
-                        embed.add_field(name=ut.textto("playinginfo-artist",ctx.message.author), value=activ.state)
+                        embed.add_field(name=ctx._("spotify-local"), value=ctx._("spotify-cantlisten-wu"))
+                        embed.add_field(name=ctx._("playinginfo-title"), value=activ.details)
+                        embed.add_field(name=ctx._("playinginfo-artist"), value=activ.state)
                 elif anactivity.type==discord.ActivityType.streaming:
                     try:
-                        embed.add_field(name=ut.textto("playinginfo-streampage",ctx.message.author), value=activ.url)
+                        embed.add_field(name=ctx._("playinginfo-streampage"), value=activ.url)
                     except:
                         pass
                     try:
-                        embed.add_field(name=ut.textto("playinginfo-do",ctx.message.author), value=activ.datails)
+                        embed.add_field(name=ctx._("playinginfo-do"), value=activ.datails)
                     except:
                         pass
                 elif anactivity.type==discord.ActivityType.custom:
-                    embed.add_field(name=ut.textto("playinginfo-det",ctx.message.author), value=str(anactivity))
+                    embed.add_field(name=ctx._("playinginfo-det"), value=str(anactivity))
                 else:
                     try:
                         vl = ""
@@ -492,7 +492,7 @@ class info(commands.Cog):
                             vl = f"{vl}{activ.state}\n"
                         if vl == "":
                             vl = "なし"
-                        embed.add_field(name=ut.textto("playinginfo-det",ctx.message.author), value=vl)
+                        embed.add_field(name=ctx._("playinginfo-det"), value=vl)
                     except:
                         pass
                 try:
@@ -506,31 +506,31 @@ class info(commands.Cog):
     @commands.command(name="serverinfo")
     async def ginfo(self,ctx):
         if ctx.guild.id in [i[0] for i in self.bot.partnerg]:
-            ptn=f'{ut.textto("partner_guild",ctx.author)}:'
+            ptn=f'{ctx._("partner_guild")}:'
         else:
             ptn=""
         pmax= 12 if "PUBLIC" in ctx.guild.features else 11
         page = 0
-        e =discord.Embed(title=ut.textto("ginfo-ov-title",ctx.author),color=self.bot.ec)
+        e =discord.Embed(title=ctx._("ginfo-ov-title"),color=self.bot.ec)
         e.set_author(name=f"{ptn}{ctx.guild.name}",icon_url=ctx.guild.icon_url_as(static_format='png'))
-        e.add_field(name=ut.textto("ginfo-region",ctx.author),value=ctx.guild.region)
-        e.add_field(name=ut.textto("ginfo-afkch",ctx.author),value=ctx.guild.afk_channel)
+        e.add_field(name=ctx._("ginfo-region"),value=ctx.guild.region)
+        e.add_field(name=ctx._("ginfo-afkch"),value=ctx.guild.afk_channel)
         if ctx.guild.afk_channel:
-            e.add_field(name=ut.textto("ginfo-afktout",ctx.author),value=f"{ctx.guild.afk_timeout/60}min")
+            e.add_field(name=ctx._("ginfo-afktout"),value=f"{ctx.guild.afk_timeout/60}min")
         else:
-            e.add_field(name=ut.textto("ginfo-afktout",ctx.author),value=ut.textto("ginfo-afknone",ctx.author))
-        e.add_field(name=ut.textto("ginfo-sysch",ctx.author),value=ctx.guild.system_channel)
-        e.add_field(name=ut.textto("ginfo-memjoinnotif",ctx.author),value=ctx.guild.system_channel_flags.join_notifications)
-        e.add_field(name=ut.textto("ginfo-serverboostnotif",ctx.author),value=ctx.guild.system_channel_flags.premium_subscriptions)
+            e.add_field(name=ctx._("ginfo-afktout"),value=ctx._("ginfo-afknone"))
+        e.add_field(name=ctx._("ginfo-sysch"),value=ctx.guild.system_channel)
+        e.add_field(name=ctx._("ginfo-memjoinnotif"),value=ctx.guild.system_channel_flags.join_notifications)
+        e.add_field(name=ctx._("ginfo-serverboostnotif"),value=ctx.guild.system_channel_flags.premium_subscriptions)
         if ctx.guild.default_notifications == discord.NotificationLevel.all_messages:
-            e.add_field(name=ut.textto("ginfo-defnotif",ctx.author),value=ut.textto("ginfo-allmsg",ctx.author))
+            e.add_field(name=ctx._("ginfo-defnotif"),value=ctx._("ginfo-allmsg"))
         else:
-            e.add_field(name=ut.textto("ginfo-defnotif",ctx.author),value=ut.textto("ginfo-omention",ctx.author))
+            e.add_field(name=ctx._("ginfo-defnotif"),value=ctx._("ginfo-omention"))
         if "INVITE_SPLASH" in ctx.guild.features:
-            e.add_field(name=ut.textto("ginfo-invitesp",ctx.author),value=ut.textto("ginfo-invitesp-pos",ctx.author))
+            e.add_field(name=ctx._("ginfo-invitesp"),value=ctx._("ginfo-invitesp-pos"))
             e.set_image(url=ctx.guild.splash_url_as(format="png"))
         if "BANNER" in ctx.guild.features:
-            e.add_field(name=ut.textto("ginfo-banner",ctx.author),value=ut.textto("ginfo-banner-pos",ctx.author))
+            e.add_field(name=ctx._("ginfo-banner"),value=ctx._("ginfo-banner-pos"))
             e.set_thumbnail(url=ctx.guild.banner_url_as(format="png"))
         mp = await ctx.send(embed=e)
         await mp.add_reaction(self.bot.get_emoji(653161518195671041))
@@ -557,47 +557,47 @@ class info(commands.Cog):
             try:
                 if page == 0:
                     #概要
-                    e =discord.Embed(title=ut.textto("ginfo-ov-title",ctx.author),color=self.bot.ec)
+                    e =discord.Embed(title=ctx._("ginfo-ov-title"),color=self.bot.ec)
                     e.set_author(name=f"{ptn}{ctx.guild.name}",icon_url=ctx.guild.icon_url_as(static_format='png'))
-                    e.add_field(name=ut.textto("ginfo-region",ctx.author),value=ctx.guild.region)
-                    e.add_field(name=ut.textto("ginfo-afkch",ctx.author),value=ctx.guild.afk_channel)
+                    e.add_field(name=ctx._("ginfo-region"),value=ctx.guild.region)
+                    e.add_field(name=ctx._("ginfo-afkch"),value=ctx.guild.afk_channel)
                     if ctx.guild.afk_channel:
-                        e.add_field(name=ut.textto("ginfo-afktout",ctx.author),value=f"{ctx.guild.afk_timeout/60}min")
+                        e.add_field(name=ctx._("ginfo-afktout"),value=f"{ctx.guild.afk_timeout/60}min")
                     else:
-                        e.add_field(name=ut.textto("ginfo-afktout",ctx.author),value=ut.textto("ginfo-afknone",ctx.author))
-                    e.add_field(name=ut.textto("ginfo-sysch",ctx.author),value=ctx.guild.system_channel)
-                    e.add_field(name=ut.textto("ginfo-memjoinnotif",ctx.author),value=ctx.guild.system_channel_flags.join_notifications)
-                    e.add_field(name=ut.textto("ginfo-serverboostnotif",ctx.author),value=ctx.guild.system_channel_flags.premium_subscriptions)
+                        e.add_field(name=ctx._("ginfo-afktout"),value=ctx._("ginfo-afknone"))
+                    e.add_field(name=ctx._("ginfo-sysch"),value=ctx.guild.system_channel)
+                    e.add_field(name=ctx._("ginfo-memjoinnotif"),value=ctx.guild.system_channel_flags.join_notifications)
+                    e.add_field(name=ctx._("ginfo-serverboostnotif"),value=ctx.guild.system_channel_flags.premium_subscriptions)
                     if ctx.guild.default_notifications == discord.NotificationLevel.all_messages:
-                        e.add_field(name=ut.textto("ginfo-defnotif",ctx.author),value=ut.textto("ginfo-allmsg",ctx.author))
+                        e.add_field(name=ctx._("ginfo-defnotif"),value=ctx._("ginfo-allmsg"))
                     else:
-                        e.add_field(name=ut.textto("ginfo-defnotif",ctx.author),value=ut.textto("ginfo-omention",ctx.author))
+                        e.add_field(name=ctx._("ginfo-defnotif"),value=ctx._("ginfo-omention"))
                     if "INVITE_SPLASH" in ctx.guild.features:
-                        e.add_field(name=ut.textto("ginfo-invitesp",ctx.author),value=ut.textto("ginfo-invitesp-pos",ctx.author))
+                        e.add_field(name=ctx._("ginfo-invitesp"),value=ctx._("ginfo-invitesp-pos"))
                         e.set_image(url=ctx.guild.splash_url_as(format="png"))
                     if "BANNER" in ctx.guild.features:
-                        e.add_field(name=ut.textto("ginfo-banner",ctx.author),value=ut.textto("ginfo-banner-pos",ctx.author))
+                        e.add_field(name=ctx._("ginfo-banner"),value=ctx._("ginfo-banner-pos"))
                         e.set_thumbnail(url=ctx.guild.banner_url_as(format="png"))
                     await mp.edit(embed=e)
                 elif page == 1:
                     #管理
-                    e = discord.Embed(title=ut.textto("ginfo-manage",ctx.author),color=self.bot.ec)
+                    e = discord.Embed(title=ctx._("ginfo-manage"),color=self.bot.ec)
                     if ctx.guild.verification_level == discord.VerificationLevel.none:
-                        e.add_field(name=ut.textto("ginfo-vlevel",ctx.author),value=ut.textto("ginfo-vlnone",ctx.author))
+                        e.add_field(name=ctx._("ginfo-vlevel"),value=ctx._("ginfo-vlnone"))
                     elif ctx.guild.verification_level == discord.VerificationLevel.low:
-                        e.add_field(name=ut.textto("ginfo-vlevel",ctx.author),value=ut.textto("ginfo-vl1",ctx.author))
+                        e.add_field(name=ctx._("ginfo-vlevel"),value=ctx._("ginfo-vl1"))
                     elif ctx.guild.verification_level == discord.VerificationLevel.medium:
-                        e.add_field(name=ut.textto("ginfo-vlevel",ctx.author),value=ut.textto("ginfo-vl2",ctx.author))
+                        e.add_field(name=ctx._("ginfo-vlevel"),value=ctx._("ginfo-vl2"))
                     elif ctx.guild.verification_level == discord.VerificationLevel.high:
-                        e.add_field(name=ut.textto("ginfo-vlevel",ctx.author),value=ut.textto("ginfo-vl3",ctx.author))
+                        e.add_field(name=ctx._("ginfo-vlevel"),value=ctx._("ginfo-vl3"))
                     elif ctx.guild.verification_level == discord.VerificationLevel.extreme:
-                        e.add_field(name=ut.textto("ginfo-vlevel",ctx.author),value=ut.textto("ginfo-vl4",ctx.author))
+                        e.add_field(name=ctx._("ginfo-vlevel"),value=ctx._("ginfo-vl4"))
                     if ctx.guild.explicit_content_filter == discord.ContentFilter.disabled:
-                        e.add_field(name=ut.textto("ginfo-filter",ctx.author),value=ut.textto("ginfo-fnone",ctx.author))
+                        e.add_field(name=ctx._("ginfo-filter"),value=ctx._("ginfo-fnone"))
                     elif ctx.guild.explicit_content_filter == discord.ContentFilter.no_role:
-                        e.add_field(name=ut.textto("ginfo-filter",ctx.author),value=ut.textto("ginfo-f1",ctx.author))
+                        e.add_field(name=ctx._("ginfo-filter"),value=ctx._("ginfo-f1"))
                     elif ctx.guild.explicit_content_filter == discord.ContentFilter.all_members:
-                        e.add_field(name=ut.textto("ginfo-filter",ctx.author),value=ut.textto("ginfo-f2",ctx.author))
+                        e.add_field(name=ctx._("ginfo-filter"),value=ctx._("ginfo-f2"))
                     await mp.edit(embed=e)
                 elif page == 2:
                     #roles
@@ -610,9 +610,9 @@ class info(commands.Cog):
                                 break
                             else:
                                 rls=f"{rls}\n{r.name}"
-                        await mp.edit(embed=discord.Embed(title=ut.textto("ginfo-roles",ctx.author),description=rls,color=self.bot.ec))
+                        await mp.edit(embed=discord.Embed(title=ctx._("ginfo-roles"),description=rls,color=self.bot.ec))
                     else:
-                        await mp.edit(embed=discord.Embed(title=ut.textto("ginfo-roles",ctx.author),description=ut.textto("ginfo-cantview",ctx.author),color=self.bot.ec))
+                        await mp.edit(embed=discord.Embed(title=ctx._("ginfo-roles"),description=ctx._("ginfo-cantview"),color=self.bot.ec))
                 elif page == 3:
                     #emoji
                     ejs=""
@@ -622,31 +622,31 @@ class info(commands.Cog):
                             break
                         else:
                             ejs=ejs + "," + str(i)
-                    await mp.edit(embed=discord.Embed(title=ut.textto("ginfo-emoji",ctx.author),description=ejs,color=self.bot.ec))
+                    await mp.edit(embed=discord.Embed(title=ctx._("ginfo-emoji"),description=ejs,color=self.bot.ec))
                 elif page == 4:
                     #webhooks
                     if ctx.author.guild_permissions.manage_webhooks or ctx.author.id == 404243934210949120:
                         await mp.edit(embed=discord.Embed(title="webhooks",description="\n".join([f"{i.name},[link]({i.url}),created by {i.user}" for i in await ctx.guild.webhooks()]),color=self.bot.ec))
                     else:
-                        await mp.edit(embed=discord.Embed(title="webhooks",description=ut.textto("ginfo-cantview",ctx.author),color=self.bot.ec))
+                        await mp.edit(embed=discord.Embed(title="webhooks",description=ctx._("ginfo-cantview"),color=self.bot.ec))
                 elif page == 5:
                     #ウィジェット
                     if ctx.author.guild_permissions.manage_guild or ctx.author.id == 404243934210949120:
                         try:
                             wdt = await ctx.guild.widget()
-                            await mp.edit(embed=discord.Embed(title=ut.textto("ginfo-widget",ctx.author),description=f"URL: {wdt.json_url}",color=self.bot.ec))
+                            await mp.edit(embed=discord.Embed(title=ctx._("ginfo-widget"),description=f"URL: {wdt.json_url}",color=self.bot.ec))
                         except:
-                            await mp.edit(embed=discord.Embed(title=ut.textto("ginfo-widget",ctx.author),description=ut.textto("ginfo-ctuw",ctx.author),color=self.bot.ec))
+                            await mp.edit(embed=discord.Embed(title=ctx._("ginfo-widget"),description=ctx._("ginfo-ctuw"),color=self.bot.ec))
                     else:
-                        await mp.edit(embed=discord.Embed(title=ut.textto("ginfo-widget",ctx.author),description=ut.textto("ginfo-cantview",ctx.author),color=self.bot.ec))
+                        await mp.edit(embed=discord.Embed(title=ctx._("ginfo-widget"),description=ctx._("ginfo-cantview"),color=self.bot.ec))
                 elif page == 6:
                     #Nitro server boost
                     e = discord.Embed(title=str(self.bot.get_emoji(653161518971617281))+"Nitro Server Boost",description=f"Level:{ctx.guild.premium_tier}\n({ctx.guild.premium_subscription_count})",color=self.bot.ec)
-                    e.add_field(name=ut.textto("ginfo-bst-add",ctx.author),value=ut.textto(f"ginfo-blev{ctx.guild.premium_tier}",ctx.author))
+                    e.add_field(name=ctx._("ginfo-bst-add"),value=ut.textto(f"ginfo-blev{ctx.guild.premium_tier}",ctx.author))
                     await mp.edit(embed=e)
                 elif page == 7:
                     #member
-                    vml=ut.textto("ginfo-strlenover",ctx.author)
+                    vml=ctx._("ginfo-strlenover")
                     if len("\n".join([f"{str(i)}" for i in ctx.guild.members])) <= 1024:
                         vml = "\n".join([f"{str(i)}" for i in ctx.guild.members]).replace(str(ctx.guild.owner),f"👑{str(ctx.guild.owner)}")
                     await mp.edit(embed=discord.Embed(title="member",description=f"member count:{len(ctx.guild.members)}\n```"+vml+"```"),color=self.bot.ec)
@@ -658,30 +658,30 @@ class info(commands.Cog):
                         except:
                             vi = "NF_VInvite"
                         #invites
-                        vil = ut.textto("ginfo-strlenover",ctx.author)
-                        if len("\n".join([f'{i.code},{ut.textto("ginfo-use-invite",ctx.author)}:{i.uses}/{i.max_uses},{ut.textto("ginfo-created-invite",ctx.author)}:{i.inviter}' for i in await ctx.guild.invites()])) <= 1023:
-                            vil = "\n".join([f'{i.code},{ut.textto("ginfo-use-invite",ctx.author)}:{i.uses}/{i.max_uses},{ut.textto("ginfo-created-invite",ctx.author)}:{i.inviter}' for i in await ctx.guild.invites()]).replace(vi,f"{self.bot.get_emoji(653161518103265291)}{vi}")
-                        await mp.edit(embed=discord.Embed(title=ut.textto("ginfo-invites",ctx.author),description=vil,color=self.bot.ec))
+                        vil = ctx._("ginfo-strlenover")
+                        if len("\n".join([f'{i.code},{ctx._("ginfo-use-invite")}:{i.uses}/{i.max_uses},{ctx._("ginfo-created-invite")}:{i.inviter}' for i in await ctx.guild.invites()])) <= 1023:
+                            vil = "\n".join([f'{i.code},{ctx._("ginfo-use-invite")}:{i.uses}/{i.max_uses},{ctx._("ginfo-created-invite")}:{i.inviter}' for i in await ctx.guild.invites()]).replace(vi,f"{self.bot.get_emoji(653161518103265291)}{vi}")
+                        await mp.edit(embed=discord.Embed(title=ctx._("ginfo-invites"),description=vil,color=self.bot.ec))
                     else:
-                        await mp.edit(embed=discord.Embed(title=ut.textto("ginfo-invites",ctx.author),description=ut.textto("ginfo-cantview",ctx.author),color=self.bot.ec))
+                        await mp.edit(embed=discord.Embed(title=ctx._("ginfo-invites"),description=ctx._("ginfo-cantview"),color=self.bot.ec))
                 elif page == 9:
                     if ctx.author.guild_permissions.ban_members or ctx.author.id == 404243934210949120:
                         #ban_user
-                        vbl=ut.textto("ginfo-strlenover",ctx.author)
+                        vbl=ctx._("ginfo-strlenover")
                         bl = []
                         for i in await ctx.guild.bans():
                             bl.append(f"{i.user},reason:{i.reason}")
                         if len("\n".join(bl)) <= 1024:
                             vbl = "\n".join(bl)
-                        await mp.edit(embed=discord.Embed(title=ut.textto("ginfo-banneduser",ctx.author),description=vbl),color=self.bot.ec)
+                        await mp.edit(embed=discord.Embed(title=ctx._("ginfo-banneduser"),description=vbl),color=self.bot.ec)
                     else:
-                        await mp.edit(embed=discord.Embed(title=ut.textto("ginfo-banneduser",ctx.author),description=ut.textto("ginfo-cantview",ctx.author),color=self.bot.ec))
+                        await mp.edit(embed=discord.Embed(title=ctx._("ginfo-banneduser"),description=ctx._("ginfo-cantview"),color=self.bot.ec))
                 elif page == 10:
                     #サーバーのチャンネル
-                    e =discord.Embed(title=ut.textto("ginfo-chlist",ctx.author),color=self.bot.ec)
+                    e =discord.Embed(title=ctx._("ginfo-chlist"),color=self.bot.ec)
                     for mct,mch in ctx.guild.by_category():
                         chs="\n".join([i.name for i in mch])
-                        e.add_field(name=str(mct).replace("None",ut.textto("ginfo-nocate",ctx.author)),value=f"```{chs}```",inline=True)
+                        e.add_field(name=str(mct).replace("None",ctx._("ginfo-nocate")),value=f"```{chs}```",inline=True)
                     await mp.edit(embed=e)
                 elif page == 11:
                     self.bot.cursor.execute("select * from guilds where id=?",(ctx.guild.id,))
@@ -689,7 +689,7 @@ class info(commands.Cog):
                     e =discord.Embed(title="other",color=self.bot.ec)
                     e.add_field(name="owner",value=ctx.guild.owner.mention)
                     e.add_field(name="features",value=f"```{','.join(ctx.guild.features)}```")
-                    e.add_field(name=ut.textto("ginfo-sinagprofile",ctx.author),value=ut.textto("ginfo-gprodesc",ctx.author).format(gs["reward"],gs["sendlog"],gs["prefix"],gs["lang"],))
+                    e.add_field(name=ctx._("ginfo-sinagprofile"),value=ctx._("ginfo-gprodesc").format(gs["reward"],gs["sendlog"],gs["prefix"],gs["lang"],))
                     await mp.edit(embed=e)
                 elif page == 12:
                     e=discord.Embed(title="公開サーバー設定",description=ctx.guild.description or "概要なし",color=self.bot.ec)
@@ -697,11 +697,11 @@ class info(commands.Cog):
                     e.add_field(name="ルールチャンネル",value=ctx.guild.rules_channel.mention)
                     await mp.edit(embed=e)
             except:
-                await mp.edit(embed=discord.Embed(title=ut.textto("ginfo-anyerror-title",ctx.author),description=ut.textto("ginfo-anyerror-desc",ctx.author).format(traceback.format_exc(0)),color=self.bot.ec))
+                await mp.edit(embed=discord.Embed(title=ctx._("ginfo-anyerror-title"),description=ctx._("ginfo-anyerror-desc").format(traceback.format_exc(0)),color=self.bot.ec))
 
     @commands.command(name="team_sina-chan")
     async def view_teammember(self,ctx):
-        await ctx.send(embed=ut.getEmbed(ut.textto("team_sina-chan",ctx.author),"\n".join([self.bot.get_user(i).name for i in self.bot.team_sina])))
+        await ctx.send(embed=ut.getEmbed(ctx._("team_sina-chan"),"\n".join([self.bot.get_user(i).name for i in self.bot.team_sina])))
 
     @commands.command()
     async def vusers(self,ctx):

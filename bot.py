@@ -1415,7 +1415,7 @@ async def on_command_error(ctx, error):
     #global DoServercmd
     """if isinstance(error, commands.CommandNotFound):
         if not DoServercmd:
-            embed = discord.Embed(title=ut.textto("cmd-error-t",ctx.message.author), description=ut.textto("cmd-notfound-d",ctx.message.author), color=bot.ec)
+            embed = discord.Embed(title=ctx._("cmd-error-t"), description=ctx._("cmd-notfound-d"), color=bot.ec)
             DoServercmd = False
             await ctx.send(embed=embed)
     el"""

@@ -30,15 +30,15 @@ class levels(commands.Cog):
                     if un is None:
                         un=f"id:`{i[0]}`"
                     else:
-                        un = str(un)+f"({ut.textto('ranklev-outsideg',ctx.author)})"
+                        un = str(un)+f"({ctx._('ranklev-outsideg')})"
                 else:
                     un = un.mention
                 if len(text+f"> {ind+1}.{un}\n　level:{i[1]},exp:{i[2]}\n") <= 2036:
                     text = text + f"> {ind+1}.{un}\n　level:{i[1]},exp:{i[2]}\n"
                 else:
-                    text = text+f"({ut.textto('ranklev-lenover',ctx.author)})"
+                    text = text+f"({ctx._('ranklev-lenover')})"
                     break
-            e = discord.Embed(title=ut.textto("ranklev-title",ctx.author),description=text,color=self.bot.ec)
+            e = discord.Embed(title=ctx._("ranklev-title"),description=text,color=self.bot.ec)
         await ctx.send(embed=e)
 
     @commands.command(aliases=["レベルカード切替","次の番号のカードにレベルカードを切り替えて"])
@@ -47,13 +47,13 @@ class levels(commands.Cog):
         upf = self.bot.cursor.fetchone()
         cn=["kazuta123-a","kazuta123-b","m@ji☆","tomohiro0405","氷河","雪銀　翔","kazuta123-c"]
         if number==None:
-            await ctx.send(ut.textto("slc-your",ctx.message.author).format(upf["levcard"].replace("-a","").replace("-b","").replace("-c","")))
+            await ctx.send(ctx._("slc-your").format(upf["levcard"].replace("-a","").replace("-b","").replace("-c","")))
         else:
             if 1 <= number <= 6:
-                await ctx.send(ut.textto("slc-set",ctx.message.author).format(number,cn[number-1].replace("-a","").replace("-b","").replace("-c","")))
+                await ctx.send(ctx._("slc-set").format(number,cn[number-1].replace("-a","").replace("-b","").replace("-c","")))
                 self.bot.cursor.execute("UPDATE users SET levcard = ? WHERE id = ?", (cn[number-1],ctx.author.id))
             else:
-                await ctx.send(ut.textto("slc-numb",ctx.message.author))
+                await ctx.send(ctx._("slc-numb"))
 
     @commands.command(name="level",aliases=["レベルカード", "レベルを見せて"])
     @commands.cooldown(1, 20, type=commands.BucketType.user)
@@ -69,7 +69,7 @@ class levels(commands.Cog):
             gs=self.bot.cursor.fetchone()
             level=gs["levels"]
             if level.get(str(u.id),None) is None:
-                await ctx.send(ut.textto("level-notcount",ctx.author))
+                await ctx.send(ctx._("level-notcount"))
             else:
                 async with ctx.message.channel.typing():
                     nowl = level[str(u.id)]['level']
@@ -122,9 +122,9 @@ class levels(commands.Cog):
                 await ctx.send(file=discord.File("imgs/sina'slevelcard.png"))
         else:
             try:
-                await ctx.send(embed=discord.Embed(title=ut.textto("dhaveper",ctx.author),description=ut.textto("per-sendfile",ctx.author)))
+                await ctx.send(embed=discord.Embed(title=ctx._("dhaveper"),description=ctx._("per-sendfile")))
             except:
-                await ctx.send(f"{ut.textto('dhaveper',ctx.author)}\n{ut.textto('per-sendfile',ctx.author)}")
+                await ctx.send(f"{ctx._('dhaveper')}\n{ctx._('per-sendfile')}")
 
 
 

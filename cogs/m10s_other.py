@@ -42,12 +42,12 @@ class other(commands.Cog):
     @commands.command()
     async def rq(self,ctx):
 
-        await ctx.send(f"{ctx.author.mention}"+ut.textto("IllQ",ctx.author)+f'\n{random.choice(ut.textto("comqest",ctx.author))}')
+        await ctx.send(f"{ctx.author.mention}"+ctx._("IllQ")+f'\n{random.choice(ctx._("comqest"))}')
 
     @commands.command(name="Af")
     async def a_01(self,ctx):
         if not ctx.user_lang()=="ja":
-            await ctx.send(ut.textto("cannot-run",ctx.author))
+            await ctx.send(ctx._("cannot-run"))
             return
 
         await ctx.send(ctx.author.mention,embed=ut.getEmbed("",f'あなたは「{random.choice(ctx.guild.members).display_name.replace(ctx.guild.me.display_name,"私").replace(ctx.author.display_name,"あなた自身")}」のこと、好きかな？'))
@@ -56,7 +56,7 @@ class other(commands.Cog):
     async def q(self,ctx,title=None,*ctt):
 
         if title == None or ctt == []:
-            await ctx.send(ut.textto("q-not",ctx.message.author))
+            await ctx.send(ctx._("q-not"))
         else:
             ky=None
             dct = {}
@@ -85,11 +85,11 @@ class other(commands.Cog):
                         await qes.add_reaction(ej)
                     except:
                         await qes.delete()
-                        await ctx.send(ut.textto("q-error",ctx.author))
+                        await ctx.send(ctx._("q-error"))
 
     @commands.command(aliases=["クレジット","クレジットを見せて"])
     async def credit(self,ctx):
-        await ctx.send(ut.textto("credit",ctx.message.author))
+        await ctx.send(ctx._("credit"))
 
     @commands.command()
     async def allonline(self,ctx,mus=None):
@@ -109,7 +109,7 @@ class other(commands.Cog):
         fbc = self.bot.get_channel(667361484283707393)
         embed.set_author(name=f"{str(ctx.message.author)}", icon_url=ctx.message.author.avatar_url_as(static_format='png'))
         await fbc.send(embed=embed)
-        await ctx.send(ut.textto("feedback-sended",ctx.message.author))
+        await ctx.send(ctx._("feedback-sended"))
 
     @commands.command(aliases=["レポート","報告","通報","お知らせ"])
     async def report(self,ctx,ttl,*,ctt=None):
@@ -117,7 +117,7 @@ class other(commands.Cog):
         fbc = self.bot.get_channel(667361501924950036)
         embed.set_author(name=f"{str(ctx.message.author)}", icon_url=ctx.message.author.avatar_url_as(static_format='png'))
         await fbc.send(embed=embed)
-        await ctx.send(ut.textto("thanks-report",ctx.author))
+        await ctx.send(ctx._("thanks-report"))
 
     @commands.command(aliases=["ステータス","あなたの情報を教えて"])
     async def botinfo(self,ctx):
@@ -127,12 +127,12 @@ class other(commands.Cog):
         used=str(mem.used/1000000000)[0:3]
         ava=str(mem.available/1000000000)[0:3]
         memparcent=mem.percent
-        embed = discord.Embed(title=ut.textto("status-inserver",ctx.message.author), description=f"{len(self.bot.guilds)}", color=self.bot.ec)
-        embed.add_field(name=ut.textto("status-prefix",ctx.message.author), value="s-")
-        embed.add_field(name=ut.textto("status-starttime",ctx.message.author), value=self.bot.StartTime.strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
-        embed.add_field(name=ut.textto("status-ver",ctx.message.author), value=platform.python_version())
-        embed.add_field(name=ut.textto("status-pros",ctx.message.author), value=platform.processor())
-        embed.add_field(name=ut.textto("status-os",ctx.message.author), value=f"{platform.system()} {platform.release()}({platform.version()})")
+        embed = discord.Embed(title=ctx._("status-inserver"), description=f"{len(self.bot.guilds)}", color=self.bot.ec)
+        embed.add_field(name=ctx._("status-prefix"), value="s-")
+        embed.add_field(name=ctx._("status-starttime"), value=self.bot.StartTime.strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
+        embed.add_field(name=ctx._("status-ver"), value=platform.python_version())
+        embed.add_field(name=ctx._("status-pros"), value=platform.processor())
+        embed.add_field(name=ctx._("status-os"), value=f"{platform.system()} {platform.release()}({platform.version()})")
         embed.add_field(name="メモリ", value=f"全てのメモリ容量:{allmem}GB\n使用量:{used}GB({memparcent}%)\n空き容量{ava}GB({100-memparcent}%)")
         embed.add_field(name="全ユーザー数",value=len(self.bot.users))
         embed.add_field(name="全チャンネル",value=len([i for i in self.bot.get_all_channels()]))
@@ -152,11 +152,11 @@ class other(commands.Cog):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
         if ctx.user_lang()=="ja":
             if ut.textto(f"eat-{it}",ctx.message.author).startswith("Not found key:"):
-                await ctx.send(ut.textto("eat-?",ctx.message.author))
+                await ctx.send(ctx._("eat-?"))
             else:
                 await ctx.send(ut.textto(f"eat-{it}",ctx.message.author))
         else:
-            await ctx.send(ut.textto("cannot-run",ctx.author))
+            await ctx.send(ctx._("cannot-run"))
 
     @commands.command()
     async def QandA(self,ctx):
@@ -176,12 +176,12 @@ class other(commands.Cog):
     @commands.command(aliases=["scratchwikiのurl", "次のページのScratchwikiのURL教えて"])
     async def jscrawiki(self,ctx, un:str):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
-        await ctx.send(ut.textto("jscrawiki-return",ctx.message.author).format(un.replace("@","@ ")))
+        await ctx.send(ctx._("jscrawiki-return").format(un.replace("@","@ ")))
 
     @commands.command(aliases=["scratchのユーザーurl", "次のScratchユーザーのURL教えて"])
     async def scrauser(self,ctx, un:str):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
-        await ctx.send(ut.textto("scrauser-return",ctx.message.author).format(un.replace("@","@ ")))
+        await ctx.send(ctx._("scrauser-return").format(un.replace("@","@ ")))
 
     @commands.command(name="randomint",liases=["randint", "乱数","次の条件で乱数を作って"])
     async def randomint(self,ctx,*args):
@@ -199,7 +199,7 @@ class other(commands.Cog):
             e=int(args[1])
             c=int(args[2])
         else:
-            await ctx.send(ut.textto("randomint-arg-error",ctx.message.author))
+            await ctx.send(ctx._("randomint-arg-error"))
         #try:
         intcount = []
         rnd = 0
@@ -212,15 +212,15 @@ class other(commands.Cog):
                 tmp =  random.randint(e, s)
                 intcount = intcount + [tmp]
                 rnd= rnd + tmp
-        await ctx.send(ut.textto("randomint-return1",ctx.message.author).format(str(s),str(e),str(c),str(rnd),str(intcount)))
+        await ctx.send(ctx._("randomint-return1").format(str(s),str(e),str(c),str(rnd),str(intcount)))
         #except:
-            #await ctx.send(ut.textto("randomint-return2",ctx.message.author))
+            #await ctx.send(ctx._("randomint-return2"))
 
     @commands.command(name="fortune",aliases=["おみくじ", "今日のおみくじをひく"])
     async def fortune(self,ctx):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
         rnd = random.randint(0, 6)
-        await ctx.send(ut.textto("omikuzi-return",ctx.message.author).format(ut.textto("omikuzi-"+str(rnd),ctx.message.author)))
+        await ctx.send(ctx._("omikuzi-return").format(ut.textto("omikuzi-"+str(rnd),ctx.message.author)))
 
     @commands.command()
     async def memo(self,ctx,mode="a",mn="def",*,ctt=None):
@@ -230,11 +230,11 @@ class other(commands.Cog):
         if mode == "r":
             if not mmj["memo"] == None:
                 if mmj["memo"].get(mn) == None:
-                    await ctx.send(ut.textto("memo-r-notfound1",ctx.message.author))
+                    await ctx.send(ctx._("memo-r-notfound1"))
                 else:
                     await ctx.send(mmj["memo"][mn].replace("@everyone","everyone").replace("@here","here"))
             else:
-                await ctx.send(ut.textto("memo-r-notfound2",ctx.message.author))
+                await ctx.send(ctx._("memo-r-notfound2"))
         elif mode == "w":
             if ctt == None:
                 mmj["memo"][mn] = None
@@ -242,19 +242,19 @@ class other(commands.Cog):
                 mmj["memo"][mn] = ctt
             self.bot.cursor.execute("UPDATE users SET memo = ? WHERE id = ?", (mmj["memo"],ctx.author.id))
 
-            await ctx.send(ut.textto("memo-w-write",ctx.message.author).format(str(mn).replace("@everyone","everyone").replace("@here","here")))
+            await ctx.send(ctx._("memo-w-write").format(str(mn).replace("@everyone","everyone").replace("@here","here")))
         elif mode == "a":
             if mmj["memo"] == {}:
-                await ctx.send(ut.textto("memo-a-notfound",ctx.message.author))
+                await ctx.send(ctx._("memo-a-notfound"))
             else:
-                await ctx.send(str(mmj["memo"].keys()).replace("dict_keys(",ut.textto("memo-a-list",ctx.message.author)).replace(")",""))
+                await ctx.send(str(mmj["memo"].keys()).replace("dict_keys(",ctx._("memo-a-list")).replace(")",""))
         else:
-            await ctx.send(ut.textto("memo-except",ctx.message.author))
+            await ctx.send(ctx._("memo-except"))
 
     @commands.command(name="textlocker")
     async def textlocker(self,ctx):
         if not ctx.user_lang() == "ja":
-            await ctx.send(ut.textto("cannot-run",ctx.author))
+            await ctx.send(ctx._("cannot-run"))
             return
 
         tl=self.bot.tl
@@ -348,9 +348,9 @@ class other(commands.Cog):
                 tmp = "hoge"
             gtxt = "\n".join([f"{'、'.join(m)}" for m in gl])
             ng = ",".join(ml)
-            await ctx.send(embed=discord.Embed(title=ut.textto("rg-title",ctx.author),description=ut.textto("rg-desc",ctx.author).format(gtxt,ng), color=self.bot.ec))
+            await ctx.send(embed=discord.Embed(title=ctx._("rg-title"),description=ctx._("rg-desc").format(gtxt,ng), color=self.bot.ec))
         else:
-            await ctx.send(ut.textto("rg-block",ctx.author))
+            await ctx.send(ctx._("rg-block"))
 
     @commands.command(aliases=["一定時間削除"])
     async def timemsg(self,ctx,sec:float):
