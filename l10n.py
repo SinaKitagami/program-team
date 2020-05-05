@@ -1,4 +1,5 @@
 import os
+import json
 import discord
 from discord.ext import commands
 
@@ -21,8 +22,9 @@ class TranslateHandler:
             return self._translation_cache[lang][key]
         try:
             with open(f"lang/{lang}.json", "r", encoding="utf-8") as f:
-                self.cache_with_same_key(lang, key, f)
-                value = f.get(key, None)
+                dic = json.load(f)
+                self.cache_with_same_key(lang, key, dic)
+                value = dic.get(key, None)
                 if value:
                     return value
                 raise MissingTranslation
@@ -78,7 +80,7 @@ class TranslateHandler:
             return self._lang_cache[user.id]
         user_db = self.bot.cursor.execute("SELECT lang FROM users WHERE id=?", (user.id,)).fetchone()
         if user_db and user_db["lang"] and user_db["lang"] in self.supported_locales:
-            self._lang_cache[user.id] = lang
+            self._lang_cache[user.id] = user_db["lang"]
             return user_db["lang"]
         return None
 
