@@ -176,12 +176,12 @@ class other(commands.Cog):
     @commands.command(aliases=["scratchwikiのurl", "次のページのScratchwikiのURL教えて"])
     async def jscrawiki(self,ctx, un:str):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
-        await ctx.send(ctx._("jscrawiki-return").format(un.replace("@","@ ")))
+        await ctx.send(ctx._("jscrawiki-return",un.replace("@","@ ")))
 
     @commands.command(aliases=["scratchのユーザーurl", "次のScratchユーザーのURL教えて"])
     async def scrauser(self,ctx, un:str):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
-        await ctx.send(ctx._("scrauser-return").format(un.replace("@","@ ")))
+        await ctx.send(ctx._("scrauser-return",un.replace("@","@ ")))
 
     @commands.command(name="randomint",liases=["randint", "乱数","次の条件で乱数を作って"])
     async def randomint(self,ctx,*args):
@@ -212,7 +212,7 @@ class other(commands.Cog):
                 tmp =  random.randint(e, s)
                 intcount = intcount + [tmp]
                 rnd= rnd + tmp
-        await ctx.send(ctx._("randomint-return1").format(str(s),str(e),str(c),str(rnd),str(intcount)))
+        await ctx.send(ctx._("randomint-return1",str(s),str(e),str(c),str(rnd),str(intcount)))
         #except:
             #await ctx.send(ctx._("randomint-return2"))
 
@@ -220,7 +220,7 @@ class other(commands.Cog):
     async def fortune(self,ctx):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
         rnd = random.randint(0, 6)
-        await ctx.send(ctx._("omikuzi-return").format(ctx._("omikuzi-"+str(rnd))))
+        await ctx.send(ctx._("omikuzi-return",ctx._("omikuzi-"+str(rnd))))
 
     @commands.command()
     async def memo(self,ctx,mode="a",mn="def",*,ctt=None):
@@ -242,7 +242,7 @@ class other(commands.Cog):
                 mmj["memo"][mn] = ctt
             self.bot.cursor.execute("UPDATE users SET memo = ? WHERE id = ?", (mmj["memo"],ctx.author.id))
 
-            await ctx.send(ctx._("memo-w-write").format(str(mn).replace("@everyone","everyone").replace("@here","here")))
+            await ctx.send(ctx._("memo-w-write",str(mn).replace("@everyone","everyone").replace("@here","here")))
         elif mode == "a":
             if mmj["memo"] == {}:
                 await ctx.send(ctx._("memo-a-notfound"))
@@ -348,7 +348,7 @@ class other(commands.Cog):
                 tmp = "hoge"
             gtxt = "\n".join([f"{'、'.join(m)}" for m in gl])
             ng = ",".join(ml)
-            await ctx.send(embed=discord.Embed(title=ctx._("rg-title"),description=ctx._("rg-desc").format(gtxt,ng), color=self.bot.ec))
+            await ctx.send(embed=discord.Embed(title=ctx._("rg-title"),description=ctx._("rg-desc",gtxt,ng), color=self.bot.ec))
         else:
             await ctx.send(ctx._("rg-block"))
 

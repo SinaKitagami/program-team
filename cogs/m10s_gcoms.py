@@ -49,7 +49,7 @@ class gcoms(commands.Cog):
                 if not u == None:
                     break
         if not u == None:
-            await ctx.send(ctx._("ison-now").format(u.name,str(u.status)))
+            await ctx.send(ctx._("ison-now",u.name,str(u.status)))
         else:
             await ctx.send(ctx._("ison-notfound"))
 
@@ -93,7 +93,7 @@ class gcoms(commands.Cog):
             cid = uid
         self.bot.cursor.execute("select * from users where id=?",(cid,))
         upf = self.bot.cursor.fetchone()
-        embed = discord.Embed(title=ctx._("global-status-title").format(cid), description="", color=upf["gcolor"])
+        embed = discord.Embed(title=ctx._("global-status-title",cid), description="", color=upf["gcolor"])
         embed.add_field(name="banned", value=upf["gban"])
         embed.add_field(name="nick", value=upf["gnick"])
         embed.add_field(name="color", value=str(upf["gcolor"]))

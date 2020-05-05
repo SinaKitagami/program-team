@@ -219,7 +219,7 @@ class manage(commands.Cog):
                 dmc = ctx.message
                 await dmc.delete()
                 dr=await dmc.channel.purge(limit=int(msgcount))
-                await ctx.send(ctx._("delmsgs-del").format(len(dr)))
+                await ctx.send(ctx._("delmsgs-del",len(dr)))
 
     @commands.command()
     async def Wecall(self,ctx, us=None, name=None):
@@ -228,7 +228,7 @@ class manage(commands.Cog):
         if not us == None and not name == None:
             if not ctx.message.mentions[0].id == ctx.author.id:
                 if ctx.message.mentions[0].bot == False:
-                    ok = await ctx.send(ctx._("Wecall-areyouok").format(ctx.message.mentions[0].mention,ctx.message.author.mention,name))
+                    ok = await ctx.send(ctx._("Wecall-areyouok",ctx.message.mentions[0].mention,ctx.message.author.mention,name))
                     await ok.add_reaction('⭕')
                     await ok.add_reaction('❌')
                     reaction, user = await self.bot.wait_for("reaction_add", check=lambda r,u: r.message.id==ok.id and u.id == ctx.message.mentions[0].id)

@@ -47,10 +47,10 @@ class levels(commands.Cog):
         upf = self.bot.cursor.fetchone()
         cn=["kazuta123-a","kazuta123-b","m@ji☆","tomohiro0405","氷河","雪銀　翔","kazuta123-c"]
         if number==None:
-            await ctx.send(ctx._("slc-your").format(upf["levcard"].replace("-a","").replace("-b","").replace("-c","")))
+            await ctx.send(ctx._("slc-your",upf["levcard"].replace("-a","").replace("-b","").replace("-c","")))
         else:
             if 1 <= number <= 6:
-                await ctx.send(ctx._("slc-set").format(number,cn[number-1].replace("-a","").replace("-b","").replace("-c","")))
+                await ctx.send(ctx._("slc-set",number,cn[number-1].replace("-a","").replace("-b","").replace("-c","")))
                 self.bot.cursor.execute("UPDATE users SET levcard = ? WHERE id = ?", (cn[number-1],ctx.author.id))
             else:
                 await ctx.send(ctx._("slc-numb"))

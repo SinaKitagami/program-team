@@ -23,7 +23,7 @@ class settings(commands.Cog):
         elif mode=="set":
             spf = upf["prefix"]+[ipf]
             self.bot.cursor.execute("UPDATE users SET prefix = ? WHERE id = ?", (spf,ctx.author.id))
-            await ctx.send(ctx._("upf-add").format(ipf))
+            await ctx.send(ctx._("upf-add",ipf))
         elif mode=="del":
             spf = upf["prefix"]
             spf.remove(ipf)
@@ -59,7 +59,7 @@ class settings(commands.Cog):
         elif mode=="set":
             spf = gs["prefix"]+[ipf]
             self.bot.cursor.execute("UPDATE guilds SET prefix = ? WHERE id = ?", (spf,ctx.guild.id))
-            await ctx.send(ctx._("upf-add").format(ipf))
+            await ctx.send(ctx._("upf-add",ipf))
         elif mode=="del":
             spf = gs["prefix"]
             spf.remove(ipf)
@@ -122,7 +122,7 @@ class settings(commands.Cog):
             if not comname in gs["lockcom"]:
                 gs["lockcom"].append(comname)
                 self.bot.cursor.execute("UPDATE guilds SET lockcom = ? WHERE id = ?", (gs["lockcom"],ctx.guild.id))
-            await ctx.send(ctx._("upf-add").format(comname))
+            await ctx.send(ctx._("upf-add",comname))
         elif do =="del":
             if not (ctx.author.guild_permissions.administrator or ctx.author.id == 404243934210949120):
                 await ctx.send(ctx._("need-admin"))
@@ -132,7 +132,7 @@ class settings(commands.Cog):
                 self.bot.cursor.execute("UPDATE guilds SET lockcom = ? WHERE id = ?", (gs["lockcom"],ctx.guild.id))
             await ctx.send(ctx._("deleted-text"))
         elif do =="view":
-            await ctx.send(ctx._("comlock-view").format(str(gs["lockcom"])))
+            await ctx.send(ctx._("comlock-view",str(gs["lockcom"])))
         else:
             await ctx.send(ctx._("comlock-unknown"))
 
@@ -198,9 +198,9 @@ class settings(commands.Cog):
                 mes = await self.bot.wait_for('message', check=check)
                 guide=mes.content
                 try:
-                    await dc.send(ctx._("scmd-add-guide3-a").format(ctx._("scmd-guide-emoji"),str(se)))
+                    await dc.send(ctx._("scmd-add-guide3-a",ctx._("scmd-guide-emoji"),str(se)))
                 except:
-                    await dc.send(ctx._("scmd-add-guide3-a").format(ctx._("scmd-guide-emoji"),"(絵文字が多すぎて表示できません！)"))
+                    await dc.send(ctx._("scmd-add-guide3-a",ctx._("scmd-guide-emoji"),"(絵文字が多すぎて表示できません！)"))
                 mg=await self.bot.wait_for('message', check=check)
                 rep = mg.clean_content.format(se)
                 mmj["commands"][name]={}
@@ -213,9 +213,9 @@ class settings(commands.Cog):
                 mes = await self.bot.wait_for('message', check=check)
                 guide=mes.content
                 try:
-                    await dc.send(ctx._("scmd-add-guide3-a").format(ctx._("scmd-guide-emoji"),str(se)))
+                    await dc.send(ctx._("scmd-add-guide3-a",ctx._("scmd-guide-emoji"),str(se)))
                 except:
-                    await dc.send(ctx._("scmd-add-guide3-a").format(ctx._("scmd-guide-emoji"),"(絵文字が多すぎて表示できません！)"))
+                    await dc.send(ctx._("scmd-add-guide3-a",ctx._("scmd-guide-emoji"),"(絵文字が多すぎて表示できません！)"))
                 rep = []
                 while True:
                     mg=await self.bot.wait_for('message', check=check)
@@ -224,9 +224,9 @@ class settings(commands.Cog):
                     else:
                         rep = rep + [mg.clean_content.format(se)]
                         try:
-                            await dc.send(ctx._("scmd-add-guide3-b").format(ctx._("scmd-guide-emoji"),str(se)))
+                            await dc.send(ctx._("scmd-add-guide3-b",ctx._("scmd-guide-emoji"),str(se)))
                         except:
-                            await dc.send(ctx._("scmd-add-guide3-b").format(ctx._("scmd-guide-emoji"),"(絵文字が多すぎて表示できません！)"))
+                            await dc.send(ctx._("scmd-add-guide3-b",ctx._("scmd-guide-emoji"),"(絵文字が多すぎて表示できません！)"))
                 mmj["commands"][name]={}
                 mmj["commands"][name]["mode"]="random"
                 mmj["commands"][name]["rep"]=rep
@@ -237,7 +237,7 @@ class settings(commands.Cog):
                     await dc.send(ctx._("scmd-add-guide2"))
                     mes = await self.bot.wait_for('message', check=check)
                     guide=mes.content
-                    await dc.send(ctx._("scmd-add-guide3-c").format(ctx._("scmd-guide-emoji"),str(se)))
+                    await dc.send(ctx._("scmd-add-guide3-c",ctx._("scmd-guide-emoji"),str(se)))
                     mg=await self.bot.wait_for('message', check=check)
                     rep = int(mg.clean_content)
                     mmj["commands"][name]={}
@@ -260,9 +260,9 @@ class settings(commands.Cog):
                 await ctx.send(ctx._("scmd-help-notfound"))
             else:
                 if isinstance(mmj["commands"][name]['createdBy'],int):
-                    await ctx.send(ctx._("scmd-help-title").format(name,await bot.fetch_user(mmj["commands"][name]['createdBy']),mmj["commands"][name]['guide']))
+                    await ctx.send(ctx._("scmd-help-title",name,await bot.fetch_user(mmj["commands"][name]['createdBy']),mmj["commands"][name]['guide']))
                 else:
-                    await ctx.send(ctx._("scmd-help-title").format(name,mmj["commands"][name]['createdBy'],mmj["commands"][name]['guide']))
+                    await ctx.send(ctx._("scmd-help-title",name,mmj["commands"][name]['createdBy'],mmj["commands"][name]['guide']))
         elif mode == "all":
             if mmj["commands"] == []:
                 await ctx.send(ctx._("scmd-all-notfound"))

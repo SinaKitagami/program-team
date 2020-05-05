@@ -79,7 +79,7 @@ class search(commands.Cog):
             try:
                 async with ctx.message.channel.typing():
                     if not sw == None:
-                        await ctx.send(ctx._("jwp-found").format(wd,sw1))
+                        await ctx.send(ctx._("jwp-found",wd,sw1))
             except:
                 await ctx.send(ctx._("jwp-notfound"))
 
@@ -130,7 +130,7 @@ class search(commands.Cog):
                 vsd = sret.replace("+","")
                 vsd = vsd.replace("-","/")
                 vsd = vsd.replace("T00:00:00Z","")
-            await ctx.send(ctx._("gwd-return1").format(str1,vsd,purl))
+            await ctx.send(ctx._("gwd-return1",str1,vsd,purl))
         except:
             await ctx.send(ctx._("gwd-return2"))
 
@@ -170,7 +170,7 @@ class search(commands.Cog):
                 type='video'
                 ).execute()
                 id = search_response['items'][0]['id']['videoId']
-                await ctx.send(ctx._("youtube-found").format(id))
+                await ctx.send(ctx._("youtube-found",id))
         except:
             await ctx.send(ctx._("youtube-notfound"))
 
@@ -183,7 +183,7 @@ class search(commands.Cog):
             async with ctx.message.channel.typing():
                 url = 'https://api.scratch.mit.edu/users/'+un+'/messages/count'
                 content = await self.bot.apple_util.get_as_json(url)
-                await ctx.send(ctx._("scranotif-notify").format(un,str(content['count'])))
+                await ctx.send(ctx._("scranotif-notify",un,str(content['count'])))
         except:
             await ctx.send(ctx._("scranotif-badrequest"))
 

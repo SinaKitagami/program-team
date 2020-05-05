@@ -30,7 +30,7 @@ class info(commands.Cog):
             except discord.HTTPException:
                 await ctx.send(ctx._("aui-he"))
             except:
-                await ctx.send(ctx._("aui-othere").format(traceback.format_exc()))
+                await ctx.send(ctx._("aui-othere",traceback.format_exc()))
             else:
                 ptn=""
                 if u.id in self.bot.team_sina:
@@ -48,7 +48,7 @@ class info(commands.Cog):
                 e.add_field(name=ctx._("aui-isbot"),value=u.bot)
                 e.set_thumbnail(url=u.avatar_url)
                 tm=(u.created_at + rdelta(hours=9)).strftime("%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}").format(*"年月日時分秒")
-                e.set_footer(text=ctx._("aui-created").format(tm))
+                e.set_footer(text=ctx._("aui-created",tm))
                 e.timestamp = u.created_at
             await ctx.send(embed=e)
         else:
@@ -120,7 +120,7 @@ class info(commands.Cog):
     @commands.command()
     async def cinvite(self,ctx,ivt:str):
         i = await self.bot.fetch_invite(ivt)
-        e=discord.Embed(title=ctx._("cinvite-title"),description=ctx._("cinvite-from").format(str(i.inviter)),color=self.bot.ec)
+        e=discord.Embed(title=ctx._("cinvite-title"),description=ctx._("cinvite-from",str(i.inviter)),color=self.bot.ec)
         e.set_author(name=f'{i.guild.name}({i.guild.id})',icon_url=i.guild.icon_url_as(format="png"))
         e.add_field(name=ctx._("cinvite-memcount"),value=f'{i.approximate_member_count}\n({ctx._("cinvite-onmemcount")}{i.approximate_presence_count})')
         e.add_field(name=ctx._("cinvite-ch"),value=f"{i.channel.name}({i.channel.type})")
@@ -181,7 +181,7 @@ class info(commands.Cog):
             if len(rlist) <= 1000:
                 embed.add_field(name=ctx._("serverinfo-roles"),value=rlist)
             try:
-                embed.add_field(name=ctx._("serverinfo-nitroboost"),value=ctx._("serverinfo-nitroboost-val").format(sevinfo.premium_tier))
+                embed.add_field(name=ctx._("serverinfo-nitroboost"),value=ctx._("serverinfo-nitroboost-val",sevinfo.premium_tier))
                 embed.add_field(name=ctx._("serverinfo-nitroboost-can-title"),value=ctx._(f"serverinfo-nitroboost-can-{sevinfo.premium_tier}").format(sevinfo.premium_tier,sevinfo.premium_subscription_count))
             except:
                 pass
@@ -230,9 +230,9 @@ class info(commands.Cog):
             if member.id in banulist:
                 bunotif = bunotif + 1
         if bunotif == 0:
-            await ctx.send(embed=discord.Embed(title=ctx._("ucheck-title").format(member),description=ctx._("ucheck-not_ban")))
+            await ctx.send(embed=discord.Embed(title=ctx._("ucheck-title",member),description=ctx._("ucheck-not_ban")))
         else:
-            await ctx.send(embed=discord.Embed(title=ctx._("ucheck-title").format(member),description=ctx._("ucheck-not_ban").format(bunotif)))
+            await ctx.send(embed=discord.Embed(title=ctx._("ucheck-title",member),description=ctx._("ucheck-not_ban",bunotif)))
 
     @commands.command(aliases=["次のボイスチャンネルのURLを教えて"])
     async def vcurl(self,ctx,vch:commands.VoiceChannelConverter=None):
@@ -446,7 +446,7 @@ class info(commands.Cog):
                 elif anactivity.type == discord.ActivityType.watching:
                     activName=ctx._("playinginfo-watching")+anactivity.name
                 elif anactivity.type == discord.ActivityType.listening:
-                    activName=ctx._("playinginfo-listening").format(anactivity.name)
+                    activName=ctx._("playinginfo-listening",anactivity.name)
                 elif anactivity.type ==  discord.ActivityType.streaming:
                     activName=ctx._("playinginfo-streaming")+anactivity.name
                 elif anactivity.type ==  discord.ActivityType.custom:
@@ -689,7 +689,7 @@ class info(commands.Cog):
                     e =discord.Embed(title="other",color=self.bot.ec)
                     e.add_field(name="owner",value=ctx.guild.owner.mention)
                     e.add_field(name="features",value=f"```{','.join(ctx.guild.features)}```")
-                    e.add_field(name=ctx._("ginfo-sinagprofile"),value=ctx._("ginfo-gprodesc").format(gs["reward"],gs["sendlog"],gs["prefix"],gs["lang"],))
+                    e.add_field(name=ctx._("ginfo-sinagprofile"),value=ctx._("ginfo-gprodesc",gs["reward"],gs["sendlog"],gs["prefix"],gs["lang"],))
                     await mp.edit(embed=e)
                 elif page == 12:
                     e=discord.Embed(title="公開サーバー設定",description=ctx.guild.description or "概要なし",color=self.bot.ec)
@@ -697,7 +697,7 @@ class info(commands.Cog):
                     e.add_field(name="ルールチャンネル",value=ctx.guild.rules_channel.mention)
                     await mp.edit(embed=e)
             except:
-                await mp.edit(embed=discord.Embed(title=ctx._("ginfo-anyerror-title"),description=ctx._("ginfo-anyerror-desc").format(traceback.format_exc(0)),color=self.bot.ec))
+                await mp.edit(embed=discord.Embed(title=ctx._("ginfo-anyerror-title"),description=ctx._("ginfo-anyerror-desc",traceback.format_exc(0)),color=self.bot.ec))
 
     @commands.command(name="team_sina-chan")
     async def view_teammember(self,ctx):

@@ -76,7 +76,7 @@ class tests(commands.Cog):
             else:
                 await ctx.send(ctx._("need-admin"))
         except:
-            await ctx.send(embed=ut.getEmbed(ctx._("ginfo-anyerror-title"),ctx._("ginfo-anyerror-title").format(traceback.format_exc(0))))
+            await ctx.send(embed=ut.getEmbed(ctx._("ginfo-anyerror-title"),ctx._("ginfo-anyerror-title",traceback.format_exc(0))))
 
 
 
