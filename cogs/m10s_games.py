@@ -17,26 +17,26 @@ class games(commands.Cog):
     @commands.command()
     async def game2(self,ctx):
         answer = random.randint(1,100)
-        await ctx.send(ut.textto("game2-ready",ctx.message.author))
+        await ctx.send(ctx._("game2-ready"))
         i=0
         while True:
             try:
                 msg = await self.bot.wait_for('message', check=lambda m: m.author==ctx.author and m.channel==ctx.channel,timeout=60)
             except:
-                await ctx.send(ut.textto("game2-timeout",ctx.message.author).format(answer))
+                await ctx.send(ctx._("game2-timeout", answer))
                 return
             try:
                 i = i + 1
                 ur = int(msg.content)
             except:
-                await ctx.send(f"{ctx.author.mention}\n{ut.textto('game2-notint',ctx.message.author)}")
+                await ctx.send(f"{ctx.author.mention}\n{ctx._('game2-notint')}")
                 continue
             if ur>answer:
-                await ctx.send(f'{ctx.author.mention}\n{ut.textto("game2-high",ctx.message.author)}')
+                await ctx.send(f'{ctx.author.mention}\n{ctx._("game2-high")}')
             elif ur<answer:
-                await ctx.send(f'{ctx.author.mention}\n{ut.textto("game2-low",ctx.message.author)}')
+                await ctx.send(f'{ctx.author.mention}\n{ctx._("game2-low")}')
             else:
-                await ctx.send(f'{ctx.author.mention}\n{ut.textto("game2-clear",ctx.message.author).format(i)}')
+                await ctx.send(f'{ctx.author.mention}\n{ctx._("game2-clear", i)}')
                 break
 
 

@@ -282,7 +282,7 @@ async def globalSend(message):
         if (datetime.datetime.now() - rdelta(hours=9) - rdelta(days=7) >= message.author.created_at) or upf["gmod"] or upf["gstar"]:
             if upf["gban"] == 1:
                 dc=await ut.opendm(message.author)
-                await dc.send(ut.textto("global-banned",message.author).format(message.author.mention))
+                await dc.send(bot._(message.author, "global-banned", message.author.mention))
                 await repomsg(message,"思惟奈ちゃんグローバルチャットの使用禁止")
                 await message.add_reaction("❌")
                 await asyncio.sleep(5)
@@ -490,10 +490,10 @@ async def on_member_update(b,a):
                     sdu = bot.get_user(pf["id"])
                     dc = await ut.opendm(sdu)
                     lm = await dc.history(limit=1).flatten()
-                    nf=str(bot.get_emoji(653161518531215390))+ut.textto("onlinenotif",sdu).format(str(a)).replace(str(bot.get_user(455284639108431873))+"さん","おあずちゃん").replace(str(bot.get_user(404243934210949120)),"みぃてん☆")
+                    nf=str(bot.get_emoji(653161518531215390))+bot._(sdu, "onlinenotif", a)
                     if not lm[0].content==nf:
                         ts = discord.Embed(title="", description="", color=bot.ec)
-                        ts.set_footer(text=ut.ondevicon(a)+","+ut.textto("sendedat",sdu))
+                        ts.set_footer(text=ut.ondevicon(a)+","+bot._(sdu,"sendedat"))
                         ts.timestamp = datetime.datetime.now() - rdelta(hours=9)
                         await dc.send(nf,embed=ts)
         elif not str(b.status)=="offline" and str(a.status)=="offline":
@@ -502,10 +502,10 @@ async def on_member_update(b,a):
                     sdu = bot.get_user(pf["id"])
                     dc = await ut.opendm(sdu)
                     lm = await dc.history(limit=1).flatten()
-                    nf=str(bot.get_emoji(653161518392803348))+ut.textto("offlinenotif",sdu).format(str(a)).replace(str(bot.get_user(455284639108431873))+"さん","おあずちゃん").replace(str(bot.get_user(404243934210949120)),"みぃてん☆")
+                    nf=str(bot.get_emoji(653161518392803348))+bot._(sdu, "offlinenotif", a)
                     if not lm[0].content==nf:
                         ts = discord.Embed(title="", description="", color=bot.ec)
-                        ts.set_footer(text=ut.textto("sendedat",sdu))
+                        ts.set_footer(text=bot._(sdu,"sendedat"))
                         ts.timestamp = datetime.datetime.now() - rdelta(hours=9)
                         await dc.send(nf,embed=ts)
     except:
@@ -1082,7 +1082,7 @@ async def domsg(message):
     try:
         if ctx.command:
             if ctx.command.name in gs["lockcom"] and not ctx.author.guild_permissions.administrator and ctx.author.id != 404243934210949120:
-                await ctx.send(ut.textto("comlock-locked",ctx.author))
+                await ctx.send(ctx._("comlock-locked"))
             else:
                 await bot.process_commands(message)
     except SystemExit:
@@ -1113,16 +1113,16 @@ async def runsercmd(message,gs,pf):
                                     try:
                                         role =message.guild.get_role(v["rep"])
                                     except:
-                                        await message.channel.send(ut.textto("scmd-notfound-role",message.author))
+                                        await message.channel.send(bot._(message.author,"scmd-notfound-role"))
                                     if role < message.author.top_role:
                                         if role in message.author.roles:
                                             await message.author.remove_roles(role)
-                                            await message.channel.send(ut.textto("scmd-delrole",message.author))
+                                            await message.channel.send(bot._(message.author, "scmd-delrole"))
                                         else:
                                             await message.author.add_roles(role)
-                                            await message.channel.send(ut.textto("scmd-addrole",message.author))
+                                            await message.channel.send(bot._(message.author, "scmd-addrole"))
                                     else:
-                                        await message.channel.send(ut.textto("scmd-notrole",message.author))
+                                        await message.channel.send(bot._(message.author,"scmd-notrole"))
                                 break
             except:
                 pass
@@ -1138,14 +1138,14 @@ async def gahash(message,gs):
             for sch in menchan:
                 if sch.id in ch:
                     if message.channel.is_nsfw():
-                        embed = discord.Embed(title="", description=ut.textto("hash-nsfw",message.guild),color=message.author.color)
-                        embed.add_field(name=ut.textto("hash-from",message.guild),value=f'{ut.textto("hash-chmention",message.guild)}:{message.channel.mention}\n{ut.textto("hash-chname",message.guild)}:{message.channel.name}')
-                        embed.add_field(name=ut.textto("hash-link",message.guild),value=message.jump_url)
+                        embed = discord.Embed(title="", description=bot.l10n_guild(message.guild,"hash-nsfw"),color=message.author.color)
+                        embed.add_field(name=bot.l10n_guild(message.guild,"hash-from"),value=f'{bot.l10n_guild(message.guild,"hash-chmention")}:{message.channel.mention}\n{bot.l10n_guild(message.guild,"hash-chname")}:{message.channel.name}')
+                        embed.add_field(name=bot.l10n_guild(message.guild,"hash-link"),value=message.jump_url)
                         embed.set_author(name=message.author.display_name, icon_url=message.author.avatar_url_as(static_format='png'))
                     else:
                         embed = discord.Embed(title="", description=message.content, color=message.author.color)
-                        embed.add_field(name=ut.textto("hash-from",message.guild),value=f'{ut.textto("hash-chmention",message.guild)}:{message.channel.mention}\n{ut.textto("hash-chname",message.guild)}:{message.channel.name}')
-                        embed.add_field(name=ut.textto("hash-link",message.guild), value=message.jump_url)
+                        embed.add_field(name=bot.l10n_guild(message.guild,"hash-from"),value=f'{bot.l10n_guild(message.guild,"hash-chmention")}:{message.channel.mention}\n{bot.l10n_guild(message.guild,"hash-chname")}:{message.channel.name}')
+                        embed.add_field(name=bot.l10n_guild(message.guild,"hash-link"), value=message.jump_url)
                         embed.set_author(name=message.author.display_name, icon_url=message.author.avatar_url_as(static_format='png'))
                         if not message.attachments == [] and (not message.attachments[0].is_spoiler()):
                             embed.set_image(url=message.attachments[0].url)
@@ -1177,16 +1177,16 @@ async def dlevel(message,gs):
                     if gs["levelupsendto"]:
                         c=bot.get_channel(gs["levelupsendto"])
                         try:
-                            m = await c.send(str(bot.get_emoji(653161518212448266))+ut.textto("levelup-notify",message.author).format(aut,gs["levels"][str(message.author.id)]["level"]))
+                            m = await c.send(str(bot.get_emoji(653161518212448266))+bot._(message.author,"levelup-notify",aut,gs["levels"][str(message.author.id)]["level"]))
                             await asyncio.sleep(1)
-                            await m.edit(content=str(bot.get_emoji(653161518212448266))+ut.textto("levelup-notify",message.author).format(message.author.mention,gs["levels"][str(message.author.id)]["level"]))
+                            await m.edit(content=str(bot.get_emoji(653161518212448266))+bot._(message.author,"levelup-notify",message.author.mention,gs["levels"][str(message.author.id)]["level"]))
                         except:
                             pass
                     else:
                         try:
-                            m = await message.channel.send(str(bot.get_emoji(653161518212448266))+ut.textto("levelup-notify",message.author).format(aut,gs["levels"][str(message.author.id)]["level"]))
+                            m = await message.channel.send(str(bot.get_emoji(653161518212448266))+bot._(message.author,"levelup-notify",aut,gs["levels"][str(message.author.id)]["level"]))
                             await asyncio.sleep(1)
-                            await m.edit(content=str(bot.get_emoji(653161518212448266))+ut.textto("levelup-notify",message.author).format(message.author.mention,gs["levels"][str(message.author.id)]["level"]))
+                            await m.edit(content=str(bot.get_emoji(653161518212448266))+bot._(message.author,"levelup-notify",message.author.mention,gs["levels"][str(message.author.id)]["level"]))
                         except:
                             pass
                     try:
@@ -1250,7 +1250,7 @@ async def ehelp(ctx,rcmd=None):
     #英語ヘルプ用
     if rcmd == None:
         page = 1
-        embed = discord.Embed(title=ut.textto("help-1-t",ctx.message.author), description=ut.textto("help-1-d",ctx.message.author), color=bot.ec)
+        embed = discord.Embed(title=ctx._("help-1-t"), description=ctx._("help-1-d"), color=bot.ec)
         embed.set_footer(text=f"page:{page}")
         msg = await ctx.send(embed=embed)
         await msg.add_reaction(bot.get_emoji(653161518195671041))
@@ -1270,7 +1270,7 @@ async def ehelp(ctx,rcmd=None):
                     page = 1
                 else:
                     page = page + 1
-                embed = discord.Embed(title=ut.textto(f"help-{page}-t",ctx.message.author), description=ut.textto(f"help-{page}-d",ctx.message.author), color=bot.ec)
+                embed = discord.Embed(title=ctx._(f"help-{page}-t"), description=ctx._(f"help-{page}-d"), color=bot.ec)
                 embed.set_footer(text=f"page:{page}")
                 await msg.edit(embed=embed)
             elif str(r) == str(bot.get_emoji(653161518195671041)):
@@ -1278,14 +1278,14 @@ async def ehelp(ctx,rcmd=None):
                     page = 14
                 else:
                     page = page - 1
-                embed = discord.Embed(title=ut.textto(f"help-{page}-t",ctx.message.author), description=ut.textto(f"help-{page}-d",ctx.message.author), color=bot.ec)
+                embed = discord.Embed(title=ctx._(f"help-{page}-t"), description=ctx._(f"help-{page}-d"), color=bot.ec)
                 embed.set_footer(text=f"page:{page}")
                 await msg.edit(embed=embed)
             elif str(r) == "🔍":
                 await msg.remove_reaction(bot.get_emoji(653161518195671041),bot.user)
                 await msg.remove_reaction("🔍",bot.user)
                 await msg.remove_reaction(bot.get_emoji(653161518170505216),bot.user)
-                qm = await ctx.send(ut.textto("help-s-send",ctx.author))
+                qm = await ctx.send(ctx._("help-s-send"))
                 try:
                     msg = await bot.wait_for('message', check=lambda m: m.author==ctx.author and m.channel==ctx.channel,timeout=60)
                     sewd = msg.content
@@ -1301,7 +1301,7 @@ async def ehelp(ctx,rcmd=None):
                         lang = ctx.user_lang()
                         with open(f"lang/{lang}.json","r",encoding="utf-8") as j:
                             f = json.load(j)
-                        sre = discord.Embed(title=ut.textto("help-s-ret-title",ctx.author),description=ut.textto("help-s-ret-desc",ctx.author).format(sewd),color=bot.ec)
+                        sre = discord.Embed(title=ctx._("help-s-ret-title"),description=ctx._("help-s-ret-desc", sewd),color=bot.ec)
                         for k,v in f.items():
                             if k.startswith("h-"):
                                 if sewd in k.replace("h-","")  or sewd in v:
@@ -1314,9 +1314,9 @@ async def ehelp(ctx,rcmd=None):
         except:
             pass
     else:
-        embed = discord.Embed(title=str(rcmd), description=ut.textto(f"h-{str(rcmd)}",ctx.message.author), color=bot.ec)
-        if embed.description.startswith("Not found key:") or embed.description.startswith("Not found language:"):
-            await ctx.send(ut.textto("h-notfound",ctx.message.author))
+        embed = discord.Embed(title=str(rcmd), description=ctx._(f"h-{str(rcmd)}"), color=bot.ec)
+        if embed.description == "":
+            await ctx.send(ctx._("h-notfound"))
         else:
             await ctx.send(embed=embed)
 
@@ -1326,7 +1326,7 @@ async def help(ctx,rcmd=None):
     #ヘルプ内容
     if rcmd == None:
         page = 1
-        embed = discord.Embed(title=ut.textto("help-1-t",ctx.message.author), description=ut.textto("help-1-d",ctx.message.author), color=bot.ec)
+        embed = discord.Embed(title=ctx._("help-1-t"), description=ctx._("help-1-d"), color=bot.ec)
         embed.set_footer(text=f"page:{page}")
         msg = await ctx.send(embed=embed)
         await msg.add_reaction(bot.get_emoji(653161518195671041))
@@ -1346,7 +1346,7 @@ async def help(ctx,rcmd=None):
                     page = 1
                 else:
                     page = page + 1
-                embed = discord.Embed(title=ut.textto(f"help-{page}-t",ctx.message.author), description=ut.textto(f"help-{page}-d",ctx.message.author), color=bot.ec)
+                embed = discord.Embed(title=ctx._(f"help-{page}-t"), description=ctx._(f"help-{page}-d"), color=bot.ec)
                 embed.set_footer(text=f"page:{page}")
                 await msg.edit(embed=embed)
             elif str(r) == str(bot.get_emoji(653161518195671041)):
@@ -1354,14 +1354,14 @@ async def help(ctx,rcmd=None):
                     page = 16
                 else:
                     page = page - 1
-                embed = discord.Embed(title=ut.textto(f"help-{page}-t",ctx.message.author), description=ut.textto(f"help-{page}-d",ctx.message.author), color=bot.ec)
+                embed = discord.Embed(title=ctx._(f"help-{page}-t"), description=ctx._(f"help-{page}-d"), color=bot.ec)
                 embed.set_footer(text=f"page:{page}")
                 await msg.edit(embed=embed)
             elif str(r) == "🔍":
                 await msg.remove_reaction(bot.get_emoji(653161518195671041),bot.user)
                 await msg.remove_reaction("🔍",bot.user)
                 await msg.remove_reaction(bot.get_emoji(653161518170505216),bot.user)
-                qm = await ctx.send(ut.textto("help-s-send",ctx.author))
+                qm = await ctx.send(ctx._("help-s-send"))
                 try:
                     msg = await bot.wait_for('message', check=lambda m: m.author==ctx.author and m.channel==ctx.channel,timeout=60)
                     sewd = msg.content
@@ -1377,7 +1377,7 @@ async def help(ctx,rcmd=None):
                         lang = ctx.user_lang()
                         with open(f"lang/{lang}.json","r",encoding="utf-8") as j:
                             f = json.load(j)
-                        sre = discord.Embed(title=ut.textto("help-s-ret-title",ctx.author),description=ut.textto("help-s-ret-desc",ctx.author).format(sewd),color=bot.ec)
+                        sre = discord.Embed(title=ctx._("help-s-ret-title"),description=ctx._("help-s-ret-desc", sewd),color=bot.ec)
                         for k,v in f.items():
                             if k.startswith("nh-"):
                                 if sewd in k.replace("nh-","")  or sewd in str(v):
@@ -1390,9 +1390,9 @@ async def help(ctx,rcmd=None):
         except:
             pass
     else:
-        dcmd = ut.textto(f"nh-{str(rcmd)}",ctx.message.author)
-        if str(dcmd).startswith("Not found "):
-            await ctx.send(ut.textto("h-notfound",ctx.message.author))
+        dcmd = ctx._(f"nh-{str(rcmd)}")
+        if str(dcmd) == "":
+            await ctx.send(ctx._("h-notfound"))
         else:
             embed = ut.getEmbed(dcmd[0],dcmd[1],bot.ec,*dcmd[2:])
             await ctx.send(embed=embed)
@@ -1421,17 +1421,17 @@ async def on_command_error(ctx, error):
     el"""
     if isinstance(error,commands.CommandOnCooldown):
         #クールダウン
-        embed = discord.Embed(title=ut.textto("cmd-error-t",ctx.message.author), description=ut.textto("cmd-cooldown-d",ctx.message.author).format(str(error.retry_after)[:4]), color=bot.ec)
+        embed = discord.Embed(title=ctx._("cmd-error-t"), description=ctx._("cmd-cooldown-d", str(error.retry_after)[:4]), color=bot.ec)
         await ctx.send(embed=embed)
     elif isinstance(error,commands.NotOwner):
         #オーナー専用コマンド
-        embed = discord.Embed(title=ut.textto("cmd-error-t",ctx.message.author), description=ut.textto("only-mii-10",ctx.message.author), color=bot.ec)
+        embed = discord.Embed(title=ctx._("cmd-error-t"), description=ctx._("only-mii-10"), color=bot.ec)
         await ctx.send(embed=embed)
         ch=bot.get_channel(652127085598474242)
         await ch.send(embed=ut.getEmbed("エラーログ",f"コマンド:`{ctx.command.name}`\n```{str(error)}```",bot.ec,f"サーバー",ctx.guild.name,"実行メンバー",ctx.author.name,"メッセージ内容",ctx.message.content))
     elif isinstance(error,commands.MissingRequiredArgument):
         #引数がないよっ☆
-        embed = discord.Embed(title=ut.textto("cmd-error-t",ctx.message.author), description=ut.textto("pls-arg",ctx.message.author), color=bot.ec)
+        embed = discord.Embed(title=ctx._("cmd-error-t"), description=ctx._("pls-arg"), color=bot.ec)
         await ctx.send(embed=embed)
     else:
         #その他例外
