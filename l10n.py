@@ -105,6 +105,8 @@ class TranslateHandler:
 
     def get_raw_translation(self, lang, key, *args, **kwargs):
         word = self.get_string_for(lang, key)
+        if isinstance(word, list):
+            return word
         return word.format(*args, **kwargs)
 
     def get_any_translation(self, target, key, *args, **kwargs):
