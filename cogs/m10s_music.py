@@ -10,6 +10,7 @@ from apiclient.discovery import build
 
 import os
 import shutil
+import re
 
 """
 上のモジュールをインストールすること！
@@ -51,18 +52,40 @@ class music(commands.Cog):
         dt=await loop.run_in_executor(None,lambda:self.ytdl.extract_info(url, download=dl))
         return dt
 
-    async def gpdate(self,url,dl=True):
+    async def gpdate(self,url,dl=True,utype="Youtube"):
         v = await self.gvinfo(url,dl)
-        return {
-            "type":"download" if dl else "stream",
-            "video_id":v['id'],
-            "video_url":v['webpage_url'],
-            "video_title":v['title'],
-            "video_thumbnail":v['thumbnail'],
-            "video_up_name":v["uploader"],
-            "video_up_url":v["uploader_url"],
-            "video_source":"Youtube"
-        }
+        if utype=="Youtube":
+            return {
+                "type":"download" if dl else "stream",
+                "video_id":v['id'],
+                "video_url":v['webpage_url'],
+                "video_title":v['title'],
+                "video_thumbnail":v['thumbnail'],
+                "video_up_name":v["uploader"],
+                "video_up_url":v["uploader_url"],
+                "video_source":"Youtube"
+            }
+        elif utype=="niconico":
+            return {
+                "type":"download" if dl else "stream",
+                "video_id":v['id'],
+                "video_url":v['webpage_url'],
+                "video_title":v['title'],
+                "video_thumbnail":v['thumbnail'],
+                "video_up_name":v["uploader"],
+                "video_up_url":"https://www.nicovideo.jp/user/"+v["uploader_id"],
+                "video_source":"niconico"
+            }
+        elif utype=="soundcloud":
+            return {
+                "video_id":v['id'],
+                "video_url":v['webpage_url'],
+                "video_title":v['title'],
+                "video_thumbnail":v['thumbnail'],
+                "video_up_name":v["uploader"],
+                "video_up_url":re.match(r"(https://soundcloud\.com/.+?/)",v['webpage_url']).group(0),
+                "video_source":"SoundCloud"
+            }
 
     @commands.command(name="join",aliases=["invc"])
     async def join_(self,ctx):
@@ -81,6 +104,10 @@ class music(commands.Cog):
     async def stop_(self,ctx):
         if ctx.voice_client and ctx.author.voice:
             if ctx.voice_client.channel==ctx.author.voice.channel:
+                try:
+                    await self.bot.mp[str(ctx.guild.id)].delete()
+                except:
+                    await ctx.send("操作パネルを削除できませんでした。")
                 self.bot.qu[str(ctx.guild.id)]=None
                 self.bot.mp[str(ctx.guild.id)]=None
                 self.bot.lp[str(ctx.guild.id)]=None
@@ -149,6 +176,45 @@ class music(commands.Cog):
                         self.bot.qu[str(ctx.guild.id)] = [iqim]
                         await asyncio.sleep(0.3)
                         self.bot.loop.create_task(self.mplay(ctx))
+            elif vinfo.get("extractor","") == "niconico":
+                iqim=await self.gpdate(vurl,True,"niconico")
+                if self.bot.qu.get(str(ctx.guild.id),None):
+                        await ctx.send("キューに追加します。")
+                        self.bot.qu[str(ctx.guild.id)] = self.bot.qu[str(ctx.guild.id)] + [iqim]
+                        await self.panel_update(ctx)
+                else:
+                    await ctx.send("再生を開始します。")
+                    self.bot.qu[str(ctx.guild.id)] = [iqim]
+                    await asyncio.sleep(0.3)
+                    self.bot.loop.create_task(self.mplay(ctx))
+            elif vinfo.get("extractor","").startswith("soundcloud"):
+                if vinfo.get("_type",None) == "playlist":
+                    
+                    tks=[]
+                    for c in vinfo["entries"]:
+                        tks.append(self.gpdate(c["url"],True,"soundcloud"))
+                    iqlt=[i for i in await asyncio.gather(*tks) if i]
+                    if self.bot.qu.get(str(ctx.guild.id),None):
+                        await ctx.send("キューにプレイリスト内の動画を追加します。")
+                        self.bot.qu[str(ctx.guild.id)] = self.bot.qu[str(ctx.guild.id)] + iqlt
+                        await self.panel_update(ctx)
+                    else:
+                        await ctx.send("プレイリストより、再生を開始します。")
+                        self.bot.qu[str(ctx.guild.id)] = iqlt
+                        await asyncio.sleep(0.3)
+                        self.bot.loop.create_task(self.mplay(ctx))
+
+                else:
+                    iqim=await self.gpdate(vurl,True,"soundcloud")
+                    if self.bot.qu.get(str(ctx.guild.id),None):
+                        await ctx.send("キューに追加します。")
+                        self.bot.qu[str(ctx.guild.id)] = self.bot.qu[str(ctx.guild.id)] + [iqim]
+                        await self.panel_update(ctx)
+                    else:
+                        await ctx.send("再生を開始します。")
+                        self.bot.qu[str(ctx.guild.id)] = [iqim]
+                        await asyncio.sleep(0.3)
+                        self.bot.loop.create_task(self.mplay(ctx))
             else:
                 await ctx.send("now,the video can't play the bot")
 
@@ -184,11 +250,15 @@ class music(commands.Cog):
             else:
                 ctx.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(f'musicfile/{self.bot.qu[str(ctx.guild.id)][0]["video_id"]}'),volume=vl))
             await self.panel_update(ctx)
-            while ctx.voice_client.is_playing() or ctx.voice_client.is_paused():
-                await asyncio.sleep(1)
+            try:
+                while ctx.voice_client.is_playing() or ctx.voice_client.is_paused():
+                    await asyncio.sleep(1)
+            except AttributeError:
+                break
             if self.bot.lp[str(ctx.guild.id)]:
                 self.bot.qu[str(ctx.guild.id)] = self.bot.qu[str(ctx.guild.id)] + [self.bot.qu[str(ctx.guild.id)][0]]
             self.bot.qu[str(ctx.guild.id)].pop(0)
+        await ctx.invoke(self.bot.get_command("stop"))
 
     @commands.command()
     async def skip(self,ctx):
@@ -334,6 +404,8 @@ class music(commands.Cog):
                 await m.add_reaction("🔼")
                 await m.add_reaction("🔽")
                 await m.add_reaction("⬇")
+                try:await m.pin()
+                except:pass
 
     @commands.Cog.listener()
     async def on_voice_state_update(self,member, before, after):
