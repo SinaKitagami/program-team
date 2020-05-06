@@ -411,6 +411,10 @@ class music(commands.Cog):
     async def on_voice_state_update(self,member, before, after):
         try:
             if not member.guild.voice_client.is_paused() and [i for i in member.guild.me.voice.channel.members if not i.bot]==[]:
+                try:
+                    await self.bot.mp[str(member.guild.id)].delete()
+                except:
+                    await self.bot.mp[str(member.guild.id)].channel.send("操作パネルを削除できませんでした。")
                 self.bot.qu[str(member.guild.id)]=None
                 self.bot.mp[str(member.guild.id)]=None
                 self.bot.lp[str(member.guild.id)]=None
