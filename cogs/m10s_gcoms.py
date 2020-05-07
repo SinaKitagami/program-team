@@ -228,7 +228,7 @@ class gcoms(commands.Cog):
                     self.bot.cursor.execute("UPDATE globalchs SET ids = ? WHERE name = ?", (chs["ids"]+[ctx.channel.id],name))
                 await ctx.channel.create_webhook(name="sina_global",avatar=None)
                 if dnf:
-                    embed = discord.Embed(title=f"{self.bot.get_emoji(653161518174699541)}グローバルチャット接続通知", description=f'{ctx.guild.name}の{ctx.channel.name}が`{name}`に接続しました。')
+                    embed = discord.Embed(title=f"{self.bot.get_emoji(653161518174699541)}グローバルチャット接続通知", description=f'{ctx.guild.name}の{ctx.channel.name}({ctx.channel.id})が`{name}`に接続しました。')
                 else:
                     embed = discord.Embed(title="グローバルチャット接続通知", description=f'{self.bot.get_emoji(653161518174699541)}どこかが`{name}`に接続しました。')
                 self.bot.cursor.execute("select * from globalchs where name=?",(name,))
