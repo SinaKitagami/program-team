@@ -1298,7 +1298,7 @@ async def ehelp(ctx,rcmd=None):
                     except:
                         pass
                     async with ctx.message.channel.typing():
-                        lang = ctx.user_lang()
+                        lang = ctx.user_lang() or "ja"
                         with open(f"lang/{lang}.json","r",encoding="utf-8") as j:
                             f = json.load(j)
                         sre = discord.Embed(title=ctx._("help-s-ret-title"),description=ctx._("help-s-ret-desc", sewd),color=bot.ec)
@@ -1374,7 +1374,7 @@ async def help(ctx,rcmd=None):
                     except:
                         pass
                     async with ctx.message.channel.typing():
-                        lang = ctx.user_lang()
+                        lang = ctx.user_lang() or "ja"
                         with open(f"lang/{lang}.json","r",encoding="utf-8") as j:
                             f = json.load(j)
                         sre = discord.Embed(title=ctx._("help-s-ret-title"),description=ctx._("help-s-ret-desc", sewd),color=bot.ec)
