@@ -182,7 +182,7 @@ class info(commands.Cog):
                 embed.add_field(name=ctx._("serverinfo-roles"),value=rlist)
             try:
                 embed.add_field(name=ctx._("serverinfo-nitroboost"),value=ctx._("serverinfo-nitroboost-val",sevinfo.premium_tier))
-                embed.add_field(name=ctx._("serverinfo-nitroboost-can-title"),value=ctx._(f"serverinfo-nitroboost-can-{sevinfo.premium_tier}").format(sevinfo.premium_tier,sevinfo.premium_subscription_count))
+                embed.add_field(name=ctx._("serverinfo-nitroboost-can-title"),value=ctx._(f"serverinfo-nitroboost-can-{sevinfo.premium_tier}",sevinfo.premium_tier,sevinfo.premium_subscription_count))
             except:
                 pass
 

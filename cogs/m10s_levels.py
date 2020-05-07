@@ -106,7 +106,7 @@ class levels(commands.Cog):
 
                         dt.text((50, 210), ctx.l10n(u,"lc-next")+tonextexp , font=fontc, fill='#ffffff')
 
-                        dt.text((50, 300), ctx.l10n("lc-createdby").format(cb.replace("m@ji☆","おあず").replace("kazuta123","kazuta246").replace("-a","").replace("-b","").replace("-c","")) , font=fontc, fill='#ffffff')
+                        dt.text((50, 300), ctx.l10n(u,"lc-createdby",cb.replace("m@ji☆","おあず").replace("kazuta123","kazuta246").replace("-a","").replace("-b","").replace("-c","")) , font=fontc, fill='#ffffff')
                     else:
                         dt.text((300, 60), u.display_name[0:10] +etc, font=fonta, fill='#000000')
 
@@ -116,7 +116,7 @@ class levels(commands.Cog):
 
                         dt.text((50, 210), ctx.l10n(u,"lc-next")+tonextexp , font=fontc, fill='#000000')
 
-                        dt.text((50, 300), ctx.l10n(u,"lc-createdby").format(cb.replace("m@ji☆","おあず").replace("kazuta123","kazuta246").replace("-a","").replace("-b","").replace("-c","")) , font=fontc, fill='#000000')
+                        dt.text((50, 300), ctx.l10n(u,"lc-createdby",cb.replace("m@ji☆","おあず").replace("kazuta123","kazuta246").replace("-a","").replace("-b","").replace("-c","")) , font=fontc, fill='#000000')
 
                     cv.save("imgs/sina'slevelcard.png", 'PNG')
                 await ctx.send(file=discord.File("imgs/sina'slevelcard.png"))
