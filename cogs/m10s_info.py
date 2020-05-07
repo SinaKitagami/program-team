@@ -49,7 +49,7 @@ class info(commands.Cog):
                 e.add_field(name=ctx._("aui-id"),value=u.id)
                 e.add_field(name=ctx._("aui-dr"),value=u.discriminator)
                 e.add_field(name=ctx._("aui-isbot"),value=u.bot)
-                e.add_field(name=ctx._("aui-flags"),value=f'\n'.join(flags.get_list()))
+                e.add_field(name=ctx._("aui-flags"),value=f'\n'.join(flags.get_list()) or "なし")
                 e.set_thumbnail(url=u.avatar_url)
                 tm=(u.created_at + rdelta(hours=9)).strftime("%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}").format(*"年月日時分秒")
                 e.set_footer(text=ctx._("aui-created",tm))
@@ -121,7 +121,7 @@ class info(commands.Cog):
             lmsc=ut.get_vmusic(self.bot,info)
             if lmsc:
                 embed.add_field(name=ctx._("play-use-sina",lmsc['name'],lmsc['url']),value=f"in:{lmsc['guild'].name}")
-            embed.add_field(name=ctx._("aui-flags"),value=f'\n'.join(flags.get_list()))
+            embed.add_field(name=ctx._("aui-flags"),value=f'\n'.join(flags.get_list()) or "なし")
         await ctx.send(embed=embed)
 
 
