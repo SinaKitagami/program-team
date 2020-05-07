@@ -5,6 +5,8 @@ import sqlite3
 import pickle
 import discord
 
+import aiohttp
+
 sqlite3.register_converter('pickle', pickle.loads)
 sqlite3.register_converter('json', json.loads)
 sqlite3.register_adapter(dict, json.dumps)
@@ -123,3 +125,61 @@ def get_vmusic(bot,member):
         }
     else:
         return None
+
+async def get_badges(bot,user):
+    headers={
+        "User-Agent":"DiscordBot ()",
+        "Authorization":f"Bot {bot.http.token}"
+    }
+    uid=user.id
+
+    async with bot.session.get(f"https://discordapp.com/api/v6/users/{uid}",headers=headers) as resp:
+        resp.raise_for_status()
+        rq=await resp.json()
+    flags=format(rq["public_flags"],"b")[::-1]
+    return m10s_badges(flags)
+
+
+
+class m10s_badges:
+
+    def __init__(self,flags):
+
+        self.raw_flags=flags[::-1]
+
+        flags=flags[::-1].zfill(18)[::-1]
+        self.staff= flags[0]=="1"
+        self.partner= flags[1]=="1"
+        self.hypesquad_events= flags[2]=="1"
+        self.bug_hunter_1= flags[3]=="1"
+        self.hypesquad_h_bravery= flags[6]=="1"
+        self.hypesquad_h_brilliance= flags[7]=="1"
+        self.hypesquad_h_balance= flags[8]=="1"
+        self.ealry_supporter= flags[9]=="1"
+        self.team_user= flags[10]=="1"
+        self.system= flags[12]=="1"
+        self.bug_hunter_2= flags[14]=="1"
+        self.verified_bot= flags[16]=="1"
+        self.verified_bot_developer= flags[17]=="1"
+
+        self.dict_flags={
+            "Discord Staff":self.staff,
+            "Discord Partner":self.partner,
+            "Hypesquad Events":self.hypesquad_events,
+            "Bug Hunter Level 1":self.bug_hunter_1,
+            "House Bravery":self.hypesquad_h_bravery,
+            "House Brilliance":self.hypesquad_h_brilliance,
+            "House Balance":self.hypesquad_h_balance,
+            "Early Supporter":self.ealry_supporter,
+            "Team User":self.team_user,
+            "System":self.system,
+            "Bug Hunter Level 2":self.bug_hunter_2,
+            "Verified Bot":self.verified_bot,
+            "Verified Bot Developer":self.verified_bot_developer,
+        }
+
+    def get_dict(self):
+        return self.dict_flags
+
+    def get_list(self):
+        return [bn for bn,bl in self.dict_flags.items() if bl]

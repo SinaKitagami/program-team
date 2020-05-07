@@ -42,7 +42,7 @@ class AppleMiscCog(commands.Cog):
             await ctx.send(f"```{result}```")
 
     @commands.command()
-    @commans.is_owner()
+    @commands.is_owner()
     async def clear_l10n_cache(self, ctx):
         self.bot.translate_handler.clean_cache()
 
