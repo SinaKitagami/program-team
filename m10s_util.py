@@ -148,25 +148,25 @@ class m10s_badges:
         self.raw_flags=flags[::-1]
 
         flags=flags[::-1].zfill(18)[::-1]
-        self.staff=True if flags[0]=="1" else False
-        self.partner=True if flags[1]=="1" else False
-        self.hypesquad_events=True if flags[2]=="1" else False
-        self.bug_hanter_1=True if flags[3]=="1" else False
-        self.hypesquad_h_bravery=True if flags[6]=="1" else False
-        self.hypesquad_h_brilliance=True if flags[7]=="1" else False
-        self.hypesquad_h_balance=True if flags[8]=="1" else False
-        self.ealry_supporter=True if flags[9]=="1" else False
-        self.team_user=True if flags[10]=="1" else False
-        self.system=True if flags[12]=="1" else False
-        self.bug_hanter_2=True if flags[14]=="1" else False
-        self.verified_bot=True if flags[16]=="1" else False
-        self.verified_bot_developer=True if flags[17]=="1" else False
+        self.staff= flags[0]=="1"
+        self.partner= flags[1]=="1"
+        self.hypesquad_events= flags[2]=="1"
+        self.bug_hunter_1= flags[3]=="1"
+        self.hypesquad_h_bravery= flags[6]=="1"
+        self.hypesquad_h_brilliance= flags[7]=="1"
+        self.hypesquad_h_balance= flags[8]=="1"
+        self.ealry_supporter= flags[9]=="1"
+        self.team_user= flags[10]=="1"
+        self.system= flags[12]=="1"
+        self.bug_hunter_2= flags[14]=="1"
+        self.verified_bot= flags[16]=="1"
+        self.verified_bot_developer= flags[17]=="1"
 
         self.dict_flags={
             "Discord Staff":self.staff,
             "Discord Partner":self.partner,
             "Hypesquad Events":self.hypesquad_events,
-            "Bug Hanter Level 1":self.bug_hanter_1,
+            "Bug Hunter Level 1":self.bug_hanter_1,
             "House Bravery":self.hypesquad_h_bravery,
             "House Brilliance":self.hypesquad_h_brilliance,
             "House Balance":self.hypesquad_h_balance,
