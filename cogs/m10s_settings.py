@@ -334,7 +334,7 @@ class settings(commands.Cog):
             try:
                 grl=commands.RoleConverter.convert(ctx,rl)
             except:
-                await ctx.send("有効な役職IDを指定してください。")
+                return await ctx.send("有効な役職IDを指定してください。")
             rid = grl.id
             gs["reward"][str(lv)] = rid
         self.bot.cursor.execute("UPDATE guilds SET reward = ? WHERE id = ?", (gs["reward"],ctx.guild.id))
