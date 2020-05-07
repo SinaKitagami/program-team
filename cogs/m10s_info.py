@@ -32,20 +32,24 @@ class info(commands.Cog):
             except:
                 await ctx.send(ctx._("aui-othere",traceback.format_exc()))
             else:
+                flags=await ut.get_badges(self.bot,u)
                 ptn=""
                 if u.id in self.bot.team_sina:
                     ptn=f',({ctx._("team_sina-chan")})'
                 if u.id in [i[1] for i in self.bot.partnerg]:
                     ptn=ptn+f',({ctx._("partner_guild_o")})'
                 if isva:
-                    ptn=ptn+f"、(💠{'認証済みアカウント'})"
+                    ptn=ptn+f"、(💠{ctx._('sina-v-ac')})"
                 e = discord.Embed(title=f"{ctx._('aui-uinfo')}{ptn}",color=self.bot.ec)
                 if u.system:
-                    e.add_field(name="✅システムアカウント",value="このアカウントは、Discordのシステムアカウントであり、安全です。",inline=False)
+                    e.add_field(name="✅",value=ctx._('aui-sysac'),inline=False)
+                if flags.verified_bot:
+                    e.add_field(name="✅",value=ctx._('aui-verified_bot'),inline=False)
                 e.add_field(name=ctx._("aui-name"),value=u.name)
                 e.add_field(name=ctx._("aui-id"),value=u.id)
                 e.add_field(name=ctx._("aui-dr"),value=u.discriminator)
                 e.add_field(name=ctx._("aui-isbot"),value=u.bot)
+                e.add_field(name=ctx._("aui-flags"),value=f'\n'.join(flags.get_list()))
                 e.set_thumbnail(url=u.avatar_url)
                 tm=(u.created_at + rdelta(hours=9)).strftime("%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}").format(*"年月日時分秒")
                 e.set_footer(text=ctx._("aui-created",tm))
@@ -68,19 +72,22 @@ class info(commands.Cog):
         else:
             isva=0
         async with ctx.message.channel.typing():
+            flags=await ut.get_badges(self.bot,info)
             ptn=""
             if info.id in self.bot.team_sina:
                 ptn=f',({ctx._("team_sina-chan")})'
             if info.id in [i[1] for i in self.bot.partnerg]:
                 ptn=ptn+f',({ctx._("partner_guild_o")})'
             if isva:
-                ptn=ptn+f"、(💠{'認証済みアカウント'})"
+                ptn=ptn+f"、(💠{ctx._('sina-v-ac')})"
             if ctx.guild.owner == info:
                 embed = discord.Embed(title=ctx._("uinfo-title"), description=f"{ptn} - {ctx._('userinfo-owner')}", color=info.color)
             else:
                 embed = discord.Embed(title=ctx._("uinfo-title"), description=ptn, color=info.color)
             if info.system:
-                embed.add_field(name="✅システムアカウント",value="このアカウントは、Discordのシステムアカウントであり、安全です。",inline=False)
+                embed.add_field(name="✅",value=ctx._("aui-sysac"),inline=False)
+            if flags.verified_bot:
+                embed.add_field(name="✅",value=ctx._("aui-verified_bot"),inline=False)
             embed.add_field(name=ctx._("userinfo-name"),value=f"{info.name} - {ut.ondevicon(info)}")
             try:
                 if not info.premium_since is None:
@@ -113,7 +120,8 @@ class info(commands.Cog):
                 embed.set_image(url=info.default_avatar_url_as(static_format='png'))
             lmsc=ut.get_vmusic(self.bot,info)
             if lmsc:
-                embed.add_field(name=f"思惟奈ちゃんを使って[{lmsc['name']}]({lmsc['url']} )を聴いています。",value=f"サーバー:{lmsc['guild'].name}")
+                embed.add_field(name=ctx._("play-use-sina",lmsc['name'],lmsc['url']),value=f"in:{lmsc['guild'].name}")
+            embed.add_field(name=ctx._("aui-flags"),value=f'\n'.join(flags.get_list()))
         await ctx.send(embed=embed)
 
 
@@ -212,7 +220,7 @@ class info(commands.Cog):
         e.add_field(name=ctx._("cpro-levelcard"),value=pf["levcard"])
         e.add_field(name=ctx._("cpro-renotif"),value=pf["onnotif"])
         e.add_field(name=ctx._("cpro-lang"),value=pf["lang"])
-        e.add_field(name="認証済みかどうか", value=pf["sinapartner"])
+        e.add_field(name=ctx._("sina-v-ac"), value=pf["sinapartner"])
         await ctx.send(embed=e)
 
     @commands.command()
