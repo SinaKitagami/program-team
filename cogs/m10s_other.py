@@ -357,7 +357,7 @@ class other(commands.Cog):
         await asyncio.sleep(sec)
         await ctx.message.delete()
 
-    @commands.command()
+    #@commands.command() - moved to apple_misc
     async def ping(self,ctx):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
         startt = time.time()

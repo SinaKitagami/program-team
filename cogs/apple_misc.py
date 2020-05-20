@@ -1,4 +1,5 @@
 import json
+import time
 import discord
 from discord.ext import commands
 
@@ -45,6 +46,23 @@ class AppleMiscCog(commands.Cog):
     @commands.is_owner()
     async def clear_l10n_cache(self, ctx):
         self.bot.translate_handler.clean_cache()
+
+    @commands.command()
+    async def ping(self, ctx):
+        message_time = ctx.message.created_at.timestamp
+        time_before_send = time.time()
+        msg = await ctx.send("...")
+        time_after_send = time.time()
+        latency = self.bot.latency
+        tb = abs(time_before_send - message_time)
+        ba = abs(time_after_send - time_before_send)
+        content = f"LA: {latency:.3}\nTB: {tb:.3}\nBA: {ba:.3}\n"
+        if hasattr(ctx, "context_at") and isinstance(ctx.context_at, float):
+            context_at = ctx.context_at
+            tc = abs(context_at - message_time)
+            cb = abs(time_before_send - context_at)
+            content += f"TC: {tc:.3}\nCB: {cb:.3}\n"
+        await msg.edit(content=content)
 
 def setup(bot):
     bot.add_cog(AppleMiscCog(bot))
