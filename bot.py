@@ -109,7 +109,7 @@ bot.translate_handler = TranslateHandler(bot, ["en", "ja"])
 bot._get_context = bot.get_context
 async def get_context(msg, cls=LocalizedContext):
     ctx = await bot._get_context(msg, cls=cls)
-    ctx.context_at = time.time()
+    ctx.context_at = datetime.datetime.utcnow().timestamp()
     return ctx
 bot.get_context = get_context
 

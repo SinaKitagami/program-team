@@ -1,5 +1,5 @@
 import json
-import time
+import datetime
 import discord
 from discord.ext import commands, tasks
 
@@ -53,9 +53,9 @@ class AppleMiscCog(commands.Cog):
     @commands.command()
     async def ping(self, ctx):
         message_time = ctx.message.created_at.timestamp()
-        time_before_send = time.time()
+        time_before_send = datetime.datetime.utcnow().timestamp()
         msg = await ctx.send("...")
-        time_after_send = time.time()
+        time_after_send = datetime.datetime.utcnow().timestamp()
         latency = self.bot.latency
         tb = abs(time_before_send - message_time)
         ba = abs(time_after_send - time_before_send)
@@ -70,9 +70,9 @@ class AppleMiscCog(commands.Cog):
     @tasks.loop(minutes=30)
     async def report_ping(self):
         channel = self.bot.get_channel(PING_CH)
-        time_before_send = time.time()
+        time_before_send = datetime.datetime.utcnow().timestamp()
         msg = await channel.send("...")
-        time_after_send = time.time()
+        time_after_send = datetime.datetime.utcnow().timestamp()
         ba = abs(time_after_send - time_before_send)
         await msg.edit(f"LA: {self.bot.latency:.3}\nBA: {ba:.3}")
 
