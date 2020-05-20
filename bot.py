@@ -107,8 +107,10 @@ bot.close = close_handler
 
 bot.translate_handler = TranslateHandler(bot, ["en", "ja"])
 bot._get_context = bot.get_context
-async def get_context(msg, cls=LocalizedContext):
-    return await bot._get_context(msg, cls=cls)
+async def get_context(msg, cls=PingContext):
+    ctx = await bot._get_context(msg, cls=cls)
+    ctx.context_at = time.time()
+    return ctx
 bot.get_context = get_context
 
 bot._ = bot.translate_handler.get_translation_for
