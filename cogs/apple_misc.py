@@ -67,7 +67,7 @@ class AppleMiscCog(commands.Cog):
             content += f"TC: {tc:.3}\nCB: {cb:.3}\n"
         await msg.edit(content=content)
 
-    @tasks.loop(hours=1)
+    @tasks.loop(minutes=30)
     async def report_ping(self):
         channel = bot.get_channel(PING_CH)
         time_before_send = time.time()
