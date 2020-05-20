@@ -1,7 +1,7 @@
 import json
 import time
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 
 LANGUAGE = {"python", "javascript"}
 BLOCKS = {"if", "while", "for", "def"}
@@ -14,9 +14,12 @@ CODE = [
     ("block_end",)
 ]
 
+PING_CH = 712564878480637973
+
 class AppleMiscCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.report_ping.start()
 
     @commands.command()
     async def code_in(self, ctx, lang):
@@ -63,6 +66,19 @@ class AppleMiscCog(commands.Cog):
             cb = abs(time_before_send - context_at)
             content += f"TC: {tc:.3}\nCB: {cb:.3}\n"
         await msg.edit(content=content)
+
+    @tasks.loop(hours=1)
+    async def report_ping(self):
+        channel = bot.get_channel(PING_CH)
+        time_before_send = time.time()
+        msg = await channel.send("...")
+        time_after_send = time.time()
+        ba = abs(time_after_send - time_before_send)
+        await msg.edit(f"LA: {self.bot.latency:.3}\nBA: {ba:.3}")
+
+    @report_ping.before_loop
+    async def before_report_loop(self):
+        await self.bot.wait_until_ready()
 
 def setup(bot):
     bot.add_cog(AppleMiscCog(bot))
