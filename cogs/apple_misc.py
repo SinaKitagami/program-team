@@ -69,7 +69,7 @@ class AppleMiscCog(commands.Cog):
 
     @tasks.loop(minutes=30)
     async def report_ping(self):
-        channel = bot.get_channel(PING_CH)
+        channel = self.bot.get_channel(PING_CH)
         time_before_send = time.time()
         msg = await channel.send("...")
         time_after_send = time.time()
