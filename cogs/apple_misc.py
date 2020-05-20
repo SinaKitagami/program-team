@@ -52,7 +52,7 @@ class AppleMiscCog(commands.Cog):
 
     @commands.command()
     async def ping(self, ctx):
-        message_time = ctx.message.created_at.timestamp
+        message_time = ctx.message.created_at.timestamp()
         time_before_send = time.time()
         msg = await ctx.send("...")
         time_after_send = time.time()
