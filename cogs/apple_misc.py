@@ -74,7 +74,7 @@ class AppleMiscCog(commands.Cog):
         msg = await channel.send("...")
         time_after_send = datetime.datetime.utcnow().timestamp()
         ba = abs(time_after_send - time_before_send)
-        await msg.edit(f"LA: {self.bot.latency:.3}\nBA: {ba:.3}")
+        await msg.edit(content=f"LA: {self.bot.latency:.3}\nBA: {ba:.3}")
 
     @report_ping.before_loop
     async def before_report_loop(self):
