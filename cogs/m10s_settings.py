@@ -295,23 +295,8 @@ class settings(commands.Cog):
             await ctx.send(ctx._("hash-connect"))
         self.bot.cursor.execute("UPDATE guilds SET hash = ? WHERE id = ?", (d["hash"],ctx.guild.id))
 
-    @commands.command(aliases=["オンライン通知"])
-    async def onlinenotif(self,ctx,mode,uid:int):
-        self.bot.cursor.execute("select * from users where id=?",(ctx.author.id,))
-        upf = self.bot.cursor.fetchone()
-        if mode=='add':
-            upf["onnotif"].append(uid)
-            self.bot.cursor.execute("UPDATE users SET onnotif = ? WHERE id = ?", (upf["onnotif"],ctx.author.id))
-            await ctx.send(ctx._("onnotif-set"))
-        elif mode =='del':
-            upf["onnotif"].remove(uid)
-            self.bot.cursor.execute("UPDATE users SET onnotif = ? WHERE id = ?", (upf["onnotif"],ctx.author.id))
-            await ctx.send(ctx._("onnotif-stop"))
-        else:
-            await ctx.send(ctx._("onnotif-error"))
-        self.bot.cursor.execute("select * from users where id=?",(ctx.author.id,))
-        upf = self.bot.cursor.fetchone()
-        await ctx.send(f"upf:{upf['onnotif']}")
+    #@commands.command(aliases=["オンライン通知"])
+    # moved to apple_onlinenotif
 
     @commands.command()
     async def levelupsendto(self,ctx,to):

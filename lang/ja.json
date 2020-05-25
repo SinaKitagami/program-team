@@ -5,13 +5,6 @@
 
     "setl-set":"設定しました。",
 
-    "onlinenotif":"{0}さんがオンラインになりました！",
-    "offlinenotif":"{0}さんがオフラインになりました。",
-
-    "onnotif-set":"そのユーザーのオンライン/オフラインの通知を受け取るようにしました。",
-    "onnotif-stop":"そのユーザーのオンライン/オフライン通知を受け取らないようにしました。",
-    "onnotif-error":"不備があります。`s-help onlinenotif`で確認してください。",
-
     "global-notprofile":"{0}!\nあなたにはまだプロファイルがありません！`s-startglobal [グローバルのニックネーム] [16進数色コード]`コマンドで作成してください！",
     "global-banned":"{0}!\nあなたはこのグローバルチャットを使用する権利がありません。",
     "global-profile-create":"プロファイルを作成しました！\n`s-globalcolor`や`s-globalnick`で、今記録した内容を書き換えることができます。\n詳しくはhelpのひきすうにコマンド名を入れて確認してください。",
@@ -1296,7 +1289,9 @@
         "使い方",
         "`s-onlinenotif [add/del] [ユーザーID]`",
         "詳しく",
-        "指定したユーザーがオンラインになったりオフラインになった時に通知します。addで受け取るように、delで受け取らないようにします。"
+        "指定したユーザーがオンラインになったりオフラインになった時に通知します。addで受け取るように、delで受け取らないようにします。",
+        "`s-onlinenotif settings yes/no`",
+        "onlinenotifを有効/無効にします。"
     ],
     "nh-levelupsendto": [
         "levelupsendtoについて",
@@ -1594,5 +1589,16 @@
     "aui-verified_bot":"認証済みbot",
     "aui-flags":"アカウントのバッジ/フラグ",
 
-    "play-use-sina":"思惟奈ちゃんをつかって[{}]({})を聴いています。"
+    "play-use-sina":"思惟奈ちゃんをつかって[{}]({})を聴いています。",
+
+    "onlinenotif-notif": "{} さんがオンラインになりました!",
+    "onlinenotif-offlinenotif": "{} さんがオフラインになりました。",
+    "onlinenotif-subscribing": "以下のユーザーのオンライン通知を受け取っています: {}",
+    "onlinenotif-nousers": "オンライン通知を受け取っていません。",
+    "onlinenotif-already": "すでにオンライン通知を受け取っています。",
+    "onlinenotif-shareGuild": "共通サーバーがありません。",
+    "onlinenotif-success": "そのユーザーのオンライン通知を受け取るよう設定しました。",
+    "onlinenotif-removeSuccess": "オンライン通知を受け取らないよう設定しました。",
+    "onlinenotif-yet": "そのユーザーのオンライン通知を受け取っていません。",
+    "onlinenotif-settings": "設定しました。"
 }
