@@ -90,7 +90,7 @@ bot.cursor.execute("CREATE TABLE IF NOT EXISTS gban_settings(id integer PRIMARY 
 bot.cursor.execute("CREATE TABLE IF NOT EXISTS gban_dates(id integer PRIMARY KEY NOT NULL,reason text NOT NULL,gban_by id NOT NULL);")
 
 bot.cursor.execute("CREATE TABLE IF NOT EXISTS welcome_auth(id integer PRIMARY KEY NOT NULL,category integer,use integer NOT NULL,can_view pickle NOT NULL,next_reaction NOT NULL,au_w pickle NOT NULL,give_role integer NOT NULL);")
-
+bot.cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS online_agreed integer;")
 bot.session = aiohttp.ClientSession(loop=bot.loop)
 
 bot._default_close = bot.close
@@ -162,6 +162,7 @@ bot.features=config.sp_features
 
 bot.apple_util = AppleUtil(bot)
 bot.load_extension("cogs.apple_misc")
+bot.load_extension("cogs.apple_onlinenotif")
 
 #初回ロード
 """db.files_download_to_file( "guildsetting.json" , "/guildsetting.json" )
@@ -480,39 +481,7 @@ async def on_member_update(b,a):
                     await ch.send(embed=e)
     except:
         pass
-    while Donotif:
-        await asyncio.sleep(0.5)
-    Donotif = True
-    bot.cursor.execute("select * from users")
-    upf = bot.cursor.fetchall()
-    try:
-        if str(b.status)=="offline" and not str(a.status)=="offline":
-            for pf in upf:
-                if a.id in pf["onnotif"] :
-                    sdu = bot.get_user(pf["id"])
-                    dc = await ut.opendm(sdu)
-                    lm = await dc.history(limit=1).flatten()
-                    nf=str(bot.get_emoji(653161518531215390))+bot._(sdu, "onlinenotif", a)
-                    if not lm[0].content==nf:
-                        ts = discord.Embed(title="", description="", color=bot.ec)
-                        ts.set_footer(text=ut.ondevicon(a)+","+bot._(sdu,"sendedat"))
-                        ts.timestamp = datetime.datetime.now() - rdelta(hours=9)
-                        await dc.send(nf,embed=ts)
-        elif not str(b.status)=="offline" and str(a.status)=="offline":
-            for pf in upf:
-                if a.id in pf["onnotif"]:
-                    sdu = bot.get_user(pf["id"])
-                    dc = await ut.opendm(sdu)
-                    lm = await dc.history(limit=1).flatten()
-                    nf=str(bot.get_emoji(653161518392803348))+bot._(sdu, "offlinenotif", a)
-                    if not lm[0].content==nf:
-                        ts = discord.Embed(title="", description="", color=bot.ec)
-                        ts.set_footer(text=bot._(sdu,"sendedat"))
-                        ts.timestamp = datetime.datetime.now() - rdelta(hours=9)
-                        await dc.send(nf,embed=ts)
-    except:
-        print(traceback.format_exc(2))
-    Donotif = False
+    # online notif are now handled in apple_onlinenotif
 
 async def nga(m,r):
     ch=m.guild.get_channel(631875590307446814)

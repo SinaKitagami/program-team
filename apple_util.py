@@ -1,4 +1,5 @@
 import time
+import datetime
 import discord
 
 # AppleUtil - utility tool made by apple502j.
@@ -58,6 +59,10 @@ class AppleUtil(object):
         async with self.bot.session.get(url) as resp:
             resp.raise_for_status()
             return await resp.text()
+
+    @staticmethod
+    def within(dt, minutes):
+        return (datetime.datetime.utcnow() - dt) < datetime.timedelta(minutes=minutes)
 
 def setup(bot):
     pass

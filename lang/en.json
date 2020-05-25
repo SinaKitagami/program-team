@@ -5,12 +5,6 @@
 
     "setl-set":"Setting done",
 
-    "onlinenotif":"{0}is online now!",
-    "offlinenotif":"{0}went offline",
-
-    "onnotif-set":"Online/Offline notification of {0} is now enabled!",
-    "onnotif-stop":"Online/Offline notification of {0} is disabled.",
-    "onnotif-error":"There seems to have an omission. Check by `s-help onlinenotif`",
 
     "global-notprofile":"{0}!\nYou don’t have a profile yet. `s-startglobal [Global Nickname] Please create it by [Hexadecimal Color Code]!`",
     "global-banned":"{0}!\nYou don’t have permission to access the global chat",
@@ -262,7 +256,7 @@
     "ssm-seeyou":"When exited server",
     "ssm-set":"Set!",
     "ssm-not":"There seems to have an omission.Please check them by `s-help setsysmsg`!",
-    
+
     "serverinfo-afkch":"afk channel ",
     "serverinfo-afktimeout":"afk timeout",
     "ci-None":"none",
@@ -364,7 +358,7 @@
     "twi-twi":"tweet",
     "twi-see":"Look this tweet ",
     "twi-error":"Unable to acquire ",
-    
+
     "game1-join-anyone":"There’s an invitation of a game! Join by reaction!",
     "game1-vs-et":"near21(Interpersonal)",
     "game1-vs-ed":"1P:{0}\n2P:{1}\n Try to get 21 as close as possible",
@@ -502,7 +496,7 @@
     "h-checkscrauname":"`s-checkscrauname [Name]`\n Reply whether one can use that name on Scratch.",
     "h-checkmember":"`s-checkmember [Things that can identify the member]`\n Reply the user’s ban status on other servers where Sina-chan is present.  ",
 
-    
+
   "h-invc":"`s-invc`\nJoin VC you are in.",
     "h-stop":"`s-stop`\n Exit from VC, and stop the music.",
     "h-play":"`s-play [url/Search word]`\nSearch a music by the word given, then play it in VC you are in. \nWhen player is playing, add it to queue.",
@@ -635,7 +629,7 @@
     "ranklev-lenover":"There are some items not shown",
 
     "playinginfo-custom_status":"Custom status",
-    
+
         "mee6-notfound":"This server is not registered to MEE6.",
 
     "comqest":[

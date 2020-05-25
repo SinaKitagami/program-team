@@ -6,12 +6,6 @@
 
     "setl-set":"设置完成。",
 
-    "onlinenotif":"{0}现在已经上线了!",
-    "offlinenotif":"{0}现在已经下线了!",
-
-    "onnotif-set":"你现在可以收到该用户的在线/离线通知。",
-    "onnotif-stop":"你现在拒否以收到该用户的在线/离线通知。",
-    "onnotif-error":"是有不足之处的。在`s-help onlinenotif`上看看吧。",
 
     "global-notprofile":"{0}!\n你简介是不存在的！用`s-startglobal [Global Chat Name] [十六进制颜色代码]`命令创建它!",
     "global-banned":"{0}!\n你可以不能使用Global Chat。",
