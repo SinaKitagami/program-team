@@ -90,7 +90,10 @@ bot.cursor.execute("CREATE TABLE IF NOT EXISTS gban_settings(id integer PRIMARY 
 bot.cursor.execute("CREATE TABLE IF NOT EXISTS gban_dates(id integer PRIMARY KEY NOT NULL,reason text NOT NULL,gban_by id NOT NULL);")
 
 bot.cursor.execute("CREATE TABLE IF NOT EXISTS welcome_auth(id integer PRIMARY KEY NOT NULL,category integer,use integer NOT NULL,can_view pickle NOT NULL,next_reaction NOT NULL,au_w pickle NOT NULL,give_role integer NOT NULL);")
-bot.cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS online_agreed integer;")
+try:
+    bot.cursor.execute("ALTER TABLE users ADD COLUMN online_agreed integer;")
+except:
+    pass
 bot.session = aiohttp.ClientSession(loop=bot.loop)
 
 bot._default_close = bot.close

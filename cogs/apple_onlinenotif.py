@@ -16,7 +16,10 @@ class OnlineNotif(commands.Cog):
             ]
         self.bot.shares_guild = shares_guild
         def get_member(user_id):
-            return [*[m for m in self.bot.get_all_members() if m.id == user_id], None][0]
+            m = [g.get_member(user_id) for g in bot.guilds if g.get_member(user_id)]
+            if m:
+                return m[0]
+            return None
         self.bot.get_member = get_member
 
         self._last_posted = {}
@@ -25,11 +28,11 @@ class OnlineNotif(commands.Cog):
         return [
             {"user_id": int(i["id"]), "subscribe": [int(j) for j in (i["onnotif"] or []) if j]}
             for i
-            in self.bot.db.execute("SELECT id, onnotif FROM users").fetchall()
+            in self.bot.cursor.execute("SELECT id, onnotif FROM users").fetchall()
         ]
 
     def get_subscribing_of_user(self, user):
-        return self.bot.db.execute("SELECT subscribe FROM users WHERE id = ?", (user.id,)).fetchone()["subscribe"]
+        return self.bot.cursor.execute("SELECT onnotif FROM users WHERE id = ?", (user.id,)).fetchone()["onnotif"] or []
 
     def get_subscribed_of_user(self, user):
         return [
@@ -40,7 +43,7 @@ class OnlineNotif(commands.Cog):
         ]
 
     def onlinenotif_enabled(self, user):
-        enabled = self.bot.db.execute("SELECT online_agreed FROM users WHERE id = ?", (user.id,)).fetchone()
+        enabled = self.bot.cursor.execute("SELECT online_agreed FROM users WHERE id = ?", (user.id,)).fetchone()
         return enabled and enabled["online_agreed"]
 
     @commands.Cog.listener()
@@ -82,7 +85,7 @@ class OnlineNotif(commands.Cog):
         if not self.bot.shares_guild(ctx.author.id, user.id):
             return await ctx.say("onlinenotif-shareGuild")
         subscribing.append(user.id)
-        ctx.db.execute("UPDATE users SET onnotif = ? WHERE id = ?",(subscribing, ctx.author.id))
+        self.bot.cursor.execute("UPDATE users SET onnotif = ? WHERE id = ?",(subscribing, ctx.author.id))
         await ctx.say("onlinenotif-success")
 
     @onlinenotif.command(aliases=["remove", "del"])
@@ -92,14 +95,14 @@ class OnlineNotif(commands.Cog):
         if user.id not in subscribing:
             return await ctx.say("onlinenotif-yet")
         subscribing.remove(user.id)
-        ctx.db.execute("UPDATE users SET onnotif = ? WHERE id = ?",(subscribing, ctx.author.id))
+        self.bot.cursor.execute("UPDATE users SET onnotif = ? WHERE id = ?",(subscribing, ctx.author.id))
         await ctx.say("onlinenotif-removeSuccess")
 
     @onlinenotif.command()
     async def settings(self, ctx, enabled: bool = False):
         """Choose whether someone can receive your online notification.
         Note that you have to share server with that user."""
-        ctx.db.execute("UPDATE users SET online_agreed = ? WHERE id = ?", (int(enabled), ctx.author.id))
+        self.bot.cursor.execute("UPDATE users SET online_agreed = ? WHERE id = ?", (int(enabled), ctx.author.id))
         await ctx.say("onlinenotif-settings")
 
 

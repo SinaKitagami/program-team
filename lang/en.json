@@ -717,5 +717,15 @@
     "p-manage_nicknames":"Management of other member’s nickname",
     "p-manage_roles":"Management of roles",
     "p-manage_webhooks":"Management of Webhooks",
-    "p-manage_emojis":"Management of Emojis"
+    "p-manage_emojis":"Management of Emojis",
+    "onlinenotif-notif": "{} is now online!",
+    "onlinenotif-offlinenotif": "{} is now offline.",
+    "onlinenotif-subscribing": "You are receiving online notifications of these users. Note that users who you don't share server with are not listed.\n{}",
+    "onlinenotif-already": "You are already receiving online notification of this user.",
+    "onlinenotif-shareGuild": "You have to share server with this user.",
+    "onlinenotif-success": "Added successfully.",
+    "onlinenotif-yet": "You are not receiving online notification of this user.",
+    "onlinenotif-removeSuccess": "Removed successfully.",
+    "onlinenotif-nousers": "You are not receiving online notifications of anyone. Make sure to share server if you didn't.",
+    "onlinenotif-settings": "Settings successfully saved."
 }
