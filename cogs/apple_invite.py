@@ -161,7 +161,7 @@ class AppleInviteCog(commands.Cog):
         i2 = await self.bot.fetch_invite(i.code)
         pc = i2.approximate_presence_count
         await i.delete()
-        online = len([m for m in ctx.guild.members if m.status is not discord.Status.offline])
+        online = len([m for m in ctx.guild.members if m.status is not discord.Status.offline and self.bot.can_use_online(m)])
         await ctx.author.send(f"オンライン隠し: {pc - online}人")
 
 
