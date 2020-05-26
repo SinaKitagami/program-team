@@ -91,17 +91,19 @@ class gcoms(commands.Cog):
             cid = ctx.author.id
         else:
             cid = uid
+        ap = self.bot.cursor("SELECT gmod FROM users WHERE id=?", (ctx.author.id,)).fetchone()
         self.bot.cursor.execute("select * from users where id=?",(cid,))
         upf = self.bot.cursor.fetchone()
         embed = discord.Embed(title=ctx._("global-status-title",cid), description="", color=upf["gcolor"])
-        embed.add_field(name="banned", value=upf["gban"])
         embed.add_field(name="nick", value=upf["gnick"])
         embed.add_field(name="color", value=str(upf["gcolor"]))
         embed.add_field(name="gmod", value=upf["gmod"])
         embed.add_field(name="tester", value=upf["galpha"])
         embed.add_field(name="star", value=upf["gstar"])
-        if upf["gban"]:
-            embed.add_field(name="reason of ban",value=upf["gbanhist"])
+        if ap and ap["gmod"]:
+            embed.add_field(name="banned", value=upf["gban"])
+            if upf["gban"]:
+                embed.add_field(name="reason of ban",value=upf["gbanhist"])
         await ctx.send(embed=embed)
 
     @commands.command()
