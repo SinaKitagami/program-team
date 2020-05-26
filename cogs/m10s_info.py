@@ -63,10 +63,12 @@ class info(commands.Cog):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
         if mus == None:
             info = ctx.message.author
+            can_online = True
         else:
             info = mus
             if not self.bot.shares_guild(mus.id, ctx.author.id):
                 return await ctx.say("cannot-send-userinfo")
+            can_online = self.bot.can_use_online(info)
         self.bot.cursor.execute("select * from users where id=?",(info.id,))
         upf = self.bot.cursor.fetchone()
         if upf:
@@ -91,7 +93,7 @@ class info(commands.Cog):
             if flags.verified_bot:
                 embed.add_field(name="✅",value=ctx._("aui-verified_bot"),inline=False)
             devices = ""
-            if self.bot.can_use_online(info):
+            if can_online:
                 devices = f" - {ut.ondevicon(info)}"
             embed.add_field(name=ctx._("userinfo-name"),value=f"{info.name}{devices}")
             try:
@@ -101,12 +103,12 @@ class info(commands.Cog):
                 pass
             embed.add_field(name=ctx._("userinfo-joindiscord"), value=(info.created_at+ rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
             embed.add_field(name=ctx._("userinfo-id"), value=info.id)
-            if self.bot.can_use_online(info):
+            if can_online:
                 embed.add_field(name=ctx._("userinfo-online"), value=f"{str(info.status)}")
             embed.add_field(name=ctx._("userinfo-isbot"), value=str(info.bot))
             embed.add_field(name=ctx._("userinfo-displayname"), value=info.display_name)
             embed.add_field(name=ctx._("userinfo-joinserver"), value=(info.joined_at + rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
-            if not info.activity == None:
+            if can_online and not info.activity == None:
                 try:
                     if info.activity.type == discord.ActivityType.custom:
                         embed.add_field(name=ctx._("userinfo-nowplaying"), value=info.activity)
