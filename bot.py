@@ -167,6 +167,20 @@ bot.apple_util = AppleUtil(bot)
 bot.load_extension("cogs.apple_misc")
 bot.load_extension("cogs.apple_onlinenotif")
 
+def shares_guild(user_id_a, user_id_b):
+    return not not [
+        guild
+        for guild
+        in bot.guilds
+        if set([user_id_a, user_id_b]).issubset(frozenset(guild._members.keys()))
+    ]
+bot.shares_guild = shares_guild
+
+def can_use_online(self, user):
+    enabled = bot.cursor.execute("SELECT online_agreed FROM users WHERE id = ?", (user.id,)).fetchone()
+    return enabled and enabled["online_agreed"]
+bot.can_use_online = can_use_online
+
 #初回ロード
 """db.files_download_to_file( "guildsetting.json" , "/guildsetting.json" )
 db.files_download_to_file( "profiles.json" , "/profiles.json" )

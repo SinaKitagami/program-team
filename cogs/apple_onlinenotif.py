@@ -7,20 +7,13 @@ from discord.ext import commands
 class OnlineNotif(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        def shares_guild(user_id_a, user_id_b):
-            return not not [
-                guild
-                for guild
-                in self.bot.guilds
-                if set([user_id_a, user_id_b]).issubset(frozenset(guild._members.keys()))
-            ]
-        self.bot.shares_guild = shares_guild
         def get_member(user_id):
             m = [g.get_member(user_id) for g in bot.guilds if g.get_member(user_id)]
             if m:
                 return m[0]
             return None
         self.bot.get_member = get_member
+        self.onlinenotif_enabled = bot.can_use_online
 
         self._last_posted = {}
 
@@ -41,10 +34,6 @@ class OnlineNotif(commands.Cog):
             in self.get_subscribers()
             if user.id in i["subscribe"]
         ]
-
-    def onlinenotif_enabled(self, user):
-        enabled = self.bot.cursor.execute("SELECT online_agreed FROM users WHERE id = ?", (user.id,)).fetchone()
-        return enabled and enabled["online_agreed"]
 
     @commands.Cog.listener()
     async def on_member_update(self, before, after):

@@ -1600,5 +1600,8 @@
     "onlinenotif-success": "そのユーザーのオンライン通知を受け取るよう設定しました。",
     "onlinenotif-removeSuccess": "オンライン通知を受け取らないよう設定しました。",
     "onlinenotif-yet": "そのユーザーのオンライン通知を受け取っていません。",
-    "onlinenotif-settings": "設定しました。"
+    "onlinenotif-settings": "設定しました。",
+
+    "cannot-send-online": "オンライン状態を送信できません。",
+    "cannot-send-userinfo": "ユーザー情報を送信できません。"
 }

@@ -43,6 +43,10 @@ class gcoms(commands.Cog):
             cid = ctx.message.author.id
         else:
             cid = uid
+            if not self.bot.shares_guild(uid, ctx.author.id):
+                return await ctx.say("ison-notfound")
+            if not self.bot.can_use_online(self.bot.get_user(uid)):
+                return await ctx.say("ison-notfound")
         async with ctx.message.channel.typing():
             for guild in self.bot.guilds:
                 u = guild.get_member(uid)
