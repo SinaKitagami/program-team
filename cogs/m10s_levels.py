@@ -16,14 +16,15 @@ class levels(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def ranklev(self,ctx):
+    async def ranklev(self,ctx,start=1,end=10):
         self.bot.cursor.execute("select * from guilds where id=?",(ctx.guild.id,))
         gs = self.bot.cursor.fetchone()
         async with ctx.channel.typing():
             le = gs["levels"]
             lrs = [(int(k),v["level"],v["exp"]) for k,v in le.items() if v["dlu"]]
             text=""
-            for ind,i in enumerate(sorted(lrs, key=itemgetter(1,2), reverse=True)):
+            lranks=[(ind,i) for ind,i in enumerate(sorted(lrs, key=itemgetter(1,2), reverse=True))]
+            for ind,i in lranks[start-1:end-1]:
                 un = ctx.guild.get_member(i[0])
                 if un is None:
                     un = await self.bot.fetch_user(i[0])
