@@ -27,7 +27,7 @@ class AppleFOCCog(commands.Cog):
             return True
 
     def is_offline(self, member):
-        return member.status is discord.Status.offline
+        return member.status is discord.Status.offline and self.bot.can_use_online(member)
 
     async def send(self, member, logc):
         e = discord.Embed(title="オンライン隠し", description=member.mention, timestamp=datetime.datetime.utcnow())

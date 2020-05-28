@@ -117,6 +117,9 @@ class TranslateHandler:
         return self.get_raw_translation(target, key, *args, **kwargs)
 
 class LocalizedContext(commands.Context):
+    async def say(self, key, *args, **kwargs):
+        return await self.send(self._(key, *args, **kwargs))
+
     def _(self, key, *args, **kwargs):
         return self.bot.translate_handler.get_translation_for(self.author, key, *args, **kwargs)
 
