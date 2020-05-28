@@ -174,7 +174,7 @@ def shares_guild(user_id_a, user_id_b):
     ]
 bot.shares_guild = shares_guild
 
-def can_use_online(self, user):
+def can_use_online(user):
     enabled = bot.cursor.execute("SELECT online_agreed FROM users WHERE id = ?", (user.id,)).fetchone()
     return enabled and enabled["online_agreed"]
 bot.can_use_online = can_use_online
