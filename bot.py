@@ -164,8 +164,6 @@ bot.partnerg=config.pg
 bot.features=config.sp_features
 
 bot.apple_util = AppleUtil(bot)
-bot.load_extension("cogs.apple_misc")
-bot.load_extension("cogs.apple_onlinenotif")
 
 def shares_guild(user_id_a, user_id_b):
     return not not [
@@ -222,6 +220,9 @@ bot.gguide = """思惟奈ちゃんのグローバルチャット利用規約 最
   ・制作者が予告なしに改定することがある。改定後は、グローバルチャットにて報告される。
   ・予告して改定した場合も、同じように改定後に報告する。
 """
+
+bot.load_extension("cogs.apple_misc")
+bot.load_extension("cogs.apple_onlinenotif")
 
 @tasks.loop(minutes=1.0)
 async def cRPC():
