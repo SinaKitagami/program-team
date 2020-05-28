@@ -329,7 +329,7 @@ async def globalSend(message):
                         ne = discord.Embed(title="", description="", color=upf["gcolor"])
                     ne.set_author(name=f"{ut.ondevicon(message.author)},ユーザーのID:{str(message.author.id)}")
                     if message.guild.id in [i[0] for i in bot.partnerg]:
-                        ne.set_footer(text=f"🔗(パートナーサーバー):{message.guild.name}(id:{message.guild.id}),{[i[2] for i in bot.partnerg if i[0]==message.guild.id][0]}",icon_url=message.guild.icon_url_as(static_format="png"))
+                        ne.set_footer(text=f"🔗(思惟奈ちゃんパートナーサーバー):{message.guild.name}(id:{message.guild.id}),{[i[2] for i in bot.partnerg if i[0]==message.guild.id][0]}",icon_url=message.guild.icon_url_as(static_format="png"))
                     else:
                         ne.set_footer(text=f"{message.guild.name}(id:{message.guild.id})",icon_url=message.guild.icon_url_as(static_format="png"))
                     ne.timestamp = datetime.datetime.now() - rdelta(hours=9)
@@ -1445,7 +1445,7 @@ async def now_sina_tweet():
         await dc.send(f"have error:```{traceback.format_exc(1)}```")
     pr=random.choice(bot.partnerg)
     if pr[3]!="":
-        e=ut.getEmbed("パートナーサーバー紹介",f"{bot.get_guild(pr[0])}\n{pr[3]}\n参加: {pr[2]}")
+        e=ut.getEmbed("思惟奈ちゃんパートナーサーバー紹介",f"{bot.get_guild(pr[0])}\n{pr[3]}\n参加: {pr[2]}")
         bot.cursor.execute("select * from globalchs where name=?",("main",))
         chs = bot.cursor.fetchone()
         for chid in chs["ids"]:
