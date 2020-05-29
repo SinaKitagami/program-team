@@ -214,7 +214,7 @@ class search(commands.Cog):
             idis = self.bot.get_guild(id)
             if idis:
                 if idis.id in [i[0] for i in self.bot.partnerg]:
-                    ptn="🔗パートナーサーバー"
+                    ptn="🔗思惟奈ちゃんパートナーサーバー"
                 else:
                     ptn=""
                 await ctx.send(embed=ut.getEmbed("サーバー",f"{ptn}\n名前:{idis.name}\nid:{idis.id}"))
