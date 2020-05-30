@@ -43,6 +43,10 @@ class gcoms(commands.Cog):
             cid = ctx.message.author.id
         else:
             cid = uid
+            if not self.bot.shares_guild(uid, ctx.author.id):
+                return await ctx.say("ison-notfound")
+            if not self.bot.can_use_online(self.bot.get_user(uid)):
+                return await ctx.say("ison-notfound")
         async with ctx.message.channel.typing():
             for guild in self.bot.guilds:
                 u = guild.get_member(uid)
@@ -91,17 +95,19 @@ class gcoms(commands.Cog):
             cid = ctx.author.id
         else:
             cid = uid
+        ap = self.bot.cursor("SELECT gmod FROM users WHERE id=?", (ctx.author.id,)).fetchone()
         self.bot.cursor.execute("select * from users where id=?",(cid,))
         upf = self.bot.cursor.fetchone()
         embed = discord.Embed(title=ctx._("global-status-title",cid), description="", color=upf["gcolor"])
-        embed.add_field(name="banned", value=upf["gban"])
         embed.add_field(name="nick", value=upf["gnick"])
         embed.add_field(name="color", value=str(upf["gcolor"]))
         embed.add_field(name="gmod", value=upf["gmod"])
         embed.add_field(name="tester", value=upf["galpha"])
         embed.add_field(name="star", value=upf["gstar"])
-        if upf["gban"]:
-            embed.add_field(name="reason of ban",value=upf["gbanhist"])
+        if ap and ap["gmod"]:
+            embed.add_field(name="banned", value=upf["gban"])
+            if upf["gban"]:
+                embed.add_field(name="reason of ban",value=upf["gbanhist"])
         await ctx.send(embed=embed)
 
     @commands.command()
@@ -228,7 +234,7 @@ class gcoms(commands.Cog):
                     self.bot.cursor.execute("UPDATE globalchs SET ids = ? WHERE name = ?", (chs["ids"]+[ctx.channel.id],name))
                 await ctx.channel.create_webhook(name="sina_global",avatar=None)
                 if dnf:
-                    embed = discord.Embed(title=f"{self.bot.get_emoji(653161518174699541)}グローバルチャット接続通知", description=f'{ctx.guild.name}の{ctx.channel.name}が`{name}`に接続しました。')
+                    embed = discord.Embed(title=f"{self.bot.get_emoji(653161518174699541)}グローバルチャット接続通知", description=f'{ctx.guild.name}の{ctx.channel.name}({ctx.channel.id})が`{name}`に接続しました。')
                 else:
                     embed = discord.Embed(title="グローバルチャット接続通知", description=f'{self.bot.get_emoji(653161518174699541)}どこかが`{name}`に接続しました。')
                 self.bot.cursor.execute("select * from globalchs where name=?",(name,))
