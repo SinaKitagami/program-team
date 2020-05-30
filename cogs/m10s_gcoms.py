@@ -65,10 +65,10 @@ class gcoms(commands.Cog):
             retchs = ""
             for ch in chs["ids"]:
                 try:
-                    retchs = f"{retchs}{self.bot.get_channel(ch).guild.name},{self.bot.get_channel(ch).name}\n"
+                    retchs = f"{retchs}{self.bot.get_channel(ch).guild.name} -> {self.bot.get_channel(ch).name}\n"
                 except:
-                    retchs = f"{retchs}不明なサーバー,チャンネルID:{ch}\n"
-            await ctx.send(embed=ut.getEmbed(f"グローバルチャンネル{name}の詳細",f"コネクトされたチャンネルとサーバー\n{retchs}",self.bot.ec))
+                    retchs = f"{retchs}不明なサーバー -> チャンネルID:{ch}\n"
+            await ctx.send(embed=ut.getEmbed(f"グローバルチャンネル {name} の詳細",f"コネクトされたサーバーとチャンネル\n{retchs}",self.bot.ec))
         else:
             await ctx.send("そのグローバルチャンネルはありません。")
 
