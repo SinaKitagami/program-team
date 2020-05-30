@@ -24,7 +24,7 @@ class levels(commands.Cog):
             lrs = [(int(k),v["level"],v["exp"]) for k,v in le.items() if v["dlu"]]
             text=""
             lranks=[(ind,i) for ind,i in enumerate(sorted(lrs, key=itemgetter(1,2), reverse=True))]
-            for ind,i in lranks[start-1:end-1]:
+            for ind,i in lranks[start-1:end]:
                 un = ctx.guild.get_member(i[0])
                 if un is None:
                     un = await self.bot.fetch_user(i[0])

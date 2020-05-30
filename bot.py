@@ -54,7 +54,7 @@ from cogs import m10s_auth_wiz
 
 logging.basicConfig(level=logging.DEBUG)"""
 
-bot = commands.Bot(command_prefix="s-",status=discord.Status.invisible)
+bot = commands.Bot(command_prefix="s-",status=discord.Status.invisible,allowed_mentions=discord.AllowedMentions(everyone=False))
 bot.owner_id = 404243934210949120
 
 bot.team_sina = config.team_sina
@@ -1425,7 +1425,9 @@ async def on_command_error(ctx, error):
     else:
         #その他例外
         ch=bot.get_channel(652127085598474242)
-        await ch.send(embed=ut.getEmbed("エラーログ",f"コマンド:`{ctx.command.name}`\n```{str(error)}```",bot.ec,f"サーバー",ctx.guild.name,"実行メンバー",ctx.author.name,"メッセージ内容",ctx.message.content))
+        msg=await ch.send(embed=ut.getEmbed("エラーログ",f"コマンド:`{ctx.command.name}`\n```{str(error)}```",bot.ec,f"サーバー",ctx.guild.name,"実行メンバー",ctx.author.name,"メッセージ内容",ctx.message.content))
+        await ctx.send(embed=ut.getEmbed(ctx._("com-error-t"),ctx._("cmd-other-d",error,bot.ec,"error id",msg.id)))
+
 
 """
 
