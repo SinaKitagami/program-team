@@ -21,6 +21,8 @@ class gcoms(commands.Cog):
         for i in dats:
             if gmid in i["allid"]:
                 post = i
+        if post is None:
+            await ctx.say("globalpost-notfound")
         self.bot.cursor.execute("select * from users where id=?",(ctx.author.id,))
         upf = self.bot.cursor.fetchone()
         if upf["gmod"]:
