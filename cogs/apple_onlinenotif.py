@@ -4,11 +4,14 @@ from discord.ext import commands
 
 # This file is copied from TeraAppleBot
 
+
 class OnlineNotif(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
         def get_member(user_id):
-            m = [g.get_member(user_id) for g in bot.guilds if g.get_member(user_id)]
+            m = [g.get_member(user_id)
+                 for g in bot.guilds if g.get_member(user_id)]
             if m:
                 return m[0]
             return None
@@ -19,7 +22,8 @@ class OnlineNotif(commands.Cog):
 
     def get_subscribers(self):
         return [
-            {"user_id": int(i["id"]), "subscribe": [int(j) for j in (i["onnotif"] or []) if j]}
+            {"user_id": int(i["id"]), "subscribe": [int(j)
+                                                    for j in (i["onnotif"] or []) if j]}
             for i
             in self.bot.cursor.execute("SELECT id, onnotif FROM users").fetchall()
         ]
@@ -74,7 +78,8 @@ class OnlineNotif(commands.Cog):
         if not self.bot.shares_guild(ctx.author.id, user.id):
             return await ctx.say("onlinenotif-shareGuild")
         subscribing.append(user.id)
-        self.bot.cursor.execute("UPDATE users SET onnotif = ? WHERE id = ?",(subscribing, ctx.author.id))
+        self.bot.cursor.execute(
+            "UPDATE users SET onnotif = ? WHERE id = ?", (subscribing, ctx.author.id))
         await ctx.say("onlinenotif-success")
 
     @onlinenotif.command(aliases=["remove", "del"])
@@ -84,14 +89,16 @@ class OnlineNotif(commands.Cog):
         if user.id not in subscribing:
             return await ctx.say("onlinenotif-yet")
         subscribing.remove(user.id)
-        self.bot.cursor.execute("UPDATE users SET onnotif = ? WHERE id = ?",(subscribing, ctx.author.id))
+        self.bot.cursor.execute(
+            "UPDATE users SET onnotif = ? WHERE id = ?", (subscribing, ctx.author.id))
         await ctx.say("onlinenotif-removeSuccess")
 
     @onlinenotif.command()
-    async def settings(self, ctx, enabled: bool = False):
+    async def settings(self, ctx, enabled: bool=False):
         """Choose whether someone can receive your online notification.
         Note that you have to share server with that user."""
-        self.bot.cursor.execute("UPDATE users SET online_agreed = ? WHERE id = ?", (int(enabled), ctx.author.id))
+        self.bot.cursor.execute(
+            "UPDATE users SET online_agreed = ? WHERE id = ?", (int(enabled), ctx.author.id))
         await ctx.say("onlinenotif-settings")
 
 

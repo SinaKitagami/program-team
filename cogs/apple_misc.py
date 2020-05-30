@@ -16,6 +16,7 @@ CODE = [
 
 PING_CH = 712564878480637973
 
+
 class AppleMiscCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -79,6 +80,7 @@ class AppleMiscCog(commands.Cog):
     @report_ping.before_loop
     async def before_report_loop(self):
         await self.bot.wait_until_ready()
+
 
 def setup(bot):
     bot.add_cog(AppleMiscCog(bot))

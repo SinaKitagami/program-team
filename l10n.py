@@ -5,8 +5,10 @@ from discord.ext import commands
 
 LOCALES = [lang[:-5] for lang in os.listdir("lang") if lang.endswith(".json")]
 
+
 class MissingTranslation(Exception):
     pass
+
 
 class TranslateHandler:
     def __init__(self, bot, supported_locales=LOCALES):
@@ -38,7 +40,8 @@ class TranslateHandler:
         if lang not in self._translation_cache:
             self._translation_cache[lang] = {}
         key_name = key.split("-")[0]
-        keys = [file_key for file_key in f.keys() if file_key.startswith(key_name)]
+        keys = [file_key for file_key in f.keys(
+        ) if file_key.startswith(key_name)]
         for cache_key in keys:
             self._translation_cache[cache_key] = f[cache_key]
 
@@ -52,7 +55,7 @@ class TranslateHandler:
                 to = self.get_lang_by_guild(target, cache=False)
             else:
                 to = self.get_lang_by_user(target, cache=False)
-            return # get function caches
+            return  # get function caches
         if to not in self.supported_locales:
             return
         self._lang_cache[target.id] = to
@@ -60,7 +63,8 @@ class TranslateHandler:
     def get_lang_by_guild(self, guild, cache=True):
         if cache and guild.id in self._lang_cache:
             return self._lang_cache[guild.id]
-        guild_db = self.bot.cursor.execute("SELECT lang FROM guilds WHERE id=?", (guild.id,)).fetchone()
+        guild_db = self.bot.cursor.execute(
+            "SELECT lang FROM guilds WHERE id=?", (guild.id,)).fetchone()
         lang = None
         if not guild_db:
             lang = guild.preferred_locale
@@ -78,7 +82,8 @@ class TranslateHandler:
     def get_lang_by_user(self, user, cache=True):
         if cache and user.id in self._lang_cache:
             return self._lang_cache[user.id]
-        user_db = self.bot.cursor.execute("SELECT lang FROM users WHERE id=?", (user.id,)).fetchone()
+        user_db = self.bot.cursor.execute(
+            "SELECT lang FROM users WHERE id=?", (user.id,)).fetchone()
         if user_db and user_db["lang"] and user_db["lang"] in self.supported_locales:
             self._lang_cache[user.id] = user_db["lang"]
             return user_db["lang"]
@@ -115,6 +120,7 @@ class TranslateHandler:
         elif isinstance(target, discord.Guild):
             return self.get_guild_translation_for(target, key, *args, **kwargs)
         return self.get_raw_translation(target, key, *args, **kwargs)
+
 
 class LocalizedContext(commands.Context):
     async def say(self, key, *args, **kwargs):
