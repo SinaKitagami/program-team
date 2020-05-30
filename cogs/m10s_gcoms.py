@@ -21,6 +21,8 @@ class gcoms(commands.Cog):
         for i in dats:
             if gmid in i["allid"]:
                 post = i
+        if post is None:
+            await ctx.say("globalpost-notfound")
         self.bot.cursor.execute("select * from users where id=?",(ctx.author.id,))
         upf = self.bot.cursor.fetchone()
         if upf["gmod"]:
@@ -95,7 +97,7 @@ class gcoms(commands.Cog):
             cid = ctx.author.id
         else:
             cid = uid
-        ap = self.bot.cursor("SELECT gmod FROM users WHERE id=?", (ctx.author.id,)).fetchone()
+        ap = self.bot.cursor.execute("SELECT gmod FROM users WHERE id=?", (ctx.author.id,)).fetchone()
         self.bot.cursor.execute("select * from users where id=?",(cid,))
         upf = self.bot.cursor.fetchone()
         embed = discord.Embed(title=ctx._("global-status-title",cid), description="", color=upf["gcolor"])

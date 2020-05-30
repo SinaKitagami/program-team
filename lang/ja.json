@@ -1638,5 +1638,7 @@
     "onlinenotif-settings": "設定しました。",
 
     "cannot-send-online": "オンライン状態を送信できません。",
-    "cannot-send-userinfo": "ユーザー情報を送信できません。"
+    "cannot-send-userinfo": "ユーザー情報を送信できません。",
+
+    "globalpost-notfound": "投稿が見つかりません。"
 }
