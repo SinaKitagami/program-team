@@ -18,18 +18,20 @@ ut.get_vmusic(bot,member)
     思惟奈ちゃんの音楽再生機能でそのメンバーがきいている曲を返します。
 """
 
+
 class ClassName(commands.Cog):
 
-    def __init__(self,bot):
+    def __init__(self, bot):
         self.bot = bot
 
     @commands.command(name="pass")
-    async def command(self,ctx,args):
+    async def command(self, ctx, args):
         pass
 
     @commands.Cog.listener()
     async def event(self, args):
         pass
+
 
 def setup(bot):
     bot.add_cog(ClassName(bot))

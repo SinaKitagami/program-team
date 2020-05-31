@@ -3,6 +3,7 @@ import datetime
 import discord
 from discord.ext import commands
 
+
 class AppleFOCCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -10,7 +11,8 @@ class AppleFOCCog(commands.Cog):
         self.guild_throttle = {}
 
     def get_log_channel(self, guild_id):
-        guild = self.db.execute("SELECT * FROM guilds WHERE id=?", (guild_id,)).fetchone()
+        guild = self.db.execute(
+            "SELECT * FROM guilds WHERE id=?", (guild_id,)).fetchone()
         if not guild:
             return None
         if guild["sendlog"]:
@@ -22,7 +24,8 @@ class AppleFOCCog(commands.Cog):
         if member_id in self.guild_throttle:
             return self.guild_throttle[member_id].use()
         else:
-            self.guild_throttle[member_id] = self.bot.apple_util.create_throttle(1, 60)
+            self.guild_throttle[member_id] = self.bot.apple_util.create_throttle(
+                1, 60)
             self.guild_throttle[member_id].use()
             return True
 
@@ -30,7 +33,8 @@ class AppleFOCCog(commands.Cog):
         return member.status is discord.Status.offline and self.bot.can_use_online(member)
 
     async def send(self, member, logc):
-        e = discord.Embed(title="オンライン隠し", description=member.mention, timestamp=datetime.datetime.utcnow())
+        e = discord.Embed(title="オンライン隠し", description=member.mention,
+                          timestamp=datetime.datetime.utcnow())
         await logc.send(embed=e)
 
     async def run(self, member):
@@ -58,6 +62,7 @@ class AppleFOCCog(commands.Cog):
     async def on_reaction_add(self, r, m):
         if isinstance(m, discord.Member):
             await self.run(m)
+
 
 def setup(bot):
     bot.add_cog(AppleFOCCog(bot))
