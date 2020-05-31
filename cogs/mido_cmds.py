@@ -10,7 +10,7 @@ class mido_cmds(commands.Cog):
     #check
     @commands.command()
     async def check(self, ctx, uid:int=None):
-        print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content )
+        print(f'{ctx.message.author.name}({ctx.message.guild.name})_'+ ctx.message.content)
         e = discord.Embed(title="思惟奈ちゃん処罰情報", description="取得中です...", color=self.bot.ec)
         msg = await ctx.send(embed=e)        
         
