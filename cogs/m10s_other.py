@@ -125,7 +125,7 @@ class other(commands.Cog):
     async def report(self, ctx, r_type):
         t_dict = {"脆弱性": 716683830366568470, "荒らし": 716684268973064202, "バグ": 683496852104282127, "その他": 667361501924950036, "vuln": 716683830366568470, "vandalism": 716684268973064202, "bug": 683496852104282127, "other": 667361501924950036}
         channel_id = t_dict.get(r_type, 667361501924950036)
-        dc = ctx.author.dm_channel
+        dc = await ut.opendm(ctx.author)
         await dc.send(ctx._("send-report-here"))
         def check(m):
             return m.channel == dc and m.author == ctx.author
