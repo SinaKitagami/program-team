@@ -627,5 +627,6 @@
     "onlinenotif-yet": "You are not receiving online notification of this user.",
     "onlinenotif-removeSuccess": "Removed successfully.",
     "onlinenotif-nousers": "You are not receiving online notifications of anyone. Make sure to share server if you didn't.",
-    "onlinenotif-settings": "Settings successfully saved."
+    "onlinenotif-settings": "Settings successfully saved.",
+    "send-report-here": "Send title and description here"
 }

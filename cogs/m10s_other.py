@@ -122,12 +122,24 @@ class other(commands.Cog):
         await ctx.send(ctx._("feedback-sended"))
 
     @commands.command(aliases=["レポート", "報告", "通報", "お知らせ"])
-    async def report(self, ctx, ttl, *, ctt=None):
+    async def report(self, ctx, r_type):
+        t_dict = {"脆弱性": 716683830366568470, "荒らし": 716684268973064202, "バグ": 683496852104282127, "その他": 667361501924950036, "vuln": 716683830366568470, "vandalism": 716684268973064202, "bug": 683496852104282127, "other": 667361501924950036}
+        channel_id = t_dict.get(r_type, 667361501924950036)
+        dc = await ut.opendm(ctx.author)
+        await dc.send(ctx._("send-report-here"))
+        def check(m):
+            return m.channel == dc and m.author == ctx.author
+        m = await self.bot.wait_for("message", check=check)
+        ttl, ctt = m.split(" ", 1)
         embed = discord.Embed(title=ttl, description=ctt, color=self.bot.ec)
-        fbc = self.bot.get_channel(667361501924950036)
+        fbc = self.bot.get_channel(channel_id)
         embed.set_author(name=f"{str(ctx.message.author)}",
                          icon_url=ctx.message.author.avatar_url_as(static_format='png'))
         await fbc.send(embed=embed)
+        files = []
+        for i in m.attachments:
+            files.append(await i.to_file())
+        await fbc.send(files=files)
         await ctx.send(ctx._("thanks-report"))
 
     @commands.command(aliases=["ステータス", "あなたの情報を教えて"])
