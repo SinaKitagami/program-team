@@ -28,6 +28,7 @@ import aiohttp
 import m10s_util as ut
 from apple_util import AppleUtil
 from l10n import TranslateHandler, LocalizedContext
+from checker import MaliciousInput, content_checker
 # tokens
 import config
 # cog
@@ -255,7 +256,7 @@ async def cRPC():
     await bot.change_presence(status=discord.Status.online, activity=discord.Game(name=rpcs[rpcct].format(len(bot.guilds), len(bot.users))))
 
 
-async def repomsg(msg, rs):
+async def repomsg(msg, rs, should_ban=False):
     ch = bot.get_channel(628929788421210144)
     e = discord.Embed(title="グローバルメッセージブロック履歴",
                       description=f"メッセージ内容:{msg.clean_content}", color=bot.ec)
@@ -266,11 +267,11 @@ async def repomsg(msg, rs):
     e.timestamp = msg.created_at
     e.add_field(name="ブロック理由", value=rs or "なし")
     await ch.send(embed=e)
-    if rs == "全員当てメンション":
+    if should_ban:
         bot.cursor.execute(
             "UPDATE users SET gban = ? WHERE id = ?", (1, msg.author.id))
         bot.cursor.execute("UPDATE users SET gbanhist = ? WHERE id = ?",
-                           ("全体メンション送信未遂で予防グローバルチャットBAN", msg.author.id))
+                           ("予防グローバルチャットBAN: {}".format(rs), msg.author.id))
 
 
 async def gsended(message, ch, embed):
@@ -303,6 +304,12 @@ async def gsendwh(message, wch, spicon, pf, ed, fls):
 
 async def globalSend(message):
     try:
+        if message.content.startswith("//"):
+            return
+        if message.author.id == bot.user.id:
+            return
+        if message.is_system():
+            return
         bot.cursor.execute("select * from globalchs")
         gchs = bot.cursor.fetchall()
         gchn = None
@@ -313,19 +320,13 @@ async def globalSend(message):
                 break
         if gchn is None:
             return
-        if message.content.startswith("//"):
+
+        try:
+            content_checker(bot, message)
+        except MaliciousInput as err:
+            await repomsg(message, err.reason, err.should_ban)
             return
-        if message.mention_everyone:
-            await repomsg(message, "全員当てメンション")
-            return
-        if "@everyone" in message.content or "@here" in message.content:
-            await repomsg(message, "全員当てメンション")
-            return
-        if len(message.mentions) >= 5:
-            await repomsg(message, "5以上のメンション")
-            return
-        if message.author.id == bot.user.id:
-            return
+
         bot.cursor.execute("select * from users where id=?",
                            (message.author.id,))
         upf = bot.cursor.fetchone()
