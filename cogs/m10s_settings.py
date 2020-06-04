@@ -222,9 +222,9 @@ class settings(commands.Cog):
                 mes = await self.bot.wait_for('message', check=check)
                 guide = mes.content
                 try:
-                    await dc.send(ctx._("scmd-add-guide3-a", ctx._("scmd-guide-emoji"), str(se)))
+                    await dc.send(ctx._("scmd-add-guide3-a", ctx._("scmd-guide-emoji", str(se))))
                 except:
-                    await dc.send(ctx._("scmd-add-guide3-a", ctx._("scmd-guide-emoji"), "(絵文字が多すぎて表示できません！)"))
+                    await dc.send(ctx._("scmd-add-guide3-a", ctx._("scmd-guide-emoji", "(絵文字が多すぎて表示できません！)")))
                 mg = await self.bot.wait_for('message', check=check)
                 rep = mg.clean_content.format(se)
                 mmj["commands"][name] = {}
