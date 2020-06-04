@@ -39,12 +39,12 @@ class syouma(commands.Cog):
             if val.find(class_="address").text.find("以下に掲載がない場合"):
                 HrfUrl = val.a.get("href")
             # print(HrfUrl)
-    #myDict = {}
-    # 住所からhrefを取得
-    # if not(HrfUrl is None):
+        # myDict = {}
+        # 住所からhrefを取得
+        # if not(HrfUrl is None):
         await asyncio.sleep(1)  # 一回requestを投げているので1秒待つ
         Req = await self.bot.apple_util.get_as_text(Url + HrfUrl)
-    # print(Req)
+        # print(Req)
         bsObj = BeautifulSoup(Req, "html.parser")
         today = bsObj.find(class_="today-weather")
         weather = today.p.string

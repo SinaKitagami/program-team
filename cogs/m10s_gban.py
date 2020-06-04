@@ -20,52 +20,58 @@ ut.get_vmusic(bot,member)
     思惟奈ちゃんの音楽再生機能でそのメンバーがきいている曲を返します。
 """
 
+
 class m10s_gban(commands.Cog):
 
-    def __init__(self,bot):
+    def __init__(self, bot):
         self.bot = bot
 
     @commands.command()
-    async def gban(self,ctx,uid:int,tof:bool,*,reason:str=None):
-        self.bot.cursor.execute("select * from users where id=?",(ctx.author.id,))
+    async def gban(self, ctx, uid: int, tof: bool, *, reason: str=None):
+        self.bot.cursor.execute(
+            "select * from users where id=?", (ctx.author.id,))
         upf = self.bot.cursor.fetchone()
-        if "global_ban" in self.bot.features.get(ctx.author.id,[]):
+        if "global_ban" in self.bot.features.get(ctx.author.id, []):
             try:
                 u = await self.bot.fetch_user(uid)
             except discord.NotFound:
                 await ctx.send("存在しないユーザーではないでしょうか？IDを見直してみてください。")
             if tof:
-                self.bot.cursor.execute("select * from gban_dates where id=?",(uid,))
+                self.bot.cursor.execute(
+                    "select * from gban_dates where id=?", (uid,))
                 gbaninfo = self.bot.cursor.fetchone()
                 if not gbaninfo:
-                    self.bot.cursor.execute("INSERT INTO gban_dates(id,reason,gban_by) VALUES(?,?,?)", (uid,reason or "なし",ctx.author.id))
+                    self.bot.cursor.execute(
+                        "INSERT INTO gban_dates(id,reason,gban_by) VALUES(?,?,?)", (uid, reason or "なし", ctx.author.id))
                     await ctx.send(f"{u.name}のグローバルBANを設定しました。\n登録済みのサーバーでグローバルBANを開始します。")
                     self.bot.cursor.execute("select * from gban_settings")
                     gs = self.bot.cursor.fetchall()
                     for gstg in gs:
                         g = self.bot.get_guild(gstg["id"])
                         ch = g.get_channel(gstg["chid"])
-                        by=ctx.author
+                        by = ctx.author
                         if g:
                             try:
-                                await g.ban(u,reason=f"思惟奈ちゃんグローバルBAN:{reason}(実行者:{by}({by.id}))")
+                                await g.ban(u, reason=f"思惟奈ちゃんグローバルBAN:{reason}(実行者:{by}({by.id}))")
                             except:
                                 if ch:
-                                    await ch.send(embed=ut.getEmbed("グローバルBANに基づく、BANの試行",f"{u}({u.id})は、`{reason}`として思惟奈ちゃんのグローバルBANを受けています。\nBANしようとしましたが、権限不足等の理由でBANできませんでした。\nグローバルBAN実行者:{by}({by.id})"))
+                                    await ch.send(embed=ut.getEmbed("グローバルBANに基づく、BANの試行", f"{u}({u.id})は、`{reason}`として思惟奈ちゃんのグローバルBANを受けています。\nBANしようとしましたが、権限不足等の理由でBANできませんでした。\nグローバルBAN実行者:{by}({by.id})"))
                                 else:
-                                    await g.owner.send(embed=ut.getEmbed("グローバルBANに基づく、BANの試行",f"{u}({u.id})は、`{reason}`として思惟奈ちゃんのグローバルBANを受けています。\nBANしようとしましたが、権限不足等の理由でBANできませんでした。\nグローバルBAN実行者:{by}({by.id})"))
+                                    await g.owner.send(embed=ut.getEmbed("グローバルBANに基づく、BANの試行", f"{u}({u.id})は、`{reason}`として思惟奈ちゃんのグローバルBANを受けています。\nBANしようとしましたが、権限不足等の理由でBANできませんでした。\nグローバルBAN実行者:{by}({by.id})"))
                             finally:
                                 if ch:
-                                    await ch.send(embed=ut.getEmbed("グローバルBANに基づく、BANの実行",f"{u}({u.id})は、`{reason}`として思惟奈ちゃんのグローバルBANを受けています。\nよって、このサーバーからBANを行いました。\nグローバルBAN実行者:{by}({by.id})"))
+                                    await ch.send(embed=ut.getEmbed("グローバルBANに基づく、BANの実行", f"{u}({u.id})は、`{reason}`として思惟奈ちゃんのグローバルBANを受けています。\nよって、このサーバーからBANを行いました。\nグローバルBAN実行者:{by}({by.id})"))
                                 else:
-                                    await g.owner.send(embed=ut.getEmbed("グローバルBANに基づく、BANの実行",f"{u}({u.id})は、`{reason}`として思惟奈ちゃんのグローバルBANを受けています。\nよって、このサーバーからBANを行いました。\nグローバルBAN実行者:{by}({by.id})"))
+                                    await g.owner.send(embed=ut.getEmbed("グローバルBANに基づく、BANの実行", f"{u}({u.id})は、`{reason}`として思惟奈ちゃんのグローバルBANを受けています。\nよって、このサーバーからBANを行いました。\nグローバルBAN実行者:{by}({by.id})"))
                 else:
-                    await ctx.send(f"{u.name}はすでに思惟奈ちゃんのグローバルbanされています。")    
+                    await ctx.send(f"{u.name}はすでに思惟奈ちゃんのグローバルbanされています。")
             else:
-                self.bot.cursor.execute("select * from gban_dates where id=?",(uid,))
+                self.bot.cursor.execute(
+                    "select * from gban_dates where id=?", (uid,))
                 gbaninfo = self.bot.cursor.fetchone()
                 if gbaninfo:
-                    self.bot.cursor.execute(f"delete from gban_dates where id = ?",(uid,))
+                    self.bot.cursor.execute(
+                        f"delete from gban_dates where id = ?", (uid,))
                     await ctx.send(f"{u.name}のグローバルBANを解除しました。")
                 else:
                     await ctx.send(f"{u.name}は思惟奈ちゃんのグローバルbanされていません")
@@ -73,49 +79,54 @@ class m10s_gban(commands.Cog):
             await ctx.send("グローバルBANの実行には、グローバルBANが使用できる認証を受けたアカウントである必要があります。\n思惟奈ちゃん運営に報告する際は、`s-report [タイトル] [説明]`を使用してください。正確性などを確認し、認められた場合はグローバルBANが行われます。")
 
     @commands.command()
-    async def check_gban(self,ctx,uid:int):
-        self.bot.cursor.execute("select * from gban_dates where id=?",(uid,))
+    async def check_gban(self, ctx, uid: int):
+        self.bot.cursor.execute("select * from gban_dates where id=?", (uid,))
         gbaninfo = self.bot.cursor.fetchone()
         if gbaninfo:
-            u=await self.bot.fetch_user(uid)
+            u = await self.bot.fetch_user(uid)
             by = await self.bot.fetch_user(gbaninfo["gban_by"])
-            await ctx.send(embed=ut.getEmbed(f"{u.name}のグローバルBANについて","",self.bot.ec,"理由",gbaninfo["reason"],"実行者",f"{by}({by.id})"))
+            await ctx.send(embed=ut.getEmbed(f"{u.name}のグローバルBANについて", "", self.bot.ec, "理由", gbaninfo["reason"], "実行者", f"{by}({by.id})"))
         else:
             await ctx.send("そのユーザーは思惟奈ちゃんのグローバルbanされていません")
 
     @commands.command()
-    async def gbanlogto(self,ctx,chid:int=None):
+    async def gbanlogto(self, ctx, chid: int=None):
         tch = ctx.guild.get_channel(chid)
         if chid and tch:
-            self.bot.cursor.execute("select * from gban_settings where id=?",(ctx.guild.id,))
+            self.bot.cursor.execute(
+                "select * from gban_settings where id=?", (ctx.guild.id,))
             gs = self.bot.cursor.fetchone()
             if gs:
-                self.bot.cursor.execute("UPDATE gban_settings SET chid = ? WHERE id = ?", (chid,ctx.guild.id))
+                self.bot.cursor.execute(
+                    "UPDATE gban_settings SET chid = ? WHERE id = ?", (chid, ctx.guild.id))
             else:
-                self.bot.cursor.execute("INSERT INTO gban_settings(id,chid) VALUES(?,?)", (ctx.guild.id,chid))
+                self.bot.cursor.execute(
+                    "INSERT INTO gban_settings(id,chid) VALUES(?,?)", (ctx.guild.id, chid))
             await ctx.send("グローバルBANの利用、送信先チャンネルを設定しました。")
         else:
-            self.bot.cursor.execute(f"delete from gban_settings where id = ?",(ctx.guild.id,))
+            self.bot.cursor.execute(
+                f"delete from gban_settings where id = ?", (ctx.guild.id,))
             await ctx.send("グローバルBANの利用、送信先チャンネルを解除しました。")
 
     @commands.Cog.listener()
     async def on_member_join(self, m):
-        self.bot.cursor.execute("select * from gban_dates where id=?",(m.id,))
+        self.bot.cursor.execute("select * from gban_dates where id=?", (m.id,))
         gbaninfo = self.bot.cursor.fetchone()
         if gbaninfo:
-            u=await self.bot.fetch_user(gbaninfo["id"])
-            by=await self.bot.fetch_user(gbaninfo["gban_by"])
-            self.bot.cursor.execute("select * from gban_settings where id=?",(m.guild.id,))
+            u = await self.bot.fetch_user(gbaninfo["id"])
+            by = await self.bot.fetch_user(gbaninfo["gban_by"])
+            self.bot.cursor.execute(
+                "select * from gban_settings where id=?", (m.guild.id,))
             gs = self.bot.cursor.fetchone()
             g = m.guild
             ch = g.get_channel(gs["chid"])
             if g:
                 try:
-                    await g.ban(u,reason=f"思惟奈ちゃんグローバルBAN:{gbaninfo['reason']}(実行者:{by}({by.id}))")
+                    await g.ban(u, reason=f"思惟奈ちゃんグローバルBAN:{gbaninfo['reason']}(実行者:{by}({by.id}))")
                 except:
-                    await ch.send(embed=ut.getEmbed("グローバルBANに基づく、BANの試行",f"{u}({u.id})は、`{gbaninfo['reason']}`として思惟奈ちゃんのグローバルBANを受けています。\nBANしようとしましたが、権限不足等の理由でBANできませんでした。\nグローバルBAN実行者:{by}({by.id})"))
+                    await ch.send(embed=ut.getEmbed("グローバルBANに基づく、BANの試行", f"{u}({u.id})は、`{gbaninfo['reason']}`として思惟奈ちゃんのグローバルBANを受けています。\nBANしようとしましたが、権限不足等の理由でBANできませんでした。\nグローバルBAN実行者:{by}({by.id})"))
                 finally:
-                    await ch.send(embed=ut.getEmbed("グローバルBANに基づく、BANの実行",f"{u}({u.id})は、`{gbaninfo['reason']}`として思惟奈ちゃんのグローバルBANを受けています。\nよって、このサーバーからBANを行いました。\nグローバルBAN実行者:{by}({by.id})"))
+                    await ch.send(embed=ut.getEmbed("グローバルBANに基づく、BANの実行", f"{u}({u.id})は、`{gbaninfo['reason']}`として思惟奈ちゃんのグローバルBANを受けています。\nよって、このサーバーからBANを行いました。\nグローバルBAN実行者:{by}({by.id})"))
 
 
 def setup(bot):
