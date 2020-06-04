@@ -237,9 +237,9 @@ class settings(commands.Cog):
                 mes = await self.bot.wait_for('message', check=check)
                 guide = mes.content
                 try:
-                    await dc.send(ctx._("scmd-add-guide3-a", ctx._("scmd-guide-emoji"), str(se)))
+                    await dc.send(ctx._("scmd-add-guide3-a", ctx._("scmd-guide-emoji", str(se))))
                 except:
-                    await dc.send(ctx._("scmd-add-guide3-a", ctx._("scmd-guide-emoji"), "(絵文字が多すぎて表示できません！)"))
+                    await dc.send(ctx._("scmd-add-guide3-a", ctx._("scmd-guide-emoji", "(絵文字が多すぎて表示できません！)")))
                 rep = []
                 while True:
                     mg = await self.bot.wait_for('message', check=check)
@@ -248,9 +248,9 @@ class settings(commands.Cog):
                     else:
                         rep = rep + [mg.clean_content.format(se)]
                         try:
-                            await dc.send(ctx._("scmd-add-guide3-b", ctx._("scmd-guide-emoji"), str(se)))
+                            await dc.send(ctx._("scmd-add-guide3-b", ctx._("scmd-guide-emoji", str(se))))
                         except:
-                            await dc.send(ctx._("scmd-add-guide3-b", ctx._("scmd-guide-emoji"), "(絵文字が多すぎて表示できません！)"))
+                            await dc.send(ctx._("scmd-add-guide3-b", ctx._("scmd-guide-emoji", "(絵文字が多すぎて表示できません！)")))
                 mmj["commands"][name] = {}
                 mmj["commands"][name]["mode"] = "random"
                 mmj["commands"][name]["rep"] = rep
@@ -261,7 +261,7 @@ class settings(commands.Cog):
                     await dc.send(ctx._("scmd-add-guide2"))
                     mes = await self.bot.wait_for('message', check=check)
                     guide = mes.content
-                    await dc.send(ctx._("scmd-add-guide3-c", ctx._("scmd-guide-emoji"), str(se)))
+                    await dc.send(ctx._("scmd-add-guide3-c", ctx._("scmd-guide-emoji", str(se))))
                     mg = await self.bot.wait_for('message', check=check)
                     rep = int(mg.clean_content)
                     mmj["commands"][name] = {}
