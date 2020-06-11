@@ -144,17 +144,17 @@ async def get_badges(bot, user):
     async with bot.session.get(f"https://discordapp.com/api/v6/users/{uid}", headers=headers) as resp:
         resp.raise_for_status()
         rq = await resp.json()
-    flags = format(rq["public_flags"], "b")[::-1]
-    return m10s_badges(flags)
+    return m10s_badges(rq["public_flags"])
 
 
 class m10s_badges:
 
     def __init__(self, flags):
 
-        self.raw_flags = flags[::-1]
+        self.raw_flags = flags
+        flags = format(flags, "b")
 
-        flags = flags[::-1].zfill(18)[::-1]
+        flags = flags.zfill(18)[::-1]
         self.staff = flags[0] == "1"
         self.partner = flags[1] == "1"
         self.hypesquad_events = flags[2] == "1"

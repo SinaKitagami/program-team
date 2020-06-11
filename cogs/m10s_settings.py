@@ -207,9 +207,7 @@ class settings(commands.Cog):
 
             emojis = ctx.guild.emojis
 
-            se = []
-            for e in emojis:
-                se = se + [str(e)]
+            se = [str(i) for i in emojis]
 
             await dc.send(ctx._("scmd-add-guide1"))
 
