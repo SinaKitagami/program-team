@@ -1528,7 +1528,6 @@ async def on_command(ctx):
                  icon_url=ctx.author.avatar_url_as(static_format="png"))
     e.set_footer(text=f"実行サーバー:{ctx.guild.name}({ctx.guild.id})",
                  icon_url=ctx.guild.icon_url_as(static_format="png"))
-    e.add_field(name="成功したか", value=str(not ctx.command_failed))
     e.add_field(name="実行チャンネル", value=ctx.channel.name)
     e.timestamp = ctx.message.created_at
     await ch.send(embed=e)
