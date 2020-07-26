@@ -130,7 +130,7 @@ class other(commands.Cog):
         def check(m):
             return m.channel == dc and m.author == ctx.author
         m = await self.bot.wait_for("message", check=check)
-        ttl, ctt = m.split(" ", 1)
+        ttl, ctt = m.content.split(" ", 1)
         embed = discord.Embed(title=ttl, description=ctt, color=self.bot.ec)
         fbc = self.bot.get_channel(channel_id)
         embed.set_author(name=f"{str(ctx.message.author)}",
