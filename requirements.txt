@@ -3,7 +3,7 @@ discord.py>=1.3.0
 aiohttp
 
 # utils
-dateutil
+python-dateutil
 psutil
 beautifulsoup4
 pytz
