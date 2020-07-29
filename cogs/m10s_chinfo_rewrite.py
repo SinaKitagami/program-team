@@ -57,7 +57,7 @@ class m10s_chinfo_rw(commands.Cog):
                 e=discord.Embed(name="チャンネル情報",description=f"{target.name}(タイプ:テキスト)\nID:{target.id}",color=self.bot.ec)
             e.timestamp=target.created_at
             if target.category:
-                e.add_field(name="所属するカテゴリー",value=f"{target.category.name}({target.category.id})")
+                e.add_field(name="所属するカテゴリ",value=f"{target.category.name}({target.category.id})")
             e.add_field(name="チャンネルトピック",value=target.topic or "(なし)")
             if not target.slowmode_delay == 0:
                 e.add_field(name="スローモードの時間",value=f"{target.slowmode_delay}秒")
@@ -76,7 +76,7 @@ class m10s_chinfo_rw(commands.Cog):
             e=discord.Embed(name="チャンネル情報",description=f"{target.name}(タイプ:ボイス)\nID:{target.id}",color=self.bot.ec)
             e.timestamp=target.created_at
             if target.category:
-                e.add_field(name="所属するカテゴリー",value=f"{target.category.name}({target.category.id})")
+                e.add_field(name="所属するカテゴリ",value=f"{target.category.name}({target.category.id})")
             e.add_field(name="チャンネルビットレート",value=f"{target.bitrate/1000}Kbps")
             if not target.user_limit == 0:
                 e.add_field(name="ユーザー数制限",value=f"{target.user_limit}人")
@@ -91,13 +91,16 @@ class m10s_chinfo_rw(commands.Cog):
                 e.add_field(name=f"参加可能なメンバー({len(target.members)}人)",value=mbs,inline=False)
             await ctx.send(embed=e)
         elif isinstance(target,discord.CategoryChannel):
-            e=discord.Embed(name="チャンネル情報",description=f"{target.name}(タイプ:カテゴリー)\nID:{target.id}",color=self.bot.ec)
+            e=discord.Embed(name="チャンネル情報",description=f"{target.name}(タイプ:カテゴリ)\nID:{target.id}",color=self.bot.ec)
             e.timestamp=target.created_at
             e.add_field(name="NSFW指定有無",value=target.is_nsfw())
             mbs=""
             for c in target.channels:
                 if c.type is discord.ChannelType.news:
-                    chtype="ニュース"
+                    if "NEWS" in target.guild.features:
+                        chtype="アナウンス"
+                    else:
+                        chtype="アナウンス(フォロー不可)"
                 elif c.type is discord.ChannelType.store:
                     chtype="ストア"
                 elif c.type is discord.ChannelType.voice:
