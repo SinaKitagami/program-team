@@ -141,7 +141,7 @@ async def get_badges(bot, user):
     }
     uid = user.id
 
-    async with bot.session.get(f"https://discordapp.com/api/v6/users/{uid}", headers=headers) as resp:
+    async with bot.session.get(f"https://discord.com/api/v6/users/{uid}", headers=headers) as resp:
         resp.raise_for_status()
         rq = await resp.json()
     return m10s_badges(rq["public_flags"])

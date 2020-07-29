@@ -51,6 +51,7 @@ from cogs import apple_foc
 from cogs import m10s_gban
 from cogs import m10s_bmail
 from cogs import m10s_auth_wiz
+from cogs import m10s_chinfo_rewrite
 
 """import logging
 
@@ -1098,6 +1099,7 @@ async def on_ready():
     m10s_gban.setup(bot)
     m10s_bmail.setup(bot)
     m10s_auth_wiz.setup(bot)
+    m10s_chinfo_rewrite.setup(bot)
     try:
         ch = bot.get_channel(595526013031546890)
         await ch.send(f"{bot.get_emoji(653161518531215390)}on_ready!")
