@@ -15,148 +15,196 @@ class info(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
-    async def anyuserinfo(self, ctx, *, uid: int=None):
-        if uid:
-            self.bot.cursor.execute("select * from users where id=?", (uid,))
-            upf = self.bot.cursor.fetchone()
-            if upf:
-                isva = upf["sinapartner"]
+    @commands.command(name="userinfo",aliases=["ui","anyuserinfo","user"])
+    async def _info_of_user(self,ctx,target=None):
+        try:
+            if target is None:
+                target=ctx.author
             else:
-                isva = 0
+                target = await commands.UserConverter().convert(ctx,target)
+        except:
             try:
-                u = await self.bot.fetch_user(uid)
-            except discord.NotFound:
-                await ctx.send(ctx._("aui-nf"))
-            except discord.HTTPException:
-                await ctx.send(ctx._("aui-he"))
+                target=int(target)
             except:
-                await ctx.send(ctx._("aui-othere", traceback.format_exc()))
+                if isinstance(target,str):
+                    users=[i for i in self.bot.users if target in i.name]
+                    if users:
+                        e = discord.Embed(title = f"{target}をユーザー名に含むユーザー", description = "```" + "\n".join([f"{u}({u.id})" for u in users]) + "```",color=self.bot.ec)
+                        await ctx.send(embed=e)
+                    else:
+                        await ctx.send(f"{target}をユーザー名に含むユーザーは見つかりませんでした。")
+                else:
+                    await ctx.send("引数はユーザーを特定できるものか、文字列でなければいけません！")
             else:
-                flags = await ut.get_badges(self.bot, u)
+                uid = target
+                self.bot.cursor.execute("select * from users where id=?", (uid,))
+                upf = self.bot.cursor.fetchone()
+                if upf:
+                    isva = upf["sinapartner"]
+                else:
+                    isva = 0
+                try:
+                    u = await self.bot.fetch_user(uid)
+                except discord.NotFound:
+                    await ctx.send(ctx._("aui-nf"))
+                except discord.HTTPException:
+                    await ctx.send(ctx._("aui-he"))
+                except:
+                    await ctx.send(ctx._("aui-othere", traceback.format_exc()))
+                else:
+                    flags = await ut.get_badges(self.bot, u)
+                    ptn = ""
+                    if u.id in self.bot.team_sina:
+                        ptn = f',({ctx._("team_sina-chan")})'
+                    if u.id in [i[1] for i in self.bot.partnerg]:
+                        ptn = ptn+f',({ctx._("partner_guild_o")})'
+                    if isva:
+                        ptn = ptn+f"、(💠{ctx._('sina-v-ac')})"
+                    e = discord.Embed(
+                        title=f"{ctx._('aui-uinfo')}{ptn}", color=self.bot.ec)
+                    if u.system:
+                        e.add_field(name="✅", value=ctx._(
+                            'aui-sysac'), inline=False)
+                    if flags.verified_bot:
+                        e.add_field(name="✅", value=ctx._(
+                            'aui-verified_bot'), inline=False)
+                    e.add_field(name=ctx._("aui-name"), value=u.name)
+                    e.add_field(name=ctx._("aui-id"), value=u.id)
+                    e.add_field(name=ctx._("aui-dr"), value=u.discriminator)
+                    e.add_field(name=ctx._("aui-isbot"), value=u.bot)
+                    e.add_field(name=ctx._("aui-flags"),
+                                value=f'\n'.join(flags.get_list()) or "なし")
+                    e.set_thumbnail(url=u.avatar_url)
+                    tm = (u.created_at + rdelta(hours=9)
+                        ).strftime("%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}").format(*"年月日時分秒")
+                    e.set_footer(text=ctx._("aui-created", tm))
+                    e.timestamp = u.created_at
+                    await ctx.send(embed=e)
+        else:
+            u=ctx.guild.get_member(target.id)
+            if u is not None:
+                info = u
+                self.bot.cursor.execute("select * from users where id=?", (info.id,))
+                upf = self.bot.cursor.fetchone()
+                if upf:
+                    isva = upf["sinapartner"]
+                else:
+                    isva = 0
+                flags = await ut.get_badges(self.bot, info)
                 ptn = ""
-                if u.id in self.bot.team_sina:
+                if info.id in self.bot.team_sina:
                     ptn = f',({ctx._("team_sina-chan")})'
-                if u.id in [i[1] for i in self.bot.partnerg]:
+                if info.id in [i[1] for i in self.bot.partnerg]:
                     ptn = ptn+f',({ctx._("partner_guild_o")})'
                 if isva:
                     ptn = ptn+f"、(💠{ctx._('sina-v-ac')})"
-                e = discord.Embed(
-                    title=f"{ctx._('aui-uinfo')}{ptn}", color=self.bot.ec)
-                if u.system:
-                    e.add_field(name="✅", value=ctx._(
-                        'aui-sysac'), inline=False)
+                if ctx.guild.owner == info:
+                    embed = discord.Embed(title=ctx._(
+                        "uinfo-title"), description=f"{ptn} - {ctx._('userinfo-owner')}", color=info.color)
+                else:
+                    embed = discord.Embed(title=ctx._(
+                        "uinfo-title"), description=ptn, color=info.color)
+                if info.system:
+                    embed.add_field(name="✅", value=ctx._(
+                        "aui-sysac"), inline=False)
                 if flags.verified_bot:
-                    e.add_field(name="✅", value=ctx._(
-                        'aui-verified_bot'), inline=False)
-                e.add_field(name=ctx._("aui-name"), value=u.name)
-                e.add_field(name=ctx._("aui-id"), value=u.id)
-                e.add_field(name=ctx._("aui-dr"), value=u.discriminator)
-                e.add_field(name=ctx._("aui-isbot"), value=u.bot)
-                e.add_field(name=ctx._("aui-flags"),
-                            value=f'\n'.join(flags.get_list()) or "なし")
-                e.set_thumbnail(url=u.avatar_url)
-                tm = (u.created_at + rdelta(hours=9)
-                      ).strftime("%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}").format(*"年月日時分秒")
-                e.set_footer(text=ctx._("aui-created", tm))
-                e.timestamp = u.created_at
-            await ctx.send(embed=e)
-        else:
-            await ctx.send(ctx._("aui-nid"))
-
-    @commands.command(aliases=["ui", "ユーザー情報", "ユーザーの情報を教えて"])
-    async def userinfo(self, ctx, mus: commands.MemberConverter=None):
-        print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
-              ctx.message.content)
-        if mus is None:
-            info = ctx.message.author
-            can_online = True
-        else:
-            info = mus
-            if not self.bot.shares_guild(mus.id, ctx.author.id):
-                return await ctx.say("cannot-send-userinfo")
-            can_online = self.bot.can_use_online(info)
-        self.bot.cursor.execute("select * from users where id=?", (info.id,))
-        upf = self.bot.cursor.fetchone()
-        if upf:
-            isva = upf["sinapartner"]
-        else:
-            isva = 0
-        async with ctx.message.channel.typing():
-            flags = await ut.get_badges(self.bot, info)
-            ptn = ""
-            if info.id in self.bot.team_sina:
-                ptn = f',({ctx._("team_sina-chan")})'
-            if info.id in [i[1] for i in self.bot.partnerg]:
-                ptn = ptn+f',({ctx._("partner_guild_o")})'
-            if isva:
-                ptn = ptn+f"、(💠{ctx._('sina-v-ac')})"
-            if ctx.guild.owner == info:
-                embed = discord.Embed(title=ctx._(
-                    "uinfo-title"), description=f"{ptn} - {ctx._('userinfo-owner')}", color=info.color)
-            else:
-                embed = discord.Embed(title=ctx._(
-                    "uinfo-title"), description=ptn, color=info.color)
-            if info.system:
-                embed.add_field(name="✅", value=ctx._(
-                    "aui-sysac"), inline=False)
-            if flags.verified_bot:
-                embed.add_field(name="✅", value=ctx._(
-                    "aui-verified_bot"), inline=False)
-            devices = ""
-            if can_online:
+                    embed.add_field(name="✅", value=ctx._(
+                        "aui-verified_bot"), inline=False)
                 devices = f" - {ut.ondevicon(info)}"
-            embed.add_field(name=ctx._("userinfo-name"),
-                            value=f"{info.name}{devices}")
-            try:
-                if info.premium_since is not None:
-                    embed.add_field(name=ctx._("userinfo-guildbooster"),
+                embed.add_field(name=ctx._("userinfo-name"),
+                                value=f"{info.name}{devices}")
+                try:
+                    if info.premium_since is not None:
+                        embed.add_field(name=ctx._("userinfo-guildbooster"),
                                     value=f"since {info.premium_since}")
-            except:
-                pass
-            embed.add_field(name=ctx._("userinfo-joindiscord"), value=(info.created_at + rdelta(
-                hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
-            embed.add_field(name=ctx._("userinfo-id"), value=info.id)
-            if can_online:
+                except:
+                    pass
+                embed.add_field(name=ctx._("userinfo-joindiscord"), value=(info.created_at + rdelta(
+                    hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
+                embed.add_field(name=ctx._("userinfo-id"), value=info.id)
                 embed.add_field(name=ctx._("userinfo-online"),
                                 value=f"{str(info.status)}")
-            embed.add_field(name=ctx._("userinfo-isbot"), value=str(info.bot))
-            embed.add_field(name=ctx._("userinfo-displayname"),
-                            value=info.display_name)
-            embed.add_field(name=ctx._("userinfo-joinserver"), value=(info.joined_at + rdelta(
-                hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
-            if can_online and info.activity is not None:
-                try:
-                    if info.activity.type == discord.ActivityType.custom:
+                embed.add_field(name=ctx._("userinfo-isbot"), value=str(info.bot))
+                embed.add_field(name=ctx._("userinfo-displayname"),
+                                value=info.display_name)
+                embed.add_field(name=ctx._("userinfo-joinserver"), value=(info.joined_at + rdelta(
+                    hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
+                if info.activity is not None:
+                    try:
+                        if info.activity.type == discord.ActivityType.custom:
+                            embed.add_field(name=ctx._(
+                                "userinfo-nowplaying"), value=info.activity)
+                        else:
+                            embed.add_field(name=ctx._(
+                                "userinfo-nowplaying"), value=f'{info.activity.name}')
+                    except:
                         embed.add_field(name=ctx._(
                             "userinfo-nowplaying"), value=info.activity)
-                    else:
-                        embed.add_field(name=ctx._(
-                            "userinfo-nowplaying"), value=f'{info.activity.name}')
-                except:
+                hasroles = ""
+                for r in info.roles:
+                    hasroles = hasroles + f"{r.mention},"
+                embed.add_field(name=ctx._("userinfo-roles"), value=hasroles)
+                embed.add_field(name=ctx._("userinfo-guildper"),
+                                value=f"`{'`,`'.join([ctx._(f'p-{i[0]}') for i in list(info.guild_permissions) if i[1]])}`")
+                if info.avatar_url is not None:
+                    embed.set_thumbnail(
+                        url=info.avatar_url_as(static_format='png'))
+                    embed.add_field(name=ctx._("userinfo-iconurl"),
+                                    value=info.avatar_url_as(static_format='png'))
+                else:
+                    embed.set_image(
+                        url=info.default_avatar_url_as(static_format='png'))
+                lmsc = ut.get_vmusic(self.bot, info)
+                if lmsc:
                     embed.add_field(name=ctx._(
-                        "userinfo-nowplaying"), value=info.activity)
-            hasroles = ""
-            for r in info.roles:
-                hasroles = hasroles + f"{r.mention},"
-            embed.add_field(name=ctx._("userinfo-roles"), value=hasroles)
-            embed.add_field(name=ctx._("userinfo-guildper"),
-                            value=f"`{'`,`'.join([ctx._(f'p-{i[0]}') for i in list(info.guild_permissions) if i[1]])}`")
-            if info.avatar_url is not None:
-                embed.set_thumbnail(
-                    url=info.avatar_url_as(static_format='png'))
-                embed.add_field(name=ctx._("userinfo-iconurl"),
-                                value=info.avatar_url_as(static_format='png'))
+                        "play-use-sina", lmsc['name'], lmsc['url']), value=f"in:{lmsc['guild'].name}")
+                embed.add_field(name=ctx._("aui-flags"),
+                                value=f'\n'.join(flags.get_list()) or "なし")
+                await ctx.send(embed=embed)
             else:
-                embed.set_image(
-                    url=info.default_avatar_url_as(static_format='png'))
-            lmsc = ut.get_vmusic(self.bot, info)
-            if lmsc:
-                embed.add_field(name=ctx._(
-                    "play-use-sina", lmsc['name'], lmsc['url']), value=f"in:{lmsc['guild'].name}")
-            embed.add_field(name=ctx._("aui-flags"),
-                            value=f'\n'.join(flags.get_list()) or "なし")
-        await ctx.send(embed=embed)
+                u=[i for i in self.bot.get_all_members() if i.id == target.id][0]
+                info = u
+                self.bot.cursor.execute("select * from users where id=?", (info.id,))
+                upf = self.bot.cursor.fetchone()
+                if upf:
+                    isva = upf["sinapartner"]
+                else:
+                    isva = 0
+                flags = await ut.get_badges(self.bot, info)
+                ptn = ""
+                if info.id in self.bot.team_sina:
+                    ptn = f',({ctx._("team_sina-chan")})'
+                if info.id in [i[1] for i in self.bot.partnerg]:
+                    ptn = ptn+f',({ctx._("partner_guild_o")})'
+                if isva:
+                    ptn = ptn+f"、(💠{ctx._('sina-v-ac')})"
+                if ctx.guild.owner == info:
+                    embed = discord.Embed(title=ctx._(
+                        "uinfo-title"), description=f"{ptn} - {ctx._('userinfo-owner')}", color=info.color)
+                else:
+                    embed = discord.Embed(title=ctx._(
+                        "uinfo-title"), description=ptn, color=info.color)
+                if info.system:
+                    embed.add_field(name="✅", value=ctx._(
+                        "aui-sysac"), inline=False)
+                if flags.verified_bot:
+                    embed.add_field(name="✅", value=ctx._(
+                        "aui-verified_bot"), inline=False)
+                embed.add_field(name=ctx._("userinfo-name"),
+                                value=f"{info.name}")
+                embed.add_field(name=ctx._("userinfo-joindiscord"), value=(info.created_at + rdelta(
+                    hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
+                embed.add_field(name=ctx._("userinfo-id"), value=info.id)
+                embed.add_field(name=ctx._("userinfo-isbot"), value=str(info.bot))
+                if info.avatar_url is not None:
+                    embed.set_thumbnail(
+                        url=info.avatar_url_as(static_format='png'))
+                    embed.add_field(name=ctx._("userinfo-iconurl"),
+                                    value=info.avatar_url_as(static_format='png'))
+                else:
+                    embed.set_image(
+                        url=info.default_avatar_url_as(static_format='png'))
+                await ctx.send(embed=embed)
 
     @commands.command()
     async def cinvite(self, ctx, ivt: str):
