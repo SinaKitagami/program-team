@@ -303,6 +303,8 @@ class music(commands.Cog):
 
     @commands.command(aliases=["plist", "queue"])
     async def view_q(self, ctx, pg=1):
+        if ctx.voice_client is None:
+            return await ctx.send("ボイスチャンネルに参加していません。")
         if ctx.voice_client.is_playing():
             page = pg-1
             pls = [self.bot.qu[str(ctx.guild.id)][5*i:5*(i+1)]
