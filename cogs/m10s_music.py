@@ -290,6 +290,8 @@ class music(commands.Cog):
 
     @commands.command(aliases=["np"])
     async def playingmusic(self, ctx):
+        if ctx.voice_client is None:
+            return await ctx.send("ボイスチャンネルに参加していません。")
         if ctx.voice_client.is_playing():
             e = discord.Embed(
                 title="再生中の曲", description=f'[{self.bot.qu[str(ctx.guild.id)][0]["video_title"]}]({self.bot.qu[str(ctx.guild.id)][0]["video_url"]})\nアップロードチャンネル:[{self.bot.qu[str(ctx.guild.id)][0]["video_up_name"]}]({self.bot.qu[str(ctx.guild.id)][0]["video_up_url"]})\nソース:{self.bot.qu[str(ctx.guild.id)][0]["video_source"]}')
