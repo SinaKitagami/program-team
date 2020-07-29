@@ -144,7 +144,10 @@ class music(commands.Cog):
                     type='video'
                 ).execute()
                 vid = search_response['items'][0]['id']['videoId']
-                vurl = f"https://www.youtube.com/watch?v={vid}"
+                if vid:
+                    vurl = f"https://www.youtube.com/watch?v={vid}"
+                else:
+                    return await ctx.send("動画が見つかりませんでした。")
             if not vurl:
                 return
             vinfo = await self.gvinfo(vurl, False)
