@@ -108,7 +108,7 @@ class other(commands.Cog):
                 info = ctx.guild.get_member(int(mus))
             if not self.bot.can_use_online(mus):
                 return await ctx.say("cannot-send-online")
-            if not self.bot.shares_guild(mus.id, ctx.author.id):
+            if not self.bot.shares_guild(info.id, ctx.author.id):
                 return await ctx.say("cannot-send-online")
         await ctx.send(f"Status:{str(info.status)}(PC:{str(info.desktop_status)},Mobile:{str(info.mobile_status)},Web:{str(info.web_status)})")
 
