@@ -156,8 +156,7 @@ class info(commands.Cog):
                         url=info.default_avatar_url_as(static_format='png'))
                 lmsc = ut.get_vmusic(self.bot, info)
                 if lmsc:
-                    embed.add_field(name=ctx._(
-                        "play-use-sina", lmsc['name'], lmsc['url']), value=f"in:{lmsc['guild'].name}")
+                    embed.add_field(name="思惟奈ちゃんで音楽タイム！", value=f"{ctx._('play-use-sina', lmsc['name'], lmsc['url'])}in:{lmsc['guild'].name}")
                 embed.add_field(name=ctx._("aui-flags"),
                                 value=f'\n'.join(flags.get_list()) or "なし")
                 await ctx.send(embed=embed)
@@ -239,6 +238,7 @@ class info(commands.Cog):
                                 value=str(emj.user))
             embed.add_field(name="url", value=emj.url)
             embed.set_footer(text=ctx._("einfo-addday"))
+            embed.set_thumbnail(url=emj.url)
             embed.timestamp = emj.created_at
             await ctx.send(embed=embed)
 
@@ -354,92 +354,7 @@ class info(commands.Cog):
             ch = vch
         await ctx.send(embed=ut.getEmbed(ch.name, f"https://discordapp.com/channels/{ctx.guild.id}/{ch.id}"))
 
-    @commands.command(name="chinfo", aliases=["チャンネル情報", "次のチャンネルについて教えて"])
-    async def channelinfo(self, ctx, cid: int=None):
-
-        if cid is None:
-            ch = ctx.message.channel
-        else:
-            ch = ctx.guild.get_channel(cid)
-        if isinstance(ch, discord.TextChannel):
-
-            embed = discord.Embed(
-                title=ch.name, description=f"id:{ch.id}", color=ctx.author.colour)
-
-            embed.add_field(name=ctx._("ci-type"), value=ctx._("ci-text"))
-
-            embed.add_field(name=ctx._("ci-topic"),
-                            value=ch.topic or ctx._("topic-is-none"))
-
-            embed.add_field(name=ctx._(
-                "ci-slow"), value=str(ch.slowmode_delay).replace("0", ctx._("ci-None")))
-
-            embed.add_field(name=ctx._("ci-nsfw"), value=ch.is_nsfw())
-
-            embed.add_field(name=ctx._("ci-cate"), value=ch.category)
-
-            embed.add_field(name=ctx._("ci-created"), value=(ch.created_at + rdelta(
-                hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
-
-            embed.add_field(name=ctx._("ci-invitec"), value=str(len(await ch.invites())).replace("0", ctx._("ci-None")))
-
-            embed.add_field(name=ctx._("ci-pinc"), value=str(len(await ch.pins())).replace("0", ctx._("ci-None")))
-
-            embed.add_field(name=ctx._("ci-whc"), value=str(len(await ch.webhooks())).replace("0", ctx._("ci-None")))
-
-            embed.add_field(name=ctx._(
-                "ci-url"), value=f"[{ctx._('ci-click')}](https://discordapp.com/channels/{ctx.guild.id}/{ch.id})")
-
-            await ctx.send(embed=embed)
-
-        elif isinstance(ch, discord.VoiceChannel):
-            embed = discord.Embed(
-                title=ch.name, description=f"id:{ch.id}", color=ctx.author.colour)
-
-            embed.add_field(name=ctx._("ci-type"), value=ctx._("ci-voice"))
-
-            embed.add_field(name=ctx._("ci-bit"), value=ch.bitrate)
-
-            embed.add_field(name=ctx._("ci-limituser"),
-                            value=str(ch.user_limit).replace("0", ctx._("ci-None")))
-
-            embed.add_field(name=ctx._("ci-cate"), value=ch.category)
-
-            embed.add_field(name=ctx._("ci-created"), value=(ch.created_at + rdelta(
-                hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
-
-            embed.add_field(name=ctx._("ci-invitec"), value=str(len(await ch.invites())).replace("0", ctx._("ci-None")))
-
-            embed.add_field(name=ctx._(
-                "ci-url"), value=f"[{ctx._('ci-click')}](https://discordapp.com/channels/{ctx.guild.id}/{ch.id})")
-
-            await ctx.send(embed=embed)
-
-        elif isinstance(ch, discord.CategoryChannel):
-
-            embed = discord.Embed(
-                title=ch.name, description=f"id:{ch.id}", color=ctx.author.colour)
-
-            embed.add_field(name=ctx._("ci-type"), value=ctx._("ci-cate"))
-
-            embed.add_field(name=ctx._("ci-nsfw"), value=ch.is_nsfw())
-
-            ic = ""
-
-            for c in ch.channels:
-                ic = ic + c.mention + ","
-
-            embed.add_field(name=ctx._("ci-inch"), value=ic)
-
-            embed.add_field(name=ctx._("ci-created"), value=(ch.created_at + rdelta(
-                hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
-
-            embed.add_field(name=ctx._(
-                "ci-url"), value=f"[{ctx._('ci-click')}](https://discordapp.com/channels/{ctx.guild.id}/{ch.id})")
-
-            await ctx.send(embed=embed)
-        else:
-            await ctx.send(ctx._("ci-notfound"))
+    #chinfo is 'm10s_chinfo_rewrite' now
 
     @commands.command(aliases=["ボイス情報", "音声情報を教えて"])
     async def voiceinfo(self, ctx, mus: commands.MemberConverter=None):
@@ -509,8 +424,12 @@ class info(commands.Cog):
             for m in role.members:
                 hasmember = hasmember + f"{m.mention},"
             if not hasmember == "":
-                embed.add_field(name=ctx._(
-                    "roleinfo-hasmember"), value=hasmember)
+                if len(hasmember) <= 1024:
+                    embed.add_field(name=ctx._(
+                        "roleinfo-hasmember"), value=hasmember)
+                else:
+                    embed.add_field(name=ctx._(
+                        "roleinfo-hasmember"), value="たくさんのユーザー")
             else:
                 embed.add_field(name=ctx._(
                     "roleinfo-hasmember"), value="(None)")
@@ -526,7 +445,7 @@ class info(commands.Cog):
         else:
             await ctx.send(ctx._("roleinfo-other"))
 
-    @commands.command(name="activity", aliases=["アクティビティ", "なにしてるか見せて"])
+    @commands.command(name="activity")
     @commands.cooldown(1, 5, type=commands.BucketType.user)
     async def infoactivity(self, ctx, mus: commands.MemberConverter=None):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
@@ -535,37 +454,36 @@ class info(commands.Cog):
             info = ctx.message.author
         else:
             info = mus
-            if not self.bot.can_use_online(mus):
-                return await ctx.say("playinginfo-offline")
-            if not self.bot.shares_guild(mus.id, ctx.author.id):
-                return await ctx.say("playinginfo-offline")
-        try:
-            await self.bot.request_offline_members(ctx.guild)
-        except:
-            pass
         lmsc = ut.get_vmusic(self.bot, info)
+        activs = []
+        embeds = []
         if lmsc:
             embed = discord.Embed(title=ctx._(
                 "playinginfo-doing"), description=f"{lmsc['guild'].name}で、思惟奈ちゃんを使って[{lmsc['name']}]({lmsc['url']} )を聞いています", color=info.color)
-            await ctx.send(embed=embed)
+            activs.append("思惟奈ちゃんでの音楽鑑賞")
+            embeds.append(embed)
         if info.activity is None:
             if str(info.status) == "offline":
                 embed = discord.Embed(title=ctx._(
                     "playinginfo-doing"), description=ctx._("playinginfo-offline"), color=info.color)
+                activs.append("オフラインユーザー")
             else:
                 sete = False
                 try:
                     if info.voice.self_stream:
                         embed = discord.Embed(title=ctx._("playinginfo-doing"), description=str(
                             self.bot.get_emoji(653161518250196992))+ctx._("playinginfo-GoLive"), color=info.color)
+                        activs.append("GoLiveストリーミング")
                         sete = True
                     elif info.voice.self_video:
                         embed = discord.Embed(title=ctx._("playinginfo-doing"), description=str(
                             self.bot.get_emoji(653161517960658945))+ctx._("playinginfo-screenshare"), color=info.color)
+                        activs.append("サーバービデオ")
                         sete = True
                     elif info.voice:
                         embed = discord.Embed(title=ctx._("playinginfo-doing"), description=str(
                             self.bot.get_emoji(653161518082293770))+ctx._("playinginfo-invc"), color=info.color)
+                        activs.append("ボイスチャット参加中")
                         sete = True
                 except:
                     pass
@@ -573,19 +491,24 @@ class info(commands.Cog):
                     if info.bot:
                         embed = discord.Embed(title=ctx._(
                             "playinginfo-doing"), description=ctx._("playinginfo-bot"), color=info.color)
+                        activs.append("botユーザー")
                     elif "🌐" == ut.ondevicon(info):
                         embed = discord.Embed(title=ctx._(
                             "playinginfo-doing"), description=ctx._("playinginfo-onlyWeb"), color=info.color)
+                        activs.append("Webクライアント")
                     elif "📱" == ut.ondevicon(info):
                         embed = discord.Embed(title=ctx._(
                             "playinginfo-doing"), description=ctx._("playinginfo-onlyPhone"), color=info.color)
+                        activs.append("スマートフォンクライアント")
                     else:
                         embed = discord.Embed(title=ctx._(
                             "playinginfo-doing"), description=ctx._("playinginfo-noActivity"), color=info.color)
+                        activs.append("なにもしてない…のかな？")
             activ = info.activity
             embed.set_author(name=info.display_name,
                              icon_url=info.avatar_url_as(static_format='png'))
-            await ctx.send(embed=embed)
+            spflag = True
+            embeds.append(embed)
         else:
             for anactivity in info.activities:
                 if anactivity.type == discord.ActivityType.playing:
@@ -606,6 +529,7 @@ class info(commands.Cog):
                 embed.set_author(name=info.display_name,
                                  icon_url=info.avatar_url_as(static_format='png'))
                 if anactivity.name == "Spotify":
+                    activs.append("Spotifyでの音楽鑑賞")
                     try:
                         embed.add_field(name=ctx._(
                             "playinginfo-title"), value=activ.title)
@@ -630,6 +554,7 @@ class info(commands.Cog):
                         embed.add_field(name=ctx._(
                             "playinginfo-artist"), value=activ.state)
                 elif anactivity.type == discord.ActivityType.streaming:
+                    activs.append("外部でのストリーミング")
                     try:
                         embed.add_field(name=ctx._(
                             "playinginfo-streampage"), value=activ.url)
@@ -641,9 +566,11 @@ class info(commands.Cog):
                     except:
                         pass
                 elif anactivity.type == discord.ActivityType.custom:
+                    activs.append("カスタムステータス")
                     embed.add_field(name=ctx._(
                         "playinginfo-det"), value=str(anactivity))
                 else:
+                    activs.append(f"{activ.name}をプレイ中")
                     try:
                         vl = ""
                         if activ.details:
@@ -662,9 +589,41 @@ class info(commands.Cog):
                         embed.timestamp = anactivity.created_at
                 except:
                     pass
-                await ctx.send(embed=embed)
+                embeds.append(embed)
+        # ページわけ
+        doingdis = f"{len(activs)}件のアクティビティ"
+        e = discord.Embed(title=doingdis,description="```"+f"\n".join(activs)+"```",color = self.bot.ec)
+        e.set_author(name=info.display_name,
+                        icon_url=info.avatar_url_as(static_format='png'))
+        embeds.insert(0,e)
+        page = 0
+        msg = await ctx.send(embed=embeds[page])
+        await msg.add_reaction(self.bot.get_emoji(653161518195671041))
+        await msg.add_reaction(self.bot.get_emoji(653161518170505216))
+        while True:
+            try:
+                r, u = await self.bot.wait_for("reaction_add", check=lambda r, u: r.message.id == msg.id and u.id == ctx.message.author.id, timeout=30)
+            except:
+                break
+            try:
+                await msg.remove_reaction(r, u)
+            except:
+                pass
+            if str(r) == str(self.bot.get_emoji(653161518170505216)):
+                if page == len(embeds) - 1:
+                    page = 0
+                else:
+                    page = page + 1
+                await msg.edit(embed=embeds[page])
+            elif str(r) == str(self.bot.get_emoji(653161518195671041)):
+                if page == 0:
+                    page = len(embeds) - 1
+                else:
+                    page = page - 1
+                await msg.edit(embed=embeds[page])
 
-    @commands.command(name="serverinfo")
+
+    @commands.command(name="serverinfo",aliases=["si"])
     async def ginfo(self, ctx):
         if ctx.guild.id in [i[0] for i in self.bot.partnerg]:
             ptn = f'{ctx._("partner_guild")}:'
