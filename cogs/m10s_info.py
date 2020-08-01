@@ -629,7 +629,7 @@ class info(commands.Cog):
             ptn = f'{ctx._("partner_guild")}:'
         else:
             ptn = ""
-        pmax = 12 if "PUBLIC" in ctx.guild.features else 11
+        pmax = 12 if "COMMUNITY" in ctx.guild.features else 11
         page = 0
         e = discord.Embed(title=ctx._("ginfo-ov-title"), color=self.bot.ec)
         e.set_author(name=f"{ptn}{ctx.guild.name}",
@@ -853,10 +853,12 @@ class info(commands.Cog):
                     await mp.edit(embed=e)
                 elif page == 12:
                     e = discord.Embed(
-                        title="公開サーバー設定", description=ctx.guild.description or "概要なし", color=self.bot.ec)
+                        title="コミュニティサーバー設定", description=ctx.guild.description or "概要なし", color=self.bot.ec)
                     e.add_field(name="優先言語", value=ctx.guild.preferred_locale)
                     e.add_field(name="ルールチャンネル",
                                 value=ctx.guild.rules_channel.mention)
+                    e.add_field(name="コミュニティ更新情報チャンネル",
+                                value=ctx.guild.public_updates_channel.mention)
                     await mp.edit(embed=e)
             except:
                 await mp.edit(embed=discord.Embed(title=ctx._("ginfo-anyerror-title"), description=ctx._("ginfo-anyerror-desc", traceback.format_exc(0)), color=self.bot.ec))
