@@ -250,6 +250,10 @@ class info(commands.Cog):
             sevinfo = self.bot.get_guild(int(str(sid)))
         else:
             sevinfo = ctx.message.guild
+        
+        if sevinfo is None:
+            return await ctx.send("そのサーバーに思惟奈ちゃんがいるかどうか確認してください。")
+        
         if sevinfo.id in [i[0] for i in self.bot.partnerg]:
             ptn = f'{ctx._("partner_guild")}:'
         else:

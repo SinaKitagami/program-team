@@ -31,19 +31,21 @@ class m10s_chinfo_rw(commands.Cog):
             target = ctx.channel
         else:
             try:
-                target = commands.TextChannelConverter.convert(ctx,target)
+                target = await commands.TextChannelConverter().convert(ctx,target)
             except:
                 try:
-                    target = commands.VoiceChannelConverter.convert(ctx,target)
+                    target = await commands.VoiceChannelConverter().convert(ctx,target)
                 except:
                     try:
-                        target = commands.CategoryChannelConverter.convert(ctx,target)
+                        target = await commands.CategoryChannelConverter().convert(ctx,target)
                     except:
                         try:
                             target = self.bot.get_channel(int(target))
                         except:
                             await ctx.send("引数をチャンネルに変換できませんでした。")
                             return
+        if target is None:
+            return await ctx.send("そのチャンネルが見つかりませんでした。")
         if not target.guild.id == ctx.guild.id:
             await ctx.send("このサーバーのチャンネルではないため、情報を表示できません。")
             return

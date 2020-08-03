@@ -106,7 +106,7 @@ class other(commands.Cog):
                 info = ctx.message.mentions[0]
             else:
                 info = ctx.guild.get_member(int(mus))
-            if not self.bot.can_use_online(mus):
+            if not self.bot.can_use_online(info):
                 return await ctx.say("cannot-send-online")
             if not self.bot.shares_guild(info.id, ctx.author.id):
                 return await ctx.say("cannot-send-online")

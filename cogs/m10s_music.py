@@ -144,7 +144,10 @@ class music(commands.Cog):
                     type='video'
                 ).execute()
                 vid = search_response['items'][0]['id']['videoId']
-                vurl = f"https://www.youtube.com/watch?v={vid}"
+                if vid:
+                    vurl = f"https://www.youtube.com/watch?v={vid}"
+                else:
+                    return await ctx.send("動画が見つかりませんでした。")
             if not vurl:
                 return
             vinfo = await self.gvinfo(vurl, False)
@@ -287,6 +290,8 @@ class music(commands.Cog):
 
     @commands.command(aliases=["np"])
     async def playingmusic(self, ctx):
+        if ctx.voice_client is None:
+            return await ctx.send("ボイスチャンネルに参加していません。")
         if ctx.voice_client.is_playing():
             e = discord.Embed(
                 title="再生中の曲", description=f'[{self.bot.qu[str(ctx.guild.id)][0]["video_title"]}]({self.bot.qu[str(ctx.guild.id)][0]["video_url"]})\nアップロードチャンネル:[{self.bot.qu[str(ctx.guild.id)][0]["video_up_name"]}]({self.bot.qu[str(ctx.guild.id)][0]["video_up_url"]})\nソース:{self.bot.qu[str(ctx.guild.id)][0]["video_source"]}')
@@ -298,6 +303,8 @@ class music(commands.Cog):
 
     @commands.command(aliases=["plist", "queue"])
     async def view_q(self, ctx, pg=1):
+        if ctx.voice_client is None:
+            return await ctx.send("ボイスチャンネルに参加していません。")
         if ctx.voice_client.is_playing():
             page = pg-1
             pls = [self.bot.qu[str(ctx.guild.id)][5*i:5*(i+1)]
