@@ -45,7 +45,7 @@ class m10s_chinfo_rw(commands.Cog):
                             await ctx.send("引数をチャンネルに変換できませんでした。")
                             return
         if target is None:
-            await ctx.send("そのチャンネルが見つかりませんでした。")
+            return await ctx.send("そのチャンネルが見つかりませんでした。")
         if not target.guild.id == ctx.guild.id:
             await ctx.send("このサーバーのチャンネルではないため、情報を表示できません。")
             return
