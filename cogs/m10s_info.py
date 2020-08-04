@@ -909,6 +909,20 @@ class info(commands.Cog):
     async def features(self, ctx):
         await ctx.author.send(embed=ut.getEmbed("あなたのfeatures", "```{}```".format(",".join(self.bot.features.get(ctx.author.id, ["(なし)"])))))
 
+    @commands.command()
+    async def invite(self,ctx,*,target:commands.MemberConverter=None):
+        #if target is None:
+        target = ctx.guild.me
+        #if target.bot:
+        ilink = discord.utils.oauth_url(str(target.id),permissions=target.guild_permissions)
+        e=discord.Embed(title="bot招待リンク",description=ilink,color=self.bot.ec)
+        e.add_field(name="このリンクで導入した際の権限",
+                        value=f"`{'`,`'.join([ctx._(f'p-{i[0]}') for i in list(target.guild_permissions) if i[1]])}`")
+        e.set_author(name=f"{target}({target.id})",icon_url=target.avatar_url_as(static_format="png"))
+        await ctx.send(embed=e)
+        #else:
+            #await ctx.send(embed=discord.Embed(title="エラー",description="ユーザーアカウントの導入リンクは作成できません！",color=self.bot.ec))
+
 
 def setup(bot):
     bot.add_cog(info(bot))
