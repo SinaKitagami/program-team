@@ -633,7 +633,7 @@ class info(commands.Cog):
             ptn = f'{ctx._("partner_guild")}:'
         else:
             ptn = ""
-        pmax = 12 if "PUBLIC" in ctx.guild.features else 11
+        pmax = 12 if "COMMUNITY" in ctx.guild.features else 11
         page = 0
         e = discord.Embed(title=ctx._("ginfo-ov-title"), color=self.bot.ec)
         e.set_author(name=f"{ptn}{ctx.guild.name}",
@@ -857,10 +857,12 @@ class info(commands.Cog):
                     await mp.edit(embed=e)
                 elif page == 12:
                     e = discord.Embed(
-                        title="公開サーバー設定", description=ctx.guild.description or "概要なし", color=self.bot.ec)
+                        title="コミュニティサーバー設定", description=ctx.guild.description or "概要なし", color=self.bot.ec)
                     e.add_field(name="優先言語", value=ctx.guild.preferred_locale)
                     e.add_field(name="ルールチャンネル",
                                 value=ctx.guild.rules_channel.mention)
+                    e.add_field(name="コミュニティ更新情報チャンネル",
+                                value=ctx.guild.public_updates_channel.mention)
                     await mp.edit(embed=e)
             except:
                 await mp.edit(embed=discord.Embed(title=ctx._("ginfo-anyerror-title"), description=ctx._("ginfo-anyerror-desc", traceback.format_exc(0)), color=self.bot.ec))
@@ -906,6 +908,20 @@ class info(commands.Cog):
     @commands.command()
     async def features(self, ctx):
         await ctx.author.send(embed=ut.getEmbed("あなたのfeatures", "```{}```".format(",".join(self.bot.features.get(ctx.author.id, ["(なし)"])))))
+
+    @commands.command()
+    async def invite(self,ctx,*,target:commands.MemberConverter=None):
+        #if target is None:
+        target = ctx.guild.me
+        #if target.bot:
+        ilink = discord.utils.oauth_url(str(target.id),permissions=target.guild_permissions)
+        e=discord.Embed(title="bot招待リンク",description=ilink,color=self.bot.ec)
+        e.add_field(name="このリンクで導入した際の権限",
+                        value=f"`{'`,`'.join([ctx._(f'p-{i[0]}') for i in list(target.guild_permissions) if i[1]])}`")
+        e.set_author(name=f"{target}({target.id})",icon_url=target.avatar_url_as(static_format="png"))
+        await ctx.send(embed=e)
+        #else:
+            #await ctx.send(embed=discord.Embed(title="エラー",description="ユーザーアカウントの導入リンクは作成できません！",color=self.bot.ec))
 
 
 def setup(bot):
