@@ -16,7 +16,11 @@ class owner(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def get_ch_id(self, ctx, cnm: str):
-        await ctx.send(embed=ut.getEmbed("一致チャンネル", str([f"{i.name}({i.id})" for i in ctx.guild.channels if i.name == cnm])))
+        text = [f"{str(ch)} ({ch.id})" for ch in ctx.guild.channels if cnm in str(ch)]
+        t = "\n".join(text)
+        await ctx.send(embed=ut.getEmbed("一致チャンネル", f"```{t}```"))
+        
+        #await ctx.send(embed=ut.getEmbed("一致チャンネル", str([f"{i.name}({i.id})" for i in ctx.guild.channels if i.name == cnm])))
 
     @commands.command()
     @commands.is_owner()
