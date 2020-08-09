@@ -86,8 +86,10 @@ db = sqlite3.connect(
     "sina_datas.db", detect_types=sqlite3.PARSE_DECLTYPES, isolation_level=None)
 db.row_factory = sqlite3.Row
 bot.cursor = db.cursor()
-bot.cursor.execute("CREATE TABLE IF NOT EXISTS users(id integer PRIMARY KEY NOT NULL,prefix pickle,gpoint integer,memo json,levcard text,onnotif pickle,lang text,accounts pickle,sinapartner integer,gban integer,gnick text,gcolor integer,gmod integer,gstar integer,galpha integer,gbanhist text)")
-bot.cursor.execute("CREATE TABLE IF NOT EXISTS guilds(id integer PRIMARY KEY NOT NULL,levels json,commands json,hash pickle,levelupsendto integer,reward json,jltasks json,lockcom pickle,sendlog integer,prefix pickle,lang text)")
+bot.cursor.execute(
+    "CREATE TABLE IF NOT EXISTS users(id integer PRIMARY KEY NOT NULL,prefix pickle,gpoint integer,memo json,levcard text,onnotif pickle,lang text,accounts pickle,sinapartner integer,gban integer,gnick text,gcolor integer,gmod integer,gstar integer,galpha integer,gbanhist text)")
+bot.cursor.execute(
+    "CREATE TABLE IF NOT EXISTS guilds(id integer PRIMARY KEY NOT NULL,levels json,commands json,hash pickle,levelupsendto integer,reward json,jltasks json,lockcom pickle,sendlog integer,prefix pickle,lang text)")
 bot.cursor.execute(
     "CREATE TABLE IF NOT EXISTS globalchs(name text PRIMARY KEY NOT NULL,ids pickle)")
 bot.cursor.execute(
@@ -99,11 +101,18 @@ bot.cursor.execute(
 bot.cursor.execute(
     "CREATE TABLE IF NOT EXISTS gban_dates(id integer PRIMARY KEY NOT NULL,reason text NOT NULL,gban_by id NOT NULL);")
 
-bot.cursor.execute("CREATE TABLE IF NOT EXISTS welcome_auth(id integer PRIMARY KEY NOT NULL,category integer,use integer NOT NULL,can_view pickle NOT NULL,next_reaction NOT NULL,au_w pickle NOT NULL,give_role integer NOT NULL);")
+bot.cursor.execute(
+    "CREATE TABLE IF NOT EXISTS welcome_auth(id integer PRIMARY KEY NOT NULL,category integer,use integer NOT NULL,can_view pickle NOT NULL,next_reaction NOT NULL,au_w pickle NOT NULL,give_role integer NOT NULL);")
 try:
     bot.cursor.execute("ALTER TABLE users ADD COLUMN online_agreed integer;")
 except:
     pass
+
+try:
+    bot.cursor.execute("ALTER TABLE guilds ADD COLUMN verified integer NOT NULL default 0;")
+except:
+    pass
+
 bot.session = aiohttp.ClientSession(loop=bot.loop)
 
 bot._default_close = bot.close
@@ -174,7 +183,6 @@ bot.StartTime = datetime.datetime.now()
 
 aglch = None
 
-bot.partnerg = config.pg
 
 bot.features = config.sp_features
 
@@ -331,6 +339,9 @@ async def globalSend(message):
         bot.cursor.execute("select * from users where id=?",
                            (message.author.id,))
         upf = bot.cursor.fetchone()
+        bot.cursor.execute("select * from guilds where id=?",
+                           (message.guild.id,))
+        gpf = bot.cursor.fetchone()
         if (datetime.datetime.now() - rdelta(hours=9) - rdelta(days=7) >= message.author.created_at) or upf["gmod"] or upf["gstar"]:
             if upf["gban"] == 1:
                 dc = await ut.opendm(message.author)
@@ -369,8 +380,8 @@ async def globalSend(message):
                             title="", description="", color=upf["gcolor"])
                     ne.set_author(
                         name=f"{ut.ondevicon(message.author)},ユーザーのID:{str(message.author.id)}")
-                    if message.guild.id in [i[0] for i in bot.partnerg]:
-                        ne.set_footer(text=f"🔗(思惟奈ちゃんパートナーサーバー):{message.guild.name}(id:{message.guild.id}),{[i[2] for i in bot.partnerg if i[0]==message.guild.id][0]}", icon_url=message.guild.icon_url_as(
+                    if gpf["verified"]:
+                        ne.set_footer(text=f"✅:{message.guild.name}(id:{message.guild.id})", icon_url=message.guild.icon_url_as(
                             static_format="png"))
                     else:
                         ne.set_footer(text=f"{message.guild.name}(id:{message.guild.id})",
@@ -396,8 +407,6 @@ async def globalSend(message):
                         spicon = spicon + "⚙"
                     if upf["sinapartner"]:
                         spicon = spicon + "💠"  # 認証済みアカウント
-                    if message.author.id in [i[1] for i in bot.partnerg]:
-                        spicon = spicon + "🔗"
                     if upf["gmod"]:
                         spicon = spicon + "🔧"
                     if upf["galpha"]:
@@ -1141,7 +1150,7 @@ async def domsg(message):
                            (message.author.id, [], 0, {}, "m@ji☆", [], "ja", [], 0, 0, message.author.name, 0, 0, 0, 0, "なし"))
         try:
             dc = await ut.opendm(message.author)
-            await dc.send(f"{bot.get_emoji(653161518153596950)}あなたの思惟奈ちゃんユーザープロファイルを作成しました！いくつかの項目はコマンドを使って書き換えることができます。詳しくはヘルプ(`s-help`)をご覧ください。\nまた、不具合や疑問点などがありましたら`mii-10#3110`にお願いします。")
+            await dc.send(f"{bot.get_emoji(653161518153596950)}あなたの思惟奈ちゃんユーザープロファイルを作成しました！いくつかの項目はコマンドを使って書き換えることができます。詳しくはヘルプ(`s-help`)をご覧ください。\n> なんでこのメッセージが来たの？\n　思惟奈ちゃんのいるサーバーで発言したことにより、プロファイルが作成されました。プロファイルの削除を希望する場合は`mii-10#3110`のDMにご連絡ください。なお、プロファイルを削除後は思惟奈ちゃんをご利用できなくなります。(レベル機能などサーバープロファイルに依存するものを含む)")
         except:
             pass
         bot.cursor.execute("select * from users where id=?",
@@ -1153,8 +1162,8 @@ async def domsg(message):
     if not gs:
         guild_lang = bot.translate_handler.get_lang_by_guild(
             message.guild, False)
-        bot.cursor.execute("INSERT INTO guilds(id,levels,commands,hash,levelupsendto,reward,jltasks,lockcom,sendlog,prefix,lang) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
-                           (message.guild.id, {}, {}, [], None, {}, {}, [], None, [], guild_lang))
+        bot.cursor.execute("INSERT INTO guilds(id,levels,commands,hash,levelupsendto,reward,jltasks,lockcom,sendlog,prefix,lang,verified) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
+                           (message.guild.id, {}, {}, [], None, {}, {}, [], None, [], guild_lang,0))
         try:
             await message.channel.send(f"{bot.get_emoji(653161518153596950)}このサーバーの思惟奈ちゃんサーバープロファイルを作成しました！いくつかの項目はコマンドを使って書き換えることができます。詳しくはヘルプ(`s-help`)をご覧ください。\nまた、不具合や疑問点などがありましたら`mii-10#3110`にお願いします。\n思惟奈ちゃんのお知らせは`s-rnotify [チャンネルid(省略可能)]`で、コマンド等の豆知識は`s-rtopic [チャンネルid(省略可能)]`で受信する設定にできます。(Webhook管理権限が必要です。)")
         except:
@@ -1586,24 +1595,6 @@ async def now_sina_tweet():
     except:
         dc=bot.get_user(404243934210949120)
         await dc.send(f"have error:```{traceback.format_exc(1)}```")
-    pr=random.choice(bot.partnerg)
-    if pr[3]!="":
-        e=ut.getEmbed("思惟奈ちゃんパートナーサーバー紹介",f"{bot.get_guild(pr[0])}\n{pr[3]}\n参加: {pr[2]}")
-        bot.cursor.execute("select * from globalchs where name=?",("main",))
-        chs = bot.cursor.fetchone()
-        for chid in chs["ids"]:
-            try:
-                ch = bot.get_channel(chid)
-                for wh in await ch.webhooks():
-                    try:
-                        if wh.name == "sina_global":
-                            await wh.send(embed=e)
-                            await asyncio.sleep(0.2)
-                            break
-                    except:
-                        continue
-            except:
-                pass
 
 """
 

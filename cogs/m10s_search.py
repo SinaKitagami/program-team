@@ -263,10 +263,14 @@ class search(commands.Cog):
                 return
             idis = self.bot.get_guild(id)
             if idis:
-                if idis.id in [i[0] for i in self.bot.partnerg]:
-                    ptn = "🔗思惟奈ちゃんパートナーサーバー"
+                self.bot.cursor.execute("select * from guilds where id = ?",(ctx.guild.id,))
+                gp = self.bot.cursor.fetchone()
+                if gp["verified"]:
+                    ptn = f'{ctx._("sina_verified_guild")}:'
                 else:
                     ptn = ""
+                if "PARTNER" in ctx.guild.features:
+                    ptn = ptn+f'{ctx._("discord_partner_guild")}:'
                 await ctx.send(embed=ut.getEmbed("サーバー", f"{ptn}\n名前:{idis.name}\nid:{idis.id}"))
                 return
             try:
