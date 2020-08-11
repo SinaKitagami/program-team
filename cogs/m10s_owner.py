@@ -254,6 +254,14 @@ class owner(commands.Cog):
         else:
             await ctx.send(embed=ut.getEmbed("", "一致ユーザーなし"))
 
+    @commands.command()
+    @commands.is_owner()
+    async def guildv(self, ctx, gid: int, bl: bool=True):
+        print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
+              ctx.message.content)
+        self.bot.cursor.execute(
+            "UPDATE guilds SET verified = ? WHERE id = ?", (bl, gid))
+        await ctx.send(f"サーバー`{self.bot.get_guild(gid)}`の認証状態を{str(bl)}にしました。")
 
 def setup(bot):
     bot.add_cog(owner(bot))

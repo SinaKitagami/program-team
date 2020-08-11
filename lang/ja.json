@@ -1549,5 +1549,8 @@
     "cannot-send-online": "オンライン状態を送信できません。",
     "cannot-send-userinfo": "ユーザー情報を送信できません。",
     "globalpost-notfound": "投稿が見つかりません。",
-    "send-report-here": "レポートのタイトルと内容をここに送信してください。"
+    "send-report-here": "レポートのタイトルと内容をここに送信してください。",
+
+    "sina_verified_guild":"思惟奈ちゃん認証サーバー",
+    "discord_partner_guild":"Discordパートナーサーバー"
 }

@@ -56,8 +56,6 @@ class info(commands.Cog):
                     ptn = ""
                     if u.id in self.bot.team_sina:
                         ptn = f',({ctx._("team_sina-chan")})'
-                    if u.id in [i[1] for i in self.bot.partnerg]:
-                        ptn = ptn+f',({ctx._("partner_guild_o")})'
                     if isva:
                         ptn = ptn+f"、(💠{ctx._('sina-v-ac')})"
                     e = discord.Embed(
@@ -94,8 +92,6 @@ class info(commands.Cog):
                 ptn = ""
                 if info.id in self.bot.team_sina:
                     ptn = f',({ctx._("team_sina-chan")})'
-                if info.id in [i[1] for i in self.bot.partnerg]:
-                    ptn = ptn+f',({ctx._("partner_guild_o")})'
                 if isva:
                     ptn = ptn+f"、(💠{ctx._('sina-v-ac')})"
                 if ctx.guild.owner == info:
@@ -173,8 +169,6 @@ class info(commands.Cog):
                 ptn = ""
                 if info.id in self.bot.team_sina:
                     ptn = f',({ctx._("team_sina-chan")})'
-                if info.id in [i[1] for i in self.bot.partnerg]:
-                    ptn = ptn+f',({ctx._("partner_guild_o")})'
                 if isva:
                     ptn = ptn+f"、(💠{ctx._('sina-v-ac')})"
                 if ctx.guild.owner == info:
@@ -253,11 +247,7 @@ class info(commands.Cog):
         
         if sevinfo is None:
             return await ctx.send("そのサーバーに思惟奈ちゃんがいるかどうか確認してください。")
-        
-        if sevinfo.id in [i[0] for i in self.bot.partnerg]:
-            ptn = f'{ctx._("partner_guild")}:'
-        else:
-            ptn = ""
+
         try:
             embed = discord.Embed(title=ctx._(
                 "serverinfo-name"), description=sevinfo.name, color=self.bot.ec)
@@ -629,10 +619,14 @@ class info(commands.Cog):
 
     @commands.command(name="serverinfo",aliases=["si"])
     async def ginfo(self, ctx):
-        if ctx.guild.id in [i[0] for i in self.bot.partnerg]:
-            ptn = f'{ctx._("partner_guild")}:'
+        self.bot.cursor.execute("select * from guilds where id = ?",(ctx.guild.id,))
+        gp = self.bot.cursor.fetchone()
+        if gp["verified"]:
+            ptn = f'{ctx._("sina_verified_guild")}:'
         else:
             ptn = ""
+        if "PARTNER" in ctx.guild.features:
+            ptn = ptn+f'{ctx._("discord_partner_guild")}:'
         pmax = 12 if "COMMUNITY" in ctx.guild.features else 11
         page = 0
         e = discord.Embed(title=ctx._("ginfo-ov-title"), color=self.bot.ec)
@@ -911,17 +905,17 @@ class info(commands.Cog):
 
     @commands.command()
     async def invite(self,ctx,*,target:commands.MemberConverter=None):
-        #if target is None:
-        target = ctx.guild.me
-        #if target.bot:
-        ilink = discord.utils.oauth_url(str(target.id),permissions=target.guild_permissions)
-        e=discord.Embed(title="bot招待リンク",description=ilink,color=self.bot.ec)
-        e.add_field(name="このリンクで導入した際の権限",
-                        value=f"`{'`,`'.join([ctx._(f'p-{i[0]}') for i in list(target.guild_permissions) if i[1]])}`")
-        e.set_author(name=f"{target}({target.id})",icon_url=target.avatar_url_as(static_format="png"))
-        await ctx.send(embed=e)
-        #else:
-            #await ctx.send(embed=discord.Embed(title="エラー",description="ユーザーアカウントの導入リンクは作成できません！",color=self.bot.ec))
+        if target is None:
+            target = ctx.guild.me
+        if target.bot:
+            ilink = discord.utils.oauth_url(str(target.id),permissions=target.guild_permissions)
+            e=discord.Embed(title="bot招待リンク",description=ilink,color=self.bot.ec)
+            e.add_field(name="このリンクで導入した際の権限",
+                            value=f"`{'`,`'.join([ctx._(f'p-{i[0]}') for i in list(target.guild_permissions) if i[1]])}`")
+            e.set_author(name=f"{target}({target.id})",icon_url=target.avatar_url_as(static_format="png"))
+            await ctx.send(embed=e)
+        else:
+            await ctx.send(embed=discord.Embed(title="エラー",description="ユーザーアカウントの導入リンクは作成できません！",color=self.bot.ec))
 
 
 def setup(bot):
