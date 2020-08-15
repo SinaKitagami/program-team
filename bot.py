@@ -617,53 +617,8 @@ async def on_member_join(member):
             e.timestamp = member.created_at
             await uich.send(embed=e)
             mrole = member.guild.get_role(574494088837988352)
-
-            bunotif = 0
-            if len([g for g in bot.guilds if g.get_member(member.id)]) == 1:
-                await nga(member, "思惟奈ちゃんとの共通のサーバーがほかにないこと")
-            else:
-                for g in bot.guilds:
-
-                    try:
-                        tmp = await g.bans()
-                    except:
-                        continue
-                    banulist = [i.user.id for i in tmp]
-                    if member.id in banulist:
-                        bunotif = bunotif + 1
-                if bunotif != 0:
-                    await nga(member, "思惟奈ちゃんとの共通のほかサーバーでのban")
-                    pass
-                else:
-                    if datetime.datetime.now() - rdelta(hours=9) - rdelta(days=4) < member.created_at:
-                        await nga(member, "アカウントの作成から4日経過していないこと")
-                        pass
-                    else:
-                        await nga(member, "本来認証していますが、現在は認証止めていること")
-                        '''await member.add_roles(mrole)
-                        ch = await ut.opendm(member)
-                        try:
-                            await ch.send(f"""{member.mention}さん！みぃてん☆のわいがや広場にようこそ！
-    思惟奈ちゃん関連の用事の方は`思惟奈ちゃん`カテゴリー内のチャンネルをご利用ください。
-    また、あなたは、いくつかの条件を満たしているため、自動的にメンバー役職が付与されましたので、サーバーで、ゆっくり過ごされてください。
-    ですが、使用前にまずはルールを確認してください!
-    https://gist.github.com/apple502j/1a81b1a95253609f0c67ecb74f38754b
-    また、必要に応じて通知設定を「すべてのメッセージ」などに変更してください。(デフォルトは「@メンションのみ」です。)
-                            """)
-                        except:
-                            ch = member.guild.get_channel(574494906287128577)
-                            await ch.send(f"""{member.mention}さん！みぃてん☆のわいがや広場にようこそ！
-    思惟奈ちゃん関連の用事の方は`思惟奈ちゃん`カテゴリー内のチャンネルをご利用ください。
-    また、あなたは、いくつかの条件を満たしているため、自動的にメンバー役職が付与されましたので、サーバーで、ゆっくり過ごされてください。
-    ですが、使用前にまずはルールを確認してください!
-    https://gist.github.com/apple502j/1a81b1a95253609f0c67ecb74f38754b
-    また、必要に応じて通知設定を「すべてのメッセージ」などに変更してください。(デフォルトは「@メンションのみ」です。)
-                            """)
-                        schs=[631815290044284938,574494906287128577]
-                        for c in schs:
-
-                            sch = bot.get_channel(c)
-                            await sch.send(embed=ut.getEmbed("自動認証完了のお知らせ",f"{member.mention}さんが自動認証を済ませました。"))'''
+            await member.add_roles(mrole)
+                        
     else:
         try:
             bot.cursor.execute(
