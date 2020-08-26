@@ -15,7 +15,7 @@ import re
 """
 上のモジュールをインストールすること！
 
-music.py
+m10s_music.py
 制作:mii-10#3110(Discord)
 """
 
@@ -225,7 +225,7 @@ class music(commands.Cog):
             else:
                 await ctx.send("now,the video can't play the bot")
 
-    async def mplay(self, ctx, vl=1.0, lp=False):
+    async def mplay(self, ctx, vl=0.5, lp=False):
         if not self.bot.lp.get(str(ctx.guild.id), None):
             self.bot.lp[str(ctx.guild.id)] = False
         if not self.bot.mp.get(str(ctx.guild.id), None):
