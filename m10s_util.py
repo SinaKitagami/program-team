@@ -167,7 +167,7 @@ class m10s_badges:
         self.system = flags[12] == "1"
         self.bug_hunter_2 = flags[14] == "1"
         self.verified_bot = flags[16] == "1"
-        self.verified_bot_developer = flags[17] == "1"
+        self.early_verified_bot_developer = flags[17] == "1"
 
         self.dict_flags = {
             "Discord Staff": self.staff,
@@ -182,7 +182,7 @@ class m10s_badges:
             "System": self.system,
             "Bug Hunter Level 2": self.bug_hunter_2,
             "Verified Bot": self.verified_bot,
-            "Verified Bot Developer": self.verified_bot_developer,
+            "Early Verified Bot Developer": self.early_verified_bot_developer,
         }
 
     def get_dict(self):
