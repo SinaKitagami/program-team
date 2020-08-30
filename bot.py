@@ -684,22 +684,19 @@ async def on_member_join(member):
 
 @bot.event
 async def on_member_remove(member):
-    if member.guild.id == 574170788165582849:
-        await member.guild.system_channel.send(f"{str(member)}さんがこのサーバーを退出しました。")
-    else:
-        try:
-            bot.cursor.execute(
-                "select * from guilds where id=?", (member.guild.id,))
-            gpf = bot.cursor.fetchone()
-            ctt = gpf["jltasks"]
-            if not ctt.get("cu") is None:
-                if ctt["cu"]["sendto"] == "sysch":
-                    await member.guild.system_channel.send(ctt["cu"]["content"].format(str(member)))
-                else:
-                    dc = await ut.opendm(member)
-                    await dc.send(ctt["cu"]["content"].format(str(member)))
-        except:
-            pass
+    try:
+        bot.cursor.execute(
+            "select * from guilds where id=?", (member.guild.id,))
+        gpf = bot.cursor.fetchone()
+        ctt = gpf["jltasks"]
+        if not ctt.get("cu") is None:
+            if ctt["cu"]["sendto"] == "sysch":
+                await member.guild.system_channel.send(ctt["cu"]["content"].format(str(member)))
+            else:
+                dc = await ut.opendm(member)
+                await dc.send(ctt["cu"]["content"].format(str(member)))
+    except:
+        pass
     e = discord.Embed(title="メンバーの退出", color=bot.ec)
     e.add_field(name="退出メンバー", value=str(member))
     e.add_field(name="役職", value=[i.name for i in member.roles])
