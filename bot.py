@@ -103,6 +103,11 @@ bot.cursor.execute(
 
 bot.cursor.execute(
     "CREATE TABLE IF NOT EXISTS welcome_auth(id integer PRIMARY KEY NOT NULL,category integer,use integer NOT NULL,can_view pickle NOT NULL,next_reaction NOT NULL,au_w pickle NOT NULL,give_role integer NOT NULL);")
+
+bot.cursor.execute(
+    "CREATE TABLE IF NOT EXISTS role_panels(id integer PRIMARY KEY NOT NULL,roles json NOT NULL);")
+
+
 try:
     bot.cursor.execute("ALTER TABLE users ADD COLUMN online_agreed integer;")
 except:
