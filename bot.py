@@ -52,6 +52,7 @@ from cogs import m10s_gban
 from cogs import m10s_bmail
 from cogs import m10s_auth_wiz
 from cogs import m10s_chinfo_rewrite
+from cogs import m10s_role_panel
 
 """import logging
 
@@ -103,6 +104,11 @@ bot.cursor.execute(
 
 bot.cursor.execute(
     "CREATE TABLE IF NOT EXISTS welcome_auth(id integer PRIMARY KEY NOT NULL,category integer,use integer NOT NULL,can_view pickle NOT NULL,next_reaction NOT NULL,au_w pickle NOT NULL,give_role integer NOT NULL);")
+
+bot.cursor.execute(
+    "CREATE TABLE IF NOT EXISTS role_panels(id integer PRIMARY KEY NOT NULL,roles json NOT NULL);")
+
+
 try:
     bot.cursor.execute("ALTER TABLE users ADD COLUMN online_agreed integer;")
 except:
@@ -617,53 +623,8 @@ async def on_member_join(member):
             e.timestamp = member.created_at
             await uich.send(embed=e)
             mrole = member.guild.get_role(574494088837988352)
-
-            bunotif = 0
-            if len([g for g in bot.guilds if g.get_member(member.id)]) == 1:
-                await nga(member, "思惟奈ちゃんとの共通のサーバーがほかにないこと")
-            else:
-                for g in bot.guilds:
-
-                    try:
-                        tmp = await g.bans()
-                    except:
-                        continue
-                    banulist = [i.user.id for i in tmp]
-                    if member.id in banulist:
-                        bunotif = bunotif + 1
-                if bunotif != 0:
-                    await nga(member, "思惟奈ちゃんとの共通のほかサーバーでのban")
-                    pass
-                else:
-                    if datetime.datetime.now() - rdelta(hours=9) - rdelta(days=4) < member.created_at:
-                        await nga(member, "アカウントの作成から4日経過していないこと")
-                        pass
-                    else:
-                        await nga(member, "本来認証していますが、現在は認証止めていること")
-                        '''await member.add_roles(mrole)
-                        ch = await ut.opendm(member)
-                        try:
-                            await ch.send(f"""{member.mention}さん！みぃてん☆のわいがや広場にようこそ！
-    思惟奈ちゃん関連の用事の方は`思惟奈ちゃん`カテゴリー内のチャンネルをご利用ください。
-    また、あなたは、いくつかの条件を満たしているため、自動的にメンバー役職が付与されましたので、サーバーで、ゆっくり過ごされてください。
-    ですが、使用前にまずはルールを確認してください!
-    https://gist.github.com/apple502j/1a81b1a95253609f0c67ecb74f38754b
-    また、必要に応じて通知設定を「すべてのメッセージ」などに変更してください。(デフォルトは「@メンションのみ」です。)
-                            """)
-                        except:
-                            ch = member.guild.get_channel(574494906287128577)
-                            await ch.send(f"""{member.mention}さん！みぃてん☆のわいがや広場にようこそ！
-    思惟奈ちゃん関連の用事の方は`思惟奈ちゃん`カテゴリー内のチャンネルをご利用ください。
-    また、あなたは、いくつかの条件を満たしているため、自動的にメンバー役職が付与されましたので、サーバーで、ゆっくり過ごされてください。
-    ですが、使用前にまずはルールを確認してください!
-    https://gist.github.com/apple502j/1a81b1a95253609f0c67ecb74f38754b
-    また、必要に応じて通知設定を「すべてのメッセージ」などに変更してください。(デフォルトは「@メンションのみ」です。)
-                            """)
-                        schs=[631815290044284938,574494906287128577]
-                        for c in schs:
-
-                            sch = bot.get_channel(c)
-                            await sch.send(embed=ut.getEmbed("自動認証完了のお知らせ",f"{member.mention}さんが自動認証を済ませました。"))'''
+            await member.add_roles(mrole)
+                        
     else:
         try:
             bot.cursor.execute(
@@ -729,22 +690,19 @@ async def on_member_join(member):
 
 @bot.event
 async def on_member_remove(member):
-    if member.guild.id == 574170788165582849:
-        await member.guild.system_channel.send(f"{str(member)}さんがこのサーバーを退出しました。")
-    else:
-        try:
-            bot.cursor.execute(
-                "select * from guilds where id=?", (member.guild.id,))
-            gpf = bot.cursor.fetchone()
-            ctt = gpf["jltasks"]
-            if not ctt.get("cu") is None:
-                if ctt["cu"]["sendto"] == "sysch":
-                    await member.guild.system_channel.send(ctt["cu"]["content"].format(str(member)))
-                else:
-                    dc = await ut.opendm(member)
-                    await dc.send(ctt["cu"]["content"].format(str(member)))
-        except:
-            pass
+    try:
+        bot.cursor.execute(
+            "select * from guilds where id=?", (member.guild.id,))
+        gpf = bot.cursor.fetchone()
+        ctt = gpf["jltasks"]
+        if not ctt.get("cu") is None:
+            if ctt["cu"]["sendto"] == "sysch":
+                await member.guild.system_channel.send(ctt["cu"]["content"].format(str(member)))
+            else:
+                dc = await ut.opendm(member)
+                await dc.send(ctt["cu"]["content"].format(str(member)))
+    except:
+        pass
     e = discord.Embed(title="メンバーの退出", color=bot.ec)
     e.add_field(name="退出メンバー", value=str(member))
     e.add_field(name="役職", value=[i.name for i in member.roles])
@@ -1109,6 +1067,7 @@ async def on_ready():
     m10s_bmail.setup(bot)
     m10s_auth_wiz.setup(bot)
     m10s_chinfo_rewrite.setup(bot)
+    m10s_role_panel.setup(bot)
     try:
         ch = bot.get_channel(595526013031546890)
         await ch.send(f"{bot.get_emoji(653161518531215390)}on_ready!")
