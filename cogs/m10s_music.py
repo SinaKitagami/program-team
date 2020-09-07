@@ -226,6 +226,7 @@ class music(commands.Cog):
                 await ctx.send("now,the video can't play the bot")
 
     async def mplay(self, ctx, vl=0.5, lp=False):
+        v = None
         if not self.bot.lp.get(str(ctx.guild.id), None):
             self.bot.lp[str(ctx.guild.id)] = False
         if not self.bot.mp.get(str(ctx.guild.id), None):
@@ -249,10 +250,6 @@ class music(commands.Cog):
             except:
                 pass
         while self.bot.qu[str(ctx.guild.id)]:
-            try:
-                v = ctx.voice_client.source.volume
-            except:
-                v = None
             if v:
                 ctx.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(
                     f'musicfile/{self.bot.qu[str(ctx.guild.id)][0]["video_id"]}'), volume=v))
@@ -263,6 +260,7 @@ class music(commands.Cog):
             try:
                 while ctx.voice_client.is_playing() or ctx.voice_client.is_paused():
                     await asyncio.sleep(1)
+                    v = ctx.voice_client.source.volume
             except AttributeError:
                 break
             if self.bot.lp[str(ctx.guild.id)]:
