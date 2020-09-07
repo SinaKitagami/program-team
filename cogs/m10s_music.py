@@ -250,22 +250,17 @@ class music(commands.Cog):
             except:
                 pass
         while self.bot.qu[str(ctx.guild.id)]:
-            if v:
-                ctx.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(
-                    f'musicfile/{self.bot.qu[str(ctx.guild.id)][0]["video_id"]}'), volume=v))
-            else:
-                ctx.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(
-                    f'musicfile/{self.bot.qu[str(ctx.guild.id)][0]["video_id"]}'), volume=vl))
+            ctx.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(
+                f'musicfile/{self.bot.qu[str(ctx.guild.id)][0]["video_id"]}'), volume=v or vl))
             await self.panel_update(ctx)
             try:
                 while ctx.voice_client.is_playing() or ctx.voice_client.is_paused():
                     await asyncio.sleep(1)
                     v = ctx.voice_client.source.volume
             except AttributeError:
-                break
+                pass
             if self.bot.lp[str(ctx.guild.id)]:
-                self.bot.qu[str(ctx.guild.id)] = self.bot.qu[str(
-                    ctx.guild.id)] + [self.bot.qu[str(ctx.guild.id)][0]]
+                self.bot.qu[str(ctx.guild.id)].append(self.bot.qu[str(ctx.guild.id)][0])
             self.bot.qu[str(ctx.guild.id)].pop(0)
         await ctx.invoke(self.bot.get_command("stop"))
 
