@@ -171,7 +171,7 @@ class m10s_badges:
 
         self.dict_flags = {
             "Discord Staff": self.staff,
-            "Discord Partner": self.partner,
+            "Partnered Server Owner": self.partner,
             "Hypesquad Events": self.hypesquad_events,
             "Bug Hunter Level 1": self.bug_hunter_1,
             "House Bravery": self.hypesquad_h_bravery,
