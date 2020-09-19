@@ -29,7 +29,11 @@ class m10s_bmail(commands.Cog):
 
     @commands.command(name="b-mail", aliases=["bm"])
     async def b_mail(self, ctx):
-        dch = await ut.opendm(ctx.author)
+        try:
+            dch = await ut.opendm(ctx.author)
+        except:
+            pass
+        
         schs = [i for i in self.bot.get_all_channels()
                 if i.name.startswith("sbm-")]
         bmaillog = self.bot.get_channel(701747896621596693)
