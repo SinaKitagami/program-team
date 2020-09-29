@@ -1070,7 +1070,8 @@ async def on_ready():
     m10s_role_panel.setup(bot)
     try:
         ch = bot.get_channel(595526013031546890)
-        await ch.send(f"{bot.get_emoji(653161518531215390)}on_ready!")
+        e=discord.Embed(title="起動時インフォメーション(テスト中)",description=f"認識ユーザー数:{len(bot.users)}\n認識サーバー数:{len(bot.guilds)}\n認識チャンネル数:{len([c for c in bot.get_all_channels()])}\ndiscord.py ver_{discord.__version__}\n-メモ-\n10/7以降使えなくなる機能への対応をチームメンバー全員、ちゃんとお願いしますね。\n",color=bot.ec)
+        await ch.send(f"{bot.get_emoji(653161518531215390)}on_ready!",embed=e)
     except:
         pass
 
