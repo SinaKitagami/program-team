@@ -276,7 +276,9 @@ class search(commands.Cog):
             try:
                 idis = await self.bot.fetch_user(id)
                 u = idis
-                e = discord.Embed(title="ユーザー", color=self.bot.ec)
+                if u.id in self.bot.team_sina:
+                    info = f',({ctx._("team_sina-chan")})'
+                e = discord.Embed(title="ユーザー", description=info, color=self.bot.ec)
                 if u.system:
                     e.add_field(
                         name="✅システムアカウント", value="このアカウントは、Discordのシステムアカウントであり、安全です。", inline=False)
