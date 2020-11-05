@@ -58,8 +58,12 @@ from cogs import m10s_role_panel
 
 logging.basicConfig(level=logging.DEBUG)"""
 
+intents:discord.Intents = discord.Intents.default()
+intents.members = True
+
 bot = commands.Bot(command_prefix="s-", status=discord.Status.invisible,
-                   allowed_mentions=discord.AllowedMentions(everyone=False))
+                   allowed_mentions=discord.AllowedMentions(everyone=False),
+                   intents=intents)
 bot.owner_id = 404243934210949120
 
 bot.team_sina = config.team_sina
@@ -261,7 +265,7 @@ bot.load_extension("cogs.apple_misc")
 bot.load_extension("cogs.apple_onlinenotif")
 
 
-@tasks.loop(minutes=1.0)
+@tasks.loop(minutes=5.0)
 async def cRPC():
     global rpcct
     if rpcct == 7:
@@ -405,8 +409,6 @@ async def globalSend(message):
 
                     if message.author.id == 404243934210949120:  # みぃてん☆
                         spicon = spicon + "🌈"
-                    if message.author.id == 539787492711464960:  # きゃらちゃんさん
-                        spicon = spicon + "❤"
                     if message.author.id in bot.team_sina:  # チーム☆思惟奈ちゃん
                         spicon = spicon + "🌠"
                     if message.author.bot:
