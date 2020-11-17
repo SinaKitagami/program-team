@@ -6,6 +6,7 @@ import asyncio
 from dateutil.relativedelta import relativedelta as rdelta
 import traceback
 import m10s_util as ut
+import textwrap
 
 
 class owner(commands.Cog):
@@ -59,8 +60,12 @@ class owner(commands.Cog):
     async def eval(self, ctx, *, cmd):
         if "eval" in self.bot.features.get(ctx.author.id, []):
             await ctx.message.add_reaction(self.bot.get_emoji(653161518346534912))
-            kg = "\n"
-            txt = f'async def evdf(ctx,bot):{kg}{kg.join([f" {i}" for i in cmd.replace("```py","").replace("```","").split(kg)])}'
+            rt = "\n"
+            if cmd.startswith("```py"):
+                cmd = cmd[5:-3]
+            elif cmd.startswith("```"):
+                cmd = cmd[3:-3]
+            txt = f'async def evdf(ctx,bot):{rt}{rt.join([f" {i}" for i in cmd.split(rt)])}'
             try:
                 exec(txt)
                 await eval("evdf(ctx,self.bot)")

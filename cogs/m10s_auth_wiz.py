@@ -15,7 +15,7 @@ class m10s_auth_wiz(commands.Cog):
             "select * from welcome_auth where id = ?", (m.guild.id,))
         auths = self.bot.cursor.fetchone()
         if auths:
-            if bool(auths["use"]):
+            if bool(auths["use"]) and not(m.bot):
                 if type(auths["next_reaction"]) is int:
                     nr = self.bot.get_emoji(auths["next_reaction"])
                 else:

@@ -28,9 +28,6 @@ class m10s_gban(commands.Cog):
 
     @commands.command()
     async def gban(self, ctx, uid: int, tof: bool, *, reason: str=None):
-        self.bot.cursor.execute(
-            "select * from users where id=?", (ctx.author.id,))
-        upf = self.bot.cursor.fetchone()
         if "global_ban" in self.bot.features.get(ctx.author.id, []):
             try:
                 u = await self.bot.fetch_user(uid)
@@ -48,7 +45,11 @@ class m10s_gban(commands.Cog):
                     gs = self.bot.cursor.fetchall()
                     for gstg in gs:
                         g = self.bot.get_guild(gstg["id"])
+                        if g is None:
+                            break
                         ch = g.get_channel(gstg["chid"])
+                        if ch is None:
+                            break
                         by = ctx.author
                         if g:
                             try:

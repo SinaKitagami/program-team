@@ -58,8 +58,12 @@ from cogs import m10s_role_panel
 
 logging.basicConfig(level=logging.DEBUG)"""
 
+intents:discord.Intents = discord.Intents.default()
+intents.members = True
+
 bot = commands.Bot(command_prefix="s-", status=discord.Status.invisible,
-                   allowed_mentions=discord.AllowedMentions(everyone=False))
+                   allowed_mentions=discord.AllowedMentions(everyone=False),
+                   intents=intents)
 bot.owner_id = 404243934210949120
 
 bot.team_sina = config.team_sina
@@ -261,7 +265,7 @@ bot.load_extension("cogs.apple_misc")
 bot.load_extension("cogs.apple_onlinenotif")
 
 
-@tasks.loop(minutes=1.0)
+@tasks.loop(minutes=5.0)
 async def cRPC():
     global rpcct
     if rpcct == 7:
@@ -405,8 +409,6 @@ async def globalSend(message):
 
                     if message.author.id == 404243934210949120:  # みぃてん☆
                         spicon = spicon + "🌈"
-                    if message.author.id == 539787492711464960:  # きゃらちゃんさん
-                        spicon = spicon + "❤"
                     if message.author.id in bot.team_sina:  # チーム☆思惟奈ちゃん
                         spicon = spicon + "🌠"
                     if message.author.bot:
@@ -1070,7 +1072,8 @@ async def on_ready():
     m10s_role_panel.setup(bot)
     try:
         ch = bot.get_channel(595526013031546890)
-        await ch.send(f"{bot.get_emoji(653161518531215390)}on_ready!")
+        e=discord.Embed(title="起動時インフォメーション(テスト中)",description=f"認識ユーザー数:{len(bot.users)}\n認識サーバー数:{len(bot.guilds)}\n認識チャンネル数:{len([c for c in bot.get_all_channels()])}\ndiscord.py ver_{discord.__version__}\n-メモ-\n10/7以降使えなくなる機能への対応をチームメンバー全員、ちゃんとお願いしますね。\n",color=bot.ec)
+        await ch.send(f"{bot.get_emoji(653161518531215390)}on_ready!",embed=e)
     except:
         pass
 
