@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*- #
 
 from cogs import apple_invite
+from cogs import apple_foc
 import discord
 from discord.ext import commands, tasks
 import json
@@ -393,8 +394,8 @@ async def globalSend(message):
                             except:
                                 m = None
                         if m:
-                            ne.add_field(name=f"{m.author.display_name}のメッセージへの返信",value=f"{m.clean_content}\n[このメッセージへ飛ぶ]({m.jump_url})")
-                            embed.add_field(name=f"{m.author.display_name}のメッセージへの返信",value=f"{m.clean_content}\n[このメッセージへ飛ぶ]({m.jump_url})")
+                            ne.add_field(name=f"{m.author.display_name}のメッセージへの返信",value=f"{m.clean_content}")
+                            embed.add_field(name=f"{m.author.display_name}のメッセージへの返信",value=f"{m.clean_content}")
                         else:
                             ne.add_field(name="メッセージへの返信",value="(このメッセージは削除されている等の理由で取得できません。)")
                             embed.add_field(name="メッセージへの返信",value="(このメッセージは削除されている等の理由で取得できません。)")
@@ -1045,7 +1046,7 @@ async def on_ready():
     now_sina_tweet.start()"""
     bot.load_extension("jishaku")
     
-    files = ["m10s_music", "m10s_info", "m10s_owner", "m10s_settings", "m10s_manage,", "m10s_levels",
+    files = ["m10s_music", "m10s_info", "m10s_owner", "m10s_settings", "m10s_manage", "m10s_levels",
              "m10s_tests", "m10s_gcoms", "m10s_other", "m10s_search", "m10s_games", "P143_jyanken",
              "nekok500_mee6", "pf9_symmetry", "syouma", "m10s_gban", "m10s_bmail", "m10s_auth_wiz",
              "m10s_chinfo_rewrite", "m10s_role_panel"
