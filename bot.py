@@ -31,28 +31,6 @@ from l10n import TranslateHandler, LocalizedContext
 from checker import MaliciousInput, content_checker
 # tokens
 import config
-# cog
-from cogs import m10s_music
-from cogs import m10s_info
-from cogs import m10s_owner
-from cogs import m10s_settings
-from cogs import m10s_manage
-from cogs import m10s_levels
-from cogs import m10s_tests
-from cogs import m10s_gcoms
-from cogs import m10s_search
-from cogs import m10s_other
-from cogs import m10s_games
-from cogs import P143_jyanken
-from cogs import nekok500_mee6
-from cogs import syouma
-from cogs import pf9_symmetry
-from cogs import apple_foc
-from cogs import m10s_gban
-from cogs import m10s_bmail
-from cogs import m10s_auth_wiz
-from cogs import m10s_chinfo_rewrite
-from cogs import m10s_role_panel
 
 """import logging
 
@@ -1050,30 +1028,30 @@ async def on_ready():
     """invite_tweet.start()
     now_sina_tweet.start()"""
     bot.load_extension("jishaku")
-    m10s_music.setup(bot)
-    m10s_info.setup(bot)
-    m10s_owner.setup(bot)
-    m10s_settings.setup(bot)
-    m10s_manage.setup(bot)
-    m10s_levels.setup(bot)
-    m10s_tests.setup(bot)
-    m10s_gcoms.setup(bot)
-    m10s_search.setup(bot)
-    m10s_other.setup(bot)
-    m10s_games.setup(bot)
-    P143_jyanken.setup(bot)
-    nekok500_mee6.setup(bot)
-    syouma.setup(bot)
-    pf9_symmetry.setup(bot)
-    m10s_gban.setup(bot)
-    m10s_bmail.setup(bot)
-    m10s_auth_wiz.setup(bot)
-    m10s_chinfo_rewrite.setup(bot)
-    m10s_role_panel.setup(bot)
+    
+    files = ["m10s_music", "m10s_info", "m10s_owner", "m10s_settings", "m10s_manage,", "m10s_levels",
+             "m10s_tests", "m10s_gcoms", "m10s_other", "m10s_search", "m10s_games", "P143_jyanken",
+             "nekok500_mee6", "pf9_symmetry", "syouma", "m10s_gban", "m10s_bmail", "m10s_auth_wiz",
+             "m10s_chinfo_rewrite", "m10s_role_panel"
+            ]
+    
+    embed = discord.Embed(title="読み込みに失敗したCog", color=bot.ec)
+    txt = ""
+    for file in files:
+        try:
+            bot.load_extension(f"cogs.{file}")
+        except:
+            print(f"Extension {file} Load Failed.")
+            txt += f"`{file}`, "
+        else:
+            print(f"Extension {file} Load.")
+    embed.description = txt
+
     try:
         ch = bot.get_channel(595526013031546890)
         e=discord.Embed(title="起動時インフォメーション(テスト中)",description=f"認識ユーザー数:{len(bot.users)}\n認識サーバー数:{len(bot.guilds)}\n認識チャンネル数:{len([c for c in bot.get_all_channels()])}\ndiscord.py ver_{discord.__version__}\n-メモ-\n10/7以降使えなくなる機能への対応をチームメンバー全員、ちゃんとお願いしますね。\n",color=bot.ec)
         await ch.send(f"{bot.get_emoji(653161518531215390)}on_ready!",embed=e)
+        await ch.send(embed=embed)
     except:
         pass
 
