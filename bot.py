@@ -383,6 +383,22 @@ async def globalSend(message):
                         embed.add_field(
                             name=message.application["name"]+"へのRPC招待", value="RPC招待はグローバル送信できません。")
 
+                    if message.type == discord.MessageType.default and message.reference:
+                        ref = message.reference
+                        if ref.cached_message:
+                            m = ref.cached_message
+                        else:
+                            try:
+                                m = await bot.get_channel(ref.channel_id).fetch_message(ref.message_id)
+                            except:
+                                m = None
+                        if m:
+                            ne.add_field(name=f"{m.author.display_name}のメッセージへの返信",value=f"{m.clean_content}\n[このメッセージへ飛ぶ]({m.jump_url})")
+                            embed.add_field(name=f"{m.author.display_name}のメッセージへの返信",value=f"{m.clean_content}\n[このメッセージへ飛ぶ]({m.jump_url})")
+                        else:
+                            ne.add_field(name="メッセージへの返信",value="(このメッセージは削除されている等の理由で取得できません。)")
+                            embed.add_field(name="メッセージへの返信",value="(このメッセージは削除されている等の理由で取得できません。)")
+
                     spicon = ""
 
                     if message.author.id == 404243934210949120:  # みぃてん☆
