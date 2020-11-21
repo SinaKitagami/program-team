@@ -134,7 +134,7 @@ class gcoms(commands.Cog):
         except:
             await ctx.send("そのIDをもつユーザーがいません！")
         else:
-            if upf["gmod"] is True:
+            if upf["gmod"] == 1:
                 self.bot.cursor.execute(
                     "select * from users where id=?", (uid,))
                 bpf = self.bot.cursor.fetchone()
@@ -324,7 +324,7 @@ class gcoms(commands.Cog):
             async with ctx.message.channel.typing():
                 blist = []
                 for i in pf:
-                    if i["gban"] is True:
+                    if i["gban"] == 1:
                         bu = await self.bot.fetch_user(i["id"])
                         blist.append(
                             f"ユーザー名:{bu},表示名:{i['gnick']},id:{i['id']},理由:{i['gbanhist']}")
