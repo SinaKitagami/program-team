@@ -1049,7 +1049,7 @@ async def on_ready():
     files = ["m10s_music", "m10s_info", "m10s_owner", "m10s_settings", "m10s_manage", "m10s_levels",
              "m10s_tests", "m10s_gcoms", "m10s_other", "m10s_search", "m10s_games", "P143_jyanken",
              "nekok500_mee6", "pf9_symmetry", "syouma", "m10s_gban", "m10s_bmail", "m10s_auth_wiz",
-             "m10s_chinfo_rewrite", "m10s_role_panel"
+             "m10s_chinfo_rewrite", "m10s_role_panel", "m10s_messageinfo"
             ]
     
     embed = discord.Embed(title="読み込みに失敗したCog", color=bot.ec)
