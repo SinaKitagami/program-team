@@ -1,8 +1,14 @@
 import discord
 from discord.ext import commands
 import asyncio
-import sqlite3
 import traceback
+
+#get_channel_or_user
+def get_channel_or_user(ctx, id:int):
+    result = ctx.bot.get_user(id)
+    if result is None:
+        result = ctx.bot.get_channel(id)
+    return result
 
 #Neta
 def is_jun50(ctx, member=None):
@@ -18,12 +24,12 @@ def is_jun50(ctx, member=None):
     
     return result
 
-#TextChannelConverter
-class TextChannelConverter(commands.Converter):
+#VoiceChannelConverter
+class VoiceChannelConverter(commands.Converter):
     async def convert(self, ctx, argument):
         try:
-            return await commands.TextChannelConverter().convert(ctx, argument)
-        except commands.BadArgument:
+            return await commands.VoiceChannelConverter().convert(ctx, argument)
+        except:
             try:
                 channel_id = int(argument, base=10)
             except ValueError:
@@ -34,12 +40,12 @@ class TextChannelConverter(commands.Converter):
                     raise commands.BadArgument(f"{argument!r} というIDのチャンネルは見つかりませんでした")
                 return channel
 
-#VoiceChannelConverter
-class VoiceChannelConverter(commands.Converter):
+#TextChannelConverter
+class TextChannelConverter(commands.Converter):
     async def convert(self, ctx, argument):
         try:
-            return await commands.VoiceChannelConverter().convert(ctx, argument)
-        except:
+            return await commands.TextChannelConverter().convert(ctx, argument)
+        except commands.BadArgument:
             try:
                 channel_id = int(argument, base=10)
             except ValueError:
@@ -83,13 +89,13 @@ class BannedMemberConverter(commands.Converter):
             raise commands.BadArgument('このユーザーはBanされていません')
         return entity
 
-#MemberConverter
+#FetchMemberConverter
 class FetchUserConverter(commands.Converter):
     async def convert(self, ctx, argument):
         if not argument.isdigit():
             raise commands.BadArgument('このIDはユーザーIDではありません')
         try:
-            return await ctx.bot.fetch_user(argument)
+            u = await ctx.bot.fetch_user(argument)
         except discord.NotFound:
             raise commands.BadArgument('ユーザーが見つかりませんでした') from None
         except discord.HTTPException:
