@@ -35,11 +35,11 @@ class m10s_messageinfo(commands.Cog):
         else:
             if ctx.message.reference and ctx.message.type == discord.MessageType.default:
                 if ctx.message.reference.cached_message:
-                    fetch_from = "引用"
+                    fetch_from = "返信"
                     msg = ctx.message.reference.cached_message
                 else:
                     try:
-                        fetch_from = "引用"
+                        fetch_from = "返信"
                         msg = await self.bot.get_channel(ctx.message.reference.channel_id).fetch_message(ctx.message.reference.message_id)
                     except:
                         fetch_from = "コマンド実行メッセージ"
