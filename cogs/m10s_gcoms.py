@@ -113,11 +113,11 @@ class gcoms(commands.Cog):
             "global-status-title", cid), description="", color=upf["gcolor"])
         embed.add_field(name="nick", value=upf["gnick"])
         embed.add_field(name="color", value=str(upf["gcolor"]))
-        embed.add_field(name="gmod", value=upf["gmod"])
-        embed.add_field(name="tester", value=upf["galpha"])
-        embed.add_field(name="star", value=upf["gstar"])
+        embed.add_field(name="gmod", value="True" if upf["gmod"] == 1 else "False")
+        embed.add_field(name="tester", value="True" if upf["galpha"] == 1 else "False")
+        embed.add_field(name="star", value="True" if upf["gstar"] == 1 else "False")
         if ap and ap["gmod"]:
-            embed.add_field(name="banned", value=upf["gban"])
+            embed.add_field(name="banned", value="True" if upf["gban"] == 1 else "False")
             if upf["gban"]:
                 embed.add_field(name="reason of ban", value=upf["gbanhist"])
         await ctx.send(embed=embed)
