@@ -276,6 +276,7 @@ class search(commands.Cog):
             try:
                 idis = await self.bot.fetch_user(id)
                 u = idis
+                info = ""
                 if u.id in self.bot.team_sina:
                     info = f',({ctx._("team_sina-chan")})'
                 e = discord.Embed(title="ユーザー", description=info, color=self.bot.ec)
