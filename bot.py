@@ -1161,7 +1161,10 @@ async def domsg(message):
             if "disable_profile_msg" in gs["lockcom"]:
                 await message.add_reaction(bot.get_emoji(653161518153596950))
             else:
-                await message.channel.send(f"{bot.get_emoji(653161518153596950)}あなたの思惟奈ちゃんユーザープロファイルを作成しました！いくつかの項目はコマンドを使って書き換えることができます。詳しくはヘルプ(`s-help`)をご覧ください。\n> なんでこのメッセージが来たの？\n　思惟奈ちゃんのいるサーバーで発言したことにより、プロファイルが作成されました。プロファイルの削除を希望する場合は`mii-10#3110`のDMにご連絡ください。なお、プロファイルを削除後は思惟奈ちゃんをご利用できなくなります。(レベル機能などサーバープロファイルに依存するものを含む)")
+                try:
+                    await message.reply(f"> {bot.get_emoji(653161518153596950)} あなたの思惟奈ちゃんユーザープロファイルを作成しました！いくつかの項目はコマンドを使って書き換えることができます。詳しくはヘルプ(`s-help`)をご覧ください。\n> なんでこのメッセージが来たの？\n　思惟奈ちゃんのいるサーバーで発言したことにより、プロファイルが作成されました。プロファイルの削除を希望する場合は`mii-10#3110`のDMにご連絡ください。なお、プロファイルを削除後は思惟奈ちゃんをご利用できなくなります。(レベル機能などサーバープロファイルに依存するものを含む)")
+                except:
+                    await message.send(f"> {bot.get_emoji(653161518153596950)} {message.author.mention}さん！あなたの思惟奈ちゃんユーザープロファイルを作成しました！いくつかの項目はコマンドを使って書き換えることができます。詳しくはヘルプ(`s-help`)をご覧ください。\n> なんでこのメッセージが来たの？\n　思惟奈ちゃんのいるサーバーで発言したことにより、プロファイルが作成されました。プロファイルの削除を希望する場合は`mii-10#3110`のDMにご連絡ください。なお、プロファイルを削除後は思惟奈ちゃんをご利用できなくなります。(レベル機能などサーバープロファイルに依存するものを含む)")
         except:
             pass
         bot.cursor.execute("select * from users where id=?",
@@ -1212,6 +1215,7 @@ async def runsercmd(message, gs, pf):
                                         role = message.guild.get_role(v["rep"])
                                     except:
                                         await message.channel.send(bot._(message.author, "scmd-notfound-role"))
+                                        return
                                     if role < message.author.top_role:
                                         if role in message.author.roles:
                                             await message.author.remove_roles(role)

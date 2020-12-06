@@ -346,7 +346,7 @@
     "help-5-t": "検索",
     "help-5-d": "`twisearch`,`jwp`,`jpwt`,`gwd`,`youtube`,`jscrawiki`",
     "help-6-t": "Discord",
-    "help-6-d": "`wid`,`anyuserinfo`,`cinvite`,`userinfo`,`dguild`,`chinfo`,`allonline`,`emojiinfo`,`voiceinfo`,`roleinfo`,`activity`,`serverinfo`,`isonline`",
+    "help-6-d": "`wid`,`anyuserinfo`,`cinvite`,`userinfo`,`dguild`,`chinfo`,`allonline`,`emojiinfo`,`voiceinfo`,`roleinfo`,`activity`,`serverinfo`,`isonline`,`Authsetting`,`invite`,`panelediy`,`messageinfo`",
     "help-7-t": "Scratch",
     "help-7-d": "`gupd`,`checkscrauname`,`scranotif`,`scrauser`",
     "help-8-t": "ニュース",
@@ -362,9 +362,9 @@
     "help-13-t": "管理用",
     "help-13-d": "`vpc`,`getby`",
     "help-14-t": "その他",
-    "help-14-d": "`reply`,`mas`,`q`,`rettext`,`randomint`,`memo`,`textlocker`,`rg`,`timemsg`,`symmetry`,`onlinenotif`",
+    "help-14-d": "`reply`,`mas`,`q`,`rettext`,`randomint`,`memo`,`textlocker`,`rg`,`timemsg`,`symmetry`,`onlinenotif`,`bmail`",
     "help-15-t": "特定のチャンネルに送信できるもの",
-    "help-15-d": "`sina-user-check`メンバー参加時に、ほかサーバーでのban状況を送信します。管理者のみが見れるようにすることを推奨します。",
+    "help-15-d": "`sina-user-check`:メンバー参加時に、ほかサーバーでのban状況を送信します。管理者のみが見れるようにすることを推奨します。\n`sbm-`から始まるチャンネル:ボトルメールが流れてきます。",
     "help-16-t": "グローバルチャットの名称前アイコン",
     "help-16-d": "🌠:チーム☆思惟奈ちゃんメンバー\n🌈:製作者\n⚙:ボット\n💠:認証済みアカウント\n🔗パートナーサーバーオーナー\n🔧:グローバルチャットモデレーター\n🌟:スターユーザー(気まぐれでつける)\n🔔:アルファテスター(一部機能の先行体験)",
     "rg-title": "メンバーグループ",
@@ -1494,7 +1494,7 @@
         "Authsettingについて",
         "サーバーへようこそ！これだけは確認してね！",
         "使い方",
-        "`s-Authsetting`",
+        "`s-Authsetting`,`s-Auth`,`s-Authsettings`",
         "詳しく",
         "操作パネルはリアクション操作します。\n設定は説明の指示に従ってください。"
     ],
@@ -1561,5 +1561,31 @@
     "send-report-here": "レポートのタイトルと内容をここに送信してください。",
 
     "sina_verified_guild":"思惟奈ちゃん認証サーバー",
-    "discord_partner_guild":"Discordパートナーサーバー"
+    "discord_partner_guild":"Discordパートナーサーバー",
+
+	"nh-invite": [
+		"inviteについて",
+        "Botをどんどん招待しよう！",
+		"使い方",
+		"`s-invite`,`s-invite [Botを特定できるもの(IDを含む)]`",
+		"詳しく",
+		"引数があればそのBotの、なければ思惟奈ちゃんの導入URLを表示します。そのサーバーに該当Botがいる場合はそのBotの権限のリンクを、なければそのサーバーにおける思惟奈ちゃんの権限のリンクです。"
+	],
+	"nh-messageinfo": [
+		"messageinfoについて",
+		"このメッセージを詳しく教えて！",
+		"使い方",
+		"`s-messageinfo`,`s-messageinfo [メッセージを特定できるもの]`,`s-messageinfo(+メッセージへの返信)`,`s-mi`,`s-mi [メッセージを特定できるもの]`,`s-mi(+メッセージへの返信)`",
+		"詳しく",
+		"メッセージの詳細(投稿時刻、最終編集時刻、添付ファイルの数など)を一覧表示します。\n引数/返信がないときは送信メッセージ、引数がある場合は引数で取得できるメッセージ、返信があるときは返信のメッセージについて表示します。\n引数と返信では、返信の方が優先度が高いです。"
+	],
+	"nh-b-mail": [
+		"b-mailについて",
+		"どこかに届け、この'想い'",
+		"使い方",
+		"`s-b-mail`",
+		"詳しく",
+		"DMにてメッセージを聞いてくるので入力してください。どこかのサーバーの`sbm-`から始まる名前のチャンネルに送信されます。"
+	]
+
 }

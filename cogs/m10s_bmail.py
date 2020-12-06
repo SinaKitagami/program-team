@@ -36,15 +36,15 @@ class m10s_bmail(commands.Cog):
         try:
             msg = await ut.wait_message_return(ctx, "あなたの思いをここにのせて…", dch, 30)
             sch = random.choice(schs)
-            try:
-                smg = await sch.send(embed=ut.getEmbed("誰かの手紙が流れ着いた…", msg.clean_content, self.bot.ec, "もし迷惑ユーザーを見かけたら", "メッセージIDを添えて`s-report`コマンドでお知らせください。"))
-                e = ut.getEmbed("ボトルメールログ", msg.clean_content, self.bot.ec,
-                                "チャンネル", msg.channel.name, "メッセージID", str(smg.id))
-                e.set_author(name=f"{msg.author}({msg.author.id})",
-                             icon_url=msg.author.icon_url_as(static_format="png"))
-                await bmaillog.send(embed=e)
-            except:
-                pass
+            #try:
+            smg = await sch.send(embed=ut.getEmbed("誰かの手紙が流れ着いた…", msg.clean_content, self.bot.ec, "もし迷惑ユーザーを見かけたら", "メッセージIDを添えて`s-report`コマンドでお知らせください。"))
+            e = ut.getEmbed("ボトルメールログ", msg.clean_content, self.bot.ec,
+                            "チャンネル", msg.channel.name, "メッセージID", str(smg.id))
+            e.set_author(name=f"{msg.author}({msg.author.id})",
+                            icon_url=msg.author.icon_url_as(static_format="png"))
+            await bmaillog.send(embed=e)
+            #except:
+                #pass
         except asyncio.TimeoutError:
             await dch.send("手紙とボトルはどこかへ消えてしまった…")
 
