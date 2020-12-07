@@ -6,6 +6,7 @@ import asyncio
 import datetime
 from dateutil.relativedelta import relativedelta as rdelta
 import traceback
+from typing import Union
 
 import m10s_util as ut
 
@@ -904,15 +905,27 @@ class info(commands.Cog):
         await ctx.author.send(embed=ut.getEmbed("あなたのfeatures", "```{}```".format(",".join(self.bot.features.get(ctx.author.id, ["(なし)"])))))
 
     @commands.command()
-    async def invite(self,ctx,*,target:commands.MemberConverter=None):
+    async def invite(self,ctx,*,target:Union[commands.MemberConverter,commands.UserConverter,int,None]):
         if target is None:
             target = ctx.guild.me
+        if isinstance(target,int):
+            try:
+                target = await self.bot.fetch_user(target)
+            except:
+                await ctx.send("> エラー\n　そのIDを持つユーザーが存在しません。")
         if target.bot:
-            ilink = discord.utils.oauth_url(str(target.id),permissions=target.guild_permissions)
-            e=discord.Embed(title="bot招待リンク",description=ilink,color=self.bot.ec)
-            e.add_field(name="このリンクで導入した際の権限",
-                            value=f"`{'`,`'.join([ctx._(f'p-{i[0]}') for i in list(target.guild_permissions) if i[1]])}`")
-            e.set_author(name=f"{target}({target.id})",icon_url=target.avatar_url_as(static_format="png"))
+            if isinstance(target,discord.Member):
+                ilink = discord.utils.oauth_url(str(target.id),permissions=target.guild_permissions)
+                e=discord.Embed(title="bot招待リンク",description=ilink,color=self.bot.ec)
+                e.add_field(name="このリンクで導入した際の権限",
+                                value=f"`{'`,`'.join([ctx._(f'p-{i[0]}') for i in list(target.guild_permissions) if i[1]])}`")
+                e.set_author(name=f"{target}({target.id})",icon_url=target.avatar_url_as(static_format="png"))
+            else:
+                ilink = discord.utils.oauth_url(str(target.id),permissions=ctx.guild.me.guild_permissions)
+                e=discord.Embed(title="bot招待リンク",description=ilink,color=self.bot.ec)
+                e.add_field(name="このリンクで導入した際の権限",
+                                value=f"`{'`,`'.join([ctx._(f'p-{i[0]}') for i in list(ctx.guild.me.guild_permissions) if i[1]])}`")
+                e.set_author(name=f"{target}({target.id})",icon_url=target.avatar_url_as(static_format="png"))
             await ctx.send(embed=e)
         else:
             await ctx.send(embed=discord.Embed(title="エラー",description="ユーザーアカウントの導入リンクは作成できません！",color=self.bot.ec))

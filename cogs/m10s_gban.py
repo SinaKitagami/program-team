@@ -25,6 +25,7 @@ class m10s_gban(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.check = bot.get_emoji(653161518103265291)
 
     @commands.command()
     async def gban(self, ctx, uid: int, tof: bool, *, reason: str=None):
@@ -33,6 +34,16 @@ class m10s_gban(commands.Cog):
                 u = await self.bot.fetch_user(uid)
             except discord.NotFound:
                 await ctx.send("存在しないユーザーではないでしょうか？IDを見直してみてください。")
+                return
+
+            m = await ctx.send(f"> ❔確認\n　{u}({u.id})のグローバルBAN状態を{tof}で上書きしてもよろしいですか？")
+            await m.add_reaction(self.check)
+            await m.add_reaction("❌")
+            r, u = await self.bot.wait_for("reaction_add", check=lambda r, u: r.message.id == m.id and u.id == ctx.author.id)
+            if not str(r.emoji) == str(self.check):
+                await m.edit(content="> グローバルBANはキャンセルされました。")
+                return
+
             if tof:
                 self.bot.cursor.execute(
                     "select * from gban_dates where id=?", (uid,))
@@ -77,7 +88,7 @@ class m10s_gban(commands.Cog):
                 else:
                     await ctx.send(f"{u.name}は思惟奈ちゃんのグローバルbanされていません")
         else:
-            await ctx.send("グローバルBANの実行には、グローバルBANが使用できる認証を受けたアカウントである必要があります。\n思惟奈ちゃん運営に報告する際は、`s-report [タイトル] [説明]`を使用してください。正確性などを確認し、認められた場合はグローバルBANが行われます。")
+            await ctx.send("グローバルBANの実行には、グローバルBANが使用できる認証を受けたアカウントである必要があります。\n思惟奈ちゃん運営に報告する際は、`s-report`コマンドを使用してください。正確性などを確認し、認められた場合はグローバルBANが行われます。")
 
     @commands.command()
     async def check_gban(self, ctx, uid: int):

@@ -40,6 +40,9 @@ logging.basicConfig(level=logging.DEBUG)"""
 intents:discord.Intents = discord.Intents.default()
 intents.members = True
 
+#テスト、切り忘れに注意
+# intents.presences = True
+
 bot = commands.Bot(command_prefix="s-", status=discord.Status.invisible,
                    allowed_mentions=discord.AllowedMentions(everyone=False),
                    intents=intents)
@@ -90,6 +93,9 @@ bot.cursor.execute(
 
 bot.cursor.execute(
     "CREATE TABLE IF NOT EXISTS role_panels(id integer PRIMARY KEY NOT NULL,roles json NOT NULL);")
+
+bot.cursor.execute(
+    "CREATE TABLE IF NOT EXISTS activity_roles(guild_id integer NOT NULL,activity_type integer NOT NULL,role_id integer NOT NULL , PRIMARY KEY(guild_id,activity_type) );")
 
 
 try:
@@ -333,12 +339,13 @@ async def globalSend(message):
         gpf = bot.cursor.fetchone()
         if (datetime.datetime.now() - rdelta(hours=9) - rdelta(days=7) >= message.author.created_at) or upf["gmod"] or upf["gstar"]:
             if upf["gban"] == 1:
-                dc = await ut.opendm(message.author)
-                await dc.send(bot._(message.author, "global-banned", message.author.mention))
-                await repomsg(message, "思惟奈ちゃんグローバルチャットの使用禁止")
-                await message.add_reaction("❌")
-                await asyncio.sleep(5)
-                await message.remove_reaction("❌", bot.user)
+                if not gchn == "sync_rsp_main_chat":
+                    dc = await ut.opendm(message.author)
+                    await dc.send(bot._(message.author, "global-banned", message.author.mention))
+                    await repomsg(message, "思惟奈ちゃんグローバルチャットの使用禁止")
+                    await message.add_reaction("❌")
+                    await asyncio.sleep(5)
+                    await message.remove_reaction("❌", bot.user)
             else:
                 try:
                     if upf["sinapartner"] and message.author.activity:
@@ -433,7 +440,8 @@ async def globalSend(message):
                     await message.remove_reaction("❌", bot.user)
                     return
                 try:
-                    await message.add_reaction(bot.get_emoji(653161518346534912))
+                    if not gchn == "sync_rsp_main_chat":
+                        await message.add_reaction(bot.get_emoji(653161518346534912))
                 except:
                     pass
             if gchn.startswith("ed-"):
@@ -474,9 +482,11 @@ async def globalSend(message):
                         for at in message.attachments:
                             await at.save(f"globalsends/{at.filename}")
                             fls.append(at)
-                        ed = ed + message.embeds + [ne]
+                        if not gchn == "sync_rsp_main_chat":
+                            ed = ed + message.embeds + [ne]
                     else:
-                        ed = ed + message.embeds + [ne]
+                        if not gchn == "sync_rsp_main_chat":
+                            ed = ed + message.embeds + [ne]
                 except:
                     traceback.print_exc(0)
                     await message.add_reaction("❌")
@@ -484,7 +494,8 @@ async def globalSend(message):
                     await message.remove_reaction("❌", bot.user)
                     return
                 try:
-                    await message.add_reaction(bot.get_emoji(653161518346534912))
+                    if not gchn == "sync_rsp_main_chat":
+                        await message.add_reaction(bot.get_emoji(653161518346534912))
                 except:
                     pass
                 tasks = []
@@ -511,14 +522,16 @@ async def globalSend(message):
                 if not fls == []:
                     shutil.rmtree("globalsends/")
                 try:
-                    await message.remove_reaction(bot.get_emoji(653161518346534912), bot.user)
+                    if not gchn == "sync_rsp_main_chat":
+                        await message.remove_reaction(bot.get_emoji(653161518346534912), bot.user)
                 except:
                     pass
             bot.cursor.execute("INSERT INTO globaldates(id,content,allid,aid,gid,timestamp) VALUES(?,?,?,?,?,?)", (int(time.time())+random.randint(1, 30), message.clean_content,
                                                                                                                    mids+[message.id], message.author.id, message.guild.id, str(message.created_at.strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))))
-            await message.add_reaction(bot.get_emoji(653161518195539975))
-            await asyncio.sleep(5)
-            await message.remove_reaction(bot.get_emoji(653161518195539975), bot.user)
+            if not gchn == "sync_rsp_main_chat":
+                await message.add_reaction(bot.get_emoji(653161518195539975))
+                await asyncio.sleep(5)
+                await message.remove_reaction(bot.get_emoji(653161518195539975), bot.user)
         else:
             await repomsg(message, "作成後7日に満たないアカウント")
     except Exception as e:
@@ -576,6 +589,7 @@ async def on_member_update(b, a):
 
 
 async def nga(m, r):
+    # 過去の遺産
     ch = m.guild.get_channel(631875590307446814)
 
     admins = m.guild.get_role(574494236951707668)
@@ -620,6 +634,7 @@ async def on_member_join(member):
             e.timestamp = member.created_at
             await uich.send(embed=e)
             mrole = member.guild.get_role(574494088837988352)
+            srole = member.guild.get_role(749483465304703057)
             await member.add_roles(mrole)
                         
     else:
@@ -990,8 +1005,26 @@ async def on_guild_join(guild):
         name="メンバー数", value=f"{len([i for i in guild.members if not i.bot])}ユーザー、{len([i for i in guild.members if i.bot])}bot")
     e.add_field(
         name="チャンネル数", value=f"テキスト:{len(guild.text_channels)}\nボイス:{len(guild.voice_channels)}\nカテゴリー{len(guild.categories)}")
+    e.add_field(name="サーバーオーナー",value=f"[{guild.owner.mention}]({guild.owner}({guild.owner.id}))")
     ch = bot.get_channel(693048937304555529)
     await ch.send(embed=e)
+
+    e=discord.Embed(title="思惟奈ちゃんの導入ありがとうございます！",description="ここでは、思惟奈ちゃんの機能を「少しだけ」ご紹介させていただきます。",color=bot.ec)
+    e.add_field(name="コマンドの利用制限",value="`s-comlock`コマンドで、使用してほしくないコマンドや、動いてほしくない一部機能の制限ができます。\n詳しくは`s-help comlock`でご確認ください！")
+    e.add_field(name="グローバルチャット",value="`s-gconnect`コマンドで、実行チャンネルをグローバルチャットに接続できます(Webhooks管理権限が必要)。\n詳しくは`s-help gconnect`でご確認ください！")
+    e.add_field(name="ハッシュタグチャンネル",value="`s-hash`コマンドで、実行チャンネルをハッシュタグチャンネルとして登録できます。登録されたチャンネルにメンションすることで、メッセージの複製を送信し、ハッシュタグのようにあとで一覧確認ができるようになります。詳しくは`s-help hash`でご確認ください。")
+    e.add_field(name="音楽再生機能",value="`s-play [URL/検索ワード]`でボイスチャット内で音楽を再生できます。その他のコマンドはヘルプのページ目で一覧確認できます。詳細は`s-help [コマンド名]`で確認できます。")
+    e.add_field(name="グローバルBANとその申請",value="`s-gbanlogto [チャンネルID]`でグローバルBANログの送信先を指定することで、グローバルBAN機能が有効化されます(BAN権限が必要)。\n一般のユーザーの方は`s-report`コマンドで申請ができます。詳しくは`s-help gbanlogto`ならびに`s-help report`をご覧ください！")
+    e.add_field(name="その他",value="このほかにもたくさんの機能を備えています。helpの1ページ目にある「みぃてんのわいがや広場」では、サポートも行っておりますのでお困りの方は一度足を運んでみてください。あなたのサーバーに少しでも役に立てるように頑張りますので思惟奈ちゃんをよろしくお願いします！")
+    try:
+        await guild.system_channel.send(embed=e)
+    except:
+        for ch in guild.text_channels:
+            try:
+                await ch.send(embed=e)
+                return
+            except:
+                continue
 
 
 @bot.event
@@ -1049,7 +1082,7 @@ async def on_ready():
     files = ["m10s_music", "m10s_info", "m10s_owner", "m10s_settings", "m10s_manage", "m10s_levels",
              "m10s_tests", "m10s_gcoms", "m10s_other", "m10s_search", "m10s_games", "P143_jyanken",
              "nekok500_mee6", "pf9_symmetry", "syouma", "m10s_gban", "m10s_bmail", "m10s_auth_wiz",
-             "m10s_chinfo_rewrite", "m10s_role_panel"
+             "m10s_chinfo_rewrite", "m10s_role_panel", "m10s_messageinfo"
             ]
     
     embed = discord.Embed(title="読み込みに失敗したCog", color=bot.ec)
@@ -1066,9 +1099,10 @@ async def on_ready():
 
     try:
         ch = bot.get_channel(595526013031546890)
-        e=discord.Embed(title="起動時インフォメーション(テスト中)",description=f"認識ユーザー数:{len(bot.users)}\n認識サーバー数:{len(bot.guilds)}\n認識チャンネル数:{len([c for c in bot.get_all_channels()])}\ndiscord.py ver_{discord.__version__}\n-メモ-\n10/7以降使えなくなる機能への対応をチームメンバー全員、ちゃんとお願いしますね。\n",color=bot.ec)
+        e=discord.Embed(title="起動時インフォメーション",description=f"認識ユーザー数:{len(bot.users)}\n認識サーバー数:{len(bot.guilds)}\n認識チャンネル数:{len([c for c in bot.get_all_channels()])}\ndiscord.py ver_{discord.__version__}\n-メモ-\n10/7以降使えなくなる機能への対応をチームメンバー全員、ちゃんとお願いしますね。\n",color=bot.ec)
         await ch.send(f"{bot.get_emoji(653161518531215390)}on_ready!",embed=e)
-        await ch.send(embed=embed)
+        if txt:
+            await ch.send(embed=embed)
     except:
         pass
 
@@ -1100,18 +1134,6 @@ async def on_message(message):
 
 async def domsg(message):
     global DoServercmd
-    bot.cursor.execute("select * from users where id=?", (message.author.id,))
-    pf = bot.cursor.fetchone()
-    if not pf:
-        bot.cursor.execute("INSERT INTO users(id,prefix,gpoint,memo,levcard,onnotif,lang,accounts,sinapartner,gban,gnick,gcolor,gmod,gstar,galpha,gbanhist) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                           (message.author.id, [], 0, {}, "m@ji☆", [], "ja", [], 0, 0, message.author.name, 0, 0, 0, 0, "なし"))
-        try:
-            await message.channel.send(f"{bot.get_emoji(653161518153596950)}あなたの思惟奈ちゃんユーザープロファイルを作成しました！いくつかの項目はコマンドを使って書き換えることができます。詳しくはヘルプ(`s-help`)をご覧ください。\n> なんでこのメッセージが来たの？\n　思惟奈ちゃんのいるサーバーで発言したことにより、プロファイルが作成されました。プロファイルの削除を希望する場合は`mii-10#3110`のDMにご連絡ください。なお、プロファイルを削除後は思惟奈ちゃんをご利用できなくなります。(レベル機能などサーバープロファイルに依存するものを含む)")
-        except:
-            pass
-        bot.cursor.execute("select * from users where id=?",
-                           (message.author.id,))
-        pf = bot.cursor.fetchone()
 
     bot.cursor.execute("select * from guilds where id=?", (message.guild.id,))
     gs = bot.cursor.fetchone()
@@ -1128,11 +1150,34 @@ async def domsg(message):
                            (message.guild.id,))
         gs = bot.cursor.fetchone()
 
+    bot.cursor.execute("select * from users where id=?", (message.author.id,))
+    pf = bot.cursor.fetchone()
+    if not pf:
+        if not message.is_system():
+            return
+        bot.cursor.execute("INSERT INTO users(id,prefix,gpoint,memo,levcard,onnotif,lang,accounts,sinapartner,gban,gnick,gcolor,gmod,gstar,galpha,gbanhist) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                        (message.author.id, [], 0, {}, "m@ji☆", [], "ja", [], 0, 0, message.author.name, 0, 0, 0, 0, "なし"))
+        try:
+            if "disable_profile_msg" in gs["lockcom"]:
+                await message.add_reaction(bot.get_emoji(653161518153596950))
+            else:
+                try:
+                    await message.reply(f"> {bot.get_emoji(653161518153596950)} あなたの思惟奈ちゃんユーザープロファイルを作成しました！いくつかの項目はコマンドを使って書き換えることができます。詳しくはヘルプ(`s-help`)をご覧ください。\n> なんでこのメッセージが来たの？\n　思惟奈ちゃんのいるサーバーで発言したことにより、プロファイルが作成されました。プロファイルの削除を希望する場合は`mii-10#3110`のDMにご連絡ください。なお、プロファイルを削除後は思惟奈ちゃんをご利用できなくなります。(レベル機能などサーバープロファイルに依存するものを含む)")
+                except:
+                    await message.send(f"> {bot.get_emoji(653161518153596950)} {message.author.mention}さん！あなたの思惟奈ちゃんユーザープロファイルを作成しました！いくつかの項目はコマンドを使って書き換えることができます。詳しくはヘルプ(`s-help`)をご覧ください。\n> なんでこのメッセージが来たの？\n　思惟奈ちゃんのいるサーバーで発言したことにより、プロファイルが作成されました。プロファイルの削除を希望する場合は`mii-10#3110`のDMにご連絡ください。なお、プロファイルを削除後は思惟奈ちゃんをご利用できなくなります。(レベル機能などサーバープロファイルに依存するものを含む)")
+        except:
+            pass
+        bot.cursor.execute("select * from users where id=?",
+                        (message.author.id,))
+        pf = bot.cursor.fetchone()
+
     tks = [asyncio.ensure_future(dlevel(message, gs)), asyncio.ensure_future(
         gahash(message, gs)), asyncio.ensure_future(runsercmd(message, gs, pf))]
     await asyncio.gather(*tks)
 
-    tpf = ["s-"]+pf["prefix"]+gs["prefix"]
+    tpf = pf["prefix"]+gs["prefix"]
+    if not "disable_defprefix" in gs["lockcom"]:
+        tpf.insert(0,"s-")
     bot.command_prefix = tpf
     ctx = await bot.get_context(message)
     try:
@@ -1170,6 +1215,7 @@ async def runsercmd(message, gs, pf):
                                         role = message.guild.get_role(v["rep"])
                                     except:
                                         await message.channel.send(bot._(message.author, "scmd-notfound-role"))
+                                        return
                                     if role < message.author.top_role:
                                         if role in message.author.roles:
                                             await message.author.remove_roles(role)
@@ -1188,7 +1234,7 @@ async def gahash(message, gs):
     # hash
     if "s-noHashSend" in (message.channel.topic or ""):
         return
-    if "hash" not in gs["lockcom"]:
+    if "shash" not in gs["lockcom"]:
         ch = gs["hash"]
         if ch is not []:
             menchan = message.channel_mentions
@@ -1562,3 +1608,4 @@ bot.run(bot.BOT_TOKEN)
 
 # テストトークン
 # bot.run(bot.BOT_TEST_TOKEN)
+
