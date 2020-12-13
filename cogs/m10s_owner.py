@@ -93,7 +93,7 @@ class owner(commands.Cog):
         embed.add_field(
             name="サーバー作成日時", value=f"{(guilds[page].created_at+ rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒')}")
         embed.add_field(
-            name="思惟奈ちゃん導入日時", value=f"{guilds[page].me.joined_at.strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒')}")
+            name="思惟奈ちゃん導入日時", value=f"{(guilds[page].me.joined_at+ rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒')}")
         embed.add_field(name="オーナー", value=f"{guilds[page].owner}")
         embed.set_thumbnail(url=guilds[page].icon_url_as(static_format="png"))
         embed.set_footer(text=f"{page+1}/{gcount+1}")
