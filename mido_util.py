@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 import asyncio
+import sqlite3
 import traceback
 
 #get_channel_or_user
@@ -93,13 +94,33 @@ class BannedMemberConverter(commands.Converter):
 class FetchUserConverter(commands.Converter):
     async def convert(self, ctx, argument):
         if not argument.isdigit():
-            raise commands.BadArgument('このIDはユーザーIDではありません')
+            u = await commands.MemberConverter().convert(ctx, argument)
         try:
             u = await ctx.bot.fetch_user(argument)
         except discord.NotFound:
             raise commands.BadArgument('ユーザーが見つかりませんでした') from None
         except discord.HTTPException:
             raise commands.BadArgument('エラーが発生しました') from None
+        
+        return u
+
+#MemberConverter
+class MemberConverter(commands.Converter):
+    async def convert(self, ctx, argument):
+        try:
+            u = await commands.MemberConverter().convert(ctx, argument)
+        except commands.MemberNotFound:
+            u = discord.utils.get(ctx.bot.users, name=argument) or discord.utils.get(ctx.bot.users, id=argument)
+        except Exception as e:
+            raise commands.BadArgument(e) from None
+        
+        if u is None:
+            try:
+                u = await FetchUserConverter().convert(ctx, argument)
+            except Exception as e:
+                raise Exception(e) from None
+            
+        return u
 
 #get_status_from_url
 async def get_status_from_url(ctx, url=None):
