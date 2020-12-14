@@ -157,7 +157,7 @@ bot.mwc = wikidata.client.Client()
 rpcct = 0
 rpcs = [
     "ヘルプ:s-help",
-    "アイコン:おあずさん",
+    "アイコン:しおさばきゅーさん",
     "サーバー数:{0}",
     "ユーザー数:{1}",
     "作成:チーム☆思惟奈ちゃん",
@@ -1005,7 +1005,7 @@ async def on_guild_join(guild):
         name="メンバー数", value=f"{len([i for i in guild.members if not i.bot])}ユーザー、{len([i for i in guild.members if i.bot])}bot")
     e.add_field(
         name="チャンネル数", value=f"テキスト:{len(guild.text_channels)}\nボイス:{len(guild.voice_channels)}\nカテゴリー{len(guild.categories)}")
-    e.add_field(name="サーバーオーナー",value=f"[{guild.owner.mention}]({guild.owner}({guild.owner.id}))")
+    e.add_field(name="サーバーオーナー",value=f"{guild.owner.mention}({guild.owner}({guild.owner.id}))")
     ch = bot.get_channel(693048937304555529)
     await ch.send(embed=e)
 
@@ -1029,8 +1029,19 @@ async def on_guild_join(guild):
 
 @bot.event
 async def on_guild_remove(guild):
+    e = discord.Embed(
+        title=f"思惟奈ちゃんが{guild.name}から退出しました。", description=f"原因としてサーバーからのkick/banまたはサーバーの削除などの可能性があります。\nid:{guild.id}", color=bot.ec)
+    e.add_field(name="サーバー作成日時",
+                value=f"{(guild.created_at+ rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒')}")
+    e.add_field(name="サーバー参加日時",
+                value=f"{(guild.me.joined_at+ rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒')}")
+    e.add_field(
+        name="メンバー数", value=f"{len([i for i in guild.members if not i.bot])}ユーザー、{len([i for i in guild.members if i.bot])}bot")
+    e.add_field(
+        name="チャンネル数", value=f"テキスト:{len(guild.text_channels)}\nボイス:{len(guild.voice_channels)}\nカテゴリー{len(guild.categories)}")
+    e.add_field(name="サーバーオーナー",value=f"{guild.owner.mention}({guild.owner}({guild.owner.id}))")
     ch = bot.get_channel(693048937304555529)
-    await ch.send(f"`{guild.name}`(id:{guild.id})から退出しました。")
+    await ch.send(embed=e)
 
 
 @bot.event
