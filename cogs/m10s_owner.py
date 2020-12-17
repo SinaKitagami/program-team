@@ -56,8 +56,8 @@ class owner(commands.Cog):
             except:
                 await ctx.send(embed=discord.Embed(title="awaitEvalエラー", description=traceback.format_exc(0)))
 
-    @commands.command()
-    async def eval(self, ctx, *, cmd):
+    @commands.command(name="eval")
+    async def eval_(self, ctx, *, cmd):
         if "eval" in self.bot.features.get(ctx.author.id, []):
             await ctx.message.add_reaction(self.bot.get_emoji(653161518346534912))
             rt = "\n"
