@@ -65,12 +65,19 @@ class owner(commands.Cog):
                 cmd = cmd[5:-3]
             elif cmd.startswith("```"):
                 cmd = cmd[3:-3]
+            elif cmd.startswith("```python"):
+                cmd = cmd[9:-3]
             txt = f'async def evdf(ctx,bot):{rt}{rt.join([f" {i}" for i in cmd.split(rt)])}'
             try:
                 exec(txt)
-                await eval("evdf(ctx,self.bot)")
+                rtn = await eval("evdf(ctx,self.bot)")
                 await ctx.message.remove_reaction(self.bot.get_emoji(653161518346534912), self.bot.user)
                 await ctx.message.add_reaction(self.bot.get_emoji(653161518103265291))
+                if rtn:
+                    if isinstance(rtn,discord.Embed):
+                        await ctx.send(embed=rtn)
+                    else:
+                        await ctx.send(f"```{rtn}```")
             except:
                 await ctx.message.remove_reaction(self.bot.get_emoji(653161518346534912), self.bot.user)
                 await ctx.message.add_reaction("❌")

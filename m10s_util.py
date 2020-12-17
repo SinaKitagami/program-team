@@ -185,6 +185,23 @@ class m10s_badges:
             "Early Verified Bot Developer": self.early_verified_bot_developer,
         }
 
+        self.n = 0
+
+    def __eq__(self, arg):
+        if isinstance(arg,m10s_badges):
+            return self.raw_flags == arg.raw_flags
+        else:
+            return False 
+
+    def __str__(self):
+        return ",".join(self.get_list)
+
+    def __ne__(self, o: object):
+        return not self.__eq__(o)
+
+    def __hash__(self):
+        return self.raw_flags
+
     def get_dict(self):
         return self.dict_flags
 
