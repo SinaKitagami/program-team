@@ -39,8 +39,8 @@ class m10s_gban(commands.Cog):
             m = await ctx.send(f"> ❔確認\n　{u}({u.id})のグローバルBAN状態を{tof}で上書きしてもよろしいですか？")
             await m.add_reaction(self.check)
             await m.add_reaction("❌")
-            r, u = await self.bot.wait_for("reaction_add", check=lambda r, u: r.message.id == m.id and u.id == ctx.author.id)
-            if not str(r.emoji) == str(self.check):
+            r, us = await self.bot.wait_for("reaction_add", check=lambda r, u: r.message.id == m.id and u.id == ctx.author.id)
+            if (not str(r.emoji) == str(self.check)):
                 await m.edit(content="> グローバルBANはキャンセルされました。")
                 return
 
@@ -57,10 +57,10 @@ class m10s_gban(commands.Cog):
                     for gstg in gs:
                         g = self.bot.get_guild(gstg["id"])
                         if g is None:
-                            break
+                            continue
                         ch = g.get_channel(gstg["chid"])
                         if ch is None:
-                            break
+                            continue
                         by = ctx.author
                         if g:
                             try:
@@ -70,11 +70,12 @@ class m10s_gban(commands.Cog):
                                     await ch.send(embed=ut.getEmbed("グローバルBANに基づく、BANの試行", f"{u}({u.id})は、`{reason}`として思惟奈ちゃんのグローバルBANを受けています。\nBANしようとしましたが、権限不足等の理由でBANできませんでした。\nグローバルBAN実行者:{by}({by.id})"))
                                 else:
                                     await g.owner.send(embed=ut.getEmbed("グローバルBANに基づく、BANの試行", f"{u}({u.id})は、`{reason}`として思惟奈ちゃんのグローバルBANを受けています。\nBANしようとしましたが、権限不足等の理由でBANできませんでした。\nグローバルBAN実行者:{by}({by.id})"))
-                            finally:
+                            else:
                                 if ch:
                                     await ch.send(embed=ut.getEmbed("グローバルBANに基づく、BANの実行", f"{u}({u.id})は、`{reason}`として思惟奈ちゃんのグローバルBANを受けています。\nよって、このサーバーからBANを行いました。\nグローバルBAN実行者:{by}({by.id})"))
                                 else:
                                     await g.owner.send(embed=ut.getEmbed("グローバルBANに基づく、BANの実行", f"{u}({u.id})は、`{reason}`として思惟奈ちゃんのグローバルBANを受けています。\nよって、このサーバーからBANを行いました。\nグローバルBAN実行者:{by}({by.id})"))
+                    await ctx.send("該当ユーザーのグローバルBANが完了しました。")
                 else:
                     await ctx.send(f"{u.name}はすでに思惟奈ちゃんのグローバルbanされています。")
             else:
