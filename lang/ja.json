@@ -346,7 +346,7 @@
     "help-5-t": "検索",
     "help-5-d": "`twisearch`,`jwp`,`jpwt`,`gwd`,`youtube`,`jscrawiki`",
     "help-6-t": "Discord",
-    "help-6-d": "`wid`,`anyuserinfo`,`cinvite`,`userinfo`,`dguild`,`chinfo`,`allonline`,`emojiinfo`,`voiceinfo`,`roleinfo`,`activity`,`serverinfo`,`isonline`,`Authsetting`,`invite`,`panelediy`,`messageinfo`",
+    "help-6-d": "`wid`,`anyuserinfo`,`cinvite`,`userinfo`,`dguild`,`chinfo`,`allonline`,`emojiinfo`,`voiceinfo`,`roleinfo`,`activity`,`serverinfo`,`isonline`,`Authsetting`,`invite`,`rolepanel`,`messageinfo`",
     "help-7-t": "Scratch",
     "help-7-d": "`gupd`,`checkscrauname`,`scranotif`,`scrauser`",
     "help-8-t": "ニュース",
@@ -358,7 +358,7 @@
     "help-11-t": "管理者",
     "help-11-d": "`checkmember`,`changenick`,`guildprefix`,`guildlang`,`sendlogto`,`comlock`,`setsysmsg`,`servercmd`,`hash`,`levelreward`,`cemojiorole`,`backup`,`lrewardupd`,`delm`,`memban`,`memkick`,`pin`,`delmsgs`,`roletrans`,`gbanlogto`",
     "help-12-t": "レベル",
-    "help-12-d": "`switchlevelup`,`levels`,`levelupsendto`,`ranklev`,`level`,`switchlevelcard`",
+    "help-12-d": "`switchLevelup`,`levels`,`levelupsendto`,`ranklev`,`level`,`switchlevelcard`",
     "help-13-t": "管理用",
     "help-13-d": "`vpc`,`getby`",
     "help-14-t": "その他",
@@ -1112,9 +1112,9 @@
         "guildprefixについて",
         "このサーバーだけのprefix！",
         "使い方",
-        "`s-guildprefix [add/del] [prefix]`",
+        "`s-guildprefix [set/del] [prefix]`",
         "詳しく",
-        "そのサーバーだけのprefix(s-の部分)を設定できます。addで追加、delで削除です。何も引数を指定しないと一覧を返します。"
+        "そのサーバーだけのprefix(s-の部分)を設定できます。setで追加、delで削除です。何も引数を指定しないと一覧を返します。"
     ],
     "nh-guildlang": [
         "guildlangについて",
@@ -1178,7 +1178,7 @@
         "servercmdについて",
         "ここだけのコマンドっ！",
         "使い方",
-        "`s-servercmd [add/del/hrlp] [コマンド名]`",
+        "`s-servercmd [add/del/help] [コマンド名]`",
         "詳しく",
         "そのサーバーだけで使えるコマンドを作成します。引数を何も指定しないと一覧を表示します。\n`one`は特定のメッセージを返し、`random`はランダムでメッセージを返し、`role`は役職を追加します。引数が`help`の時は、続けて入力されたサーバーコマンドのヘルプを表示します。"
     ],
@@ -1498,13 +1498,13 @@
         "詳しく",
         "操作パネルはリアクション操作します。\n設定は説明の指示に従ってください。"
     ],
-    "nh-paneledit": [
-        "paneleditについて",
+    "nh-rolepanel": [
+        "rolepanelについて",
         "おてがる！役職パネル作成！",
         "使い方",
-        "`s-paneledit`,`s-paneledit [パネルのメッセージID] (繰り返し:[絵文字] [役職ID])`",
+        "`s-rolepanel`,`s-rolepanel [create]`,`s-rolepanel [delete] [パネルID]`,`s-rolepanel [add] [パネルID] [絵文字] [役職が特定できるもの]`,`s-rolepanel [remove] [パネルID] [絵文字]`",
         "詳しく",
-        "引数なしで役職パネルとして扱う投稿を作成します。作成後、引数を入れて役職パネルとしての機能を与えます。"
+        "役職パネルとして扱う投稿を作成/編集できます。"
     ],
 
     "sina-v-ac": "思惟奈ちゃん認証済みアカウント",
@@ -1587,6 +1587,15 @@
 		"詳しく",
 		"DMにてメッセージを聞いてくるので入力してください。どこかのサーバーの`sbm-`から始まる名前のチャンネルに送信されます。"
     ],
-    "eat-みぃてん":"え？みぃてんさんを料理してほしいって？\nえーっとね、それしたら「私」ってものがなくなっちゃう気がするんだ…\nだから、それは私はしないよ。"
+    "eat-みぃてん":"え？みぃてんさんを料理してほしいって？\nえーっとね、それしたら「私」ってものがなくなっちゃう気がするんだ…\nだから、それは私はしないよ。",
+
+    "nh-settings":[
+        "settingsについて",
+        "思惟奈ちゃんの設定に困ったらこのコマンド！",
+        "使い方",
+        "`s-settings`,`s-setting`,`s-edit`",
+        "詳しく",
+        "思惟奈ちゃんのユーザー・サーバー向け設定をページめくりで見て呼び出せます。"
+    ]
 
 }
