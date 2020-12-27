@@ -46,42 +46,49 @@ class owner(commands.Cog):
     async def cu(self, ctx):
         await ctx.send("see you...")
         await self.bot.close()
+    
+    #check function
+    async def is_evalable(ctx):
+        if "eval" in ctx.bot.features.get(ctx.author.id, []):
+            return True
+        else:
+            return False
 
     @commands.command()
+    @commands.check(is_evalable)
     async def aev(self, ctx, *, cmd):
-        if "eval" in self.bot.features.get(ctx.author.id, []):
-            try:
-                await eval(cmd)
-                await ctx.message.add_reaction(self.bot.get_emoji(653161518103265291))
-            except:
-                await ctx.send(embed=discord.Embed(title="awaitEvalエラー", description=traceback.format_exc(0)))
+        try:
+            await eval(cmd)
+            await ctx.message.add_reaction(self.bot.get_emoji(653161518103265291))
+        except:
+            await ctx.send(embed=discord.Embed(title="awaitEvalエラー", description=traceback.format_exc(0)))
 
     @commands.command(name="eval")
+    @commands.check(is_evalable)
     async def eval_(self, ctx, *, cmd):
-        if "eval" in self.bot.features.get(ctx.author.id, []):
-            await ctx.message.add_reaction(self.bot.get_emoji(653161518346534912))
-            rt = "\n"
-            if cmd.startswith("```py"):
-                cmd = cmd[5:-3]
-            elif cmd.startswith("```"):
-                cmd = cmd[3:-3]
-            elif cmd.startswith("```python"):
-                cmd = cmd[9:-3]
-            txt = f'async def evdf(ctx,bot):{rt}{rt.join([f" {i}" for i in cmd.split(rt)])}'
-            try:
-                exec(txt)
-                rtn = await eval("evdf(ctx,self.bot)")
-                await ctx.message.remove_reaction(self.bot.get_emoji(653161518346534912), self.bot.user)
-                await ctx.message.add_reaction(self.bot.get_emoji(653161518103265291))
-                if rtn:
-                    if isinstance(rtn,discord.Embed):
-                        await ctx.send(embed=rtn)
-                    else:
-                        await ctx.send(f"```{rtn}```")
-            except:
-                await ctx.message.remove_reaction(self.bot.get_emoji(653161518346534912), self.bot.user)
-                await ctx.message.add_reaction("❌")
-                await ctx.author.send(embed=discord.Embed(title="eval's Error", description=f"```{traceback.format_exc(3)}```", color=self.bot.ec))
+        await ctx.message.add_reaction(self.bot.get_emoji(653161518346534912))
+        rt = "\n"
+        if cmd.startswith("```py"):
+            cmd = cmd[5:-3]
+        elif cmd.startswith("```"):
+            cmd = cmd[3:-3]
+        elif cmd.startswith("```python"):
+            cmd = cmd[9:-3]
+        txt = f'async def evdf(ctx,bot):{rt}{rt.join([f" {i}" for i in cmd.split(rt)])}'
+        try:
+            exec(txt)
+            rtn = await eval("evdf(ctx,self.bot)")
+            await ctx.message.remove_reaction(self.bot.get_emoji(653161518346534912), self.bot.user)
+            await ctx.message.add_reaction(self.bot.get_emoji(653161518103265291))
+            if rtn:
+                if isinstance(rtn,discord.Embed):
+                    await ctx.send(embed=rtn)
+                else:
+                    await ctx.send(f"```{rtn}```")
+        except:
+            await ctx.message.remove_reaction(self.bot.get_emoji(653161518346534912), self.bot.user)
+            await ctx.message.add_reaction("❌")
+            await ctx.author.send(embed=discord.Embed(title="eval's Error", description=f"```{traceback.format_exc(3)}```", color=self.bot.ec))
 
     @commands.command()
     @commands.is_owner()
