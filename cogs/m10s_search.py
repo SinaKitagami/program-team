@@ -12,6 +12,9 @@ from dateutil.relativedelta import relativedelta as rdelta
 
 import m10s_util as ut
 
+import config as cf
+
+import traceback
 
 class search(commands.Cog):
 
@@ -40,13 +43,13 @@ class search(commands.Cog):
         except:
             await ctx.send("何らかの例外が発生しました。")
 
-    @commands.command(aliases=["twitter検索", "twitterで検索して"])
+    @commands.command(aliases=["twitter", "twitterで検索して"])
     @commands.cooldown(1, 15, type=commands.BucketType.user)
     async def twisearch(self, ctx, *, word: str):
         try:
             async with ctx.message.channel.typing():
                 ret = self.bot.twi.search.tweets(
-                    q=word, result_type="recent", lang="ja", count=2)
+                    q=word, result_type="recent", lang="ja", count=1)
                 tweet = ret["statuses"][0]
                 embed = discord.Embed(description=tweet["text"], color=int(
                     tweet["user"]["profile_background_color"], 16))
@@ -279,6 +282,8 @@ class search(commands.Cog):
                 info = ""
                 if u.id in self.bot.team_sina:
                     info = f',({ctx._("team_sina-chan")})'
+                if u.id in cf.partner_ids:
+                        info = info+f"、(🔗{ctx._('sina_parnter_bot')})"
                 e = discord.Embed(title="ユーザー", description=info, color=self.bot.ec)
                 if u.system:
                     e.add_field(

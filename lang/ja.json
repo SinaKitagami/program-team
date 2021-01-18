@@ -352,7 +352,7 @@
     "help-8-t": "ニュース",
     "help-8-d": "`news`,`tenki`",
     "help-9-t": "音楽",
-    "help-9-d": "`invc`,`vcurl`,`skip`,`play`,`loop_q`,`view_q`,`stop`,`playingmusic`,`pupdate`,`chvol`,`pause`",
+    "help-9-d": "`invc`,`vcurl`,`skip`,`play`,`loop_q`,`view_q`,`stop`,`playingmusic`,`pupdate`,`chvol`,`pause`,`shuffle`",
     "help-10-t": "ゲーム",
     "help-10-d": "`rq`,`af`,`eatit`,`qanda`,`fortune`,`game2`,`fish`,`near21`,`jyanken`",
     "help-11-t": "管理者",
@@ -1596,6 +1596,38 @@
         "`s-settings`,`s-setting`,`s-edit`",
         "詳しく",
         "思惟奈ちゃんのユーザー・サーバー向け設定をページめくりで見て呼び出せます。"
+    ],
+
+    "help-17-t": "思惟奈ちゃんパートナー",
+    "help-17-d": "`s-partners`コマンドで詳細を確認できます。\n・陽菜-ひな#6069(Discord認証済みBot)\n・慧莉 -Midori-#1930(Discord認証済みBot)",
+    "sina_parnter_bot":"思惟奈ちゃんパートナーBot",
+
+    "nh-remainder":[
+        "remainderについて",
+        "～あの日にすること忘れないで～",
+        "使い方",
+        "`s-remainder set \"[text]\" [(必要に応じて):役職のID]`,`s-remainder check [(必要に応じて):リマインダーID]`,`s-remainder delete [リマインダーID]`",
+        "詳しく",
+        "リマインダー機能です。setで設定、checkで確認、deleteで削除が行えます。"
+    ],
+
+    "nh-partners":[
+        "partnersについて",
+        "思惟奈ちゃんとのパートナー",
+        "使い方",
+        "`s-partners`",
+        "詳しく",
+        "思惟奈ちゃんのパートナーについて、詳しく見ることができます。"
+    ],
+
+    "nh-shuffle":[
+        "shuffleについて",
+        "みんなでシャッフル！",
+        "使い方",
+        "`s-shuffle`",
+        "詳しく",
+        "再生キューに入っている「2曲目以降」の曲をシャッフルします。"
     ]
+
 
 }

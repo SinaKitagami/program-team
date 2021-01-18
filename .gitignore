@@ -8,3 +8,4 @@ __pycache__/
 imgs/
 cogtest.py
 backup_bot.py
+debug.log

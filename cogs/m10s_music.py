@@ -11,6 +11,9 @@ from apiclient.discovery import build
 import os
 import shutil
 import re
+import random
+
+import m10s_util as ut
 
 """
 上のモジュールをインストールすること！
@@ -42,9 +45,10 @@ class music(commands.Cog):
         self.bot = bot
         self.youtube = build('youtube', 'v3', developerKey=bot.GAPI_TOKEN)
         self.ytdl = YoutubeDL(ytdlopts)
-        self.bot.qu = {}
-        self.bot.lp = {}
-        self.bot.mp = {}
+        if not ("qu" in dir(bot) and "lp" in dir(bot) and "mp" in dir(bot)):
+            self.bot.qu = {}
+            self.bot.lp = {}
+            self.bot.mp = {}
 
     async def gvinfo(self, url, dl=False):
         loop = self.bot.loop or asyncio.get_event_loop()
@@ -132,100 +136,124 @@ class music(commands.Cog):
             await self.panel_update(ctx)
             return
         if text == "":
-            await ctx.send("URL/曲名が未指定です。また、現在リアクションからの追加はできません。")
-            return
-        async with ctx.typing():
-            if text.startswith("http://") or text.startswith("https://"):
-                vurl = text
-            else:
-                search_response = self.youtube.search().list(
-                    part='snippet',
-                    q=text,
-                    type='video'
-                ).execute()
-                vid = search_response['items'][0]['id']['videoId']
-                if vid:
-                    vurl = f"https://www.youtube.com/watch?v={vid}"
-                else:
-                    return await ctx.send("動画が見つかりませんでした。")
-            if not vurl:
+            try:
+                m = await ut.wait_message_return(ctx, "検索するワード または 再生するURLを送信してください。", ctx.channel)
+            except asyncio.TimeoutError:
+                await ctx.send("タイムアウトしました。")
                 return
-            vinfo = await self.gvinfo(vurl, False)
-            if vinfo.get("extractor", "").startswith("youtube"):
-                if vinfo.get("_type", None) == "playlist":
-                    tks = []
-                    for c in vinfo["entries"]:
-                        tks.append(self.gpdate(
-                            f"https://www.youtube.com/watch?v={c['id']}", True))
-                    iqlt = [i for i in await asyncio.gather(*tks) if i]
-                    if self.bot.qu.get(str(ctx.guild.id), None):
-                        await ctx.send("キューにプレイリスト内の動画を追加します。")
-                        self.bot.qu[str(ctx.guild.id)] = self.bot.qu[str(
-                            ctx.guild.id)] + iqlt
-                        await self.panel_update(ctx)
-                    else:
-                        await ctx.send("プレイリストより、再生を開始します。")
-                        self.bot.qu[str(ctx.guild.id)] = iqlt
-                        await asyncio.sleep(0.3)
-                        self.bot.loop.create_task(self.mplay(ctx))
-                else:
-                    iqim = await self.gpdate(vurl, True)
-                    if self.bot.qu.get(str(ctx.guild.id), None):
-                        await ctx.send("キューに追加します。")
-                        self.bot.qu[str(ctx.guild.id)] = self.bot.qu[str(
-                            ctx.guild.id)] + [iqim]
-                        await self.panel_update(ctx)
-                    else:
-                        await ctx.send("再生を開始します。")
-                        self.bot.qu[str(ctx.guild.id)] = [iqim]
-                        await asyncio.sleep(0.3)
-                        self.bot.loop.create_task(self.mplay(ctx))
-            elif vinfo.get("extractor", "") == "niconico":
-                iqim = await self.gpdate(vurl, True, "niconico")
-                if self.bot.qu.get(str(ctx.guild.id), None):
-                    await ctx.send("キューに追加します。")
-                    self.bot.qu[str(ctx.guild.id)] = self.bot.qu[str(
-                        ctx.guild.id)] + [iqim]
-                    await self.panel_update(ctx)
-                else:
-                    await ctx.send("再生を開始します。")
-                    self.bot.qu[str(ctx.guild.id)] = [iqim]
-                    await asyncio.sleep(0.3)
-                    self.bot.loop.create_task(self.mplay(ctx))
-            elif vinfo.get("extractor", "").startswith("soundcloud"):
-                if vinfo.get("_type", None) == "playlist":
-
-                    tks = []
-                    for c in vinfo["entries"]:
-                        tks.append(self.gpdate(c["url"], True, "soundcloud"))
-                    iqlt = [i for i in await asyncio.gather(*tks) if i]
-                    if self.bot.qu.get(str(ctx.guild.id), None):
-                        await ctx.send("キューにプレイリスト内の動画を追加します。")
-                        self.bot.qu[str(ctx.guild.id)] = self.bot.qu[str(
-                            ctx.guild.id)] + iqlt
-                        await self.panel_update(ctx)
-                    else:
-                        await ctx.send("プレイリストより、再生を開始します。")
-                        self.bot.qu[str(ctx.guild.id)] = iqlt
-                        await asyncio.sleep(0.3)
-                        self.bot.loop.create_task(self.mplay(ctx))
-
-                else:
-                    iqim = await self.gpdate(vurl, True, "soundcloud")
-                    if self.bot.qu.get(str(ctx.guild.id), None):
-                        await ctx.send("キューに追加します。")
-                        self.bot.qu[str(ctx.guild.id)] = self.bot.qu[str(
-                            ctx.guild.id)] + [iqim]
-                        await self.panel_update(ctx)
-                    else:
-                        await ctx.send("再生を開始します。")
-                        self.bot.qu[str(ctx.guild.id)] = [iqim]
-                        await asyncio.sleep(0.3)
-                        self.bot.loop.create_task(self.mplay(ctx))
             else:
-                await ctx.send("now,the video can't play the bot")
+                vurls = [m.content]
+        async with ctx.typing():
+            try:
+                vurls = []
+                vdl = True
+                if (text.startswith("<http://") and text.endswith(">")) or (text.startswith("<https://") and text.endswith(">")):
+                    vurls = [text[1:-1]]
+                elif text.startswith("http://") or text.startswith("https://"):
+                    vurls = [text]
+                elif text.startswith("memo:"):
+                    self.bot.cursor.execute(
+                        "select * from users where id=?", (ctx.author.id,))
+                    pf = self.bot.cursor.fetchone()
+                    mn = text[5:]
+                    if pf["memo"] is not None and pf["memo"].get(mn,None) is not None:
+                        vurls = pf["memo"][mn].split("\n")
+                    else:
+                        await ctx.send("> 音楽再生\n　該当名称のメモが見つかりません。")
+                        return
+                else:
+                    search_response = self.youtube.search().list(
+                        part='snippet',
+                        q=text,
+                        type='video'
+                    ).execute()
+                    vid = search_response['items'][0]['id']['videoId']
+                    if vid:
+                        vurls = [f"https://www.youtube.com/watch?v={vid}"]
+                    else:
+                        return await ctx.send("動画が見つかりませんでした。")
+                if vurls == []:
+                    return
+                for vurl in vurls:
+                    vinfo = await self.gvinfo(vurl, False)
+                    if vinfo.get("extractor", "").startswith("youtube"):
+                        if vinfo.get("_type", None) == "playlist":
+                            tks = []
+                            for c in vinfo["entries"]:
+                                tks.append(self.gpdate(
+                                    f"https://www.youtube.com/watch?v={c['id']}", vdl))
+                            iqlt = [i for i in await asyncio.gather(*tks) if i]
+                            if self.bot.qu.get(str(ctx.guild.id), None):
+                                await ctx.send(f"キューにプレイリスト内の動画{len(iqlt)}本を追加します。")
+                                self.bot.qu[str(ctx.guild.id)] = self.bot.qu[str(
+                                    ctx.guild.id)] + iqlt
+                                await self.panel_update(ctx)
+                            else:
+                                await ctx.send(f"プレイリストより、{len(iqlt)}本の再生を開始します。")
+                                self.bot.qu[str(ctx.guild.id)] = iqlt
+                                await asyncio.sleep(0.3)
+                                self.bot.loop.create_task(self.mplay(ctx))
+                        else:
+                            iqim = await self.gpdate(vurl, vdl)
+                            if self.bot.qu.get(str(ctx.guild.id), None):
+                                await ctx.send(f"`{iqim['video_title']}`をキューに追加します。")
+                                self.bot.qu[str(ctx.guild.id)] = self.bot.qu[str(
+                                    ctx.guild.id)] + [iqim]
+                                await self.panel_update(ctx)
+                            else:
+                                await ctx.send(f"`{iqim['video_title']}`の再生を開始します。")
+                                self.bot.qu[str(ctx.guild.id)] = [iqim]
+                                await asyncio.sleep(0.3)
+                                self.bot.loop.create_task(self.mplay(ctx))
+                    elif vinfo.get("extractor", "") == "niconico":
+                        iqim = await self.gpdate(vurl, vdl, "niconico")
+                        if self.bot.qu.get(str(ctx.guild.id), None):
+                            await ctx.send(f"`{iqim['video_title']}`をキューに追加します。")
+                            self.bot.qu[str(ctx.guild.id)] = self.bot.qu[str(
+                                ctx.guild.id)] + [iqim]
+                            await self.panel_update(ctx)
+                        else:
+                            await ctx.send(f"`{iqim['video_title']}`の再生を開始します。")
+                            self.bot.qu[str(ctx.guild.id)] = [iqim]
+                            await asyncio.sleep(0.3)
+                            self.bot.loop.create_task(self.mplay(ctx))
+                    elif vinfo.get("extractor", "").startswith("soundcloud"):
+                        if vinfo.get("_type", None) == "playlist":
 
-    async def mplay(self, ctx, vl=0.5, lp=False):
+                            tks = []
+                            for c in vinfo["entries"]:
+                                tks.append(self.gpdate(c["url"], vdl, "soundcloud"))
+                            iqlt = [i for i in await asyncio.gather(*tks) if i]
+                            if self.bot.qu.get(str(ctx.guild.id), None):
+                                await ctx.send(f"キューにプレイリスト内の動画{len(iqlt)}本を追加します。")
+                                self.bot.qu[str(ctx.guild.id)] = self.bot.qu[str(
+                                    ctx.guild.id)] + iqlt
+                                await self.panel_update(ctx)
+                            else:
+                                await ctx.send(f"プレイリストより、{len(iqlt)}本の再生を開始します。")
+                                self.bot.qu[str(ctx.guild.id)] = iqlt
+                                await asyncio.sleep(0.3)
+                                self.bot.loop.create_task(self.mplay(ctx))
+
+                        else:
+                            iqim = await self.gpdate(vurl, vdl, "soundcloud")
+                            if self.bot.qu.get(str(ctx.guild.id), None):
+                                await ctx.send(f"`{iqim['video_title']}`をキューに追加します。")
+                                self.bot.qu[str(ctx.guild.id)] = self.bot.qu[str(
+                                    ctx.guild.id)] + [iqim]
+                                await self.panel_update(ctx)
+                            else:
+                                await ctx.send(f"`{iqim['video_title']}`の再生を開始します。")
+                                self.bot.qu[str(ctx.guild.id)] = [iqim]
+                                await asyncio.sleep(0.3)
+                                self.bot.loop.create_task(self.mplay(ctx))
+                    else:
+                        await ctx.send("now,the video can't play the bot")
+            except:
+                import traceback
+                await ctx.send(f"> traceback\n```{traceback.format_exc(4)}```")
+
+    async def mplay(self, ctx, vl=0.5):
         v = None
         if not self.bot.lp.get(str(ctx.guild.id), None):
             self.bot.lp[str(ctx.guild.id)] = False
@@ -236,15 +264,16 @@ class music(commands.Cog):
             ebd.add_field(name="ループ:", value="未読み込み")
             ebd.add_field(name="ボリューム:", value="未読み込み")
             m = await ctx.send(embed=ebd)
+            self.bot.mp[str(ctx.guild.id)] = m
             await m.add_reaction("▶")
             await m.add_reaction("⏸")
             await m.add_reaction("⏹")
             await m.add_reaction("⏭")
             await m.add_reaction("🔁")
+            await m.add_reaction("🔀")
             await m.add_reaction("🔼")
             await m.add_reaction("🔽")
             await m.add_reaction("⬇")
-            self.bot.mp[str(ctx.guild.id)] = m
             try:
                 await m.pin()
             except:
@@ -267,7 +296,6 @@ class music(commands.Cog):
     @commands.command()
     async def skip(self, ctx):
         if ctx.author.voice and ctx.voice_client.is_playing():
-            v = ctx.voice_client.source.volume
             lp = self.bot.lp[str(ctx.guild.id)]
             self.bot.lp[str(ctx.guild.id)] = False
             ctx.voice_client.stop()
@@ -356,7 +384,7 @@ class music(commands.Cog):
 
     async def panel_update(self, ctx):
         ebd = discord.Embed(title="思惟奈ちゃん-ミュージック操作パネル",
-                            description=f"キューの曲数:{len(self.bot.qu[str(ctx.guild.id)])}曲\nリアクションで操作でき、そのたびに操作パネルが更新されます。\n▶:(一時停止中)再生の再開,⏸:(再生中)一時停止,⏹:ストップ,⏭:スキップ,🔁:ループ切替,🔼:ボリュームを上げる,🔽:ボリュームを下げる,⬇:パネルを下に持ってくる", color=self.bot.ec)
+                            description=f"キューの曲数:{len(self.bot.qu[str(ctx.guild.id)])}曲\nリアクションで操作でき、そのたびに操作パネルが更新されます。\n▶:(一時停止中)再生の再開,⏸:(再生中)一時停止,⏹:ストップ,⏭:スキップ,🔁:ループ切替,🔀次以降の曲のシャッフル,🔼:ボリュームを上げる,🔽:ボリュームを下げる,⬇:パネルを下に持ってくる", color=self.bot.ec)
         if ctx.voice_client.is_paused():
             ebd.add_field(name="現在一時停止中",
                           value="再開には`s-play`か▶リアクション", inline=False)
@@ -378,7 +406,22 @@ class music(commands.Cog):
             ebd.add_field(name="ボリューム:", value="現在アクセス不可")
         ebd.set_thumbnail(
             url=self.bot.qu[str(ctx.guild.id)][0]["video_thumbnail"])
-        await self.bot.mp[str(ctx.guild.id)].edit(embed=ebd)
+        try:
+            await self.bot.mp[str(ctx.guild.id)].edit(embed=ebd)
+        except AttributeError:
+            # パネルメッセージが、まだない状態の可能性があるため
+            pass
+
+
+    @commands.command(name="shuffle")
+    async def shuffle_(self, ctx):
+        if self.bot.qu.get(str(ctx.guild.id), None) is not None and len(self.bot.qu[str(ctx.guild.id)]) > 2:
+            tmplist = self.bot.qu[str(ctx.guild.id)][1:]
+            random.shuffle(tmplist)
+            self.bot.qu[str(ctx.guild.id)] = [self.bot.qu[str(ctx.guild.id)][0]] + tmplist
+            await ctx.send("> シャッフル\n　シャッフルしました。再生パネルや`s-view_q`でご確認ください。")
+        else:
+            await ctx.send("> シャッフルエラー\n　シャッフルに必要要件を満たしていません。(VCで音楽再生中で、3曲以上キューに入っている)")
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, pr):
@@ -408,6 +451,8 @@ class music(commands.Cog):
                     await ctx.invoke(self.bot.get_command("loop"), False)
                 else:
                     await ctx.invoke(self.bot.get_command("loop"), True)
+            elif str(r.emoji) == "🔀":
+                await ctx.invoke(self.bot.get_command("shuffle"))
             elif str(r.emoji) == "🔼":
                 await ctx.invoke(self.bot.get_command("chvol"), int(ctx.voice_client.source.volume*100+10))
             elif str(r.emoji) == "🔽":
@@ -422,6 +467,7 @@ class music(commands.Cog):
                 await m.add_reaction("⏹")
                 await m.add_reaction("⏭")
                 await m.add_reaction("🔁")
+                await m.add_reaction("🔀")
                 await m.add_reaction("🔼")
                 await m.add_reaction("🔽")
                 await m.add_reaction("⬇")

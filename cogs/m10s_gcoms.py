@@ -158,7 +158,7 @@ class gcoms(commands.Cog):
         self.bot.cursor.execute(
             "select * from users where id=?", (ctx.author.id,))
         upf = self.bot.cursor.fetchone()
-        if upf["gmod"] is True:
+        if upf["gmod"] == 1:
             self.bot.cursor.execute(
                 "UPDATE users SET galpha = ? WHERE id = ?", (int(bl), uid))
             await ctx.send(f"テスト機能の使用を{str(bl)}にしました。")
@@ -188,7 +188,7 @@ class gcoms(commands.Cog):
         self.bot.cursor.execute(
             "select * from users where id=?", (ctx.author.id,))
         upf = self.bot.cursor.fetchone()
-        if upf["gmod"] is True:
+        if upf["gmod"] == 1:
             self.bot.cursor.execute(
                 "UPDATE users SET gstar = ? WHERE id = ?", (int(bl), uid))
             await ctx.send(f"スターユーザーを{str(bl)}にしました。")
@@ -246,8 +246,12 @@ class gcoms(commands.Cog):
                 if chs is not None:
                     for ch in chs:
                         if ctx.channel.id in ch["ids"]:
-                            await ctx.send(f"このチャンネルは既に`{ch['name']}`に接続されています！")
-                            return
+                            if ctx.channel.id == 792695837414916116:
+                                await ctx.reply("このチャンネルをグローバルチャットに接続する際にエラーが発生しました。")
+                                return
+                            else:
+                                await ctx.send(f"このチャンネルは既に`{ch['name']}`に接続されています！")
+                                return
                 self.bot.cursor.execute(
                     "select * from globalchs where name=?", (name,))
                 chs = self.bot.cursor.fetchone()
