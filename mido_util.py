@@ -4,12 +4,56 @@ import asyncio
 import sqlite3
 import traceback
 
+#InvailedIDException
+class InvailedIDException(Exception):
+    pass
+
+#InviteNotFound
+class InviteNotFound(Exception):
+    pass
+
+#resolve_invite
+async def resolve_invite(ctx, code:str):
+    try:
+        ret = await ctx.bot.fetch_invite(code)
+    except:
+        raise InviteNotFound(f"{code} という招待は見つかりませんでした")
+    else:
+        return ret
+
 #get_channel_or_user
 def get_channel_or_user(ctx, id:int):
     result = ctx.bot.get_user(id)
     if result is None:
         result = ctx.bot.get_channel(id)
     return result
+
+#get_region
+def get_region(guild):
+    region = guild.region
+    
+    regions = {
+        "brazil":"🇧🇷 Brazil",
+        "europe":"🇪🇺 Europe",
+        "hongkong":"🇭🇰 HongKong",
+        "india":"🇮🇳 India",
+        "japan":"🇯🇵 Japan",
+        "russia":"🇷🇺 Russia",
+        "singapore":"🇸🇬 Singapore",
+        "southafrica":"🇿🇦 SouthAfrica",
+        "sydney":"🇦🇺 Sydney",
+        "us_central":"🇺🇸 US_Central",
+        "us_east":"🇺🇸 US_East",
+        "us_south":"🇺🇸 US_South",
+        "us_west":"🇺🇸 US_West"
+    }
+    
+    try:
+        key = regions[str(region)]
+    except KeyError:
+        key = str(region)
+    
+    return key
 
 #Neta
 def is_jun50(ctx, member=None):
