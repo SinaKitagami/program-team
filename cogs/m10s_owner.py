@@ -282,5 +282,39 @@ class owner(commands.Cog):
             "UPDATE guilds SET verified = ? WHERE id = ?", (bl, gid))
         await ctx.send(f"サーバー`{self.bot.get_guild(gid)}`の認証状態を{str(bl)}にしました。")
 
+
+    @commands.group()
+    @commands.is_owner()
+    async def manage_features(self, ctx):
+        pass
+
+    @manage_features.command(name="view")
+    async def view_(self,ctx,uid:int):
+        await ctx.reply(f"```py\n{self.bot.features.get(uid,[])}```")
+
+    @manage_features.command(name="del")
+    async def del_(self,ctx,uid:int,feature):
+        uf = self.bot.features.get(uid,None)
+        if uf and feature in uf:
+            self.bot.features[uid].remove(feature)
+        await ctx.message.add_reaction(self.bot.get_emoji(653161518103265291))
+
+    @manage_features.command(name="add")
+    async def add_(self,ctx,uid:int,feature):
+        uf = self.bot.features.get(uid,None)
+        if uf:
+            self.bot.features[uid].append(feature)
+        else:
+            self.bot.features[uid] = [feature]
+        await ctx.message.add_reaction(self.bot.get_emoji(653161518103265291))
+
+    @manage_features.command(name="reload")
+    async def reload_(self,ctx):
+        import importlib
+        import config
+        importlib.reload(config)
+        self.bot.features = config.sp_features
+        await ctx.message.add_reaction(self.bot.get_emoji(653161518103265291))
+
 def setup(bot):
     bot.add_cog(owner(bot))

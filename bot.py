@@ -97,6 +97,12 @@ bot.cursor.execute(
 bot.cursor.execute(
     "CREATE TABLE IF NOT EXISTS activity_roles(guild_id integer NOT NULL,activity_type integer NOT NULL,role_id integer NOT NULL , PRIMARY KEY(guild_id,activity_type) );")
 
+bot.cursor.execute("create table if not exists remaind(\
+    id integer primary key not null,\
+    stext text not null,\
+    mention_role integer,\
+    time real not null,\
+    chid integer not null)")
 
 try:
     bot.cursor.execute("ALTER TABLE users ADD COLUMN online_agreed integer;")
@@ -337,9 +343,9 @@ async def globalSend(message):
         bot.cursor.execute("select * from guilds where id=?",
                            (message.guild.id,))
         gpf = bot.cursor.fetchone()
-        if (datetime.datetime.now() - rdelta(hours=9) - rdelta(days=7) >= message.author.created_at) or upf["gmod"] or upf["gstar"]:
+        if (datetime.datetime.now() - rdelta(hours=9) - rdelta(days=7) >= message.author.created_at) or upf["gmod"] or upf["gstar"] or gchn=="mido_sync_a":
             if upf["gban"] == 1:
-                if not gchn == "sync_rsp_main_chat":
+                if not (gchn == "sync_rsp_main_chat" or gchn=="mido_sync_a"):
                     dc = await ut.opendm(message.author)
                     await dc.send(bot._(message.author, "global-banned", message.author.mention))
                     await repomsg(message, "思惟奈ちゃんグローバルチャットの使用禁止")
@@ -417,6 +423,8 @@ async def globalSend(message):
                         spicon = spicon + "⚙"
                     if upf["sinapartner"]:
                         spicon = spicon + "💠"  # 認証済みアカウント
+                    if message.author.id in config.partner_ids:
+                        spicon = spicon + "🔗"
                     if upf["gmod"]:
                         spicon = spicon + "🔧"
                     if upf["galpha"]:
@@ -440,7 +448,7 @@ async def globalSend(message):
                     await message.remove_reaction("❌", bot.user)
                     return
                 try:
-                    if not gchn == "sync_rsp_main_chat":
+                    if not (gchn == "sync_rsp_main_chat" or gchn=="mido_sync_a"):
                         await message.add_reaction(bot.get_emoji(653161518346534912))
                 except:
                     pass
@@ -477,6 +485,27 @@ async def globalSend(message):
                     sfs = False
                     fls = []
                     ed = []
+
+                    #sticker
+                    try:
+                        if message.stickers:
+                            sticker = message.stickers[0]
+                            sembed = discord.Embed(title=f"スタンプ:{sticker.name}",)
+                            if sticker.format == discord.StickerType.png:
+                                sembed.set_image(url=sticker.image_url)
+                            elif sticker.format == discord.StickerType.apng:
+                                sembed.set_image(url=f"https://dsticker.herokuapp.com/convert.gif?url={sticker.image_url}")
+                            elif sticker.format == discord.StickerType.lottie:
+                                # メモ: https://cdn.discordapp.com/stickers/{id}/{hash}.json?size=1024
+                                sembed.description = "画像取得非対応のスタンプです。"
+                            ed.append(sembed)
+                    except:
+                        traceback.print_exc(0)
+                        await message.add_reaction("❌")
+                        await asyncio.sleep(5)
+                        await message.remove_reaction("❌", bot.user)
+                        return
+
                     if not message.attachments == []:
                         os.makedirs('globalsends/', exist_ok=True)
                         for at in message.attachments:
@@ -494,7 +523,7 @@ async def globalSend(message):
                     await message.remove_reaction("❌", bot.user)
                     return
                 try:
-                    if not gchn == "sync_rsp_main_chat":
+                    if not (gchn == "sync_rsp_main_chat" or gchn=="mido_sync_a"):
                         await message.add_reaction(bot.get_emoji(653161518346534912))
                 except:
                     pass
@@ -522,13 +551,13 @@ async def globalSend(message):
                 if not fls == []:
                     shutil.rmtree("globalsends/")
                 try:
-                    if not gchn == "sync_rsp_main_chat":
+                    if not (gchn == "sync_rsp_main_chat" or gchn=="mido_sync_a"):
                         await message.remove_reaction(bot.get_emoji(653161518346534912), bot.user)
                 except:
                     pass
             bot.cursor.execute("INSERT INTO globaldates(id,content,allid,aid,gid,timestamp) VALUES(?,?,?,?,?,?)", (int(time.time())+random.randint(1, 30), message.clean_content,
                                                                                                                    mids+[message.id], message.author.id, message.guild.id, str(message.created_at.strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))))
-            if not gchn == "sync_rsp_main_chat":
+            if not (gchn == "sync_rsp_main_chat" or gchn=="mido_sync_a"):
                 await message.add_reaction(bot.get_emoji(653161518195539975))
                 await asyncio.sleep(5)
                 await message.remove_reaction(bot.get_emoji(653161518195539975), bot.user)
@@ -540,6 +569,10 @@ async def globalSend(message):
 
 @bot.event
 async def on_member_update(b, a):
+    if a.guild.id == 574170788165582849:
+        if b.pending and (not a.pending):
+            mrole = a.guild.get_role(574494088837988352)
+            await a.add_roles(mrole)
     global Donotif
     # serverlog
     try:
@@ -576,6 +609,15 @@ async def on_member_update(b, a):
                 e.add_field(name="変更内容", value="役職付与")
                 e.add_field(name="役職", value=list(
                     set(a.roles)-set(b.roles))[0])
+            bot.cursor.execute(
+                "select * from guilds where id=?", (a.guild.id,))
+            gpf = bot.cursor.fetchone()
+            if gpf["sendlog"]:
+                ch = bot.get_channel(gpf["sendlog"])
+                if ch.guild.id == a.guild.id:
+                    await ch.send(embed=e)
+        elif not b.pending == a.pending:
+            e.add_field(name="メンバースクリーニングの状態変更",value=f"メンバースクリーニング{'が再度要求されます。' if a.pending else 'を完了しました。'}")
             bot.cursor.execute(
                 "select * from guilds where id=?", (a.guild.id,))
             gpf = bot.cursor.fetchone()
@@ -633,9 +675,6 @@ async def on_member_join(member):
             e.set_footer(text="アカウント作成タイムスタンプ")
             e.timestamp = member.created_at
             await uich.send(embed=e)
-            mrole = member.guild.get_role(574494088837988352)
-            srole = member.guild.get_role(749483465304703057)
-            await member.add_roles(mrole)
                         
     else:
         try:
@@ -862,21 +901,38 @@ async def on_message_delete(message):
 
 @bot.event
 async def on_bulk_message_delete(messages):
+    logs = ["一括削除ログ\n",f"チャンネル:{messages[0].channel}({messages[0].channel.id})\n","------\n"]
+    for m in messages:
+        logs.append(f"author(送信者):{m.author.display_name}({m.author}/{m.author.id})\n")
+        logs.append(f"content(メッセージ内容):{m.system_content}\n")
+        logs.append(f"message id(メッセージid):{m.id}\n")
+        c_at = (m.created_at + rdelta(hours=9)).strftime("%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}").format(*"年月日時分秒")
+        logs.append(f"created_at(送信日時):{c_at}\n")
+        if m.type == discord.MessageType.default and m.reference:
+            rfm = m.reference
+            if rfm.cached_message:
+                logs.append(f"返信メッセージ:(送信者)-{rfm.cached_message.author.display_name}({rfm.cached_message.author}/{rfm.cached_message.author.id})\n")
+                logs.append(f"返信メッセージ:(メッセージ内容)-{rfm.cached_message.system_content}\n")
+                logs.append(f"返信メッセージ:(メッセージid)-{rfm.cached_message.id}\n")
+                c_at = (rfm.cached_message.created_at + rdelta(hours=9)).strftime("%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}").format(*"年月日時分秒")
+                logs.append(f"created_at(送信日時):{c_at}\n")
+            else:
+                logs.append(f"返信メッセージ:(guild_id/channel_id/message_id)-{rfm.guild_id}/{rfm.channel_id}/{rfm.message_id}\n")
+        logs.append("------\n")
+    
+    with open("bulk_message_delete.txt",mode="w",encoding="utf_8") as f:
+        f.writelines(logs)
+
     e = discord.Embed(title="メッセージ一括削除", color=bot.ec)
     e.add_field(name="件数", value=len(messages))
     e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-    for message in messages:
-        if not message.author.bot:
-            e.add_field(name="メッセージ", value=message.content)
-            e.add_field(name="メッセージ送信者", value=message.author.mention)
-            e.add_field(name="メッセージのid", value=message.id)
     bot.cursor.execute("select * from guilds where id=?",
                        (messages[0].guild.id,))
     gpf = bot.cursor.fetchone()
     if gpf["sendlog"]:
         ch = bot.get_channel(gpf["sendlog"])
         if ch.guild.id == messages[0].guild.id:
-            await ch.send(embed=e)
+            await ch.send(embed=e,file=discord.File(fp="bulk_message_delete.txt"))
 
 
 @bot.event
@@ -998,7 +1054,7 @@ async def on_member_unban(guild, user):
 @bot.event
 async def on_guild_join(guild):
     e = discord.Embed(
-        title=f"思惟奈ちゃんが{guild.name}に参加したよ！", description=f"id:{guild.id}", color=bot.ec)
+        title=f"思惟奈ちゃんが{guild.name}に参加したよ！({len(bot.guilds)}サーバー)", description=f"id:{guild.id}", color=bot.ec)
     e.add_field(name="サーバー作成日時",
                 value=f"{(guild.created_at+ rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒')}")
     e.add_field(
@@ -1015,6 +1071,8 @@ async def on_guild_join(guild):
     e.add_field(name="ハッシュタグチャンネル",value="`s-hash`コマンドで、実行チャンネルをハッシュタグチャンネルとして登録できます。登録されたチャンネルにメンションすることで、メッセージの複製を送信し、ハッシュタグのようにあとで一覧確認ができるようになります。詳しくは`s-help hash`でご確認ください。")
     e.add_field(name="音楽再生機能",value="`s-play [URL/検索ワード]`でボイスチャット内で音楽を再生できます。その他のコマンドはヘルプのページ目で一覧確認できます。詳細は`s-help [コマンド名]`で確認できます。")
     e.add_field(name="グローバルBANとその申請",value="`s-gbanlogto [チャンネルID]`でグローバルBANログの送信先を指定することで、グローバルBAN機能が有効化されます(BAN権限が必要)。\n一般のユーザーの方は`s-report`コマンドで申請ができます。詳しくは`s-help gbanlogto`ならびに`s-help report`をご覧ください！")
+    e.add_field(name="サーバー/ユーザーの設定変更に関して",description="`s-settings`コマンドで設定できる内容を見て、直接該当コマンドを呼び出すことができます。また、該当コマンドを直接呼び出しても設定を変えることもできます。使いやすい方を使ってください。")
+    e.add_field(name=">思惟奈ちゃんのお知らせを受け取ろう！",value="`s-rnotify`コマンドで、そのチャンネルに思惟奈ちゃんのお知らせを受け取れるようになります。ぜひ！受信設定をお願いします。")
     e.add_field(name="その他",value="このほかにもたくさんの機能を備えています。helpの1ページ目にある「みぃてんのわいがや広場」では、サポートも行っておりますのでお困りの方は一度足を運んでみてください。あなたのサーバーに少しでも役に立てるように頑張りますので思惟奈ちゃんをよろしくお願いします！")
     try:
         await guild.system_channel.send(embed=e)
@@ -1029,17 +1087,21 @@ async def on_guild_join(guild):
 
 @bot.event
 async def on_guild_remove(guild):
-    e = discord.Embed(
-        title=f"思惟奈ちゃんが{guild.name}から退出しました。", description=f"原因としてサーバーからのkick/banまたはサーバーの削除などの可能性があります。\nid:{guild.id}", color=bot.ec)
-    e.add_field(name="サーバー作成日時",
-                value=f"{(guild.created_at+ rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒')}")
-    e.add_field(name="サーバー参加日時",
-                value=f"{(guild.me.joined_at+ rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒')}")
-    e.add_field(
-        name="メンバー数", value=f"{len([i for i in guild.members if not i.bot])}ユーザー、{len([i for i in guild.members if i.bot])}bot")
-    e.add_field(
-        name="チャンネル数", value=f"テキスト:{len(guild.text_channels)}\nボイス:{len(guild.voice_channels)}\nカテゴリー{len(guild.categories)}")
-    e.add_field(name="サーバーオーナー",value=f"{guild.owner.mention}({guild.owner}({guild.owner.id}))")
+    try:
+        e = discord.Embed(
+            title=f"思惟奈ちゃんが{guild.name}から退出しました。({len(bot.guilds)}サーバー)", description=f"原因としてサーバーからのkick/banまたはサーバーの削除などの可能性があります。\nid:{guild.id}", color=bot.ec)
+        e.add_field(name="サーバー作成日時",
+                    value=f"{(guild.created_at+ rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒')}")
+        e.add_field(name="サーバー参加日時",
+                    value=f"{(guild.me.joined_at+ rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒')}")
+        e.add_field(
+            name="メンバー数", value=f"{len([i for i in guild.members if not i.bot])}ユーザー、{len([i for i in guild.members if i.bot])}bot")
+        e.add_field(
+            name="チャンネル数", value=f"テキスト:{len(guild.text_channels)}\nボイス:{len(guild.voice_channels)}\nカテゴリー{len(guild.categories)}")
+        e.add_field(name="サーバーオーナー",value=f"{guild.owner.mention}({guild.owner}({guild.owner.id}))")
+    except:
+        e=discord.Embed(title="退出通知",description=f"以下のエラーにより正常に生成できていないため、一部情報が断片的な情報を送ります。\n```py\n{traceback.format_exc(3)}```")
+        e.add_field(name="サーバー名/id",value=f"{guild.name}({guild.id})")
     ch = bot.get_channel(693048937304555529)
     await ch.send(embed=e)
 
@@ -1093,7 +1155,8 @@ async def on_ready():
     files = ["m10s_music", "m10s_info", "m10s_owner", "m10s_settings", "m10s_manage", "m10s_levels",
              "m10s_tests", "m10s_gcoms", "m10s_other", "m10s_search", "m10s_games", "P143_jyanken",
              "nekok500_mee6", "pf9_symmetry", "syouma", "m10s_gban", "m10s_bmail", "m10s_auth_wiz",
-             "m10s_chinfo_rewrite", "m10s_role_panel", "m10s_messageinfo"
+             "m10s_chinfo_rewrite", "m10s_role_panel", "m10s_messageinfo", "m10s_setting_command",
+             "m10s_partners", "m10s_remainder", "m10s_level_edit"
             ]
     
     embed = discord.Embed(title="読み込みに失敗したCog", color=bot.ec)
@@ -1196,7 +1259,10 @@ async def domsg(message):
             if ctx.command.name in gs["lockcom"] and not ctx.author.guild_permissions.administrator and ctx.author.id != 404243934210949120:
                 await ctx.send(ctx._("comlock-locked"))
             else:
-                await bot.process_commands(message)
+                if ctx.command.name in bot.features[0]:
+                    await ctx.send("> command locked by admins\n　このコマンドはメンテナンスなどのために一時的な使用制限がかかっています。\n　問題点が解消され次第、再度利用が可能となりますので今しばらくお待ちください。")
+                else:
+                    await bot.process_commands(message)
     except SystemExit:
         sys.exit()
     except Exception:
@@ -1483,7 +1549,7 @@ async def help(ctx, rcmd=None):
             except:
                 pass
             if str(r) == str(bot.get_emoji(653161518170505216)):
-                if page == 16:
+                if page == 17:
                     page = 1
                 else:
                     page = page + 1
@@ -1493,7 +1559,7 @@ async def help(ctx, rcmd=None):
                 await msg.edit(embed=embed)
             elif str(r) == str(bot.get_emoji(653161518195671041)):
                 if page == 1:
-                    page = 16
+                    page = 17
                 else:
                     page = page - 1
                 embed = discord.Embed(title=ctx._(
