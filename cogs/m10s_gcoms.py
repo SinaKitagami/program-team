@@ -12,6 +12,83 @@ class gcoms(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    @commands.command(name="gannounce", aliases=["gsay"])
+    async def global_announce(self, ctx, type:str=None, loc:str=None, content:str=None, content2:str=None):
+        if type is None:
+            return await ctx.send("Embedかtextか選んでね！")
+        
+        if loc is None:
+            loc = "SELECT * FROM globalchs"
+        else:
+            loc = f"SELECT * FROM globalchs WHERE name={loc}"
+        
+        data = self.bot.cursor.execute(loc).fetchall()
+        
+        if data is None:
+            return await ctx.send("グローバルチャットのチャンネルが間違えてるよ！")
+        
+        r = [i["ids"] for i in data]
+        
+        if str(type) == "embed":
+            if content is None:
+                return await ctx.send("タイトルを入力してね！")
+            if content2 is None:
+                return await ctx.send("内容を入力してね！")
+            
+            ret = ut.getEmbed(title=content, description=content2, color=self.bot.ec, timestamp=ctx.message.created_at)
+            ret.set_author(name=f"{ctx.author} ({ctx.author.id})", icon_url=ctx.author.avatar_url_as(static_format="png"))
+            
+            task = []
+            for i in r:
+                ch = self.bot.get_channel(i)
+                
+                if ch is None:
+                    continue
+                else:
+                    task.append(ch.send(embed=ret))
+            
+            failed = 0
+            suc = 0
+            all = len(r)
+            
+            try:
+                suc += 1
+                await asyncio.gather(*task)
+            except Exception as e:
+                print(f"[Error] {e}")
+                failed += 1
+            else:
+                return await ctx.send(f"アナウンスを送信したよ！\n合計数: {all}, 成功: {suc}, 失敗: {failed}")
+        elif str(type) == "text":
+            if content is None:
+                return await ctx.send("内容を入力してね！")
+            
+            ret = content
+            
+            task = []
+            for i in r:
+                ch = self.bot.get_channel(i)
+                
+                if ch is None:
+                    continue
+                else:
+                    task.append(ch.send(ret))
+            
+            failed = 0
+            suc = 0
+            all = len(r)
+            
+            try:
+                suc += 1
+                await asyncio.gather(*task)
+            except Exception as e:
+                print(f"[Error] {e}")
+                failed += 1
+            else:
+                return await ctx.send(f"アナウンスを送信したよ！\n合計数: {all}, 成功: {suc}, 失敗: {failed}")
+        else:
+            return await ctx.send("種類はtextかembedにしてね！")
+        
     @commands.command()
     async def globalpost(self, ctx, gmid: int):
         post = None
