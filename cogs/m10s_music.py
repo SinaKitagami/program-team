@@ -398,7 +398,7 @@ class music(commands.Cog):
                 name="次の曲:", value=f"[{self.bot.qu[str(ctx.guild.id)][0]['video_title']}]({self.bot.qu[str(ctx.guild.id)][0]['video_url']})(from {self.bot.qu[str(ctx.guild.id)][0]['video_source']})(スキップでキューから削除され、再生が止まります。)")
         else:
             ebd.add_field(name="次の曲:", value=f"再生終了")
-        ebd.add_field(name="ループ:", value=self.bot.lp[str(ctx.guild.id)])
+        ebd.add_field(name="ループ:", value="有効" if self.bot.lp[str(ctx.guild.id)] else "無効")
         try:
             ebd.add_field(name="ボリューム:", value=int(
                 ctx.voice_client.source.volume*100))
