@@ -45,15 +45,15 @@ class music(commands.Cog):
         self.bot = bot
         self.youtube = build('youtube', 'v3', developerKey=bot.GAPI_TOKEN)
         self.ytdl = YoutubeDL(ytdlopts)
-        if not ("qu" in dir(bot) and "lp" in dir(bot) and "mp" in dir(bot)):
+        if not (hasattr(bot, "qu") and hasattr(bot, "lp") and hasattr(bot, "mp")):
             self.bot.qu = {}
             self.bot.lp = {}
             self.bot.mp = {}
 
     async def gvinfo(self, url, dl=False):
         loop = self.bot.loop or asyncio.get_event_loop()
-        dt = await loop.run_in_executor(None, lambda: self.ytdl.extract_info(url, download=dl))
-        return dt
+        ret = await loop.run_in_executor(None, lambda: self.ytdl.extract_info(url, download=dl))
+        return ret
 
     async def gpdate(self, url, dl=True, utype="Youtube"):
         v = await self.gvinfo(url, dl)
