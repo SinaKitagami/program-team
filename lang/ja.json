@@ -336,11 +336,11 @@
     "serverinfo-sysch-welcome": "メンバー参加時のメッセージ送信",
     "serverinfo-sysch-boost": "サーバーブースト時のメッセージ送信",
     "help-1-t": "ヘルプ(◀/▶でページ切り替え)",
-    "help-1-d": "> 重要なお知らせ---\nDiscord側の更新により、このbotの機能の一部が10/7以降使えない/意図したとおりに動かないことがあります。運営チームが順次対応していきますので温かく見守っていてもらえると幸いです。\n-------------\n先頭にはプレフィックスがいるよ。\n共通プレフィックス:\"s-\"\n更新につき、使える/使えないコマンドが存在するほか、ここに書いてないコマンドもあります。詳しくは聞いてください。\n言語切替(switch language)\n日本語:`s-userlang ja`\nEnglish:`s-userlang en`\n--サポートサーバー--\n[みぃてん☆のわいがや広場](https://discord.gg/vtn2V3v )\n----------------------\n------------迷惑ユーザーの報告など------------\n`s-report 荒らし`\n報告の際には行為がわかる画像のURLなども一緒に送ってもらうとスムーズです。\n----------------------------------------------",
+    "help-1-d": "先頭にはプレフィックスがいるよ。\n共通プレフィックス:`s-`\n更新につき、使える/使えないコマンドが存在するほか、ここに書いてないコマンドもあります。詳しくは聞いてください。\n言語切替(switch language)\n日本語:`s-userlang ja`\nEnglish:`s-userlang en`\n--サポートサーバー--\n[みぃてん☆のわいがや広場](https://discord.gg/vtn2V3v)\n----------------------\n------------迷惑ユーザーの報告など------------\n`s-report 荒らし`\n報告の際には行為がわかる画像のURLなども一緒に送ってもらうとスムーズです。\n----------------------------------------------\nスラッシュコマンドについて\n音楽機能はスラッシュコマンドでも使用できます。[このリンク](https://discord.com/oauth2/authorize?client_id=462885760043843584&scope=applications.commands)から有効化することで使うことができます。自動補完などもありおすすめです。",
     "help-2-t": "詳細確認の方法",
     "help-2-d": "次のページよりコマンド名を区分ごとに表示します。`s-help ping`のように、コマンド名を付けて送信することで詳細を確認できます。",
     "help-3-t": "グローバルチャット",
-    "help-3-d": "`globalguide`,`gdconnect`,`gconnect`,`globalcolor`,`globalnick`,`gprofile`,`globalpost`,`gchinfo`",
+    "help-3-d": "`globalguide`,`gchat`,`globalcolor`,`globalnick`,`gprofile`,`globalpost`,`gchinfo`",
     "help-4-t": "思惟奈について",
     "help-4-d": "`sina-guild`,`cprofile`,`features`,`mutual_guilds`,`check_gban`,`credit`,`feedback`,`report`,`botinfo`,`team_sina-chan`,`vusers`,`ping`,`userprefix`,`rnotify`,`rtopic`,`userlang`,`Wecall`,`help`,`chtrans`",
     "help-5-t": "検索",
@@ -492,8 +492,8 @@
     "ucheck-not_ban": "そのユーザーは、思惟奈ちゃんのいるサーバーではBANされていません。",
     "ucheck-ban": "そのユーザーは、思惟奈ちゃんのいる{0}個のサーバーでBANされています。",
     "topic-is-none": "トピックはありません。",
-    "spotify-local": "ローカルファイルの再生",
-    "spotify-cantlisten-wu": "一緒に聞くことは出来ません。",
+    "spotify-local": "断片的な情報",
+    "spotify-cantlisten-wu": "スマートフォンでの再生やローカルファイルの再生のため、一部情報が表示されていません。",
     "ginfo-invitesp": "招待の背景画像",
     "ginfo-invitesp-pos": "下に表示",
     "ginfo-banner": "サーバーバナー",
@@ -645,28 +645,6 @@
         "`s-globalguide`",
         "詳しく",
         "グローバルチャットの規約を読むことができます。"
-    ],
-    "nh-gdconnect": [
-        "gdconnectについて",
-        "グローバルチャット、さようなら",
-        "使い方",
-        "`s-gdconnect`",
-        "詳しく",
-        "グローバルチャットから切断します。グローバルチャットにつながっているチャンネルで実行しなければ失敗します。",
-        "必要な権限",
-        "実行者には管理者権限、思惟奈ちゃんにはWebhooksの管理権限が必要です。"
-    ],
-    "nh-gconnect": [
-        "gconnectについて",
-        "こんにちは！こっちに来てみんなで話そうよ！",
-        "使い方",
-        "`s-gconnect`,`s-gconnect [接続先名]`",
-        "使い方",
-        "接続先名を入力せずに実行すると、`main`という名前のグローバルチャットにつながります。みんなが集まっていて、一番栄えているグローバルチャットです。\n接続先名を指定すると、その接続先を指定したチャンネル同士がつながります。",
-        "どんなチャンネルがあるの？",
-        "`防災情報`では、いくつかのソースの防災に関する情報が自動送信されています。便利ですよ？",
-        "豆知識",
-        "名前の最初が`ed-`(例:`ed-main`)の接続先にすると、Embedを使用したグローバルチャットになります。"
     ],
     "nh-getby": [
         "getbyについて",
@@ -1627,6 +1605,14 @@
         "`s-shuffle`",
         "詳しく",
         "再生キューに入っている「2曲目以降」の曲をシャッフルします。"
+    ],
+    "nh-gchat": [
+        "gchatについて",
+        "グローバルチャットにようこそ！",
+        "使い方",
+        "`s-gchat connect [オプション:部屋名]`/``s-gchat dconnect``",
+        "詳しく",
+        "`connect`で接続、`dconnect`で切断を行います。"
     ]
 
 

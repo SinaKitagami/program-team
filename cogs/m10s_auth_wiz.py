@@ -59,7 +59,7 @@ class m10s_auth_wiz(commands.Cog):
 
     @commands.command(name="Authsetting", aliases=["Auth","Authsettings"])
     @commands.has_permissions(administrator=True)
-    @commands.bot_has_permissions(manage_messages=True)
+    @commands.bot_has_permissions(manage_messages=True,manage_roles=True)
     async def _setting(self, ctx):
         self.bot.cursor.execute(
             "select * from welcome_auth where id = ?", (ctx.guild.id,))
@@ -150,6 +150,16 @@ class m10s_auth_wiz(commands.Cog):
                         "UPDATE welcome_auth SET category = ? WHERE id = ?", (category, ctx.guild.id))
                     await udm.send("変更が完了しました。")
                 elif r.emoji == "📖":
+                    self.bot.cursor.execute(
+                        "select * from welcome_auth where id = ?", (ctx.guild.id,))
+                    auths = self.bot.cursor.fetchone()
+                    if isinstance(auths["next_reaction"], str):
+                        nr = auths["next_reaction"]
+                    elif isinstance(auths["next_reaction"], int):
+                        nr = self.bot.get_emoji(auths["next_reaction"])
+                    else:
+                        nr = "➡"
+
                     seted = False
                     auth_w = []
                     while not seted:

@@ -127,7 +127,7 @@ class settings(commands.Cog):
             await ctx.send(ctx._("setl-set"))
 
     @commands.command()
-    async def comlock(self, ctx, do="view", comname=""):
+    async def comlock(self, ctx, do="view", *comname):
         self.bot.cursor.execute(
             "select * from guilds where id=?", (ctx.guild.id,))
         gs = self.bot.cursor.fetchone()
@@ -135,19 +135,22 @@ class settings(commands.Cog):
             if not (ctx.author.guild_permissions.administrator or ctx.author.id == 404243934210949120):
                 await ctx.send(ctx._("need-admin"))
                 return
-            if comname not in gs["lockcom"]:
-                gs["lockcom"].append(comname)
-                self.bot.cursor.execute(
-                    "UPDATE guilds SET lockcom = ? WHERE id = ?", (gs["lockcom"], ctx.guild.id))
-            await ctx.send(ctx._("upf-add", comname))
+            for i in comname:
+                gs["lockcom"].append(i)
+            self.bot.cursor.execute(
+                "UPDATE guilds SET lockcom = ? WHERE id = ?", (gs["lockcom"], ctx.guild.id))
+            await ctx.send(ctx._("upf-add", str(comname)))
         elif do == "del":
             if not (ctx.author.guild_permissions.administrator or ctx.author.id == 404243934210949120):
                 await ctx.send(ctx._("need-admin"))
                 return
-            if comname in gs["lockcom"]:
-                gs["lockcom"].remove(comname)
-                self.bot.cursor.execute(
-                    "UPDATE guilds SET lockcom = ? WHERE id = ?", (gs["lockcom"], ctx.guild.id))
+            for i in comname:
+                try:
+                    gs["lockcom"].remove(i)
+                except:
+                    pass
+            self.bot.cursor.execute(
+                "UPDATE guilds SET lockcom = ? WHERE id = ?", (gs["lockcom"], ctx.guild.id))
             await ctx.send(ctx._("deleted-text"))
         elif do == "view":
             await ctx.send(ctx._("comlock-view", str(gs["lockcom"])))

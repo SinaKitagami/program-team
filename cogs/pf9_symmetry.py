@@ -12,6 +12,7 @@ class Symmetry(commands.Cog):
         self.bot = bot
 
     @commands.command(name="symmetry")
+    @commands.bot_has_permissions(attach_files=True)
     async def symmetry(self, ctx, side: str="left"):
         if side == "left" or side == "right" or side == "up" or side == "down":
             await ctx.send("シンメトリーにしたい画像をアップしてください↓")

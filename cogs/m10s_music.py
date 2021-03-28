@@ -66,7 +66,7 @@ class music(commands.Cog):
                 "video_thumbnail": v['thumbnail'],
                 "video_up_name": v["uploader"],
                 "video_up_url": v["uploader_url"],
-                "video_source": "Youtube"
+                "video_source": "YouTube"
             }
         elif utype == "niconico":
             return {
@@ -81,6 +81,7 @@ class music(commands.Cog):
             }
         elif utype == "soundcloud":
             return {
+                "type": "download" if dl else "stream",
                 "video_id": v['id'],
                 "video_url": v['webpage_url'],
                 "video_title": v['title'],
@@ -94,12 +95,16 @@ class music(commands.Cog):
     async def join_(self, ctx):
         if ctx.author.voice:
             if ctx.voice_client:
-                await ctx.send(f"{ctx.voice_client.channel.name}に接続しました。")
+                    await ctx.send(f"すでに{ctx.guild.voice_client.channel.name}に接続しています。")
             else:
                 try:
                     await ctx.author.voice.channel.connect()
                 except asyncio.TimeoutError:
                     await ctx.send("接続のタイムアウト！")
+                else:
+                    e=discord.Embed(title="スラッシュコマンドのご案内", description="音楽機能はスラッシュコマンドでも使用できます。[このリンク](https://discord.com/oauth2/authorize?client_id=462885760043843584&scope=applications.commands)から有効化することで使うことができます。", color=self.bot.ec)
+                    e.set_image(url="https://media.discordapp.net/attachments/667351221106901042/820635535935537182/unknown.png")
+                    await ctx.send(f"{ctx.voice_client.channel.name}に接続しました。",embed=e)
         else:
             await ctx.send("あなたがボイスチャンネルに接続していません！")
 
@@ -110,10 +115,13 @@ class music(commands.Cog):
                 try:
                     await self.bot.mp[str(ctx.guild.id)].delete()
                 except:
-                    await ctx.send("操作パネルを削除できませんでした。")
-                self.bot.qu[str(ctx.guild.id)] = None
-                self.bot.mp[str(ctx.guild.id)] = None
-                self.bot.lp[str(ctx.guild.id)] = None
+                    pass
+                try:
+                    del self.bot.qu[str(ctx.guild.id)]
+                    del self.bot.mp[str(ctx.guild.id)]
+                    del self.bot.lp[str(ctx.guild.id)]
+                except:
+                    pass
                 await ctx.voice_client.disconnect()
                 await ctx.send("切断しました。")
 
@@ -145,8 +153,9 @@ class music(commands.Cog):
                 vurls = [m.content]
         async with ctx.typing():
             try:
-                vurls = []
-                vdl = True
+                vurls = [] #処理するURL
+                vdl = True #ビデオダウンロードを行うかどうか
+                c_info = False #再生時の表示情報をカスタム作成するかどうか
                 if (text.startswith("<http://") and text.endswith(">")) or (text.startswith("<https://") and text.endswith(">")):
                     vurls = [text[1:-1]]
                 elif text.startswith("http://") or text.startswith("https://"):
@@ -157,10 +166,46 @@ class music(commands.Cog):
                     pf = self.bot.cursor.fetchone()
                     mn = text[5:]
                     if pf["memo"] is not None and pf["memo"].get(mn,None) is not None:
-                        vurls = pf["memo"][mn].split("\n")
+                        for i in pf["memo"][mn].split("\n"):
+                            if (i.startswith("<http://") and i.endswith(">")) or (i.startswith("<https://") and i.endswith(">")):
+                                vurls = [i[1:-1]]
+                            elif i.startswith("http://") or i.startswith("https://"):
+                                vurls = [i]
                     else:
                         await ctx.send("> 音楽再生\n　該当名称のメモが見つかりません。")
                         return
+                elif text.startswith("activity:"):
+                    tar = ctx.guild.get_member(int(text[9:])) or ctx.author
+                    spac = [i for i in tar.activities if i.name == "Spotify"]
+
+                    if spac:
+                        title = getattr(spac[0], "title",None) or spac[0].details
+                        artist = getattr(spac[0], "artist",None) or spac[0].state
+                        search_response = self.youtube.search().list(
+                            part='snippet',
+                            q=f"{title} {artist}",
+                            type='video'
+                        ).execute()
+                        vid = search_response['items'][0]['id']['videoId']
+                        if vid:
+                            vurls = [f"https://www.youtube.com/watch?v={vid}"]
+                        else:
+                            return await ctx.send("動画が見つかりませんでした。")
+                    else:
+                        return await ctx.send("プレイ中のActivityがSpotifyではありません。")
+                elif text.startswith("file:"):
+                    c_info = True
+                    await ctx.message.attachments[0].save(f"musicfile/{ctx.message.id}")
+                    vinfo = {
+                            "type": "download",
+                            "video_id": ctx.message.id,
+                            "video_url": "",
+                            "video_title": ctx.message.attachments[0].filename,
+                            "video_thumbnail": "",
+                            "video_up_name": f"{ctx.author}({ctx.author.id})",
+                            "video_up_url": f"https://discord.com/users/{ctx.author.id}",
+                            "video_source": "Direct Upload"
+                        }
                 else:
                     search_response = self.youtube.search().list(
                         part='snippet',
@@ -172,71 +217,42 @@ class music(commands.Cog):
                         vurls = [f"https://www.youtube.com/watch?v={vid}"]
                     else:
                         return await ctx.send("動画が見つかりませんでした。")
-                if vurls == []:
-                    return
-                for vurl in vurls:
-                    vinfo = await self.gvinfo(vurl, False)
-                    if vinfo.get("extractor", "").startswith("youtube"):
-                        if vinfo.get("_type", None) == "playlist":
-                            tks = []
-                            for c in vinfo["entries"]:
-                                tks.append(self.gpdate(
-                                    f"https://www.youtube.com/watch?v={c['id']}", vdl))
-                            iqlt = [i for i in await asyncio.gather(*tks) if i]
-                            if self.bot.qu.get(str(ctx.guild.id), None):
-                                await ctx.send(f"キューにプレイリスト内の動画{len(iqlt)}本を追加します。")
-                                self.bot.qu[str(ctx.guild.id)] = self.bot.qu[str(
-                                    ctx.guild.id)] + iqlt
-                                await self.panel_update(ctx)
+                if not c_info:
+                    if vurls == []:
+                        return
+                    for vurl in vurls:
+                        vinfo = await self.gvinfo(vurl, False)
+                        if vinfo.get("extractor", "").startswith("youtube"):
+                            if vinfo.get("_type", None) == "playlist":
+                                tks = []
+                                for c in vinfo["entries"]:
+                                    tks.append(self.gpdate(
+                                        f"https://www.youtube.com/watch?v={c['id']}", vdl))
+                                iqlt = [i for i in await asyncio.gather(*tks) if i]
+                                if self.bot.qu.get(str(ctx.guild.id), None):
+                                    await ctx.send(f"キューにプレイリスト内の動画{len(iqlt)}本を追加します。")
+                                    self.bot.qu[str(ctx.guild.id)] = self.bot.qu[str(
+                                        ctx.guild.id)] + iqlt
+                                    await self.panel_update(ctx)
+                                else:
+                                    await ctx.send(f"プレイリストより、{len(iqlt)}本の再生を開始します。")
+                                    self.bot.qu[str(ctx.guild.id)] = iqlt
+                                    await asyncio.sleep(0.3)
+                                    self.bot.loop.create_task(self.mplay(ctx))
                             else:
-                                await ctx.send(f"プレイリストより、{len(iqlt)}本の再生を開始します。")
-                                self.bot.qu[str(ctx.guild.id)] = iqlt
-                                await asyncio.sleep(0.3)
-                                self.bot.loop.create_task(self.mplay(ctx))
-                        else:
-                            iqim = await self.gpdate(vurl, vdl)
-                            if self.bot.qu.get(str(ctx.guild.id), None):
-                                await ctx.send(f"`{iqim['video_title']}`をキューに追加します。")
-                                self.bot.qu[str(ctx.guild.id)] = self.bot.qu[str(
-                                    ctx.guild.id)] + [iqim]
-                                await self.panel_update(ctx)
-                            else:
-                                await ctx.send(f"`{iqim['video_title']}`の再生を開始します。")
-                                self.bot.qu[str(ctx.guild.id)] = [iqim]
-                                await asyncio.sleep(0.3)
-                                self.bot.loop.create_task(self.mplay(ctx))
-                    elif vinfo.get("extractor", "") == "niconico":
-                        iqim = await self.gpdate(vurl, vdl, "niconico")
-                        if self.bot.qu.get(str(ctx.guild.id), None):
-                            await ctx.send(f"`{iqim['video_title']}`をキューに追加します。")
-                            self.bot.qu[str(ctx.guild.id)] = self.bot.qu[str(
-                                ctx.guild.id)] + [iqim]
-                            await self.panel_update(ctx)
-                        else:
-                            await ctx.send(f"`{iqim['video_title']}`の再生を開始します。")
-                            self.bot.qu[str(ctx.guild.id)] = [iqim]
-                            await asyncio.sleep(0.3)
-                            self.bot.loop.create_task(self.mplay(ctx))
-                    elif vinfo.get("extractor", "").startswith("soundcloud"):
-                        if vinfo.get("_type", None) == "playlist":
-
-                            tks = []
-                            for c in vinfo["entries"]:
-                                tks.append(self.gpdate(c["url"], vdl, "soundcloud"))
-                            iqlt = [i for i in await asyncio.gather(*tks) if i]
-                            if self.bot.qu.get(str(ctx.guild.id), None):
-                                await ctx.send(f"キューにプレイリスト内の動画{len(iqlt)}本を追加します。")
-                                self.bot.qu[str(ctx.guild.id)] = self.bot.qu[str(
-                                    ctx.guild.id)] + iqlt
-                                await self.panel_update(ctx)
-                            else:
-                                await ctx.send(f"プレイリストより、{len(iqlt)}本の再生を開始します。")
-                                self.bot.qu[str(ctx.guild.id)] = iqlt
-                                await asyncio.sleep(0.3)
-                                self.bot.loop.create_task(self.mplay(ctx))
-
-                        else:
-                            iqim = await self.gpdate(vurl, vdl, "soundcloud")
+                                iqim = await self.gpdate(vurl, vdl)
+                                if self.bot.qu.get(str(ctx.guild.id), None):
+                                    await ctx.send(f"`{iqim['video_title']}`をキューに追加します。")
+                                    self.bot.qu[str(ctx.guild.id)] = self.bot.qu[str(
+                                        ctx.guild.id)] + [iqim]
+                                    await self.panel_update(ctx)
+                                else:
+                                    await ctx.send(f"`{iqim['video_title']}`の再生を開始します。")
+                                    self.bot.qu[str(ctx.guild.id)] = [iqim]
+                                    await asyncio.sleep(0.3)
+                                    self.bot.loop.create_task(self.mplay(ctx))
+                        elif vinfo.get("extractor", "") == "niconico":
+                            iqim = await self.gpdate(vurl, vdl, "niconico")
                             if self.bot.qu.get(str(ctx.guild.id), None):
                                 await ctx.send(f"`{iqim['video_title']}`をキューに追加します。")
                                 self.bot.qu[str(ctx.guild.id)] = self.bot.qu[str(
@@ -247,11 +263,52 @@ class music(commands.Cog):
                                 self.bot.qu[str(ctx.guild.id)] = [iqim]
                                 await asyncio.sleep(0.3)
                                 self.bot.loop.create_task(self.mplay(ctx))
+                        elif vinfo.get("extractor", "").startswith("soundcloud"):
+                            if vinfo.get("_type", None) == "playlist":
+
+                                tks = []
+                                for c in vinfo["entries"]:
+                                    tks.append(self.gpdate(c["url"], vdl, "soundcloud"))
+                                iqlt = [i for i in await asyncio.gather(*tks) if i]
+                                if self.bot.qu.get(str(ctx.guild.id), None):
+                                    await ctx.send(f"キューにプレイリスト内の動画{len(iqlt)}本を追加します。")
+                                    self.bot.qu[str(ctx.guild.id)] = self.bot.qu[str(
+                                        ctx.guild.id)] + iqlt
+                                    await self.panel_update(ctx)
+                                else:
+                                    await ctx.send(f"プレイリストより、{len(iqlt)}本の再生を開始します。")
+                                    self.bot.qu[str(ctx.guild.id)] = iqlt
+                                    await asyncio.sleep(0.3)
+                                    self.bot.loop.create_task(self.mplay(ctx))
+
+                            else:
+                                iqim = await self.gpdate(vurl, vdl, "soundcloud")
+                                if self.bot.qu.get(str(ctx.guild.id), None):
+                                    await ctx.send(f"`{iqim['video_title']}`をキューに追加します。")
+                                    self.bot.qu[str(ctx.guild.id)] = self.bot.qu[str(
+                                        ctx.guild.id)] + [iqim]
+                                    await self.panel_update(ctx)
+                                else:
+                                    await ctx.send(f"`{iqim['video_title']}`の再生を開始します。")
+                                    self.bot.qu[str(ctx.guild.id)] = [iqim]
+                                    await asyncio.sleep(0.3)
+                                    self.bot.loop.create_task(self.mplay(ctx))
+                        else:
+                            await ctx.send("now,the video can't play the bot")
+                else:
+                    if self.bot.qu.get(str(ctx.guild.id), None):
+                        await ctx.send(f"`{vinfo['video_title']}`をキューに追加します。")
+                        self.bot.qu[str(ctx.guild.id)] = self.bot.qu[str(
+                            ctx.guild.id)] + [vinfo]
+                        await self.panel_update(ctx)
                     else:
-                        await ctx.send("now,the video can't play the bot")
+                        await ctx.send(f"`{vinfo['video_title']}`の再生を開始します。")
+                        self.bot.qu[str(ctx.guild.id)] = [vinfo]
+                        await asyncio.sleep(0.3)
+                        self.bot.loop.create_task(self.mplay(ctx))
             except:
                 import traceback
-                await ctx.send(f"> traceback\n```{traceback.format_exc(4)}```")
+                await ctx.send(f"> traceback\n```{traceback.format_exc(2)}```")
 
     async def mplay(self, ctx, vl=0.5):
         v = None
@@ -423,6 +480,32 @@ class music(commands.Cog):
         else:
             await ctx.send("> シャッフルエラー\n　シャッフルに必要要件を満たしていません。(VCで音楽再生中で、3曲以上キューに入っている)")
 
+    @commands.command(name="move_panel")
+    async def move_panel(self, ctx, move_to:commands.TextChannelConverter):
+        ebd = discord.Embed(title="思惟奈ちゃん-ミュージック操作パネル", color=self.bot.ec)
+        ebd.add_field(name="再生中の曲:", value="未読み込み")
+        ebd.add_field(name="次の曲:", value="未読み込み")
+        ebd.add_field(name="ループ:", value="未読み込み")
+        ebd.add_field(name="ボリューム:", value="未読み込み")
+        m = await move_to.send(embed=ebd)
+        await self.bot.mp[str(ctx.guild.id)].delete()
+        self.bot.mp[str(ctx.guild.id)] = m
+        await m.add_reaction("▶")
+        await m.add_reaction("⏸")
+        await m.add_reaction("⏹")
+        await m.add_reaction("⏭")
+        await m.add_reaction("🔁")
+        await m.add_reaction("🔀")
+        await m.add_reaction("🔼")
+        await m.add_reaction("🔽")
+        await m.add_reaction("⬇")
+        try:
+            await m.pin()
+        except:
+            pass
+        await self.panel_update(ctx)
+        await ctx.send(f"> 音楽再生パネルの移動\n　{move_to.mention}に移動しました。")
+
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, pr):
         if self.bot.mp.get(str(pr.member.guild.id), None) is None:
@@ -434,6 +517,8 @@ class music(commands.Cog):
                 await msg.remove_reaction(pr.emoji, pr.member)
             except:
                 pass
+            if not pr.member.voice:
+                return
             msg.author = pr.member
             ctx = await self.bot.get_context(msg)
             r = pr
@@ -484,9 +569,12 @@ class music(commands.Cog):
                     await self.bot.mp[str(member.guild.id)].delete()
                 except:
                     await self.bot.mp[str(member.guild.id)].channel.send("操作パネルを削除できませんでした。")
-                self.bot.qu[str(member.guild.id)] = None
-                self.bot.mp[str(member.guild.id)] = None
-                self.bot.lp[str(member.guild.id)] = None
+                try:
+                    del self.bot.qu[str(member.guild.id)]
+                    del self.bot.mp[str(member.guild.id)]
+                    del self.bot.lp[str(member.guild.id)]
+                except:
+                    pass
                 await member.guild.voice_client.disconnect()
         except:
             pass

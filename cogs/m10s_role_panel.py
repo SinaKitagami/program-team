@@ -28,7 +28,7 @@ class m10s_role_panel(commands.Cog):
 
     @commands.group(name="rolepanel",aliases=["paneledit"])
     @commands.has_permissions(administrator=True)
-    @commands.bot_has_permissions(manage_messages=True,manage_roles=True)
+    @commands.bot_has_permissions(manage_messages=True, manage_roles=True)
     async def role_panel(self, ctx:commands.Context):
         if ctx.invoked_subcommand is None:
             await ctx.send("""> 役職パネル機能　

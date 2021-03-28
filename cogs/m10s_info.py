@@ -493,7 +493,7 @@ class info(commands.Cog):
             for pn, bl in iter(role.permissions):
                 if bl:
                     hasper = hasper + f"`{ctx._(f'p-{pn}')}`,"
-            embed.add_field(name=ctx._("roleinfo-hasper"), value=hasper)
+            embed.add_field(name=ctx._("roleinfo-hasper"), value=hasper or "(権限なし)")
             embed.add_field(name=ctx._("roleinfo-created"), value=(role.created_at + rdelta(
                 hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
 
@@ -603,12 +603,38 @@ class info(commands.Cog):
                         embed.add_field(name="経過時間", value=f"{pnow}/{pml}")
                         embed.set_thumbnail(url=activ.album_cover_url)
                     except AttributeError:
-                        embed.add_field(name=ctx._("spotify-local"),
-                                        value=ctx._("spotify-cantlisten-wu"))
-                        embed.add_field(name=ctx._(
-                            "playinginfo-title"), value=activ.details)
-                        embed.add_field(name=ctx._(
-                            "playinginfo-artist"), value=activ.state)
+                        try:
+                            embed.add_field(name=ctx._("spotify-local"),
+                                            value=ctx._("spotify-cantlisten-wu"))
+                            embed.add_field(name=ctx._(
+                                "playinginfo-title"), value=activ.details)
+                            embed.add_field(name=ctx._(
+                                "playinginfo-artist"), value=activ.state)
+                            tmp = str(
+                                int((datetime.datetime.utcnow() - activ.start).seconds % 60))
+                            pnow = f"{int((datetime.datetime.utcnow() - activ.start).seconds/60)}:{tmp if len(tmp)==2 else f'0{tmp}'}"
+                            deua = activ.end - activ.start
+                            tmp = str(int(deua.seconds % 60))
+                            pml = f"{int(deua.seconds/60)}:{tmp if len(tmp)==2 else f'0{tmp}'}"
+                            embed.add_field(name="経過時間", value=f"{pnow}/{pml}")
+                        except:
+                            activName = "プレイ中:"+anactivity.name
+                            embed = discord.Embed(title="していること", description=activName, color=info.color)
+                            activ = anactivity
+                            embed.set_author(name=info.display_name,
+                                            icon_url=info.avatar_url_as(static_format='png'))
+                            activs.append(f"{activ.name}をプレイ中")
+                            try:
+                                vl = ""
+                                if activ.details:
+                                    vl = f"{activ.details}\n"
+                                if activ.state:
+                                    vl = f"{vl}{activ.state}\n"
+                                if vl == "":
+                                    vl = "なし"
+                                embed.add_field(name="詳細", value=vl)
+                            except:
+                                pass
                 elif anactivity.type == discord.ActivityType.streaming:
                     activs.append("外部でのストリーミング")
                     try:
@@ -641,14 +667,14 @@ class info(commands.Cog):
                         pass
                 try:
                     if anactivity.created_at:
-                        embed.set_footer(text=f"started the activity at")
+                        embed.set_footer(text=f"the activity started at")
                         embed.timestamp = anactivity.created_at
                 except:
                     pass
                 embeds.append(embed)
         # ページわけ
         doingdis = f"{len(activs)}件のアクティビティ"
-        e = discord.Embed(title=doingdis,description="```"+f"\n".join(activs)+"```",color = self.bot.ec)
+        e = discord.Embed(title=doingdis,description="```\n"+f"\n".join(activs)+"```",color = self.bot.ec)
         e.set_author(name=info.display_name,
                         icon_url=info.avatar_url_as(static_format='png'))
         embeds.insert(0,e)
