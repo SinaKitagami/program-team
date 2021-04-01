@@ -65,6 +65,7 @@ class levels(commands.Cog):
 
     @commands.command(name="level", aliases=["レベルカード", "レベルを見せて"])
     @commands.cooldown(1, 20, type=commands.BucketType.user)
+    @commands.bot_has_permissions(attach_files=True)
     async def level(self, ctx, tu: commands.MemberConverter=None):
         if tu:
             u = tu

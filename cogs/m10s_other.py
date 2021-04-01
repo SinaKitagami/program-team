@@ -207,13 +207,13 @@ class other(commands.Cog):
         elif quest == 4:
             await ctx.send("?")
 
-    @commands.command(aliases=["scratchwikiのurl", "次のページのScratchwikiのURL教えて"])
+    #@commands.command(aliases=["scratchwikiのurl", "次のページのScratchwikiのURL教えて"])
     async def jscrawiki(self, ctx, un: str):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
               ctx.message.content)
         await ctx.send(ctx._("jscrawiki-return", un.replace("@", "@ ")))
 
-    @commands.command(aliases=["scratchのユーザーurl", "次のScratchユーザーのURL教えて"])
+    #@commands.command(aliases=["scratchのユーザーurl", "次のScratchユーザーのURL教えて"])
     async def scrauser(self, ctx, un: str):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
               ctx.message.content)
@@ -237,9 +237,12 @@ class other(commands.Cog):
             c = int(args[2])
         else:
             await ctx.send(ctx._("randomint-arg-error"))
+            return
         # try:
         intcount = []
         rnd = 0
+        if c >= 256:
+            c = 255
         for i in range(c):
             if s <= e:
                 tmp = random.randint(s, e)

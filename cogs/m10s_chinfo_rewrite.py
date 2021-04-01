@@ -25,7 +25,7 @@ class m10s_chinfo_rw(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="chinfo",)
+    @commands.command(name="chinfo")
     async def command(self, ctx, target=None):
         if target is None:
             target = ctx.channel

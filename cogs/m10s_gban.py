@@ -103,6 +103,7 @@ class m10s_gban(commands.Cog):
             await ctx.send("そのユーザーは思惟奈ちゃんのグローバルbanされていません")
 
     @commands.command()
+    @commands.has_permissions(manage_guild=True)
     async def gbanlogto(self, ctx, chid: int=None):
         tch = ctx.guild.get_channel(chid)
         if chid and tch:

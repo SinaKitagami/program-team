@@ -128,6 +128,7 @@ def get_vmusic(bot, member):
         return {
             "name": mn["video_title"],
             "url": mn["video_url"],
+            "uploader":mn["video_up_name"],
             "guild": mg
         }
     else:

@@ -40,6 +40,7 @@ class games(commands.Cog):
                 break
 
     @commands.command(name="near21")
+    @commands.bot_has_permissions(manage_messages=True, embed_links=True)
     async def game1(self, ctx, user2: commands.MemberConverter=None):
 
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +

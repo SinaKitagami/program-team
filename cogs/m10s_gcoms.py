@@ -15,30 +15,30 @@ class gcoms(commands.Cog):
     @commands.command()
     async def globalpost(self, ctx, gmid: int):
         post = None
-        self.bot.cursor.execute("select * from globaldates")
+        self.bot.cursor.execute("select * from gchat_pinfo")
         dats = self.bot.cursor.fetchall()
         for i in dats:
-            if gmid in i["allid"]:
+            if gmid in ([j[1] for j in i["allids"]]+[i["id"]]):
                 post = i
+                break
         if post is None:
             await ctx.say("globalpost-notfound")
+            return
         self.bot.cursor.execute(
             "select * from users where id=?", (ctx.author.id,))
         upf = self.bot.cursor.fetchone()
         if upf["gmod"]:
             self.bot.cursor.execute(
-                "select * from users where id=?", (i["aid"],))
+                "select * from users where id=?", (post["author_id"],))
             apf = self.bot.cursor.fetchone()
-            u = self.bot.cursor.fetchone()
-            g = self.bot.get_guild(post["gid"])
-            await ctx.send(embed=ut.getEmbed("メッセージ内容", post['content'], self.bot.ec, "送信者id:", post['aid'], "送信先", post["allid"], "送信者のプロファイルニックネーム", apf['gnick'], "サーバーid", g.id, "サーバーネーム", g.name))
+            g = self.bot.get_guild(post["guild_id"])
+            await ctx.send(embed=ut.getEmbed(f"オリジナルID:'{post['id']}'のメッセージ内容(配列[オリジナル(,編集後,…,最新のメッセージ)])", str(post['content']), self.bot.ec, "送信者id:", str(post['author_id']), "送信先", str([i[1] for i in post["allids"]]), "送信者のプロファイルニックネーム", apf['gnick'], "サーバーid", g.id, "サーバーネーム", g.name))
         else:
             self.bot.cursor.execute(
-                "select * from users where id=?", (i["aid"],))
-            u = self.bot.cursor.fetchone()
-            g = self.bot.get_guild(post["gid"])
+                "select * from users where id=?", (post["author_id"],))
             apf = self.bot.cursor.fetchone()
-            await ctx.send(embed=ut.getEmbed("メッセージ内容", post['content'], self.bot.ec, "送信者id:", post['aid'], "送信者のプロファイルニックネーム", apf['gnick']))
+            g = self.bot.get_guild(post["guild_id"])
+            await ctx.send(embed=ut.getEmbed("メッセージ内容", post['content'][-1], self.bot.ec, "送信者id:", str(post['author_id']), "送信者のプロファイルニックネーム", apf['gnick']))
 
     @commands.command(aliases=["オンライン状況", "次の人のオンライン状況を教えて"])
     async def isonline(self, ctx, uid: int=None):
@@ -65,15 +65,18 @@ class gcoms(commands.Cog):
     @commands.command()
     async def gchinfo(self, ctx, name="main"):
         self.bot.cursor.execute(
-            "select * from globalchs where name = ?", (name,))
-        chs = self.bot.cursor.fetchone()
-        if chs:
+            "select * from gchat_clist where name = ?", (name,))
+        gch = self.bot.cursor.fetchone()
+        if gch:
+            self.bot.cursor.execute(
+                "select * from gchat_cinfo where connected_to = ?", (name,))
+            chs = self.bot.cursor.fetchall()
             retchs = ""
-            for ch in chs["ids"]:
+            for ch in chs:
                 try:
-                    retchs = f"{retchs}{self.bot.get_channel(ch).guild.name} -> {self.bot.get_channel(ch).name}\n"
+                    retchs = f"{retchs}{self.bot.get_channel(ch['id']).guild.name} -> {self.bot.get_channel(ch['id']).name}\n"
                 except:
-                    retchs = f"{retchs}不明なサーバー -> チャンネルID:{ch}\n"
+                    retchs = f"{retchs}不明なサーバー -> チャンネルID:{ch['id']}\n"
             await ctx.send(embed=ut.getEmbed(f"グローバルチャンネル {name} の詳細", f"コネクトされたサーバーとチャンネル\n{retchs}", self.bot.ec))
         else:
             await ctx.send("そのグローバルチャンネルはありません。")
@@ -146,7 +149,7 @@ class gcoms(commands.Cog):
                     await ctx.send(f"ban状態を{str(ban)}にしました。")
                 elif bui:
                     self.bot.cursor.execute("INSERT INTO users(id,prefix,gpoint,memo,levcard,onnotif,lang,accounts,sinapartner,gban,gnick,gcolor,gmod,gstar,galpha,gbanhist) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (bui.id, [
-                    ], 0, {}, "m@ji☆", [], "ja", [], 0, 1, bui.name, 0, 0, 0, 0, rea))
+                    ], 0, {}, "m@ji☆", [], "ja", [], 0, int(ban), bui.name, 0, 0, 0, 0, rea))
                     await ctx.send(f"プロファイルを作成し、ban状態を{str(ban)}にしました。")
                 else:
                     await ctx.send("これが呼び出されることは、ありえないっ！")
@@ -198,7 +201,7 @@ class gcoms(commands.Cog):
         embed = discord.Embed(description=self.bot.gguide, color=self.bot.ec)
         await ctx.send(embed=embed)
 
-    @commands.command()
+    """@commands.command()
     @commands.cooldown(1, 20, type=commands.BucketType.guild)
     async def gdconnect(self, ctx):
         if ctx.author.permissions_in(ctx.channel).administrator is True or ctx.author.id == 404243934210949120:
@@ -228,7 +231,7 @@ class gcoms(commands.Cog):
             else:
                 await ctx.send("webhooksの管理権限がありません！")
         else:
-            await ctx.send("このコマンドを実行するには、このサーバーで管理者権限を持つ必要があります。")
+            await ctx.send("このコマンドを実行するには、あなたがこのサーバーで管理者権限を持つ必要があります。")
 
     @commands.command()
     @commands.cooldown(1, 20, type=commands.BucketType.guild)
@@ -288,14 +291,11 @@ class gcoms(commands.Cog):
             else:
                 await ctx.send("webhooksの管理権限がありません！")
         else:
-            await ctx.send("このコマンドを実行するには、このサーバーで管理者権限を持つ必要があります。")
+            await ctx.send("このコマンドを実行するには、あなたがこのサーバーで管理者権限を持つ必要があります。")"""
 
     @commands.command()
     @commands.cooldown(1, 30, type=commands.BucketType.user)
-    async def globaldel(self, ctx, gmid: int, gchn: str):
-        self.bot.cursor.execute(
-            "select * from globalchs where name = ?", (gchn,))
-        ch = self.bot.cursor.fetchone()
+    async def globaldel(self, ctx, gmid: int):
         self.bot.cursor.execute(
             "select * from users where id=?", (ctx.author.id,))
         upf = self.bot.cursor.fetchone()
@@ -304,18 +304,28 @@ class gcoms(commands.Cog):
         dats = self.bot.cursor.fetchall()
         if upf["gmod"]:
             for i in dats:
-                if gmid in i["allid"]:
+                if gmid in [j[1] for j in i["allids"]] or gmid  == i["id"]:
                     post = i
+                    break
             if post:
-                for cid in ch["ids"]:
-                    ch = self.bot.get_channel(cid)
-                    for mid in post["allid"]:
-                        try:
-                            m = await ch.fetch_message(mid)
-                            await m.delete()
-                        except:
-                            pass
-            await ctx.send("削除が完了しました。")
+                tasks = []
+                for t in post["allids"]:
+                    try:
+                        wh = await self.bot.fetch_webhook(t[0])
+                    except:
+                        continue
+                    else:
+                        tasks.append(
+                            asyncio.ensure_future(
+                                wh.delete_message(t[1])
+                            )
+                        )
+                await asyncio.gather(*tasks)
+                await ctx.send("削除が完了しました。")
+            else:
+                await ctx.send("削除するコンテンツが見つかりませんでした。")
+        else:
+            await ctx.send("このコマンドは運営のみ実行できます。")
 
     @commands.command()
     async def viewgban(self, ctx):

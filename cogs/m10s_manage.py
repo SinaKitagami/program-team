@@ -201,6 +201,8 @@ class manage(commands.Cog):
             await ctx.send(ctx._("mem-don'thasper"))
 
     @commands.command(aliases=["ピン留め切替", "次のメッセージをピン留めして"])
+    @commands.bot_has_permissions(manage_messages=True)
+    @commands.has_permissions(manage_messages=True)
     async def pin(self, ctx, mid: int):
         msg = await ctx.message.channel.fetch_message(mid)
         if msg.pinned:
@@ -212,6 +214,7 @@ class manage(commands.Cog):
 
     @commands.command(aliases=["メッセージ一括削除", "次の件数分、メッセージを消して"])
     @commands.cooldown(1, 15, type=commands.BucketType.guild)
+    @commands.bot_has_permissions(manage_messages=True)
     async def delmsgs(self, ctx, msgcount):
         if ctx.message.author.permissions_in(ctx.message.channel).manage_messages is True or ctx.author.id == 404243934210949120:
             async with ctx.message.channel.typing():
