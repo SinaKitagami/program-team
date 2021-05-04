@@ -69,6 +69,43 @@ class m10s_re_gchat(commands.Cog):
             self.bot.cursor.execute("UPDATE users SET gbanhist = ? WHERE id = ?",
                             ("予防グローバルチャットBAN: {}".format(rs), msg.author.id))
 
+    def check(self, channel):
+        if channel in self.without_react:
+            return True
+        else:
+            return False
+
+    @commands.command(name="ignorereact")
+    @commands.is_owner()
+    async def ignorereact(self, ctx, type: str="add", channel: str=None):
+        if channel is None:
+            await ctx.send("チャンネルのIDを入力してね")
+            return
+
+        db = self.bot.cursor.execute(
+            "SELECT * FROM gchat_clist WHERE name = ?", (channel,)).fetchone()
+
+        if db:
+            txt = ""
+
+            if type == "add":
+                if not self.check(channel):
+                    self.without_react.append(channel)
+                    txt = f"{channel} を追加したよ"
+                else:
+                    txt = "すでに追加されているよ"
+            elif type == "remove":
+                if self.check(channel):
+                    self.without_react.remove(channel)
+                    txt = f"{channel} を削除したよ"
+                else:
+                    txt = "追加されていないよ"
+            else:
+                txt = "引数が不正です (add/remove)"
+
+            await ctx.send(txt)
+        else:
+            await ctx.send("そのチャンネルは存在しないよ")
 
     @commands.group()
     @commands.cooldown(1, 20, type=commands.BucketType.guild)
