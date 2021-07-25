@@ -534,6 +534,10 @@
     "p-manage_roles": "役職の管理",
     "p-manage_webhooks": "Webhooksの管理",
     "p-manage_emojis": "絵文字の管理",
+
+    "p-use_slash_commands": "スラッシュコマンドを使う",
+    "p-request_to_speak": "ステージチャンネルで話者になることをリクエストする",
+
     "h-notfound": "見つかりませんでした。",
     "nh-owner": [
         "所有者専用コマンドについて",

@@ -199,6 +199,7 @@ class m10s_re_gchat(commands.Cog):
                     await m.add_reaction("❌")
                     await asyncio.sleep(5)
                     await m.remove_reaction("❌", self.bot.user)
+                    return
 
             if (datetime.datetime.now() - rdelta(hours=9) - rdelta(days=7) >= m.author.created_at) or upf["gmod"] or upf["gstar"]:
 

@@ -91,6 +91,7 @@ class m10s_chinfo_rw(commands.Cog):
                     mbs=mbs+f"`{m.name}`,"
             if mbs != "":
                 e.add_field(name=f"参加可能なメンバー({len(target.members)}人)",value=mbs,inline=False)
+            e.add_field(name="ボイスチャンネルの地域",value=target.rtc_region if target.rtc_region else "自動")
             await ctx.send(embed=e)
         elif isinstance(target,discord.CategoryChannel):
             e=discord.Embed(name="チャンネル情報",description=f"{target.name}(タイプ:カテゴリ)\nID:{target.id}",color=self.bot.ec)
@@ -109,6 +110,8 @@ class m10s_chinfo_rw(commands.Cog):
                     chtype="ボイス"
                 elif c.type is discord.ChannelType.text:
                     chtype="テキスト"
+                elif c.type is discord.ChannelType.stage_voice:
+                    chtype="ステージ"
                 else:
                     chtype=str(c.type)
                 if len(mbs+f"`{c.name}({chtype})`,")>=1020:
@@ -118,6 +121,26 @@ class m10s_chinfo_rw(commands.Cog):
                     mbs=mbs+f"`{c.name}({chtype})`,"
             if mbs != "":
                 e.add_field(name=f"所属するチャンネル({len(target.channels)}チャンネル)",value=mbs,inline=False)
+            await ctx.send(embed=e)
+        if isinstance(target,discord.StageChannel):
+            e=discord.Embed(name="チャンネル情報",description=f"{target.name}(タイプ:ステージ)\nID:{target.id}",color=self.bot.ec)
+            e.timestamp=target.created_at
+            if target.category:
+                e.add_field(name="所属するカテゴリ",value=f"{target.category.name}({target.category.id})")
+            e.add_field(name="チャンネルビットレート",value=f"{target.bitrate/1000}Kbps")
+            e.add_field(name="チャンネルトピック",value=target.topic or "(なし)")
+            if not target.user_limit == 0:
+                e.add_field(name="ユーザー数制限",value=f"{target.user_limit}人")
+            mbs=""
+            for m in target.members:
+                if len(mbs+f"`{m.name}`,")>=1020:
+                    mbs=mbs+f"他"
+                    break
+                else:
+                    mbs=mbs+f"`{m.name}`,"
+            if mbs != "":
+                e.add_field(name=f"参加可能なメンバー({len(target.members)}人)",value=mbs,inline=False)
+            e.add_field(name="ボイスチャンネルの地域",value=target.rtc_region if target.rtc_region else "自動")
             await ctx.send(embed=e)
         else:
             await ctx.send("> エラー\n予期しないタイプのチャンネルです。チーム☆思惟奈ちゃんメンバーに報告してください。")

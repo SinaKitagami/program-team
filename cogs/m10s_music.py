@@ -23,6 +23,7 @@ m10s_music.py
 """
 
 ytdlopts = {
+    'proxy': 'http://proxy-sve1.d.rspnet.jp:26020/',
     'format': 'bestaudio/best',
     'outtmpl': 'musicfile/%(id)s',
     'restrictfilenames': True,
@@ -50,45 +51,85 @@ class music(commands.Cog):
             self.bot.lp = {}
             self.bot.mp = {}
 
-    async def gvinfo(self, url, dl=False):
-        loop = self.bot.loop or asyncio.get_event_loop()
-        dt = await loop.run_in_executor(None, lambda: self.ytdl.extract_info(url, download=dl))
-        return dt
+    async def gvinfo(self, ctx, url:str, dl=False):
+        if url.endswith(".mp3"):
+            return {
+                "id":ctx.message.id,
+                "webpage_url":url,
+                "title":url.split("/")[-1],
+                "thumbnail":"",
+                "uploader":"None",
+                "uploader_url":"",
+                "uploader_id":"",
+                "extractor":"URL_Stream"
+            }
+        else:
+            loop = self.bot.loop or asyncio.get_event_loop()
+            dt = await loop.run_in_executor(None, lambda: self.ytdl.extract_info(url, download=dl))
+            return dt
 
-    async def gpdate(self, url, dl=True, utype="Youtube"):
-        v = await self.gvinfo(url, dl)
+    async def gpdate(self, url, ctx, dl=True, utype="Youtube"):
+        v = await self.gvinfo(ctx, url, dl)
         if utype == "Youtube":
             return {
                 "type": "download" if dl else "stream",
+                "stream_url":v["url"],
                 "video_id": v['id'],
                 "video_url": v['webpage_url'],
                 "video_title": v['title'],
                 "video_thumbnail": v['thumbnail'],
                 "video_up_name": v["uploader"],
                 "video_up_url": v["uploader_url"],
-                "video_source": "YouTube"
+                "video_source": "YouTube",
+                "requester":ctx.author.id
             }
         elif utype == "niconico":
             return {
                 "type": "download" if dl else "stream",
+                "stream_url":v["url"],
                 "video_id": v['id'],
                 "video_url": v['webpage_url'],
                 "video_title": v['title'],
                 "video_thumbnail": v['thumbnail'],
                 "video_up_name": v["uploader"],
                 "video_up_url": "https://www.nicovideo.jp/user/"+v["uploader_id"],
-                "video_source": "niconico"
+                "video_source": "niconico",
+                "requester":ctx.author.id
             }
         elif utype == "soundcloud":
             return {
                 "type": "download" if dl else "stream",
+                "stream_url":v["url"],
                 "video_id": v['id'],
                 "video_url": v['webpage_url'],
                 "video_title": v['title'],
                 "video_thumbnail": v['thumbnail'],
                 "video_up_name": v["uploader"],
                 "video_up_url": re.match(r"(https://soundcloud\.com/.+?/)", v['webpage_url']).group(0),
-                "video_source": "SoundCloud"
+                "video_source": "SoundCloud",
+                "requester":ctx.author.id
+            }
+        elif utype == "URL_Stream":
+            if dl:
+                async with self.bot.session.get(v["webpage_url"]) as resp:
+                    resp.raise_for_status()
+                    with open(f"musicfile/{v['id']}","wb") as f:
+                        try:
+                            bt = await resp.read()
+                            await self.bot.loop.run_in_executor(None, lambda:f.write(bt))
+                        finally:
+                            resp.close()
+            return {
+                "type": "download" if dl else "stream",
+                "stream_url":v["webpage_url"],
+                "video_id": v['id'],
+                "video_url": v['webpage_url'],
+                "video_title": v['title'],
+                "video_thumbnail": v['thumbnail'],
+                "video_up_name": v["uploader"],
+                "video_up_url": v["uploader_id"],
+                "video_source": "URL_Stream",
+                "requester":ctx.author.id
             }
 
     @commands.command(name="join", aliases=["invc"])
@@ -160,6 +201,9 @@ class music(commands.Cog):
                     vurls = [text[1:-1]]
                 elif text.startswith("http://") or text.startswith("https://"):
                     vurls = [text]
+                elif text.startswith("stream:http://") or text.startswith("stream:https://"):
+                    vdl = False
+                    vurls = [text[7:]]
                 elif text.startswith("memo:"):
                     self.bot.cursor.execute(
                         "select * from users where id=?", (ctx.author.id,))
@@ -198,14 +242,16 @@ class music(commands.Cog):
                     await ctx.message.attachments[0].save(f"musicfile/{ctx.message.id}")
                     vinfo = {
                             "type": "download",
+                            "stream_url":str(ctx.message.attachments[0].url),
                             "video_id": ctx.message.id,
                             "video_url": "",
                             "video_title": ctx.message.attachments[0].filename,
                             "video_thumbnail": "",
                             "video_up_name": f"{ctx.author}({ctx.author.id})",
                             "video_up_url": f"https://discord.com/users/{ctx.author.id}",
-                            "video_source": "Direct Upload"
-                        }
+                            "video_source": "Direct Upload",
+                            "requester":ctx.author.id
+                            }
                 else:
                     search_response = self.youtube.search().list(
                         part='snippet',
@@ -221,13 +267,13 @@ class music(commands.Cog):
                     if vurls == []:
                         return
                     for vurl in vurls:
-                        vinfo = await self.gvinfo(vurl, False)
+                        vinfo = await self.gvinfo(ctx, vurl, False)
                         if vinfo.get("extractor", "").startswith("youtube"):
                             if vinfo.get("_type", None) == "playlist":
                                 tks = []
                                 for c in vinfo["entries"]:
                                     tks.append(self.gpdate(
-                                        f"https://www.youtube.com/watch?v={c['id']}", vdl))
+                                        f"https://www.youtube.com/watch?v={c['id']}", ctx, vdl))
                                 iqlt = [i for i in await asyncio.gather(*tks) if i]
                                 if self.bot.qu.get(str(ctx.guild.id), None):
                                     await ctx.send(f"キューにプレイリスト内の動画{len(iqlt)}本を追加します。")
@@ -240,7 +286,7 @@ class music(commands.Cog):
                                     await asyncio.sleep(0.3)
                                     self.bot.loop.create_task(self.mplay(ctx))
                             else:
-                                iqim = await self.gpdate(vurl, vdl)
+                                iqim = await self.gpdate(vurl, ctx, vdl)
                                 if self.bot.qu.get(str(ctx.guild.id), None):
                                     await ctx.send(f"`{iqim['video_title']}`をキューに追加します。")
                                     self.bot.qu[str(ctx.guild.id)] = self.bot.qu[str(
@@ -252,7 +298,7 @@ class music(commands.Cog):
                                     await asyncio.sleep(0.3)
                                     self.bot.loop.create_task(self.mplay(ctx))
                         elif vinfo.get("extractor", "") == "niconico":
-                            iqim = await self.gpdate(vurl, vdl, "niconico")
+                            iqim = await self.gpdate(vurl, ctx, vdl, "niconico")
                             if self.bot.qu.get(str(ctx.guild.id), None):
                                 await ctx.send(f"`{iqim['video_title']}`をキューに追加します。")
                                 self.bot.qu[str(ctx.guild.id)] = self.bot.qu[str(
@@ -268,7 +314,7 @@ class music(commands.Cog):
 
                                 tks = []
                                 for c in vinfo["entries"]:
-                                    tks.append(self.gpdate(c["url"], vdl, "soundcloud"))
+                                    tks.append(self.gpdate(c["url"], ctx, vdl, "soundcloud"))
                                 iqlt = [i for i in await asyncio.gather(*tks) if i]
                                 if self.bot.qu.get(str(ctx.guild.id), None):
                                     await ctx.send(f"キューにプレイリスト内の動画{len(iqlt)}本を追加します。")
@@ -282,7 +328,7 @@ class music(commands.Cog):
                                     self.bot.loop.create_task(self.mplay(ctx))
 
                             else:
-                                iqim = await self.gpdate(vurl, vdl, "soundcloud")
+                                iqim = await self.gpdate(vurl, ctx, vdl, "soundcloud")
                                 if self.bot.qu.get(str(ctx.guild.id), None):
                                     await ctx.send(f"`{iqim['video_title']}`をキューに追加します。")
                                     self.bot.qu[str(ctx.guild.id)] = self.bot.qu[str(
@@ -293,6 +339,18 @@ class music(commands.Cog):
                                     self.bot.qu[str(ctx.guild.id)] = [iqim]
                                     await asyncio.sleep(0.3)
                                     self.bot.loop.create_task(self.mplay(ctx))
+                        elif vinfo.get("extractor", "").startswith("URL_Stream"):
+                            iqim = await self.gpdate(vurl, ctx, vdl, "URL_Stream")
+                            if self.bot.qu.get(str(ctx.guild.id), None):
+                                await ctx.send(f"`{iqim['video_title']}`をキューに追加します。")
+                                self.bot.qu[str(ctx.guild.id)] = self.bot.qu[str(
+                                    ctx.guild.id)] + [iqim]
+                                await self.panel_update(ctx)
+                            else:
+                                await ctx.send(f"`{iqim['video_title']}`の再生を開始します。")
+                                self.bot.qu[str(ctx.guild.id)] = [iqim]
+                                await asyncio.sleep(0.3)
+                                self.bot.loop.create_task(self.mplay(ctx))                        
                         else:
                             await ctx.send("now,the video can't play the bot")
                 else:
@@ -335,9 +393,19 @@ class music(commands.Cog):
                 await m.pin()
             except:
                 pass
+        if isinstance(ctx.me.voice.channel, discord.StageChannel):
+            try:
+                await ctx.me.edit(suppress=False)
+                await ctx.send("> ステージチャンネルのため、自動的にスピーカーに移動しました。")
+            except:
+                await ctx.send("> ステージチャンネルのため、音楽を再生するためにはスピーカーに移動させる必要があります。")
         while self.bot.qu[str(ctx.guild.id)]:
-            ctx.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(
+            if self.bot.qu[str(ctx.guild.id)][0]["type"] == "download":
+                ctx.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(
                 f'musicfile/{self.bot.qu[str(ctx.guild.id)][0]["video_id"]}'), volume=v or vl))
+            else:
+                ctx.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(
+                self.bot.qu[str(ctx.guild.id)][0]["stream_url"]), volume=v or vl))
             await self.panel_update(ctx)
             try:
                 while ctx.voice_client.is_playing() or ctx.voice_client.is_paused():
