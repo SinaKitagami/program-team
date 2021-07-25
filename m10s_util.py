@@ -120,16 +120,21 @@ def get_vmusic(bot, member):
         if not vm_m == []:
             try:
                 mg = v.guild
-                mn = bot.qu.get(str(v.guild.id), [])[0]
+                mn = bot.qu.get(str(v.guild.id), [])
+                mvc = v
                 break
             except:
                 pass
     if mg and mn:
         return {
-            "name": mn["video_title"],
-            "url": mn["video_url"],
-            "uploader":mn["video_up_name"],
-            "guild": mg
+            "name": mn[0]["video_title"],
+            "url": mn[0]["video_url"],
+            "uploader":mn[0]["video_up_name"],
+            "image":mn[0]["video_thumbnail"],
+            "guild": mg,
+
+            "queue":mn,
+            "isPlaying":mvc.is_playing()
         }
     else:
         return None
@@ -137,7 +142,7 @@ def get_vmusic(bot, member):
 
 async def get_badges(bot, user):
     headers = {
-        "User-Agent": "DiscordBot ()",
+        "User-Agent": "DiscordBot (sina-chan with discord.py)",
         "Authorization": f"Bot {bot.http.token}"
     }
     uid = user.id
@@ -155,7 +160,7 @@ class m10s_badges:
         self.raw_flags = flags
         flags = format(flags, "b")
 
-        flags = flags.zfill(18)[::-1]
+        flags = flags.zfill(19)[::-1]
         self.staff = flags[0] == "1"
         self.partner = flags[1] == "1"
         self.hypesquad_events = flags[2] == "1"
@@ -169,6 +174,7 @@ class m10s_badges:
         self.bug_hunter_2 = flags[14] == "1"
         self.verified_bot = flags[16] == "1"
         self.early_verified_bot_developer = flags[17] == "1"
+        self.discord_certified_moderator = flags[18] == "1"
 
         self.dict_flags = {
             "Discord Staff": self.staff,
@@ -184,6 +190,7 @@ class m10s_badges:
             "Bug Hunter Level 2": self.bug_hunter_2,
             "Verified Bot": self.verified_bot,
             "Early Verified Bot Developer": self.early_verified_bot_developer,
+            "Discord Certified Moderator":self.discord_certified_moderator
         }
 
         self.n = 0

@@ -26,6 +26,8 @@ import sqlite3
 import aiohttp
 from discord_slash import SlashCommand
 
+from my_module import dpy_interaction_ui as dpyui
+
 # textto etc
 import m10s_util as ut
 from apple_util import AppleUtil
@@ -48,6 +50,8 @@ bot = commands.Bot(command_prefix="s-", status=discord.Status.invisible,
 bot.owner_id = 404243934210949120
 
 slash = SlashCommand(bot,sync_commands=True,sync_on_cog_reload=True)
+
+bot.dpyui = dpyui.ui_actions(bot)
 
 bot.team_sina = config.team_sina
 
@@ -1154,7 +1158,8 @@ async def on_ready():
             "nekok500_mee6", "pf9_symmetry", "syouma", "m10s_gban", "m10s_bmail", "m10s_auth_wiz",
             "m10s_chinfo_rewrite", "m10s_role_panel", "m10s_messageinfo", "m10s_setting_command",
             "m10s_partners", "m10s_remainder", "m10s_level_edit", "m10s_set_activity_roles", "m10s_re_gchat",
-            "_m10s_slash_testing","_m10s_music_slash"
+            "_m10s_slash_testing","_m10s_music_slash",
+            "_m10s_api"
             ]
     
     embed = discord.Embed(title="読み込みに失敗したCog", color=bot.ec)
@@ -1215,7 +1220,7 @@ async def domsg(message):
         bot.cursor.execute("INSERT INTO guilds(id,levels,commands,hash,levelupsendto,reward,jltasks,lockcom,sendlog,prefix,lang,verified) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
                            (message.guild.id, {}, {}, [], None, {}, {}, [], None, [], guild_lang,0))
         try:
-            await message.channel.send(f"{bot.get_emoji(653161518153596950)}このサーバーの思惟奈ちゃんサーバープロファイルを作成しました！いくつかの項目はコマンドを使って書き換えることができます。詳しくはヘルプ(`s-help`)をご覧ください。\nまた、不具合や疑問点などがありましたら`mii-10#3110`にお願いします。\n思惟奈ちゃんのお知らせは`s-rnotify [チャンネルid(省略可能)]`で、コマンド等の豆知識は`s-rtopic [チャンネルid(省略可能)]`で受信する設定にできます。(Webhook管理権限が必要です。)")
+            await message.channel.send(f"{bot.get_emoji(653161518153596950)}このサーバーの思惟奈ちゃんサーバープロファイルを作成しました！いくつかの項目はコマンドを使って書き換えることができます。詳しくはヘルプ(`s-help`)をご覧ください。\nまた、不具合や疑問点などがありましたら`mii-10#3110`にお願いします。\n思惟奈ちゃんのお知らせは`s-rnotify [チャンネルid(省略可能)]`で、コマンド等の豆知識は`s-rtopic [チャンネルid(省略可能)]`で受信する設定にできます。(Webhook管理権限が必要です。)\nこのメッセージを見たことがある？\n　長期のメンテナンスによりデータが失われてしまった可能性があります。お手数をおかけしますが、再度設定をお願いします。")
         except:
             pass
         bot.cursor.execute("select * from guilds where id=?",

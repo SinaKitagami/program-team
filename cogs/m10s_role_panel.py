@@ -49,8 +49,7 @@ class m10s_role_panel(commands.Cog):
         else:
             if r.emoji == self.e_check:
                 pd={}
-                pm = await ctx.send(embed=discord.Embed())
-                await pm.edit(embed=ut.getEmbed("思惟奈ちゃん役職パネル",f"このパネルは{ctx.author.mention}によって作成されました。",self.bot.ec,f"内容の変更は`s-paneledit {pm.id} (絵文字と役職idをスペース区切りで繰り返す)`"))
+                pm = await ctx.send(embed=ut.getEmbed("思惟奈ちゃん役職パネル",f"このパネルは{ctx.author.mention}によって作成されました。",self.bot.ec,))
                 self.bot.cursor.execute("INSERT INTO role_panels(id,roles) VALUES(?,?)", (pm.id,pd))
                 await m.edit(content=f"> パネルを発行しました！\n　パネルのIDは`{pm.id}`です。編集や削除時に使用します。(紛失時はパネルのメッセージIDを取り出してください。)")
             else:

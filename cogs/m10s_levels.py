@@ -72,6 +72,15 @@ class levels(commands.Cog):
         else:
             u = ctx.author
         LEVEL_FONT = "meiryo.ttc"
+
+        headers = {
+            "User-Agent": "DiscordBot (sina-chan with discord.py)",
+            "Authorization": f"Bot {self.bot.http.token}"
+        }
+        async with self.bot.session.get(f"https://discord.com/api/v9/users/{u.id}", headers=headers) as resp:
+            resp.raise_for_status()
+            ucb = await resp.json()
+
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
               ctx.message.content)
         if ctx.channel.permissions_for(ctx.guild.me).attach_files is True:
@@ -95,11 +104,22 @@ class levels(commands.Cog):
                     except:
                         dlicon = Image.open('imgs/noimg.png', 'r')
                     dlicon = dlicon.resize((100, 100))
-                    self.bot.cursor.execute(
-                        "select * from users where id=?", (u.id,))
-                    c = self.bot.cursor.fetchone()
-                    cb = c["levcard"] or "m@ji☆"
-                    cv = Image.open('imgs/'+cb+'.png', 'r')
+                    cv = None
+                    if ucb["banner"]:
+                        cb = "banner"
+                        banner_url = f'https://cdn.discordapp.com/banners/{u.id}/{ucb["banner"]}.png?size=640'
+                        async with self.bot.session.get(banner_url, headers=headers) as resp:
+                            resp.raise_for_status()
+                            bt = await resp.read()
+                            with open(f"imgs/custom_banner_{u.id}.png", mode="wb")as f:
+                                f.write(bt)
+                        cv = Image.open(f"imgs/custom_banner_{u.id}.png", 'r')
+                    else:
+                        self.bot.cursor.execute(
+                            "select * from users where id=?", (u.id,))
+                        c = self.bot.cursor.fetchone()
+                        cb = c["levcard"] or "m@ji☆"
+                        cv = Image.open('imgs/'+cb+'.png', 'r')
                     cv.paste(dlicon, (200, 10))
                     dt = ImageDraw.Draw(cv)
                     fonta = ImageFont.truetype(LEVEL_FONT, 30)
@@ -121,8 +141,9 @@ class levels(commands.Cog):
 
                         dt.text((50, 210), ctx.l10n(u, "lc-next") +
                                 tonextexp, font=fontc, fill='#ffffff')
-
-                        dt.text((50, 300), ctx.l10n(u, "lc-createdby", cb.replace("m@ji☆", "おあず").replace("kazuta123", "kazuta246").replace("-a", "").replace("-b", "").replace("-c", "")), font=fontc, fill='#ffffff')
+                        
+                        if cb != "banner":
+                            dt.text((50, 300), ctx.l10n(u, "lc-createdby", cb.replace("m@ji☆", "おあず").replace("kazuta123", "kazuta246").replace("-a", "").replace("-b", "").replace("-c", "")), font=fontc, fill='#ffffff')
                     else:
                         dt.text(
                             (300, 60), u.display_name[0:10] + etc, font=fonta, fill='#000000')
@@ -136,7 +157,8 @@ class levels(commands.Cog):
                         dt.text((50, 210), ctx.l10n(u, "lc-next") +
                                 tonextexp, font=fontc, fill='#000000')
 
-                        dt.text((50, 300), ctx.l10n(u, "lc-createdby", cb.replace("m@ji☆", "おあず").replace("kazuta123", "kazuta246").replace("-a", "").replace("-b", "").replace("-c", "")), font=fontc, fill='#000000')
+                        if cb != "banner":
+                            dt.text((50, 300), ctx.l10n(u, "lc-createdby", cb.replace("m@ji☆", "おあず").replace("kazuta123", "kazuta246").replace("-a", "").replace("-b", "").replace("-c", "")), font=fontc, fill='#000000')
 
                     cv.save("imgs/sina'slevelcard.png", 'PNG')
                 await ctx.send(file=discord.File("imgs/sina'slevelcard.png"))

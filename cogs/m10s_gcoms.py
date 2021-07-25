@@ -300,7 +300,7 @@ class gcoms(commands.Cog):
             "select * from users where id=?", (ctx.author.id,))
         upf = self.bot.cursor.fetchone()
         post = None
-        self.bot.cursor.execute("select * from globaldates")
+        self.bot.cursor.execute("select * from gchat_pinfo")
         dats = self.bot.cursor.fetchall()
         if upf["gmod"]:
             for i in dats:

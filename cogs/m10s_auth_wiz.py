@@ -47,8 +47,7 @@ class m10s_auth_wiz(commands.Cog):
                         await msg.add_reaction(rct)
                     await msg.add_reaction(nr)
                     r, u = await self.bot.wait_for("reaction_add", check=lambda r, u: r.message.id == msg.id and u.id == m.id and r.emoji == auths["next_reaction"])
-                    ridx = [i["reactions"].index(
-                        r.emoji) for r in r.message.reactions if r.count == 2 and r.emoji != nr]
+                    ridx = [i["reactions"].index(str(r.emoji)) for r in r.message.reactions if r.count == 2 and r.emoji != nr]
                     for ri in ridx:
                         grl = m.guild.get_role(i["give_role"][ri])
                         if grl:
