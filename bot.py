@@ -24,9 +24,9 @@ import shutil
 import pytz
 import sqlite3
 import aiohttp
-from discord_slash import SlashCommand
+# from discord_slash import SlashCommand
 
-from my_module import dpy_interaction_ui as dpyui
+from my_module import dpy_interaction as dpyui
 
 # textto etc
 import m10s_util as ut
@@ -49,9 +49,9 @@ bot = commands.Bot(command_prefix="s-", status=discord.Status.invisible,
                    intents=intents)
 bot.owner_id = 404243934210949120
 
-slash = SlashCommand(bot,sync_commands=True,sync_on_cog_reload=True)
+# slash = SlashCommand(bot,sync_commands=True,sync_on_cog_reload=True)
 
-bot.dpyui = dpyui.ui_actions(bot)
+bot.dpyui = dpyui.interaction_actions(bot)
 
 bot.team_sina = config.team_sina
 
@@ -274,7 +274,7 @@ bot.load_extension("cogs.apple_misc")
 bot.load_extension("cogs.apple_onlinenotif")
 
 
-@tasks.loop(minutes=5.0)
+@tasks.loop(minutes=20.0)
 async def cRPC():
     global rpcct
     if rpcct == 7:
@@ -1137,6 +1137,7 @@ async def on_invite_delete(invite):
         if ch.guild.id == invite.guild.id:
             await ch.send(embed=e)
 
+discord.abc.Messageable
 
 @bot.event
 async def on_ready():
@@ -1150,6 +1151,7 @@ async def on_ready():
     cRPC.start()
     """invite_tweet.start()
     now_sina_tweet.start()"""
+    bot.application_id = (await bot.application_info()).id
     bot.load_extension("jishaku")
     
     files = [
@@ -1158,8 +1160,9 @@ async def on_ready():
             "nekok500_mee6", "pf9_symmetry", "syouma", "m10s_gban", "m10s_bmail", "m10s_auth_wiz",
             "m10s_chinfo_rewrite", "m10s_role_panel", "m10s_messageinfo", "m10s_setting_command",
             "m10s_partners", "m10s_remainder", "m10s_level_edit", "m10s_set_activity_roles", "m10s_re_gchat",
-            "_m10s_slash_testing","_m10s_music_slash",
-            "_m10s_api"
+            # "_m10s_slash_testing","_m10s_music_slash",
+            "_m10s_api",
+            "_m10s_ctx_menu"
             ]
     
     embed = discord.Embed(title="読み込みに失敗したCog", color=bot.ec)

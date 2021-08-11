@@ -12,7 +12,7 @@ import config as cf
 
 import m10s_util as ut
 
-from my_module import dpy_interaction_ui as dpyui
+from my_module import dpy_interaction as dpyui
 
 
 class info(commands.Cog):
@@ -58,7 +58,7 @@ class info(commands.Cog):
         msg = await self.bot.dpyui.send_with_ui(ctx.channel, "下から表示したい情報を選んでください。タイムアウトは30秒です。",ui=menu)
         while True:
             try:
-                cb:dpyui.interaction_menu_callback = await self.bot.wait_for("menu_select", check=lambda icb:icb.custom_id==f"userinfo_{ctx.message.id}" and icb.message.id==msg.id and icb.clicker_id == ctx.author.id, timeout=30)
+                cb:dpyui.interaction_menu_callback = await self.bot.wait_for("menu_select", check=lambda icb:icb.custom_id==f"userinfo_{ctx.message.id}" and icb.message.id==msg.id and icb.user_id == ctx.author.id, timeout=30)
             except:
                 return
             e = discord.Embed(title="ユーザー情報", color=self.bot.ec)

@@ -121,6 +121,7 @@ def get_vmusic(bot, member):
             try:
                 mg = v.guild
                 mn = bot.qu.get(str(v.guild.id), [])
+                ml = bot.lp.get(str(v.guild.id), [])
                 mvc = v
                 break
             except:
@@ -134,7 +135,9 @@ def get_vmusic(bot, member):
             "guild": mg,
 
             "queue":mn,
-            "isPlaying":mvc.is_playing()
+            "isPlaying":mvc.is_playing(),
+            "loop":ml,
+            "volume":mvc.source.volume
         }
     else:
         return None
