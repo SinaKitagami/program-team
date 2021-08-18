@@ -137,7 +137,7 @@ class music_slash(commands.Cog):
                 "requester":ctx.author.id
             }
 
-    @cog_slash(name="join", description="ボイスチャンネルに参加します。",guild_ids=target_guilds)
+    @cog_slash(name="join", description="ボイスチャンネルに参加します。")
     async def join_(self, ctx:SlashContext):
         await ctx.defer(hidden=True)
         if ctx.author.voice:
@@ -152,7 +152,7 @@ class music_slash(commands.Cog):
         else:
             await ctx.send("あなたがボイスチャンネルに接続していません！",hidden=True)
 
-    @cog_slash(name="stop", description="ボイスチャンネルから切断します。",guild_ids=target_guilds)
+    @cog_slash(name="stop", description="ボイスチャンネルから切断します。")
     async def stop_(self, ctx:SlashContext):
         await ctx.defer(hidden=True)
         if ctx.guild.voice_client and ctx.author.voice:
@@ -170,7 +170,7 @@ class music_slash(commands.Cog):
                 await ctx.guild.voice_client.disconnect()
                 await ctx.send("切断しました。",hidden=True)
 
-    @cog_slash(name="pause",description="再生中の楽曲を一時停止します。",guild_ids=target_guilds)
+    @cog_slash(name="pause",description="再生中の楽曲を一時停止します。")
     async def pause_(self, ctx:SlashContext):
         await ctx.defer(hidden=True)
         if ctx.guild.voice_client and ctx.author.voice:
@@ -178,12 +178,12 @@ class music_slash(commands.Cog):
             await ctx.send("一時停止しました。ボイスチャットを出ても構いません。",hidden=True)
             await self.panel_update(ctx)
 
-    @cog_slash(name="play", description="引数に入れたものをもとに曲を再生します。/一時停止した音楽を再生します。" ,guild_ids=target_guilds,
+    @cog_slash(name="play", description="引数に入れたものをもとに曲を再生します。/一時停止した音楽を再生します。" ,
         options=[
-            create_option(name="URL",description="これを指定した場合、指定したURLから読み込みます。(優先度1)",option_type=3,required=False),
+            create_option(name="url",description="これを指定した場合、指定したURLから読み込みます。(優先度1)",option_type=3,required=False),
             create_option(name="word",description="これを指定した場合、指定した言葉で検索を行います。(優先度2)",option_type=3,required=False),
             create_option(name="memo",description="これを指定した場合、そのメモに書かれたURLから読み込みます。(優先度3)",option_type=3,required=False),
-            create_option(name="user",description="これを指定した場合、このユーザーのSpotifyアクティビティに基づいて再生します。(優先度4)",option_type=6,required=False)
+            create_option(name="user_activity",description="これを指定した場合、このユーザーのSpotifyアクティビティに基づいて再生します。(優先度4)",option_type=6,required=False)
             ]
     )
     async def play_(self, ctx:SlashContext, **kargs):
@@ -409,7 +409,7 @@ class music_slash(commands.Cog):
             self.bot.qu[str(ctx.guild.id)].pop(0)
         await ctx.invoke(self.bot.get_command("stop"))
 
-    @cog_slash(name="skip",description="現在再生中の曲をスキップします。",guild_ids=target_guilds)
+    @cog_slash(name="skip",description="現在再生中の曲をスキップします。")
     async def skip(self, ctx:SlashContext):
         await ctx.defer(hidden=True)
         if ctx.author.voice and ctx.guild.voice_client.is_playing():
@@ -419,17 +419,17 @@ class music_slash(commands.Cog):
             self.bot.lp[str(ctx.guild.id)] = lp
             await ctx.send("曲をスキップしました。",hidden=True)
 
-    @cog_slash(name="volume",description="設定した値にボリュームを調節します。",guild_ids=target_guilds,
-        options=[create_option(name="音量",description="設定する音量(0~100)",option_type=4,required=True)]
+    @cog_slash(name="set_volume",description="設定した値にボリュームを調節します。",
+        options=[create_option(name="volume",description="設定する音量(0~100)",option_type=4,required=True)]
     )
     async def chvol(self, ctx:SlashContext, **kargs):
         await ctx.defer(hidden=True)
         if ctx.author.voice and ctx.guild.voice_client.is_playing():
-            ctx.guild.voice_client.source.volume = float(kargs.get("音量"))/100.0
+            ctx.guild.voice_client.source.volume = float(kargs.get("volume"))/100.0
             await ctx.send(f"ボリュームを{ctx.guild.voice_client.source.volume*100.0}に調節しました。",hidden=True)
             await self.panel_update(ctx)
 
-    @cog_slash(name="now_playing",description="現在再生中の音楽について表示します。",guild_ids=target_guilds)
+    @cog_slash(name="now_playing",description="現在再生中の音楽について表示します。")
     async def playingmusic(self, ctx:SlashContext):
         await ctx.defer(hidden=True)
         if ctx.guild.voice_client is None:
@@ -443,7 +443,7 @@ class music_slash(commands.Cog):
         else:
             await ctx.send("再生中の曲はありません。",hidden=True)
 
-    @cog_slash(name="queue",description="再生キューに入っている曲を表示します。",guild_ids=target_guilds)
+    @cog_slash(name="queue",description="再生キューに入っている曲を表示します。")
     async def view_q(self, ctx:SlashContext):
         await ctx.defer(hidden=True)
         if ctx.guild.voice_client is None:
@@ -490,11 +490,11 @@ class music_slash(commands.Cog):
         else:
             await ctx.send("現在キューには何もありません。")
 
-    @cog_slash(name="loop",description="再生キューをループするかどうかを設定します。",guild_ids=target_guilds,
-        options=[create_option(name="有効にするかどうか",description="Trueで有効に、Falseで無効にします。(入力しなければ現在の状態を表示します。)",option_type=5,required=False)]
+    @cog_slash(name="loop",description="再生キューをループするかどうかを設定します。",
+        options=[create_option(name="enable",description="Trueで有効に、Falseで無効にします。(入力しなければ現在の状態を表示します。)",option_type=5,required=False)]
     )
     async def loop_q(self, ctx:SlashContext, **kargs):
-        torf = kargs.get("有効にするかどうか",None)
+        torf = kargs.get("enable",None)
         await ctx.defer(hidden=True)
         if ctx.author.voice:
             if torf is None:
@@ -504,7 +504,7 @@ class music_slash(commands.Cog):
                 await ctx.send(f"きりかえました。\n今のキューのループ状態:{self.bot.lp[str(ctx.guild.id)]}",hidden=True)
                 await self.panel_update(ctx)
 
-    @cog_slash(name="panel_update",description="再生パネルを強制的に更新します。",guild_ids=target_guilds)
+    @cog_slash(name="panel_update",description="再生パネルを強制的に更新します。")
     async def pupdate(self, ctx):
         await ctx.defer(hidden=True)
         await self.panel_update(ctx)
@@ -540,7 +540,7 @@ class music_slash(commands.Cog):
             pass
 
 
-    @cog_slash(name="shuffle",description="再生キューをシャッフルします。",guild_ids=target_guilds)
+    @cog_slash(name="shuffle",description="再生キューをシャッフルします。")
     async def shuffle_(self, ctx):
         await ctx.defer(hidden=True)
         if self.bot.qu.get(str(ctx.guild.id), None) is not None and len(self.bot.qu[str(ctx.guild.id)]) > 2:
@@ -552,11 +552,11 @@ class music_slash(commands.Cog):
             await ctx.send("> シャッフルエラー\n　シャッフルに必要要件を満たしていません。(VCで音楽再生中で、3曲以上キューに入っている)",hidden=True)
 
 
-    @cog_slash(name="move_panel",description="他のチャンネルにミュージック操作パネルを移動します。",guild_ids=target_guilds,
-        options=[create_option(name="移動先チャンネル",description="音楽再生パネルを移動させたいテキストチャンネルを指定してください。",option_type=7,required=True)]
+    @cog_slash(name="move_panel",description="他のチャンネルにミュージック操作パネルを移動します。",
+        options=[create_option(name="move to",description="音楽再生パネルを移動させたいテキストチャンネルを指定してください。",option_type=7,required=True)]
     )
     async def move_panel(self, ctx:SlashContext, **kargs):
-        move_to = kargs.get("移動先チャンネル")
+        move_to = kargs.get("move to")
         await ctx.defer(hidden=True)
         if move_to.type == discord.ChannelType.text:
             ebd = discord.Embed(title="思惟奈ちゃん-ミュージック操作パネル", color=self.bot.ec)
