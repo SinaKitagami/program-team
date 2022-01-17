@@ -225,20 +225,22 @@ class music_slash(commands.Cog):
                 else:
                     vurls = [text]
             elif kargs.get("word",None):
-                search_response = self.youtube.search().list(
-                    part='snippet',
-                    q=kargs["word"],
-                    type='video'
-                ).execute()
-                vid = search_response['items'][0]['id']['videoId']
-                if vid:
-                    vurls = [f"https://www.youtube.com/watch?v={vid}"]
-                else:
-                    return await ctx.send("動画が見つかりませんでした。",hidden=True)
-            elif kargs.get("memo's_name",None):
-                self.bot.cursor.execute(
-                    "select * from users where id=?", (ctx.author.id,))
-                pf = self.bot.cursor.fetchone()
+                try:
+                    search_response = self.youtube.search().list(
+                        q=kargs["word"],
+                        type='video'
+                    ).execute()
+                    vid = search_response['items'][0]['id']['videoId']
+                    if vid:
+                        vurls = [f"https://www.youtube.com/watch?v={vid}"]
+                    else:
+                        return await ctx.send("動画が見つかりませんでした。",hidden=True)
+                except:
+                    return await ctx.send("> 検索エラー\n　現在検索ワードを用いた検索ができません。URLをお試しください。",hidden=True)
+            elif kargs.get("memo",None):
+                pf = await self.bot.cursor.fetchone(
+                    "select * from users where id=%s", (ctx.author.id,))
+                #pf = await self.bot.cursor.fetchone()
                 mn = kargs["memo"]
                 if pf["memo"] is not None and pf["memo"].get(mn,None) is not None:
                     for i in pf["memo"][mn].split("\n"):

@@ -49,22 +49,22 @@ class TranslateHandler:
         self._translation_cache = {}
         self._lang_cache = {}
 
-    def update_language_cache(self, target, to=None):
+    async def update_language_cache(self, target, to=None):
         if to is None:
             if isinstance(target, discord.Guild):
-                to = self.get_lang_by_guild(target, cache=False)
+                to = await self.get_lang_by_guild(target, cache=False)
             else:
-                to = self.get_lang_by_user(target, cache=False)
+                to = await self.get_lang_by_user(target, cache=False)
             return  # get function caches
         if to not in self.supported_locales:
             return
         self._lang_cache[target.id] = to
 
-    def get_lang_by_guild(self, guild, cache=True):
+    async def get_lang_by_guild(self, guild, cache=True):
         if cache and guild.id in self._lang_cache:
             return self._lang_cache[guild.id]
-        guild_db = self.bot.cursor.execute(
-            "SELECT lang FROM guilds WHERE id=?", (guild.id,)).fetchone()
+        guild_db = await self.bot.cursor.fetchone("SELECT lang FROM guilds WHERE id=%s", (guild.id,))
+        #guild_db = await self.bot.cursor.fetchone()
         lang = None
         if not guild_db:
             lang = guild.preferred_locale
@@ -79,31 +79,32 @@ class TranslateHandler:
             return lang
         return None
 
-    def get_lang_by_user(self, user, cache=True):
+    async def get_lang_by_user(self, user, cache=True):
         if cache and user.id in self._lang_cache:
             return self._lang_cache[user.id]
-        user_db = self.bot.cursor.execute(
-            "SELECT lang FROM users WHERE id=?", (user.id,)).fetchone()
+        user_db = await self.bot.cursor.fetchone(
+            "SELECT lang FROM users WHERE id = %s", (user.id,))
+        #user_db = await self.bot.cursor.fetchone()
         if user_db and user_db["lang"] and user_db["lang"] in self.supported_locales:
             self._lang_cache[user.id] = user_db["lang"]
             return user_db["lang"]
         return None
 
-    def get_lang(self, user):
-        lang = self.get_lang_by_user(user)
+    async def get_lang(self, user):
+        lang = await self.get_lang_by_user(user)
         if lang:
             return lang
         if isinstance(user, discord.Member):
-            lang = self.get_lang_by_guild(user.guild)
+            lang = await self.get_lang_by_guild(user.guild)
             if lang:
                 return lang
         return "ja"
 
-    def get_translation_for(self, user, key, *args, **kwargs):
-        return self.get_raw_translation(self.get_lang(user), key, *args, **kwargs)
+    async def get_translation_for(self, user, key, *args, **kwargs):
+        return self.get_raw_translation(await self.get_lang(user), key, *args, **kwargs)
 
-    def get_guild_translation_for(self, guild, key, *args, **kwargs):
-        lang = self.get_lang_by_guild(guild)
+    async def get_guild_translation_for(self, guild, key, *args, **kwargs):
+        lang = await self.get_lang_by_guild(guild)
         if not lang:
             lang = "ja"
         return self.get_raw_translation(lang, key, *args, **kwargs)
@@ -114,11 +115,11 @@ class TranslateHandler:
             return word
         return word.format(*args, **kwargs)
 
-    def get_any_translation(self, target, key, *args, **kwargs):
+    async def get_any_translation(self, target, key, *args, **kwargs):
         if isinstance(target, discord.abc.User):
-            return self.get_translation_for(target, key, *args, **kwargs)
+            return await self.get_translation_for(target, key, *args, **kwargs)
         elif isinstance(target, discord.Guild):
-            return self.get_guild_translation_for(target, key, *args, **kwargs)
+            return await self.get_guild_translation_for(target, key, *args, **kwargs)
         return self.get_raw_translation(target, key, *args, **kwargs)
 
 
@@ -126,22 +127,22 @@ class LocalizedContext(commands.Context):
     async def say(self, key, *args, **kwargs):
         return await self.send(self._(key, *args, **kwargs))
 
-    def _(self, key, *args, **kwargs):
-        return self.bot.translate_handler.get_translation_for(self.author, key, *args, **kwargs)
+    async def _(self, key, *args, **kwargs):
+        return await self.bot.translate_handler.get_translation_for(self.author, key, *args, **kwargs)
 
-    def l10n(self, user, key, *args, **kwargs):
-        return self.bot.translate_handler.get_translation_for(user, key, *args, **kwargs)
+    async def l10n(self, user, key, *args, **kwargs):
+        return await self.bot.translate_handler.get_translation_for(user, key, *args, **kwargs)
 
-    def l10n_guild(self, guild, key, *args, **kwargs):
-        return self.bot.translate_handler.get_guild_translation_for(guild, key, *args, **kwargs)
+    async def l10n_guild(self, guild, key, *args, **kwargs):
+        return await self.bot.translate_handler.get_guild_translation_for(guild, key, *args, **kwargs)
 
-    def l10n_any(self, target, key, *args, **kwargs):
-        return self.bot.translate_handler.get_any_translation(target, key, *args, **kwargs)
+    async def l10n_any(self, target, key, *args, **kwargs):
+        return await self.bot.translate_handler.get_any_translation(target, key, *args, **kwargs)
 
     def l10n_raw(self, lang, key, *args, **kwargs):
         return self.bot.translate_handler.get_raw_translation(lang, key, *args, **kwargs)
 
-    def user_lang(self, user=None):
+    async def user_lang(self, user=None):
         if user is None:
             user = self.author
-        return self.bot.translate_handler.get_lang_by_user(user)
+        return await self.bot.translate_handler.get_lang_by_user(user)

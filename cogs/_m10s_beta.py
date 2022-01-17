@@ -9,7 +9,7 @@ import asyncio
 
 import m10s_util as ut
 
-from my_module import dpy_interaction_ui as dpyui
+from my_module import dpy_interaction as dpyui
 
 class m10s_beta(commands.Cog):
 

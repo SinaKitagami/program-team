@@ -8,17 +8,17 @@ class AppleInviteCog(commands.Cog):
         self.db = bot.cursor
         self._lock = False
 
-    def get_log_channel(self, guild_id):
-        guild = self.db.execute(
-            "SELECT * FROM guilds WHERE id=?", (guild_id,)).fetchone()
+    async def get_log_channel(self, guild_id):
+        guild = await self.db.fetchone("SELECT * FROM guilds WHERE id=%s", (guild_id,))
+        #guild = await self.bot.cursor.fetchone()
         if not guild:
             return None
         if guild["sendlog"]:
             return self.bot.get_channel(guild["sendlog"])
         return None
 
-    def delete_invite(self, code):
-        self.db.execute("DELETE FROM invites WHERE id = ?", (code,))
+    async def delete_invite(self, code):
+        await self.db.execute("DELETE FROM invites WHERE id = %s", (code,))
 
     async def add_invite(self, invite):
         # Validate the Invite. If those are missing, we have to return.
@@ -32,7 +32,7 @@ class AppleInviteCog(commands.Cog):
         )):
             return
 
-        if not self.get_log_channel(invite.guild.id):
+        if not await self.get_log_channel(invite.guild.id):
             return
 
         if not self.bot.apple_util.has_all_perms(
@@ -53,17 +53,18 @@ class AppleInviteCog(commands.Cog):
             invites = await invite.guild.invites()
             invite = discord.utils.get(invites, code=invite.code)
 
-        self.db.execute("INSERT INTO invites values (?, ?, 0, ?)", (
+        await self.db.execute("INSERT INTO invites values (%s, %s, 0, %s)", (
             invite.code,
             invite.guild.id,
             invite.inviter.id
         ))
 
     async def sync_invites(self):
+        p = await self.bot.cursor.fetchall("SELECT id FROM guilds WHERE sendlog IS NOT NULL")
         guilds = [
             self.bot.get_guild(g["id"])
             for g
-            in self.db.execute("SELECT id FROM guilds WHERE sendlog IS NOT NULL").fetchall()
+            in p
             if self.bot.get_guild(g["id"])
         ]
         touched_invites = set()
@@ -78,21 +79,23 @@ class AppleInviteCog(commands.Cog):
                 continue
             invites = await guild.invites()
             touched_invites |= set(i.code for i in invites)
+            
             for invite in invites:
-                if self.db.execute("SELECT id FROM invites WHERE id = ?", (invite.code,)).fetchone():
+                a = await self.bot.cursor.fetchone("SELECT id FROM invites WHERE id = %s", (invite.code,))
+                if a:
                     # invite exists, updating
-                    self.db.execute(
-                        "UPDATE invites SET uses = ? WHERE id = ?", (invite.uses, invite.code))
+                    await self.db.execute(
+                        "UPDATE invites SET uses = %s WHERE id = %s", (invite.uses, invite.code))
                 else:
                     await self.add_invite(invite)
-        invites_in_db = set(i["id"] for i in self.db.execute(
-            "SELECT id FROM invites").fetchall())
+        b = await self.bot.cursor.fetchall("SELECT id FROM invites")
+        invites_in_db = set(i["id"] for i in b)
         needs_deletion = invites_in_db.difference(touched_invites)
-        map(self.delete_invite, needs_deletion)
+        [await self.delete_invite(i) for i in needs_deletion]
 
     @commands.Cog.listener()
     async def on_invite_delete(self, invite):
-        self.delete_invite(invite.code)
+        await self.delete_invite(invite.code)
 
     @commands.Cog.listener()
     async def on_invite_create(self, invite):
@@ -106,14 +109,14 @@ class AppleInviteCog(commands.Cog):
     async def on_member_join(self, member):
         self._lock = True
         guild = member.guild
-        log_ch = self.get_log_channel(guild.id)
+        log_ch = await self.get_log_channel(guild.id)
         if not log_ch:
             self._lock = False
             return
         used_invites = []
         invites = await guild.invites()
-        invites_in_db = self.db.execute(
-            "SELECT * FROM invites WHERE guild_id = ?", (guild.id,)).fetchall()
+        invites_in_db = await self.db.fetchall("SELECT * FROM invites WHERE guild_id = %s", (guild.id,))
+        #invites_in_db = await self.bot.cursor.fetchall()
         for invite in invites:
             invite_db = discord.utils.find(
                 lambda i: i["id"] == invite.code, invites_in_db)
@@ -122,12 +125,12 @@ class AppleInviteCog(commands.Cog):
                     "code": invite.code,
                     "inviter": invite.inviter
                 }]
-                self.db.execute(
-                    "UPDATE invites SET uses = ? WHERE id = ?", (invite.uses, invite.code))
+                await self.db.execute(
+                    "UPDATE invites SET uses = %s WHERE id = %s", (invite.uses, invite.code))
                 break
         if not used_invites:
-            db_set = set(i["id"] for i in self.db.execute(
-                "SELECT id FROM invites").fetchall())
+            await self.self.bot.cursor.execute("SELECT id FROM invites")
+            db_set = set(i["id"] for i in await self.bpt.cursor.fetchall())
             api_set = set(i.code for i in invites)
             diff = db_set.difference(api_set)
             used_invites = [
@@ -136,7 +139,7 @@ class AppleInviteCog(commands.Cog):
                 for code
                 in diff
             ]
-            map(self.delete_invite, diff)
+            _ = [await self.delete_invite(i) for i in diff]
         self._lock = False
         self.bot.dispatch('member_join_with_invites', member, used_invites)
 
@@ -153,7 +156,7 @@ class AppleInviteCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join_with_invites(self, member, invites):
-        log_ch = self.get_log_channel(member.guild.id)
+        log_ch = await self.get_log_channel(member.guild.id)
         e = discord.Embed(title=f"{str(member)}の招待の情報",
                           description=str(member.id))
         e.set_thumbnail(url=str(member.avatar_url))
@@ -172,7 +175,7 @@ class AppleInviteCog(commands.Cog):
         pc = i2.approximate_presence_count
         await i.delete()
         online = len(
-            [m for m in ctx.guild.members if m.status is not discord.Status.offline and self.bot.can_use_online(m)])
+            [m for m in ctx.guild.members if m.status is not discord.Status.offline and await self.bot.can_use_online(m)])
         await ctx.author.send(f"オンライン隠し: {pc - online}人")
 
 

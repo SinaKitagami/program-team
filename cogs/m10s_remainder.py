@@ -35,14 +35,14 @@ class m10s_remainder(commands.Cog):
         except:
             await ctx.send("> リマインダー\n　日時の指定が誤っています。もう一度やり直してください。")
             return
-        self.bot.cursor.execute("insert into remaind (id,stext,mention_role,time,chid) values (?,?,?,?,?)", (rid, send_text, mention_at, ts.timestamp(), ctx.channel.id))
+        await self.bot.cursor.execute("insert into remaind (id,stext,mention_role,time,chid) values (%s,%s,%s,%s,%s)", (rid, send_text, mention_at, ts.timestamp(), ctx.channel.id))
         await ctx.send(f"> リマインダー\n　{ts.strftime('%Y/%m/%d %H:%M')}にリマインダーの登録をしました。(リマインダーID:`{rid}`)")
 
     @remainder.command()
     async def check(self,ctx,rid=None):
         if rid:
-            self.bot.cursor.execute("select * from remaind where id = ?",(int(rid),))
-            i = self.bot.cursor.fetchone()
+            i = await self.bot.cursor.fetchone("select * from remaind where id = %s",(int(rid),))
+            #i = await self.bot.cursor.fetchone()
             if i:
                 e=discord.Embed(title="リマインド情報",color=self.bot.ec)
                 try:
@@ -56,8 +56,8 @@ class m10s_remainder(commands.Cog):
             else:
                 await ctx.send("> リマインダー\n　該当IDのリマインドは見つかりませんでした。")
         else:
-            self.bot.cursor.execute("select * from remaind where chid = ?",(ctx.channel.id,))
-            i = self.bot.cursor.fetchall()
+            i = await self.bot.cursor.fetchall("select * from remaind where chid = %s",(ctx.channel.id,))
+            #i = await self.bot.cursor.fetchall()
             if i:
                 pmax = len(i)-1
                 page = 0
@@ -105,7 +105,7 @@ class m10s_remainder(commands.Cog):
 
     @remainder.command()
     async def delete(self,ctx,rid:int):
-        self.bot.cursor.execute("delete from remaind where id = ?",(rid,))
+        await self.bot.cursor.execute("delete from remaind where id = %s",(rid,))
         await ctx.send("> リマインダー\n　該当IDを持ったリマインドがある場合、それを削除しました。")
 
 
@@ -113,8 +113,8 @@ class m10s_remainder(commands.Cog):
     @tasks.loop(seconds=2)
     async def remainder_check(self):
         now = datetime.datetime.now()
-        self.bot.cursor.execute("select * from remaind")
-        remainds = self.bot.cursor.fetchall()
+        remainds = await self.bot.cursor.fetchall("select * from remaind")
+        #remainds = await self.bot.cursor.fetchall()
         remaind_list =  [i for i in remainds if datetime.datetime.fromtimestamp(i['time'])<= now]
         for i in remaind_list:
             ch = self.bot.get_channel(i["chid"])
@@ -130,7 +130,7 @@ class m10s_remainder(commands.Cog):
             except:
                 print("失敗したリマインダー")
             finally:
-                self.bot.cursor.execute("delete from remaind where id = ?",(i["id"],))
+                await self.bot.cursor.execute("delete from remaind where id = %s",(i["id"],))
 
 
 def setup(bot):

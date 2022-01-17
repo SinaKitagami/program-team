@@ -53,6 +53,25 @@ class owner(commands.Cog):
             return True
         else:
             return False
+    
+    @commands.command()
+    @commands.check(is_evalable)
+    async def sql(self, ctx, *, query):
+        await ctx.message.add_reaction(self.bot.get_emoji(653161518346534912))
+        try:
+            ret = await self.bot.cursor.fetchall(query)
+        except Exception as exc:
+            await ctx.message.remove_reaction(self.bot.get_emoji(653161518346534912), self.bot.user)
+            await ctx.message.add_reaction("❌")
+            return await ctx.author.send(embed=discord.Embed(title="sql's Error", description=f"```py\n{exc}\n```", color=self.bot.ec))
+        else:
+            await ctx.message.remove_reaction(self.bot.get_emoji(653161518346534912), self.bot.user)
+            await ctx.message.add_reaction(self.bot.get_emoji(653161518103265291))
+            
+            if ret:
+                await ctx.send(f"```\n{ret}\n```")
+            else:
+                await ctx.send("```\nnone\n```")
 
     @commands.command()
     @commands.check(is_evalable)
@@ -178,39 +197,39 @@ class owner(commands.Cog):
         if info:
             async with ctx.message.channel.typing():
                 if ctx.guild.owner == info:
-                    embed = discord.Embed(title=ctx._(
-                        "userinfo-name"), description=f"{info.name} - {ut.ondevicon(info)} - {ctx._('userinfo-owner')}", color=info.color)
+                    embed = discord.Embed(title=await ctx._(
+                        "userinfo-name"), description=f"{info.name} - {ut.ondevicon(info)} - {await ctx._('userinfo-owner')}", color=info.color)
                 else:
-                    embed = discord.Embed(title=ctx._(
+                    embed = discord.Embed(title=await ctx._(
                         "userinfo-name"), description=f"{info.name} - {ut.ondevicon(info)}", color=info.color)
-                embed.add_field(name=ctx._(
+                embed.add_field(name=await ctx._(
                     "userinfo-joindiscord"), value=info.created_at)
-                embed.add_field(name=ctx._("userinfo-id"), value=info.id)
-                embed.add_field(name=ctx._("userinfo-online"),
+                embed.add_field(name=await ctx._("userinfo-id"), value=info.id)
+                embed.add_field(name=await ctx._("userinfo-online"),
                                 value=f"{str(info.status)}")
-                embed.add_field(name=ctx._("userinfo-isbot"),
+                embed.add_field(name=await ctx._("userinfo-isbot"),
                                 value=str(info.bot))
-                embed.add_field(name=ctx._(
+                embed.add_field(name=await ctx._(
                     "userinfo-displayname"), value=info.display_name)
-                embed.add_field(name=ctx._(
+                embed.add_field(name=await ctx._(
                     "userinfo-joinserver"), value=info.joined_at)
                 embed.set_footer(
                     text=f"サーバー:{info.guild.name}({info.guild.id})")
                 if info.activity is not None:
                     try:
-                        embed.add_field(name=ctx._(
+                        embed.add_field(name=await ctx._(
                             "userinfo-nowplaying"), value=f'{info.activity.name}')
                     except:
-                        embed.add_field(name=ctx._(
+                        embed.add_field(name=await ctx._(
                             "userinfo-nowplaying"), value=info.activity)
                 hasroles = ""
                 for r in info.roles:
                     hasroles = hasroles + f"{r.mention},"
-                embed.add_field(name=ctx._("userinfo-roles"), value=hasroles)
+                embed.add_field(name=await ctx._("userinfo-roles"), value=hasroles)
                 if info.avatar_url is not None:
                     embed.set_thumbnail(
                         url=info.avatar_url_as(static_format='png'))
-                    embed.add_field(name=ctx._("userinfo-iconurl"),
+                    embed.add_field(name=await ctx._("userinfo-iconurl"),
                                     value=info.avatar_url_as(static_format='png'))
                 else:
                     embed.set_image(
@@ -221,12 +240,12 @@ class owner(commands.Cog):
 
     @commands.command()
     async def cuglobal(self, ctx, *cids):
-        self.bot.cursor.execute(
-            "select * from users where id=?", (ctx.author.id,))
-        upf = self.bot.cursor.fetchone()
+        upf = await self.bot.cursor.fetchone(
+            "select * from users where id=%s", (ctx.author.id,))
+        #upf = await self.bot.cursor.fetchone()
         if upf["gmod"] is True:
-            self.bot.cursor.execute("select * from globalchs")
-            chs = self.bot.cursor.fetchall()
+            chs = await self.bot.cursor.fetchall("select * from globalchs")
+            #chs = await self.bot.cursor.fetchall()
             async with ctx.channel.typing():
                 for cid in [int(i) for i in cids]:
                     await asyncio.sleep(0.5)
@@ -235,8 +254,8 @@ class owner(commands.Cog):
                             if cid in ch["ids"]:
                                 clt = ch["ids"]
                                 clt.remove(cid)
-                                self.bot.cursor.execute(
-                                    "UPDATE globalchs SET ids = ? WHERE name = ?", (clt, ch["name"]))
+                                await self.bot.cursor.execute(
+                                    "UPDATE globalchs SET ids = %s WHERE name = %s", (clt, ch["name"]))
                                 break
                     except:
                         pass
@@ -278,8 +297,8 @@ class owner(commands.Cog):
     async def guildv(self, ctx, gid: int, bl: bool=True):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
               ctx.message.content)
-        self.bot.cursor.execute(
-            "UPDATE guilds SET verified = ? WHERE id = ?", (bl, gid))
+        await self.bot.cursor.execute(
+            "UPDATE guilds SET verified = %s WHERE id = %s", (bl, gid))
         await ctx.send(f"サーバー`{self.bot.get_guild(gid)}`の認証状態を{str(bl)}にしました。")
 
 

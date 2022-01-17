@@ -80,9 +80,9 @@ class tests(commands.Cog):
                                 pass
                 await ctx.send("完了しました。")
             else:
-                await ctx.send(ctx._("need-admin"))
+                await ctx.send(await ctx._("need-admin"))
         except:
-            await ctx.send(embed=ut.getEmbed(ctx._("ginfo-anyerror-title"), ctx._("ginfo-anyerror-title", traceback.format_exc(0))))
+            await ctx.send(embed=ut.getEmbed(await ctx._("ginfo-anyerror-title"), await ctx._("ginfo-anyerror-title", traceback.format_exc(0))))
 
 
 def setup(bot):

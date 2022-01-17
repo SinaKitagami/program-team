@@ -3,6 +3,8 @@ from discord.ext import commands
 import asyncio
 import m10s_util as ut
 
+import json
+
 
 class m10s_auth_wiz(commands.Cog):
 
@@ -11,11 +13,11 @@ class m10s_auth_wiz(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, m):
-        self.bot.cursor.execute(
-            "select * from welcome_auth where id = ?", (m.guild.id,))
-        auths = self.bot.cursor.fetchone()
+        auths = await self.bot.cursor.fetchone(
+            "select * from welcome_auth where id = %s", (m.guild.id,))
+        #auths = await self.bot.cursor.fetchone()
         if auths:
-            if bool(auths["use"]) and not(m.bot):
+            if bool(auths["uses"]) and not(m.bot):
                 if type(auths["next_reaction"]) is int:
                     nr = self.bot.get_emoji(auths["next_reaction"])
                 else:
@@ -26,7 +28,7 @@ class m10s_auth_wiz(commands.Cog):
                     m.guild.me: discord.PermissionOverwrite(
                         read_messages=True, send_messages=True, manage_messages=True)
                 }
-                for i in auths["can_view"]:
+                for i in json.loads(auths["can_view"]):
                     rl = m.guild.get_role(i)
                     if rl:
                         ow[rl] = discord.PermissionOverwrite(
@@ -37,7 +39,7 @@ class m10s_auth_wiz(commands.Cog):
                 else:
                     ch = await m.guild.create_text_channel(f"sinaauth-{m.name}", overwrites=ow, topic=str(m.id), position=0)
                 msg = await ch.send("please wait...\nしばらくお待ちください…")
-                for i in auths["au_w"]:
+                for i in json.loads(auths["au_w"]):
                     await msg.edit(content=None, embed=ut.getEmbed(f"サーバーユーザー認証", f"※{nr}で進行します。\n{i['text']}"))
                     for r in i["reactions"]:
                         if type(r) is int:
@@ -46,7 +48,7 @@ class m10s_auth_wiz(commands.Cog):
                             rct = r
                         await msg.add_reaction(rct)
                     await msg.add_reaction(nr)
-                    r, u = await self.bot.wait_for("reaction_add", check=lambda r, u: r.message.id == msg.id and u.id == m.id and r.emoji == auths["next_reaction"])
+                    r, _ = await self.bot.wait_for("reaction_add", check=lambda r, u: r.message.id == msg.id and u.id == m.id and r.emoji == auths["next_reaction"])
                     ridx = [i["reactions"].index(str(r.emoji)) for r in r.message.reactions if r.count == 2 and r.emoji != nr]
                     for ri in ridx:
                         grl = m.guild.get_role(i["give_role"][ri])
@@ -60,11 +62,11 @@ class m10s_auth_wiz(commands.Cog):
     @commands.has_permissions(administrator=True)
     @commands.bot_has_permissions(manage_messages=True,manage_roles=True)
     async def _setting(self, ctx):
-        self.bot.cursor.execute(
-            "select * from welcome_auth where id = ?", (ctx.guild.id,))
-        auths = self.bot.cursor.fetchone()
+        auths = await self.bot.cursor.fetchone(
+            "select * from welcome_auth where id = %s", (ctx.guild.id,))
+        #auths = await self.bot.cursor.fetchone()
         if auths:
-            use = bool(auths["use"])
+            use = bool(auths["uses"])
         else:
             use = False
         e = discord.Embed(title="認証ウィザードの設定", description="""
@@ -75,7 +77,7 @@ class m10s_auth_wiz(commands.Cog):
         if use:
             e.add_field(name="利用状況", value="使用する", inline=False)
             roles = "\n".join([str(ctx.guild.get_role(i))
-                               for i in auths["can_view"]])
+                               for i in json.loads(auths["can_view"])])
             e.add_field(name="認証を閲覧できる役職", value=roles, inline=False)
             if auths["category"]:
                 category = self.bot.get_channel(auths["category"])
@@ -90,7 +92,7 @@ class m10s_auth_wiz(commands.Cog):
             elif isinstance(auths["next_reaction"], int):
                 nr = self.bot.get_emoji(auths["next_reaction"])
             e.add_field(name="次に進むリアクション", value=nr, inline=False)
-            auth_w = auths["au_w"]
+            auth_w = json.loads(auths["au_w"])
             e.add_field(name="現在の認証の長さ", value=len(auth_w), inline=False)
             grole = ctx.guild.get_role(auths["give_role"])
             e.add_field(name="与える役職", value=str(grole), inline=False)
@@ -127,8 +129,8 @@ class m10s_auth_wiz(commands.Cog):
                 if r.emoji == "🎖":
                     m = await ut.wait_message_return(ctx, "認証後、与える役職のIDを送信してください。", udm, 60)
                     grole = int(m.content)
-                    self.bot.cursor.execute(
-                        "UPDATE welcome_auth SET give_role = ? WHERE id = ?", (grole, ctx.guild.id))
+                    await self.bot.cursor.execute(
+                        "UPDATE welcome_auth SET give_role = %s WHERE id = %s", (grole, ctx.guild.id))
                     await udm.send("変更が完了しました。")
                 elif r.emoji == "▶":
                     m = await ut.wait_message_return(ctx, "作成するウィザードの進行絵文字を送ってください。\nサーバー絵文字の場合は、IDを送信してください。", udm, 60)
@@ -136,8 +138,8 @@ class m10s_auth_wiz(commands.Cog):
                         nr = int(m.content)
                     except:
                         nr = m.content
-                    self.bot.cursor.execute(
-                        "UPDATE welcome_auth SET next_reaction = ? WHERE id = ?", (nr, ctx.guild.id))
+                    await self.bot.cursor.execute(
+                        "UPDATE welcome_auth SET next_reaction = %s WHERE id = %s", (nr, ctx.guild.id))
                     await udm.send("変更が完了しました。")
                 elif r.emoji == "🎫":
                     m = await ut.wait_message_return(ctx, "チャンネルを作成するカテゴリーのIDを送信してください。\nカテゴリーを作らない場合は、任意のテキストを送信してください。", udm, 60)
@@ -145,13 +147,13 @@ class m10s_auth_wiz(commands.Cog):
                         category = int(m.content)
                     except:
                         category = None
-                    self.bot.cursor.execute(
-                        "UPDATE welcome_auth SET category = ? WHERE id = ?", (category, ctx.guild.id))
+                    await self.bot.cursor.execute(
+                        "UPDATE welcome_auth SET category = %s WHERE id = %s", (category, ctx.guild.id))
                     await udm.send("変更が完了しました。")
                 elif r.emoji == "📖":
-                    self.bot.cursor.execute(
-                        "select * from welcome_auth where id = ?", (ctx.guild.id,))
-                    auths = self.bot.cursor.fetchone()
+                    auths = await self.bot.cursor.fetchone(
+                        "select * from welcome_auth where id = %s", (ctx.guild.id,))
+                    #auths = await self.bot.cursor.fetchone()
                     if isinstance(auths["next_reaction"], str):
                         nr = auths["next_reaction"]
                     elif isinstance(auths["next_reaction"], int):
@@ -189,14 +191,14 @@ class m10s_auth_wiz(commands.Cog):
                             tmsg = await ut.wait_message_return(ctx, f"> 編集ウィザード\n最後に、そのページのテキストを送信してください。", udm, 60)
                             tmp["text"] = tmsg.content
                             auth_w.append(tmp)
-                    self.bot.cursor.execute(
-                        "UPDATE welcome_auth SET au_w = ? WHERE id = ?", (auth_w, ctx.guild.id))
+                    await self.bot.cursor.execute(
+                        "UPDATE welcome_auth SET au_w = %s WHERE id = %s", (json.dumps(auth_w), ctx.guild.id))
                     await udm.send("変更が完了しました。")
                 elif r.emoji == "🔍":
                     tmsg = await ut.wait_message_return(ctx, f"> 編集ウィザード\nそのチャンネルを閲覧できる役職のIDをスペース区切りで送信してください。", udm, 60)
                     cv = [int(i) for i in tmsg.content.split(" ")]
-                    self.bot.cursor.execute(
-                        "UPDATE welcome_auth SET can_view = ? WHERE id = ?", (cv, ctx.guild.id))
+                    await self.bot.cursor.execute(
+                        "UPDATE welcome_auth SET can_view = %s WHERE id = %s", (json.dumps(cv), ctx.guild.id))
                     await udm.send("変更が完了しました。")
             else:  # 設定が存在しない場合、初期設定を行います。
                 udm = await ut.opendm(ctx.author)
@@ -250,8 +252,8 @@ class m10s_auth_wiz(commands.Cog):
                             tmsg = await ut.wait_message_return(ctx, f"> 作成ウィザード\n最後に、そのページのテキストを送信してください。", udm, 60)
                             tmp["text"] = tmsg.content
                             auth_w.append(tmp)
-                    self.bot.cursor.execute("insert into welcome_auth (id,category,use,can_view,next_reaction,au_w,give_role) values(?,?,?,?,?,?,?)", (
-                        ctx.guild.id, category, 1, cv, nr, auth_w, grole))
+                    await self.bot.cursor.execute("insert into welcome_auth (id,category,use,can_view,next_reaction,au_w,give_role) values(%s,%s,%s,%s,%s,%s,%s)", (
+                        ctx.guild.id, category, 1, json.dumps(cv), nr, json.dumps(auth_w), grole))
                     await udm.send("> 作成ウィザード\n作成が完了しました！設定の確認や変更は、再度`s-Authsetting`コマンドで行えます。")
                 except asyncio.TimeoutError:
                     await udm.send("タイムアウトしました。再度設定をするには、初めからやり直してください。")
@@ -259,11 +261,11 @@ class m10s_auth_wiz(commands.Cog):
             if auths:
                 await m.clear_reactions()
                 if use:
-                    self.bot.cursor.execute(
-                        "UPDATE welcome_auth SET use = ? WHERE id = ?", (0, ctx.guild.id))
+                    await self.bot.cursor.execute(
+                        "UPDATE welcome_auth SET uses = %s WHERE id = %s", (0, ctx.guild.id))
                 else:
-                    self.bot.cursor.execute(
-                        "UPDATE welcome_auth SET use = ? WHERE id = ?", (1, ctx.guild.id))
+                    await self.bot.cursor.execute(
+                        "UPDATE welcome_auth SET uses = %s WHERE id = %s", (1, ctx.guild.id))
                 await m.edit(embed=ut.getEmbed("認識ウィザード", f"利用設定を{not use}に切り替えました。"))
             else:
                 await m.edit(embed=ut.getEmbed("認識ウィザード", f"初めに✏絵文字から利用設定を行ってください。"))

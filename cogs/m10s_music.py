@@ -46,10 +46,11 @@ class music(commands.Cog):
         self.bot = bot
         self.youtube = build('youtube', 'v3', developerKey=bot.GAPI_TOKEN)
         self.ytdl = YoutubeDL(ytdlopts)
-        if not ("qu" in dir(bot) and "lp" in dir(bot) and "mp" in dir(bot) ):
+        if not ("qu" in dir(bot) and "lp" in dir(bot) and "mp" in dir(bot) and "am" in dir(bot)):
             self.bot.qu = {}
             self.bot.lp = {}
             self.bot.mp = {}
+            self.bot.am = []
         self.bot.music_panel_update = self.panel_update
 
     async def gvinfo(self, ctx, url:str, dl=False):
@@ -196,19 +197,19 @@ class music(commands.Cog):
         async with ctx.typing():
             #try:
             vurls = [] #処理するURL
-            vdl = True #ビデオダウンロードを行うかどうか
+            vdl = False #ビデオダウンロードを行うかどうか
             c_info = False #再生時の表示情報をカスタム作成するかどうか
             if (text.startswith("<http://") and text.endswith(">")) or (text.startswith("<https://") and text.endswith(">")):
                 vurls = [text[1:-1]]
             elif text.startswith("http://") or text.startswith("https://"):
                 vurls = [text]
-            elif text.startswith("stream:http://") or text.startswith("stream:https://"):
-                vdl = False
+            elif text.startswith("dl:http://") or text.startswith("stream:https://"):
+                vdl = True
                 vurls = [text[7:]]
             elif text.startswith("memo:"):
-                self.bot.cursor.execute(
-                    "select * from users where id=?", (ctx.author.id,))
-                pf = self.bot.cursor.fetchone()
+                await self.bot.cursor.execute(
+                    "select * from users where id=%s", (ctx.author.id,))
+                pf = await self.bot.cursor.fetchone()
                 mn = text[5:]
                 if pf["memo"] is not None and pf["memo"].get(mn,None) is not None:
                     for i in pf["memo"][mn].split("\n"):
@@ -227,7 +228,7 @@ class music(commands.Cog):
                     title = getattr(spac[0], "title",None) or spac[0].details
                     artist = getattr(spac[0], "artist",None) or spac[0].state
                     search_response = self.youtube.search().list(
-                        part='snippet',
+                        part='id',
                         q=f"{title} {artist}",
                         type='video'
                     ).execute()
@@ -254,16 +255,19 @@ class music(commands.Cog):
                         "requester":ctx.author.id
                         }
             else:
-                search_response = self.youtube.search().list(
-                    part='snippet',
-                    q=text,
-                    type='video'
-                ).execute()
-                vid = search_response['items'][0]['id']['videoId']
-                if vid:
-                    vurls = [f"https://www.youtube.com/watch?v={vid}"]
-                else:
-                    return await ctx.send("動画が見つかりませんでした。")
+                try:
+                    search_response = self.youtube.search().list(
+                        part='id',
+                        q=text,
+                        type='video'
+                    ).execute()
+                    vid = search_response['items'][0]['id']['videoId']
+                    if vid:
+                        vurls = [f"https://www.youtube.com/watch?v={vid}"]
+                    else:
+                        return await ctx.send("動画が見つかりませんでした。")
+                except:
+                    return await ctx.send("> 検索エラー\n　現在検索ワードを用いた検索ができません。URLをお試しください。")
             if not c_info:
                 if vurls == []:
                     return
@@ -273,8 +277,9 @@ class music(commands.Cog):
                         if vinfo.get("_type", None) == "playlist":
                             tks = []
                             for c in vinfo["entries"]:
+                                self.bot.am.append(c["id"])
                                 tks.append(self.gpdate(
-                                    f"https://www.youtube.com/watch?v={c['id']}", ctx, vdl))
+                                    f"https://www.youtube.com/watch?v={c['id']}", ctx, False if c["id"] in self.bot.am else vdl))
                             iqlt = [i for i in await asyncio.gather(*tks) if i]
                             if self.bot.qu.get(str(ctx.guild.id), None):
                                 await ctx.send(f"キューにプレイリスト内の動画{len(iqlt)}本を追加します。")
@@ -287,6 +292,7 @@ class music(commands.Cog):
                                 await asyncio.sleep(0.3)
                                 self.bot.loop.create_task(self.mplay(ctx))
                         else:
+                            self.bot.am.append(vinfo["id"])
                             iqim = await self.gpdate(vurl, ctx, vdl)
                             if self.bot.qu.get(str(ctx.guild.id), None):
                                 await ctx.send(f"`{iqim['video_title']}`をキューに追加します。")
@@ -299,7 +305,8 @@ class music(commands.Cog):
                                 await asyncio.sleep(0.3)
                                 self.bot.loop.create_task(self.mplay(ctx))
                     elif vinfo.get("extractor", "") == "niconico":
-                        iqim = await self.gpdate(vurl, ctx, vdl, "niconico")
+                        self.bot.am.append(vinfo["id"])
+                        iqim = await self.gpdate(vurl, ctx, False if vinfo["id"] in self.bot.am else vdl, "niconico")
                         if self.bot.qu.get(str(ctx.guild.id), None):
                             await ctx.send(f"`{iqim['video_title']}`をキューに追加します。")
                             self.bot.qu[str(ctx.guild.id)] = self.bot.qu[str(
@@ -315,7 +322,8 @@ class music(commands.Cog):
 
                             tks = []
                             for c in vinfo["entries"]:
-                                tks.append(self.gpdate(c["url"], ctx, vdl, "soundcloud"))
+                                self.bot.am.append(c["id"])
+                                tks.append(self.gpdate(c["url"], ctx, False if c["id"] in self.bot.am else vdl, "soundcloud"))
                             iqlt = [i for i in await asyncio.gather(*tks) if i]
                             if self.bot.qu.get(str(ctx.guild.id), None):
                                 await ctx.send(f"キューにプレイリスト内の動画{len(iqlt)}本を追加します。")
@@ -329,7 +337,8 @@ class music(commands.Cog):
                                 self.bot.loop.create_task(self.mplay(ctx))
 
                         else:
-                            iqim = await self.gpdate(vurl, ctx, vdl, "soundcloud")
+                            self.bot.am.append(vinfo["id"])
+                            iqim = await self.gpdate(vurl, ctx, False if vinfo["id"] in self.bot.am else vdl, "soundcloud")
                             if self.bot.qu.get(str(ctx.guild.id), None):
                                 await ctx.send(f"`{iqim['video_title']}`をキューに追加します。")
                                 self.bot.qu[str(ctx.guild.id)] = self.bot.qu[str(
@@ -341,7 +350,8 @@ class music(commands.Cog):
                                 await asyncio.sleep(0.3)
                                 self.bot.loop.create_task(self.mplay(ctx))
                     elif vinfo.get("extractor", "").startswith("URL_Stream"):
-                        iqim = await self.gpdate(vurl, ctx, vdl, "URL_Stream")
+                        self.bot.am.append(vinfo["id"])
+                        iqim = await self.gpdate(vurl, ctx, False if vinfo["id"] in self.bot.am else vdl, "URL_Stream")
                         if self.bot.qu.get(str(ctx.guild.id), None):
                             await ctx.send(f"`{iqim['video_title']}`をキューに追加します。")
                             self.bot.qu[str(ctx.guild.id)] = self.bot.qu[str(
@@ -355,6 +365,7 @@ class music(commands.Cog):
                     else:
                         await ctx.send("now,the video can't play the bot")
             else:
+                self.bot.am.append(vinfo["id"])
                 if self.bot.qu.get(str(ctx.guild.id), None):
                     await ctx.send(f"`{vinfo['video_title']}`をキューに追加します。")
                     self.bot.qu[str(ctx.guild.id)] = self.bot.qu[str(
@@ -400,13 +411,13 @@ class music(commands.Cog):
                 await ctx.send("> ステージチャンネルのため、自動的にスピーカーに移動しました。")
             except:
                 await ctx.send("> ステージチャンネルのため、音楽を再生するためにはスピーカーに移動させる必要があります。")
-        while self.bot.qu[str(ctx.guild.id)]:
+        while self.bot.qu.get(str(ctx.guild.id),None):
             if self.bot.qu[str(ctx.guild.id)][0]["type"] == "download":
                 ctx.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(
                 f'musicfile/{self.bot.qu[str(ctx.guild.id)][0]["video_id"]}'), volume=v or vl))
             else:
                 ctx.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(
-                self.bot.qu[str(ctx.guild.id)][0]["stream_url"]), volume=v or vl))
+                self.bot.qu[str(ctx.guild.id)][0]["stream_url"], before_options="-reconnect 1"), volume=v or vl))
             await self.panel_update(ctx.guild.id, ctx.voice_client)
             try:
                 while ctx.voice_client.is_playing() or ctx.voice_client.is_paused():
@@ -414,9 +425,16 @@ class music(commands.Cog):
                     v = ctx.voice_client.source.volume
             except AttributeError:
                 pass
-            if self.bot.lp[str(ctx.guild.id)]:
+            can_delete = True
+            if self.bot.lp.get(str(ctx.guild.id),None):
+                can_delete = False
                 self.bot.qu[str(ctx.guild.id)].append(self.bot.qu[str(ctx.guild.id)][0])
-            self.bot.qu[str(ctx.guild.id)].pop(0)
+            else:
+                self.bot.am.remove(self.bot.qu[str(ctx.guild.id)][0]["video_id"])
+            poped_item = self.bot.qu[str(ctx.guild.id)].pop(0)
+            if can_delete and (not poped_item["video_id"] in self.bot.am) and poped_item["type"] == "download":
+                loop = self.bot.loop or asyncio.get_event_loop()
+                await loop.run_in_executor(None, lambda: os.remove(f'musicfile/{poped_item["video_id"]}'))
         await ctx.invoke(self.bot.get_command("stop"))
 
     @commands.command()
@@ -460,7 +478,7 @@ class music(commands.Cog):
                 title="キューの中身", description=f"全{len(self.bot.qu[str(ctx.guild.id)])}曲")
             for i in pls[page]:
                 e.add_field(
-                    name=i["video_title"], value=f'[動画]({i["video_url"]})/[アップロードチャンネル]({i["video_up_url"]})\nソース:{i["video_source"]}')
+                    name=i["video_title"], value=f'[動画]({i["video_url"]})/[アップロードチャンネル]({i["video_up_url"]})\nソース:{i["video_source"]}/{i["type"]}\n追加メンバー:{self.bot.get_user(i["requester"]).mention}')
             e.set_footer(text=f"page:{page+1}/{len(pls)}")
             msg = await ctx.send(embed=e)
             await msg.add_reaction(self.bot.get_emoji(653161518195671041))  # ←
@@ -488,7 +506,7 @@ class music(commands.Cog):
                     title="キューの中身", description=f"全{len(self.bot.qu[str(ctx.guild.id)])}曲")
                 for i in pls[page]:
                     e.add_field(
-                        name=i["video_title"], value=f'[動画]({i["video_url"]})/[アップロードチャンネル]({i["video_up_url"]})\nソース:{i["video_source"]}')
+                        name=i["video_title"], value=f'[動画]({i["video_url"]})/[アップロードチャンネル]({i["video_up_url"]})\nソース:{i["video_source"]}/{i["type"]}\n追加メンバー:{self.bot.get_user(i["requester"]).mention}')
                 e.set_footer(text=f"page:{page+1}/{len(pls)}")
                 await msg.edit(embed=e)
         else:
@@ -515,13 +533,13 @@ class music(commands.Cog):
             ebd.add_field(name="現在一時停止中",
                           value="再開には`s-play`か▶リアクション", inline=False)
         ebd.add_field(
-            name="再生中の曲:", value=f"[{self.bot.qu[str(guild_id)][0]['video_title']}]({self.bot.qu[str(guild_id)][0]['video_url']})(from {self.bot.qu[str(guild_id)][0]['video_source']})")
+            name="再生中の曲:", value=f"[{self.bot.qu[str(guild_id)][0]['video_title']}]({self.bot.qu[str(guild_id)][0]['video_url']})(from {self.bot.qu[str(guild_id)][0]['video_source']})(再生方式:{self.bot.qu[str(guild_id)][0]['type']})(追加者:{self.bot.get_user(self.bot.qu[str(guild_id)][0]['requester']).mention})")
         if len(self.bot.qu[str(guild_id)]) > 1:
             ebd.add_field(
-                name="次の曲:", value=f"[{self.bot.qu[str(guild_id)][1]['video_title']}]({self.bot.qu[str(guild_id)][0]['video_url']})(from {self.bot.qu[str(guild_id)][1]['video_source']})")
+                name="次の曲:", value=f"[{self.bot.qu[str(guild_id)][1]['video_title']}]({self.bot.qu[str(guild_id)][1]['video_url']})(from {self.bot.qu[str(guild_id)][1]['video_source']})(再生方式:{self.bot.qu[str(guild_id)][1]['type']})(追加者:{self.bot.get_user(self.bot.qu[str(guild_id)][1]['requester']).mention})")
         elif self.bot.lp[str(guild_id)]:
             ebd.add_field(
-                name="次の曲:", value=f"[{self.bot.qu[str(guild_id)][0]['video_title']}]({self.bot.qu[str(guild_id)][0]['video_url']})(from {self.bot.qu[str(guild_id)][0]['video_source']})(スキップでキューから削除され、再生が止まります。)")
+                name="次の曲:", value=f"[{self.bot.qu[str(guild_id)][0]['video_title']}]({self.bot.qu[str(guild_id)][0]['video_url']})(from {self.bot.qu[str(guild_id)][0]['video_source']})(再生方式:{self.bot.qu[str(guild_id)][0]['type']})(追加者:{self.bot.get_user(self.bot.qu[str(guild_id)][0]['requester']).mention})(スキップでキューから削除され、再生が止まります。)")
         else:
             ebd.add_field(name="次の曲:", value=f"再生終了")
         ebd.add_field(name="ループ:", value=self.bot.lp[str(guild_id)])
@@ -632,21 +650,24 @@ class music(commands.Cog):
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
-        try:
-            if not member.guild.voice_client.is_paused() and [i for i in member.guild.me.voice.channel.members if not i.bot] == []:
+        if member.guild.me.voice and [i for i in member.guild.me.voice.channel.members if not i.bot] == []:
+            try:
+                if member.guild.voice_client.is_paused():
+                    return
+            except:
+                pass
+            await member.guild.voice_client.disconnect()
+            try:
+                await self.bot.mp[str(member.guild.id)].channel.send("参加者がいなくなったため、自動退出を行いました。")
                 try:
                     await self.bot.mp[str(member.guild.id)].delete()
                 except:
                     await self.bot.mp[str(member.guild.id)].channel.send("操作パネルを削除できませんでした。")
-                try:
-                    del self.bot.qu[str(member.guild.id)]
-                    del self.bot.mp[str(member.guild.id)]
-                    del self.bot.lp[str(member.guild.id)]
-                except:
-                    pass
-                await member.guild.voice_client.disconnect()
-        except:
-            pass
+                del self.bot.qu[str(member.guild.id)]
+                del self.bot.mp[str(member.guild.id)]
+                del self.bot.lp[str(member.guild.id)]
+            except:
+                pass
         try:
             if self.bot.voice_clients == []:
                 shutil.rmtree("musicfile/")

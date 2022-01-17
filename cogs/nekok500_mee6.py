@@ -18,7 +18,7 @@ class MEE6(commands.Cog):
             js = await resp.json()
             if "status_code" in js:
                 if js["status_code"] == 404:
-                    await ctx.send(embed=discord.Embed(title=ctx._("cmd-error-t"), description=ctx._("mee6-notfound")))
+                    await ctx.send(embed=discord.Embed(title=await ctx._("cmd-error-t"), description=await ctx._("mee6-notfound")))
                     return
 
             else:

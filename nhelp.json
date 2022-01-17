@@ -1,0 +1,1856 @@
+{
+    "botinfo": {
+        "title": "botinfoについて",
+        "short_description": "このBotについて見てみましょう。",
+        "call": {
+            "main": "botinfo",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "このBotの参加しているサーバー数や全ユーザー数、チャンネル数などを閲覧することができます。いつもご利用ありがとうございます。",
+        "category": "bot"
+    },
+    "view_q": {
+        "title": "view_qについて",
+        "short_description": "どんな曲が流れるかな？",
+        "call": {
+            "main": "view_q",
+            "aliases": "`plist`,`queue`,☆`/queue`",
+            "args": [
+                "(オプション)表示するページ数[数字]"
+            ]
+        },
+        "long_description": "現在このサーバーの音楽再生キューに入っている音楽を、1ページに5つずつ表示します。左右のリアクションでページを切り替えることができます。\n☆このコマンドはスラッシュコマンドでも呼び出すことができます。",
+        "category": "music"
+    },
+    "roleinfo": {
+        "title": "roleinfoについて",
+        "short_description": "この役職なんだっけ",
+        "call": {
+            "main": "roleinfo",
+            "aliases": "`(なし)`",
+            "args": [
+                "(必須)表示する役職[ID/メンション/完全な名称]"
+            ]
+        },
+        "long_description": "引数に指定した役職について、IDや別表示されるかどうか、持っているメンバーなどが表示されます。",
+        "category": "server"
+    },
+    "rettext": {
+        "title": "rettextについて",
+        "short_description": "オウム返しはお手の物",
+        "call": {
+            "main": "rettext",
+            "aliases": "`rt`",
+            "args": [
+                "(必須)表示させたいテキスト[文字列]"
+            ]
+        },
+        "long_description": "思惟奈ちゃんにテキストを発言させることができます。(コマンドの実行者名が発言の下に表示されます。)",
+        "category": "bot"
+    },
+    "activity": {
+        "title": "activityについて",
+        "short_description": "実はいっぱい表示できる",
+        "call": {
+            "main": "activity",
+            "aliases": "`(なし)`",
+            "args": [
+                "(オプション)ユーザーを特定できるもの[ID/メンション/完全な名称]"
+            ]
+        },
+        "long_description": "引数を指定した時はその引数のメンバーの、指定してない場合はコマンド実行者の「プレイ中」等のステータスを一覧表示します。",
+        "category": "user"
+    },
+    "playingmusic": {
+        "title": "playingmusicについて",
+        "short_description": "いまどんな曲がながれてるかな？",
+        "call": {
+            "main": "playingmusic",
+            "aliases": "`np`,☆`/now_playing`",
+            "args": []
+        },
+        "long_description": "現在再生中の音楽を表示することができます。\n☆このコマンドはスラッシュコマンドでも呼び出すことができます。",
+        "category": "music"
+    },
+    "eatit": {
+        "title": "eatitについて",
+        "short_description": "思惟奈にたべものを食べさせてみる？",
+        "call": {
+            "main": "eatit",
+            "aliases": "`(なし)`",
+            "args": [
+                "(必須)食べさせる食べ物の絵文字[絵文字一つ(例:🍟)]"
+            ]
+        },
+        "long_description": "その食べ物を思惟奈ちゃんにあげたときのリアクションを見ることができます。喜んでくれるとは限らないかも…？",
+        "category": "bot"
+    },
+    "tenki": {
+        "title": "tenkiについて",
+        "short_description": "ここの天気どうなるかな",
+        "call": {
+            "main": "tenki",
+            "aliases": "`(なし)`",
+            "args": [
+                "(必須)場所[文字列(例:東京)]"
+            ]
+        },
+        "long_description": "引数に入れた場所の天気予報を表示できます。",
+        "category": "info"
+    },
+    "onlinenotif": {
+        "title": "onlinenotifについて",
+        "short_description": "あれ、この人オンラインにならないけど大丈夫かな…",
+        "call": {
+            "main": "onlinenotif",
+            "aliases": "`(なし)`",
+            "args": [
+                "(追加時)`add [ユーザーID]`",
+                "(解除時)`del [ユーザーID]`",
+                "(他人に自分のオンライン状況を通知するかの設定)`settings [yes/no]`"
+            ]
+        },
+        "long_description": "相手がオンライン状況の通知を許可している場合、指定ユーザーのオンライン状況が変化した際にDMに通知を送る設定ができます。",
+        "category": "info"
+    },
+    "serverinfo": {
+        "title": "serverinfoについて",
+        "short_description": "このサーバー、そんな特徴が！",
+        "call": {
+            "main": "serverinfo",
+            "aliases": "`si`",
+            "args": []
+        },
+        "long_description": "そのサーバーに関する情報をページごとに分けて表示できます。あなたの権限によって、表示できる項目が変化します。",
+        "category": "server"
+    },
+    "Authsetting": {
+        "title": "Authsettingについて",
+        "short_description": "自動化されたユーザーアカウント(規約違反)からサーバーを守れる…かも？",
+        "call": {
+            "main": "Authsetting",
+            "aliases": "`Auth`,`Authsettings`",
+            "args": []
+        },
+        "long_description": "コマンドを実行することで現在の設定状況を見ることができます。リアクションで項目を選ぶことで設定変更などを行うことができます。",
+        "category": "guild"
+    },
+    "QandA": {
+        "title": "QandAについて",
+        "short_description": "「はい」か「いいえ」の質問に答えるよ！",
+        "call": {
+            "main": "QandA",
+            "aliases": "`(なし)`",
+            "args": ["(必須)質問内容[テキスト]"]
+        },
+        "long_description": "「はい」「いいえ」「わからない」で答えることができる質問に、思惟奈が答えるよ！",
+        "category": "bot"
+    },
+    "levels": {
+        "title": "levelsについて",
+        "short_description": "mee6のrankをチェック！",
+        "call": {
+            "main": "levels",
+            "aliases": "`(なし)`",
+            "args": [
+                "(オプション)始めの順位[数字]",
+                "(オプション)終わりの順位[数字]"
+            ]
+        },
+        "long_description": "mee6のrankを表示できます。mee6が導入されていて、レベルボードが存在している状態でのみ、正常に動作します。",
+        "category": "info"
+    },
+    "team_sina-chan": {
+        "title": "team_sina-chanについて",
+        "short_description": "誰がチームメンバー？",
+        "call": {
+            "main": "team_sina-chan",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "チーム☆思惟奈ちゃんのメンバー一覧を表示します。",
+        "category": "bot"
+    },
+    "vusers": {
+        "title": "vusersについて",
+        "short_description": "認証されているユーザーの皆さんです！",
+        "call": {
+            "main": "vusers",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "思惟奈ちゃんで認証を受けているユーザーを一覧表示します。",
+        "category": "bot"
+    },
+    "mutual_guilds": {
+        "title": "mutual_guildsについて",
+        "short_description": "[チームメンバー向け]該当ユーザーと共通なサーバーを表示できます。",
+        "call": {
+            "main": "mutual_guilds",
+            "aliases": "`(なし)`",
+            "args": [
+                "(オプション)ユーザーID[数字]"
+            ]
+        },
+        "long_description": "該当ユーザーと共通なサーバーを表示します。一般ユーザーの方は「思惟奈ちゃん」のプロフィールから「共通のサーバー」を選ぶとみることができます。",
+        "category": "admin"
+    },
+    "join": {
+        "title": "joinについて",
+        "short_description": "ボイスチャンネルに参加します。",
+        "call": {
+            "main": "join",
+            "aliases": "`invc`/☆`/join`",
+            "args": []
+        },
+        "long_description": "コマンド実行者が参加しているボイスチャットに参加します。\n☆このコマンドはスラッシュコマンドでも呼び出すことができます。",
+        "category": "music"
+    },
+    "remainder": {
+        "title": "remainderについて",
+        "short_description": "",
+        "call": {
+            "main": "remainder",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "randomint": {
+        "title": "randomintについて",
+        "short_description": "",
+        "call": {
+            "main": "randomint",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数*args"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "features": {
+        "title": "featuresについて",
+        "short_description": "",
+        "call": {
+            "main": "features",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "fortune": {
+        "title": "fortuneについて",
+        "short_description": "",
+        "call": {
+            "main": "fortune",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "invite": {
+        "title": "inviteについて",
+        "short_description": "",
+        "call": {
+            "main": "invite",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数target: Union[discord.ext.commands.converter.MemberConverter, discord.ext.commands.converter.UserConverter, int, NoneType]"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "memo": {
+        "title": "memoについて",
+        "short_description": "",
+        "call": {
+            "main": "memo",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数mode='a'",
+                "引数mn='def'",
+                "引数ctt=None"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "gban": {
+        "title": "gbanについて",
+        "short_description": "",
+        "call": {
+            "main": "gban",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数uid: int",
+                "引数tof: bool",
+                "引数reason: str = None"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "textlocker": {
+        "title": "textlockerについて",
+        "short_description": "",
+        "call": {
+            "main": "textlocker",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "skip": {
+        "title": "skipについて",
+        "short_description": "",
+        "call": {
+            "main": "skip",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "rg": {
+        "title": "rgについて",
+        "short_description": "",
+        "call": {
+            "main": "rg",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数cou: int",
+                "引数role: discord.ext.commands.converter.RoleConverter = None"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "ldb": {
+        "title": "ldbについて",
+        "short_description": "",
+        "call": {
+            "main": "ldb",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数name"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "timemsg": {
+        "title": "timemsgについて",
+        "short_description": "",
+        "call": {
+            "main": "timemsg",
+            "aliases": "`\u4e00\u5b9a\u6642\u9593\u524a\u9664`",
+            "args": [
+                "引数sec: float"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "symmetry": {
+        "title": "symmetryについて",
+        "short_description": "",
+        "call": {
+            "main": "symmetry",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数side: str = 'left'"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "chinfo": {
+        "title": "chinfoについて",
+        "short_description": "",
+        "call": {
+            "main": "chinfo",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数target=None"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "chvol": {
+        "title": "chvolについて",
+        "short_description": "",
+        "call": {
+            "main": "chvol",
+            "aliases": "`vol`",
+            "args": [
+                "引数vol: float"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "vpc": {
+        "title": "vpcについて",
+        "short_description": "",
+        "call": {
+            "main": "vpc",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "leveledit": {
+        "title": "leveleditについて",
+        "short_description": "",
+        "call": {
+            "main": "leveledit",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "gchat": {
+        "title": "gchatについて",
+        "short_description": "",
+        "call": {
+            "main": "gchat",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "check_gban": {
+        "title": "check_gbanについて",
+        "short_description": "",
+        "call": {
+            "main": "check_gban",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数uid: int"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "mentdb": {
+        "title": "mentdbについて",
+        "short_description": "",
+        "call": {
+            "main": "mentdb",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "gbanlogto": {
+        "title": "gbanlogtoについて",
+        "short_description": "",
+        "call": {
+            "main": "gbanlogto",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数chid: int = None"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "rnotify": {
+        "title": "rnotifyについて",
+        "short_description": "",
+        "call": {
+            "main": "rnotify",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数ch: int = None"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "play": {
+        "title": "playについて",
+        "short_description": "",
+        "call": {
+            "main": "play",
+            "aliases": "`p`",
+            "args": [
+                "引数text: str = ''"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "checkoffline": {
+        "title": "checkofflineについて",
+        "short_description": "",
+        "call": {
+            "main": "checkoffline",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "rtopic": {
+        "title": "rtopicについて",
+        "short_description": "",
+        "call": {
+            "main": "rtopic",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数ch: int = None"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "userinfo": {
+        "title": "userinfoについて",
+        "short_description": "",
+        "call": {
+            "main": "userinfo",
+            "aliases": "`ui`,`anyuserinfo`,`user`",
+            "args": [
+                "引数target=None"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "b-mail": {
+        "title": "b-mailについて",
+        "short_description": "",
+        "call": {
+            "main": "b-mail",
+            "aliases": "`bm`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "ehelp": {
+        "title": "ehelpについて",
+        "short_description": "",
+        "call": {
+            "main": "ehelp",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数rcmd=None"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "cinvite": {
+        "title": "cinviteについて",
+        "short_description": "",
+        "call": {
+            "main": "cinvite",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数ivt: str"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "help": {
+        "title": "helpについて",
+        "short_description": "",
+        "call": {
+            "main": "help",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数rcmd=None"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "emojiinfo": {
+        "title": "emojiinfoについて",
+        "short_description": "",
+        "call": {
+            "main": "emojiinfo",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数emj: discord.ext.commands.converter.EmojiConverter = None"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "dguild": {
+        "title": "dguildについて",
+        "short_description": "",
+        "call": {
+            "main": "dguild",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数sid=None"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "cprofile": {
+        "title": "cprofileについて",
+        "short_description": "",
+        "call": {
+            "main": "cprofile",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数usid=None"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "stop": {
+        "title": "stopについて",
+        "short_description": "",
+        "call": {
+            "main": "stop",
+            "aliases": "`leave`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "rolepanel": {
+        "title": "rolepanelについて",
+        "short_description": "",
+        "call": {
+            "main": "rolepanel",
+            "aliases": "`paneledit`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "checkmember": {
+        "title": "checkmemberについて",
+        "short_description": "",
+        "call": {
+            "main": "checkmember",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数member: discord.ext.commands.converter.MemberConverter"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "vcurl": {
+        "title": "vcurlについて",
+        "short_description": "",
+        "call": {
+            "main": "vcurl",
+            "aliases": "`\u6b21\u306e\u30dc\u30a4\u30b9\u30c1\u30e3\u30f3\u30cd\u30eb\u306eURL\u3092\u6559\u3048\u3066`",
+            "args": [
+                "引数vch: discord.ext.commands.converter.VoiceChannelConverter = None"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "getby": {
+        "title": "getbyについて",
+        "short_description": "",
+        "call": {
+            "main": "getby",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数k: str"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "voiceinfo": {
+        "title": "voiceinfoについて",
+        "short_description": "",
+        "call": {
+            "main": "voiceinfo",
+            "aliases": "`\u30dc\u30a4\u30b9\u60c5\u5831`,`\u97f3\u58f0\u60c5\u5831\u3092\u6559\u3048\u3066`",
+            "args": [
+                "引数mus: discord.ext.commands.converter.MemberConverter = None"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "checkscrauname": {
+        "title": "checkscraunameについて",
+        "short_description": "",
+        "call": {
+            "main": "checkscrauname",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数un: str"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "hash": {
+        "title": "hashについて",
+        "short_description": "",
+        "call": {
+            "main": "hash",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "pin": {
+        "title": "pinについて",
+        "short_description": "",
+        "call": {
+            "main": "pin",
+            "aliases": "`\u30d4\u30f3\u7559\u3081\u5207\u66ff`,`\u6b21\u306e\u30e1\u30c3\u30bb\u30fc\u30b8\u3092\u30d4\u30f3\u7559\u3081\u3057\u3066`",
+            "args": [
+                "引数mid: int"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "twisearch": {
+        "title": "twisearchについて",
+        "short_description": "",
+        "call": {
+            "main": "twisearch",
+            "aliases": "`twitter`,`twitter\u3067\u691c\u7d22\u3057\u3066`",
+            "args": [
+                "引数word: str"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "levelupsendto": {
+        "title": "levelupsendtoについて",
+        "short_description": "",
+        "call": {
+            "main": "levelupsendto",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数to"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "delmsgs": {
+        "title": "delmsgsについて",
+        "short_description": "",
+        "call": {
+            "main": "delmsgs",
+            "aliases": "`\u30e1\u30c3\u30bb\u30fc\u30b8\u4e00\u62ec\u524a\u9664`,`\u6b21\u306e\u4ef6\u6570\u5206\u3001\u30e1\u30c3\u30bb\u30fc\u30b8\u3092\u6d88\u3057\u3066`",
+            "args": [
+                "引数msgcount"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "jwp": {
+        "title": "jwpについて",
+        "short_description": "",
+        "call": {
+            "main": "jwp",
+            "aliases": "`wikipedia`,`\u6b21\u306e\u8a00\u8449\u3067wikipedia\u8abf\u3079\u3066`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "levelreward": {
+        "title": "levelrewardについて",
+        "short_description": "",
+        "call": {
+            "main": "levelreward",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数lv: int",
+                "引数rl=None"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "Wecall": {
+        "title": "Wecallについて",
+        "short_description": "",
+        "call": {
+            "main": "Wecall",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数us=None",
+                "引数name=None"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "messageinfo": {
+        "title": "messageinfoについて",
+        "short_description": "",
+        "call": {
+            "main": "messageinfo",
+            "aliases": "`minfo`,`mi`",
+            "args": [
+                "引数target: Union[discord.ext.commands.converter.MessageConverter, NoneType]"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "jpwt": {
+        "title": "jpwtについて",
+        "short_description": "",
+        "call": {
+            "main": "jpwt",
+            "aliases": "`\u5929\u6c17`,`\u4eca\u65e5\u306e\u5929\u6c17\u306f`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "isonline": {
+        "title": "isonlineについて",
+        "short_description": "",
+        "call": {
+            "main": "isonline",
+            "aliases": "`\u30aa\u30f3\u30e9\u30a4\u30f3\u72b6\u6cc1`,`\u6b21\u306e\u4eba\u306e\u30aa\u30f3\u30e9\u30a4\u30f3\u72b6\u6cc1\u3092\u6559\u3048\u3066`",
+            "args": [
+                "引数uid: int = None"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "news": {
+        "title": "newsについて",
+        "short_description": "",
+        "call": {
+            "main": "news",
+            "aliases": "`\u30cb\u30e5\u30fc\u30b9`,`\u30cb\u30e5\u30fc\u30b9\u3092\u898b\u305b\u3066`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "gchinfo": {
+        "title": "gchinfoについて",
+        "short_description": "",
+        "call": {
+            "main": "gchinfo",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数name='main'"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "jishaku": {
+        "title": "jishakuについて",
+        "short_description": "",
+        "call": {
+            "main": "jishaku",
+            "aliases": "`jsk`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "activrole": {
+        "title": "activroleについて",
+        "short_description": "",
+        "call": {
+            "main": "activrole",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数is_enable=True"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "gwd": {
+        "title": "gwdについて",
+        "short_description": "",
+        "call": {
+            "main": "gwd",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "globalcolor": {
+        "title": "globalcolorについて",
+        "short_description": "",
+        "call": {
+            "main": "globalcolor",
+            "aliases": "`\u30b0\u30ed\u30fc\u30d0\u30eb\u30c1\u30e3\u30c3\u30c8\u306e\u8272\u3092\u5909\u3048\u308b`",
+            "args": [
+                "引数color='0x000000'"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "userprefix": {
+        "title": "userprefixについて",
+        "short_description": "",
+        "call": {
+            "main": "userprefix",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数mode='view'",
+                "引数ipf=''"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "gupd": {
+        "title": "gupdについて",
+        "short_description": "",
+        "call": {
+            "main": "gupd",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "globalnick": {
+        "title": "globalnickについて",
+        "short_description": "",
+        "call": {
+            "main": "globalnick",
+            "aliases": "`\u30b0\u30ed\u30fc\u30d0\u30eb\u30c1\u30e3\u30c3\u30c8\u306e\u30cb\u30c3\u30af\u30cd\u30fc\u30e0\u3092\u5909\u3048\u308b`",
+            "args": [
+                "引数nick"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "pupdate": {
+        "title": "pupdateについて",
+        "short_description": "",
+        "call": {
+            "main": "pupdate",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "youtube": {
+        "title": "youtubeについて",
+        "short_description": "",
+        "call": {
+            "main": "youtube",
+            "aliases": "`\u6b21\u306e\u8a00\u8449\u3067youtube\u8abf\u3079\u3066`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "gprofile": {
+        "title": "gprofileについて",
+        "short_description": "",
+        "call": {
+            "main": "gprofile",
+            "aliases": "`\u30b0\u30ed\u30fc\u30d0\u30eb\u30c1\u30e3\u30c3\u30c8\u306e\u30b9\u30c6\u30fc\u30bf\u30b9`,`\u30b0\u30ed\u30fc\u30d0\u30eb\u30c1\u30e3\u30c3\u30c8\u306e\u30b9\u30c6\u30fc\u30bf\u30b9\u3092\u898b\u305b\u3066`",
+            "args": [
+                "引数uid: int = None"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "get_ch_id": {
+        "title": "get_ch_idについて",
+        "short_description": "",
+        "call": {
+            "main": "get_ch_id",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数cnm: str"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "prole": {
+        "title": "proleについて",
+        "short_description": "",
+        "call": {
+            "main": "prole",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数activity_type: str",
+                "引数role_id: Union[int, NoneType]"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "scranotif": {
+        "title": "scranotifについて",
+        "short_description": "",
+        "call": {
+            "main": "scranotif",
+            "aliases": "`snotify`,`Scratch\u306e\u901a\u77e5`,`Scratch\u306e\u901a\u77e5\u3092\u8abf\u3079\u3066`",
+            "args": [
+                "引数un: str"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "gchatban": {
+        "title": "gchatbanについて",
+        "short_description": "",
+        "call": {
+            "main": "gchatban",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数uid: int",
+                "引数ban: bool = True",
+                "引数rea='(なし)'"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "pause": {
+        "title": "pauseについて",
+        "short_description": "",
+        "call": {
+            "main": "pause",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "wid": {
+        "title": "widについて",
+        "short_description": "",
+        "call": {
+            "main": "wid",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数inid"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "globaltester": {
+        "title": "globaltesterについて",
+        "short_description": "",
+        "call": {
+            "main": "globaltester",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数uid",
+                "引数bl: bool = True"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "backup": {
+        "title": "backupについて",
+        "short_description": "",
+        "call": {
+            "main": "backup",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数gid: int"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "globalmod": {
+        "title": "globalmodについて",
+        "short_description": "",
+        "call": {
+            "main": "globalmod",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数uid",
+                "引数bl: bool = True"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "userv": {
+        "title": "uservについて",
+        "short_description": "",
+        "call": {
+            "main": "userv",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数uid",
+                "引数bl: bool = True"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "globalstar": {
+        "title": "globalstarについて",
+        "short_description": "",
+        "call": {
+            "main": "globalstar",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数uid",
+                "引数bl: bool = True"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "shuffle": {
+        "title": "shuffleについて",
+        "short_description": "",
+        "call": {
+            "main": "shuffle",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "chlogs": {
+        "title": "chlogsについて",
+        "short_description": "",
+        "call": {
+            "main": "chlogs",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数cid: int",
+                "引数count: int"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "ranklev": {
+        "title": "ranklevについて",
+        "short_description": "",
+        "call": {
+            "main": "ranklev",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数start=1",
+                "引数end=10"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "globalguide": {
+        "title": "globalguideについて",
+        "short_description": "",
+        "call": {
+            "main": "globalguide",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "dcomrun": {
+        "title": "dcomrunについて",
+        "short_description": "",
+        "call": {
+            "main": "dcomrun",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数cname",
+                "引数ags"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "switchlevelcard": {
+        "title": "switchlevelcardについて",
+        "short_description": "",
+        "call": {
+            "main": "switchlevelcard",
+            "aliases": "`\u30ec\u30d9\u30eb\u30ab\u30fc\u30c9\u5207\u66ff`,`\u6b21\u306e\u756a\u53f7\u306e\u30ab\u30fc\u30c9\u306b\u30ec\u30d9\u30eb\u30ab\u30fc\u30c9\u3092\u5207\u308a\u66ff\u3048\u3066`",
+            "args": [
+                "引数number: int = None"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "globaldel": {
+        "title": "globaldelについて",
+        "short_description": "",
+        "call": {
+            "main": "globaldel",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数gmid: int"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "cu": {
+        "title": "cuについて",
+        "short_description": "",
+        "call": {
+            "main": "cu",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "level": {
+        "title": "levelについて",
+        "short_description": "",
+        "call": {
+            "main": "level",
+            "aliases": "`\u30ec\u30d9\u30eb\u30ab\u30fc\u30c9`,`\u30ec\u30d9\u30eb\u3092\u898b\u305b\u3066`",
+            "args": [
+                "引数tu: discord.ext.commands.converter.MemberConverter = None"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "viewgban": {
+        "title": "viewgbanについて",
+        "short_description": "",
+        "call": {
+            "main": "viewgban",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "aev": {
+        "title": "aevについて",
+        "short_description": "",
+        "call": {
+            "main": "aev",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数cmd"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "settings": {
+        "title": "settingsについて",
+        "short_description": "",
+        "call": {
+            "main": "settings",
+            "aliases": "`setting`,`edit`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "code_in": {
+        "title": "code_inについて",
+        "short_description": "",
+        "call": {
+            "main": "code_in",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数lang"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "eval": {
+        "title": "evalについて",
+        "short_description": "",
+        "call": {
+            "main": "eval",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数cmd"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "inserver": {
+        "title": "inserverについて",
+        "short_description": "",
+        "call": {
+            "main": "inserver",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "sina-guild": {
+        "title": "sina-guildについて",
+        "short_description": "",
+        "call": {
+            "main": "sina-guild",
+            "aliases": "`\u601d\u60df\u5948\u3061\u3083\u3093\u516c\u5f0f\u30b5\u30fc\u30d0\u30fc`,`\u601d\u60df\u5948\u3061\u3083\u3093\u306e\u30b5\u30fc\u30d0\u30fc\u306b\u884c\u304d\u305f\u3044`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "clear_l10n_cache": {
+        "title": "clear_l10n_cacheについて",
+        "short_description": "",
+        "call": {
+            "main": "clear_l10n_cache",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "dmember": {
+        "title": "dmemberについて",
+        "short_description": "",
+        "call": {
+            "main": "dmember",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数mus=None"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "mas": {
+        "title": "masについて",
+        "short_description": "",
+        "call": {
+            "main": "mas",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数text"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "game2": {
+        "title": "game2について",
+        "short_description": "",
+        "call": {
+            "main": "game2",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "ping": {
+        "title": "pingについて",
+        "short_description": "",
+        "call": {
+            "main": "ping",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "testA": {
+        "title": "testAについて",
+        "short_description": "",
+        "call": {
+            "main": "testA",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "loop_q": {
+        "title": "loop_qについて",
+        "short_description": "",
+        "call": {
+            "main": "loop_q",
+            "aliases": "`loop`,`repeat`",
+            "args": [
+                "引数torf: bool = None"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "cuglobal": {
+        "title": "cuglobalについて",
+        "short_description": "",
+        "call": {
+            "main": "cuglobal",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数*cids"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "reply": {
+        "title": "replyについて",
+        "short_description": "",
+        "call": {
+            "main": "reply",
+            "aliases": "`r`,`\u8fd4\u4fe1`,`\u5f15\u7528`",
+            "args": [
+                "引数id: int",
+                "引数text"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "near21": {
+        "title": "near21について",
+        "short_description": "",
+        "call": {
+            "main": "near21",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数user2: discord.ext.commands.converter.MemberConverter = None"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "switchLevelup": {
+        "title": "switchLevelupについて",
+        "short_description": "",
+        "call": {
+            "main": "switchLevelup",
+            "aliases": "`switchlevelup`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "retfmt": {
+        "title": "retfmtについて",
+        "short_description": "",
+        "call": {
+            "main": "retfmt",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "rq": {
+        "title": "rqについて",
+        "short_description": "",
+        "call": {
+            "main": "rq",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "fish": {
+        "title": "fishについて",
+        "short_description": "",
+        "call": {
+            "main": "fish",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "guildprefix": {
+        "title": "guildprefixについて",
+        "short_description": "",
+        "call": {
+            "main": "guildprefix",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数mode='view'",
+                "引数ipf=''"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "changenick": {
+        "title": "changenickについて",
+        "short_description": "",
+        "call": {
+            "main": "changenick",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数name=None"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "Af": {
+        "title": "Afについて",
+        "short_description": "",
+        "call": {
+            "main": "Af",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "guildlang": {
+        "title": "guildlangについて",
+        "short_description": "",
+        "call": {
+            "main": "guildlang",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数lang"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "guserft": {
+        "title": "guserftについて",
+        "short_description": "",
+        "call": {
+            "main": "guserft",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数nandt"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "sendlogto": {
+        "title": "sendlogtoについて",
+        "short_description": "",
+        "call": {
+            "main": "sendlogto",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数to=None"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "q": {
+        "title": "qについて",
+        "short_description": "",
+        "call": {
+            "main": "q",
+            "aliases": "`\u30a2\u30f3\u30b1\u30fc\u30c8`,`\u6b21\u306e\u30a2\u30f3\u30b1\u30fc\u30c8\u3092\u958b\u3044\u3066`",
+            "args": [
+                "引数title=None",
+                "引数*ctt"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "roletrans": {
+        "title": "roletransについて",
+        "short_description": "",
+        "call": {
+            "main": "roletrans",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数gid: int"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "partners": {
+        "title": "partnersについて",
+        "short_description": "",
+        "call": {
+            "main": "partners",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "guildv": {
+        "title": "guildvについて",
+        "short_description": "",
+        "call": {
+            "main": "guildv",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数gid: int",
+                "引数bl: bool = True"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "lrewardupd": {
+        "title": "lrewardupdについて",
+        "short_description": "",
+        "call": {
+            "main": "lrewardupd",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "credit": {
+        "title": "creditについて",
+        "short_description": "",
+        "call": {
+            "main": "credit",
+            "aliases": "`\u30af\u30ec\u30b8\u30c3\u30c8`,`\u30af\u30ec\u30b8\u30c3\u30c8\u3092\u898b\u305b\u3066`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "userlang": {
+        "title": "userlangについて",
+        "short_description": "",
+        "call": {
+            "main": "userlang",
+            "aliases": "`\u8a00\u8a9e\u8a2d\u5b9a`,`\u8a00\u8a9e\u3092\u6b21\u306e\u8a00\u8a9e\u306b\u5909\u3048\u3066`",
+            "args": [
+                "引数lang"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "chtrans": {
+        "title": "chtransについて",
+        "short_description": "",
+        "call": {
+            "main": "chtrans",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数gid: int"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "manage_features": {
+        "title": "manage_featuresについて",
+        "short_description": "",
+        "call": {
+            "main": "manage_features",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "cemojiorole": {
+        "title": "cemojioroleについて",
+        "short_description": "",
+        "call": {
+            "main": "cemojiorole",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数name",
+                "引数*rlis"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "allonline": {
+        "title": "allonlineについて",
+        "short_description": "",
+        "call": {
+            "main": "allonline",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数mus=None"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "comlock": {
+        "title": "comlockについて",
+        "short_description": "",
+        "call": {
+            "main": "comlock",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数do='view'",
+                "引数*comname"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "delm": {
+        "title": "delmについて",
+        "short_description": "",
+        "call": {
+            "main": "delm",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数ctxid"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "globalpost": {
+        "title": "globalpostについて",
+        "short_description": "",
+        "call": {
+            "main": "globalpost",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数gmid: int"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "feedback": {
+        "title": "feedbackについて",
+        "short_description": "",
+        "call": {
+            "main": "feedback",
+            "aliases": "`\u30d5\u30a3\u30fc\u30c9\u30d0\u30c3\u30af`,`\u958b\u767a\u8005\u306b\u30d5\u30a3\u30fc\u30c9\u30d0\u30c3\u30af\u3092\u9001\u3063\u3066`",
+            "args": [
+                "引数ttl",
+                "引数ctt=None"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "setsysmsg": {
+        "title": "setsysmsgについて",
+        "short_description": "",
+        "call": {
+            "main": "setsysmsg",
+            "aliases": "`(なし)`",
+            "args": [
+                "引数mode='check'",
+                "引数when='welcome'",
+                "引数to='sysch'",
+                "引数content=None"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "jyanken": {
+        "title": "jyankenについて",
+        "short_description": "",
+        "call": {
+            "main": "jyanken",
+            "aliases": "`(なし)`",
+            "args": []
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "memban": {
+        "title": "membanについて",
+        "short_description": "",
+        "call": {
+            "main": "memban",
+            "aliases": "`\u30d0\u30f3`,`\u6b21\u306e\u30e1\u30f3\u30d0\u30fc\u3092\u3053\u306e\u30b5\u30fc\u30d0\u30fc\u304b\u3089ban\u3057\u3066`",
+            "args": [
+                "引数mem: int",
+                "引数dmd: int = 0",
+                "引数rs=None"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "report": {
+        "title": "reportについて",
+        "short_description": "",
+        "call": {
+            "main": "report",
+            "aliases": "`\u30ec\u30dd\u30fc\u30c8`,`\u5831\u544a`,`\u901a\u5831`,`\u304a\u77e5\u3089\u305b`",
+            "args": [
+                "引数r_type"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "servercmd": {
+        "title": "servercmdについて",
+        "short_description": "",
+        "call": {
+            "main": "servercmd",
+            "aliases": "`\u30b5\u30fc\u30d0\u30fc\u30b3\u30de\u30f3\u30c9`,`\u6b21\u306e\u6761\u4ef6\u3067\u30b5\u30fc\u30d0\u30fc\u30b3\u30de\u30f3\u30c9\u3092\u958b\u304f`",
+            "args": [
+                "引数mode='all'",
+                "引数name=None"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    },
+    "memkick": {
+        "title": "memkickについて",
+        "short_description": "",
+        "call": {
+            "main": "memkick",
+            "aliases": "`\u30ad\u30c3\u30af`,`\u6b21\u306e\u30e1\u30f3\u30d0\u30fc\u3092\u3053\u306e\u30b5\u30fc\u30d0\u30fc\u304b\u3089\u8ffd\u3044\u51fa\u3057\u3066`",
+            "args": [
+                "引数mem: discord.ext.commands.converter.MemberConverter"
+            ]
+        },
+        "long_description": "",
+        "category": ""
+    }
+}

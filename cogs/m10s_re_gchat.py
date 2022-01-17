@@ -6,7 +6,7 @@ from discord.ext import commands
 import asyncio
 from dateutil.relativedelta import relativedelta as rdelta
 
-
+import json
 import m10s_util as ut
 
 import config
@@ -32,6 +32,7 @@ class m10s_re_gchat(commands.Cog):
         self.bot = bot
         self.manage_category = bot.get_channel(809280196192108564)
         self.without_react = ["rsp_main-chat"]
+        self.ignore_ch = []
 
     async def gchat_send(self, to, fch, content, name, avatar, embeds=None, attachments=None):
         tasks = []
@@ -64,9 +65,9 @@ class m10s_re_gchat(commands.Cog):
         e.add_field(name="ブロック理由", value=rs or "なし")
         await ch.send(embed=e)
         if should_ban:
-            self.bot.cursor.execute(
-                "UPDATE users SET gban = ? WHERE id = ?", (1, msg.author.id))
-            self.bot.cursor.execute("UPDATE users SET gbanhist = ? WHERE id = ?",
+            await self.bot.cursor.execute(
+                "UPDATE users SET gban = %s WHERE id = %s", (1, msg.author.id))
+            await self.bot.cursor.execute("UPDATE users SET gbanhist = %s WHERE id = %s",
                             ("予防グローバルチャットBAN: {}".format(rs), msg.author.id))
 
 
@@ -83,36 +84,40 @@ class m10s_re_gchat(commands.Cog):
 
     @gchat.command()
     async def connect(self, ctx, *, name="main"):
-        self.bot.cursor.execute(
-            "select * from users where id=?", (ctx.author.id,))
-        upf = self.bot.cursor.fetchone()
+        upf = await self.bot.cursor.fetchone(
+            "select * from users where id=%s", (ctx.author.id,))
+        #upf = await self.bot.cursor.fetchone()
         if upf["gban"] == 1:
             await ctx.send("あなたはグローバルチャットを使えないため、このコマンドは使用できません。")
             return
-        if self.bot.cursor.execute("select * from gchat_cinfo where id = ?",(ctx.channel.id,)).fetchone():
+        p = await self.bot.cursor.fetchone("select * from gchat_cinfo where id = %s",(ctx.channel.id,))
+        if p:
             await ctx.reply("> 接続エラー\n　このチャンネルは既にグローバルチャットに接続されています。")
         else:
-            gch = self.bot.cursor.execute("select * from gchat_clist where name = ?",(name,)).fetchone()
+            gch = await self.bot.cursor.fetchone("select * from gchat_clist where name = %s",(name,))
+            #gch = await self.bot.cursor.fetchone()
             if gch:
                 if gch["pass"]:
                     try:
                         m = await ut.wait_message_return(ctx, f"{name}に接続するためのパスワードを送信してください。", ctx.author.dm_channel or await ctx.author.create_dm(),tout=30)
                         if m.content != gch["pass"]:
                             await ctx.author.send("> 接続エラー\n　パスワードが違います。もう一度最初からやり直してください。")
-                            sendto = self.bot.cursor.execute("select * from gchat_cinfo where connected_to == ?",(name,)).fetchall()
+                            sendto = await self.bot.cursor.fetchall("select * from gchat_cinfo where connected_to = %s",(name,))
+                            #sendto = await self.bot.cursor.fetchall()
                             await self.gchat_send(sendto, ctx.channel, f"> {ctx.author}({ctx.author.id})が{ctx.channel.name}({ctx.channel.id})をこのチャンネルに接続しようとしました。(パスワードが違うことにより失敗)",
                                 "[🛠💠]思惟奈ちゃんグローバルチャット接続案内", ctx.guild.me.avatar_url_as(static_format="png"))
                             return
                     except:
                         await ctx.author.send("> 接続エラー\n　パスワードが入力されませんでした。")
-                        sendto = self.bot.cursor.execute("select * from gchat_cinfo where connected_to == ?",(name,)).fetchall()
+                        sendto = await self.bot.cursor.fetchall("select * from gchat_cinfo where connected_to = %s",(name,))
+                        #sendto = await self.bot.cursor.fetchall()
                         await self.gchat_send(sendto, ctx.channel, f"> {ctx.author}({ctx.author.id})が{ctx.channel.name}({ctx.channel.id})をこのチャンネルに接続しようとしました。(パスワード未入力により失敗)",
                             "[🛠💠]思惟奈ちゃんグローバルチャット接続案内", ctx.guild.me.avatar_url_as(static_format="png"))
                         return
                 wh = await ctx.channel.create_webhook(name="sina_gchat_webhook",reason=f"思惟奈ちゃんグローバルチャット:{name}への接続が行われたため")
-                self.bot.cursor.execute("insert into gchat_cinfo(id,connected_to,wh_id) values(?,?,?)",(ctx.channel.id,name,wh.id))
-
-                sendto = self.bot.cursor.execute("select * from gchat_cinfo where connected_to == ?",(name,)).fetchall()
+                await self.bot.cursor.execute("insert into gchat_cinfo(id,connected_to,wh_id) values(%s,%s,%s)",(ctx.channel.id,name,wh.id))
+                sendto = await self.bot.cursor.fetchall("select * from gchat_cinfo where connected_to = %s",(name,))
+                #sendto = await self.bot.cursor.fetchall()
                 await self.gchat_send(sendto, ctx.channel, f"> グローバルチャットに{ctx.channel.name}({ctx.channel.id})が接続しました！ようこそ！",
                     "[🛠💠]思惟奈ちゃんグローバルチャット接続案内", ctx.guild.me.avatar_url_as(static_format="png"))
 
@@ -124,16 +129,17 @@ class m10s_re_gchat(commands.Cog):
                 except:
                     m = None
                 finally:    
-                    self.bot.cursor.execute("insert into gchat_clist(name,pass) values(?,?)", (name, m.content if not m is None else None))
+                    await self.bot.cursor.execute("insert into gchat_clist(name,pass) values(%s,%s)", (name, m.content if not m is None else None))
 
                     wh = await ctx.channel.create_webhook(name="sina_gchat_webhook",reason=f"思惟奈ちゃんグローバルチャット:{name}への接続が行われたため")
-                    self.bot.cursor.execute("insert into gchat_cinfo(id,connected_to,wh_id) values(?,?,?)",(ctx.channel.id,name,wh.id))
+                    await self.bot.cursor.execute("insert into gchat_cinfo(id,connected_to,wh_id) values(%s,%s,%s)",(ctx.channel.id,name,wh.id))
 
                     mch = await self.manage_category.create_text_channel(name=f"gch_{name}",topic=f"接続先名:`{name}`{f',接続パスワード:{m.content}' if not m is None else ''}")
                     mwh = await mch.create_webhook(name="sina_gchat_webhook",reason=f"思惟奈ちゃんグローバルチャット:{name}の作成が行われたため")
-                    self.bot.cursor.execute("insert into gchat_cinfo(id,connected_to,wh_id) values(?,?,?)",(mch.id,name,mwh.id))
-
-                    sendto = self.bot.cursor.execute("select * from gchat_cinfo where connected_to == ?",(name,)).fetchall()
+                    await self.bot.cursor.execute("insert into gchat_cinfo(id,connected_to,wh_id) values(%s,%s,%s)",(mch.id,name,mwh.id))
+                    
+                    sendto = await self.bot.cursor.fetchall("select * from gchat_cinfo where connected_to = %s",(name,))
+                    #sendto = await self.bot.cursor.fetchall()
                     await self.gchat_send(sendto, ctx.channel, f"> グローバルチャットに{ctx.channel.name}({ctx.channel.id})が接続しました！",
                         "[🛠💠]思惟奈ちゃんグローバルチャット接続案内", ctx.guild.me.avatar_url_as(static_format="png"))
 
@@ -142,7 +148,8 @@ class m10s_re_gchat(commands.Cog):
 
     @gchat.command()
     async def dconnect(self, ctx):
-        cgch = self.bot.cursor.execute("select * from gchat_cinfo where id = ?",(ctx.channel.id,)).fetchone()
+        cgch = await self.bot.cursor.fetchone("select * from gchat_cinfo where id = %s",(ctx.channel.id,))
+        #cgch = await self.bot.cursor.fetchone()
         if cgch:
             try:
                 wh = await self.bot.fetch_webhook(cgch["wh_id"])
@@ -150,9 +157,10 @@ class m10s_re_gchat(commands.Cog):
             except:
                 pass
             finally:
-                self.bot.cursor.execute("delete from gchat_cinfo where id = ?",(ctx.channel.id,))
+                await self.bot.cursor.execute("delete from gchat_cinfo where id = %s",(ctx.channel.id,))
 
-                sendto = self.bot.cursor.execute("select * from gchat_cinfo where connected_to == ?",(cgch["connected_to"],)).fetchall()
+                sendto = await self.bot.cursor.fetchall("select * from gchat_cinfo where connected_to = %s",(cgch["connected_to"],))
+                #sendto = await self.bot.cursor.fetchall()
                 await self.gchat_send(sendto, ctx.channel, f"> グローバルチャットから{ctx.channel.name}({ctx.channel.id})が切断しました。さようなら。",
                     "[🛠💠]思惟奈ちゃんグローバルチャット接続案内", ctx.guild.me.avatar_url_as(static_format="png"))
 
@@ -163,7 +171,7 @@ class m10s_re_gchat(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, m):
-        if m.channel.id in []: #グローバルチャットの外部との相互連携作成時用
+        if m.channel.id in self.ignore_ch: #グローバルチャットの外部との相互連携作成時用
             return
         
         if m.content.startswith("s-"):
@@ -180,21 +188,25 @@ class m10s_re_gchat(commands.Cog):
             return
         if m.webhook_id:
             return
-
-        self.bot.cursor.execute("select * from users where id=?",
-            (m.author.id,))
-        upf = self.bot.cursor.fetchone()
-
         
-        gchat_cinfo = self.bot.cursor.execute("select * from gchat_cinfo where id == ?", (m.channel.id,)).fetchone()
+        if not m.author.id in self.bot.team_sina:
+            if self.bot.maintenance:
+                return
+                
+        upf = await self.bot.cursor.fetchone("select * from users where id=%s",
+            (m.author.id,))
+        #upf = await self.bot.cursor.fetchone()
 
-        if gchat_cinfo:
+        gchat_info = await self.bot.cursor.fetchone("select * from gchat_cinfo where id = %s", (m.channel.id,))
+        #gchat_cinfo = await self.bot.cursor.fetchone()
+
+        if gchat_info:
 
             if upf["gban"] == 1:
-                if not gchat_cinfo["connected_to"] in self.without_react:
+                if not gchat_info["connected_to"] in self.without_react:
 
                     dc = await ut.opendm(m.author)
-                    await dc.send(self.bot._(m.author, "global-banned", m.author.mention))
+                    await dc.send(await self.bot._(m.author, "global-banned", m.author.mention))
                     await self.repomsg(m, "思惟奈ちゃんグローバルチャットの使用禁止")
                     await m.add_reaction("❌")
                     await asyncio.sleep(5)
@@ -210,14 +222,14 @@ class m10s_re_gchat(commands.Cog):
                     return
 
                 try:
-                    if not gchat_cinfo["connected_to"] in self.without_react:
+                    if not gchat_info["connected_to"] in self.without_react:
                         await m.add_reaction(self.bot.get_emoji(653161518346534912))
                 except:
                     pass
 
-                self.bot.cursor.execute("select * from guilds where id=?",
+                gpf = await self.bot.cursor.fetchone("select * from guilds where id=%s",
                     (m.guild.id,))
-                gpf = self.bot.cursor.fetchone()
+                #gpf = await self.bot.cursor.fetchone()
 
                 status_embed = discord.Embed(title="", description="", color=upf["gcolor"])
                 status_embed.set_author(
@@ -243,7 +255,7 @@ class m10s_re_gchat(commands.Cog):
                     else:
                         status_embed.add_field(name="メッセージへの返信",value="(このメッセージは削除されている等で取得できません。)")
 
-                if gchat_cinfo["connected_to"] in self.without_react:
+                if gchat_info["connected_to"] in self.without_react:
                     embeds = []
                 else:
                     embeds = [status_embed]
@@ -282,15 +294,16 @@ class m10s_re_gchat(commands.Cog):
                 
                 name = f"[{spicon}]{upf['gnick']}"
 
-                sendto = self.bot.cursor.execute("select * from gchat_cinfo where connected_to = ?", (gchat_cinfo["connected_to"],)).fetchall()
+                sendto = await self.bot.cursor.fetchall("select * from gchat_cinfo where connected_to = %s", (gchat_info["connected_to"],))
+                #sendto = await self.bot.cursor.fetchall()
                 rtn = await self.gchat_send(sendto, m.channel, m.clean_content,
                     name, m.author.avatar_url_as(static_format="png"), embeds, attachments)
 
-                self.bot.cursor.execute("INSERT INTO gchat_pinfo(id,content,allids,author_id,guild_id,timestamp) VALUES(?,?,?,?,?,?)", (m.id, [m.clean_content],
-                            rtn, m.author.id, m.guild.id, [str(m.created_at.strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))]))
+                await self.bot.cursor.execute("INSERT INTO gchat_pinfo(id,allids,author_id,guild_id) VALUES(%s,%s,%s,%s)", (m.id, 
+                            json.dumps(rtn), m.author.id, m.guild.id))
 
                 try:
-                    if not gchat_cinfo["connected_to"] in self.without_react:
+                    if not gchat_info["connected_to"] in self.without_react:
                         await m.remove_reaction(self.bot.get_emoji(653161518346534912),self.bot.user)
                         await m.add_reaction(self.bot.get_emoji(653161518195539975))
                         await asyncio.sleep(5)
@@ -305,10 +318,11 @@ class m10s_re_gchat(commands.Cog):
     async def on_raw_message_edit(self, pr):
         ncon = pr.data.get("content",None)
         if ncon:
-            gpost = self.bot.cursor.execute("select * from gchat_pinfo where id = ?",(pr.message_id,)).fetchone()
+            gpost = await self.bot.cursor.fetchone("select * from gchat_pinfo where id = %s",(pr.message_id,))
+            #gpost = await self.bot.cursor.fetchone()
             if gpost:
                 tasks = []
-                for t in gpost["allids"]:
+                for t in json.loads(gpost["allids"]):
                     try:
                         wh = await self.bot.fetch_webhook(t[0])
                     except:
@@ -320,33 +334,41 @@ class m10s_re_gchat(commands.Cog):
                             )
                         )
                 await asyncio.gather(*tasks)
-                self.bot.cursor.execute("UPDATE gchat_pinfo SET content = ? where id = ?",(gpost["content"] + [ncon], pr.message_id))
 
     @commands.Cog.listener()
     async def on_raw_message_delete(self, pr):
-        gpost = self.bot.cursor.execute("select * from gchat_pinfo where id = ?", (pr.message_id,)).fetchone()
+        gpost = await self.bot.cursor.fetchone("select * from gchat_pinfo where id = %s", (pr.message_id,))
+        #gpost = await self.bot.cursor.fetchone()
         if gpost:
             tasks = []
-            for t in gpost["allids"]:
+            for t in json.loads(gpost["allids"]):
                 try:
                     wh = await self.bot.fetch_webhook(t[0])
                 except:
                     continue
                 else:
-                    if wh.guild.id  == 560434525277126656:
-                        tasks.append(
-                            asyncio.ensure_future(
-                                wh.edit_message(t[1], content="[deleted_message]")
-                            )
-                        )
-                    else:
+                    if wh.guild.id != 560434525277126656:
                         tasks.append(
                             asyncio.ensure_future(
                                 wh.delete_message(t[1])
                             )
                         )
             await asyncio.gather(*tasks)
-            self.bot.cursor.execute("UPDATE gchat_pinfo SET content = ? where id = ?",(gpost["content"] + ["このメッセージは削除されました。"], pr.message_id))
+
+    @commands.Cog.listener()
+    async def on_guild_channel_delete(self, ch):
+        cgch = await self.bot.cursor.fetchone("select * from gchat_cinfo where id = %s",(ch.id,))
+        #cgch = await self.bot.cursor.fetchone()
+        if cgch:
+            await self.bot.cursor.execute("delete from gchat_cinfo where id = %s",(ch.id,))
+
+    @commands.Cog.listener()
+    async def on_webhooks_update(self, ch):
+        cgch = await self.bot.cursor.fetchone("select * from gchat_cinfo where id = %s",(ch.id,))
+        #cgch = await self.bot.cursor.fetchone()
+        if cgch:
+            if cgch["wh_id"] in [i.id for i in await ch.webhooks()]:
+                await self.bot.cursor.execute("delete from gchat_cinfo where id = %s",(ch.id,))
 
 
 def setup(bot):

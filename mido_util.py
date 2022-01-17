@@ -1,32 +1,82 @@
 import discord
 from discord.ext import commands
-import asyncio
-import sqlite3
-import traceback
 
-#InvailedIDException
-class InvailedIDException(Exception):
-    pass
+import re
+import random
 
-#InviteNotFound
-class InviteNotFound(Exception):
-    pass
+#get_status
+def get_status(member):
+    if str(member.status) == "online":
+        return "💚オンライン"
+    elif str(member.status) == "idle":
+        return "🧡退席中"
+    elif str(member.status) == "dnd":
+        return "❤取り込み中"
+    elif str(member.status) == "offline":
+        return "🖤オフライン"
+
+#resolve_url
+def resolve_url(url):
+    HTTP_URL_REGEX = "https?://[\w/:%#\$&\?\(\)~\.=\+\-]+"
+    URL_REGEX = "[\w/:%#\$&\?\(\)~\.=\+\-]+"
+    
+    if re.match(HTTP_URL_REGEX, str(url)):
+        return str(url)
+    elif re.match(URL_REGEX, str(url)):
+        return f"http://" + str(url)
 
 #resolve_invite
 async def resolve_invite(ctx, code:str):
     try:
-        ret = await ctx.bot.fetch_invite(code)
-    except:
-        raise InviteNotFound(f"{code} という招待は見つかりませんでした")
-    else:
-        return ret
+        return await ctx.bot.fetch_invite(code)
+    except discord.NotFound:
+        raise commands.BadArgument(f"Invite {code} not found.")
+    except discord.HTTPException as e:
+        raise commands.BadArgument(f"Error fetching invite code: {e}")
 
 #get_channel_or_user
 def get_channel_or_user(ctx, id:int):
     result = ctx.bot.get_user(id)
     if result is None:
         result = ctx.bot.get_channel(id)
+        
+        if result is None:
+            raise commands.BadArgument(f"Argument {id} not found.")
     return result
+
+#get_features
+def get_features(guild):
+    feature = guild.features
+    
+    key = []
+    
+    features = {
+        "VIP_REGIONS":"VIP Region",
+        "VANITY_URL":"Vanity URL",
+        "INVITE_SPLASH":"Splash Invite",
+        "VERIFIED":"Verified",
+        "PARTNERED":"Partnered",
+        "MORE_EMOJI":"More Emoji",
+        "DISCOVERABLE":"Discoverable",
+        "FEATUREABLE":"Featureable",
+        "COMMUNITY":"Community",
+        "PUBLIC":"Public",
+        "NEWS":"News",
+        "BANNER":"Banner",
+        "ANIMATED_ICON":"Animated Icon",
+        "PUBLIC_DISABLED":"Public Disabled",
+        "WELCOME_SCREEN_ENABLED":"Welcome Screen Enabled",
+        "MEMBER_VERIFICATION_GATE_ENABLED":"Member Verification Gate Enabled",
+        "PREVIEW_ENABLED":"Preview Enabled"
+    }
+    
+    for i in range(len(feature)):
+        try:
+            key.append(features[str(feature)])
+        except KeyError:
+            key.append(str(feature))
+    
+    return key
 
 #get_region
 def get_region(guild):
@@ -59,15 +109,28 @@ def get_region(guild):
 def is_jun50(ctx, member=None):
     if member is None:
         member = ctx.author
-    else:
-        member = member
     
-    if member.id == 579598776721735690 or member.id == 449867036558884866:
-        result = True
-    else:
-        result = False
+    return member.id in [579598776721735690, 449867036558884866]
+
+#get_guild_or_user
+async def get_guild_or_user(ctx, id):
+    if ctx.bot.get_guild(id) is None:
+        try:
+            return await FetchUserConverter().convert(ctx, str(id))
+        except:
+            raise commands.BadArgument(f"ID {id} not guild or user.")
     
-    return result
+#choice
+def choice(l, c=1):
+    r = []
+    
+    for c in range(c):
+        d = random.choice(l)
+    
+        r.append(d)
+        l.remove(d)
+        
+    return r
 
 #VoiceChannelConverter
 class VoiceChannelConverter(commands.Converter):
@@ -78,11 +141,11 @@ class VoiceChannelConverter(commands.Converter):
             try:
                 channel_id = int(argument, base=10)
             except ValueError:
-                raise commands.BadArgument(f"{argument!r} というIDのチャンネルは見つかりませんでした")
+                raise commands.BadArgument(f"VoiceChannel {argument!r} not found.")
             else:
                 channel = ctx.bot.get_channel(channel_id)
                 if channel is None:
-                    raise commands.BadArgument(f"{argument!r} というIDのチャンネルは見つかりませんでした")
+                    raise commands.BadArgument(f"VoiceChannel {argument!r} not found.")
                 return channel
 
 #TextChannelConverter
@@ -94,28 +157,60 @@ class TextChannelConverter(commands.Converter):
             try:
                 channel_id = int(argument, base=10)
             except ValueError:
-                raise commands.BadArgument(f"{argument!r} というIDのチャンネルは見つかりませんでした")
+                raise commands.BadArgument(f"TextChannel {argument!r} not found.")
             else:
                 channel = ctx.bot.get_channel(channel_id)
                 if channel is None:
-                    raise commands.BadArgument(f"{argument!r} というIDのチャンネルは見つかりませんでした")
+                    raise commands.BadArgument(f"TextChannel {argument!r} not found.")
                 return channel
+
+#ChannelConverter
+class ChannelConverter(commands.Converter):
+    async def convert(self, ctx, argument):
+        try:
+            return await TextChannelConverter().convert(ctx, argument)
+        except:
+            try:
+                return await VoiceChannelConverter().convert(ctx, argument)
+            except:
+                try:
+                    return await commands.CategoryChannelConverter().convert(ctx, argument)
+                except:
+                    raise commands.ChannelNotFound(argument)
+
+#GuildConverter
+class GuildConverter(commands.Converter):
+    async def convert(self, ctx, argument):
+        guild = None
+        if argument.isdigit():
+            guild = ctx.bot.get_guild(int(argument))
+            
+            if guild is None:
+                raise commands.BadArgument(f"Guild {argument} not found.")
+        else:
+            if guild is None:
+                guild = discord.utils.get(ctx.bot.guilds, name=argument)
+                
+                if guild is None:
+                    raise commands.BadArgument(f"Guild {argument} not found.")
+        
+        return guild
 
 #BotUserConverter
 class BotUserConverter(commands.Converter):
     async def convert(self, ctx, argument):
         if not argument.isdigit():
-            raise commands.BadArgument("このIDはBotのIDではありません")
+            raise commands.BadArgument("Not a valid bot user ID.")
         try:
-            user = await ctx.bot.fetch_user(argument)
+            result = await ctx.bot.fetch_user(argument)
         except discord.NotFound:
-            raise commands.BadArgument("そのユーザーは見つかりませんでした")
-        except discord.HTTPException as e:
-            raise commands.BadArgument(f"ユーザー検索中にエラーが発生しました: {e}")
+            raise commands.BadArgument("Bot user not found (404).")
+        except discord.HTTPException as exc:
+            raise commands.BadArgument(f"Error fetching bot user: {exc}")
         else:
-            if not user.bot:
-                raise commands.BadArgument("このユーザーはBotではありません")
-            return user
+            if not result.bot:
+                raise commands.BadArgument("This is not a bot.")
+            return result
 
 #BannedMemberConverter
 class BannedMemberConverter(commands.Converter):
@@ -125,60 +220,46 @@ class BannedMemberConverter(commands.Converter):
             try:
                 return await ctx.guild.fetch_ban(discord.Object(id=member_id))
             except discord.NotFound:
-                raise commands.BadArgument('このユーザーはBanされていません') from None
+                raise commands.BadArgument(f'User {argument} is not banned.') from None
 
         ban_list = await ctx.guild.bans()
         entity = discord.utils.find(lambda u: str(u.user) == argument, ban_list)
 
         if entity is None:
-            raise commands.BadArgument('このユーザーはBanされていません')
+            raise commands.BadArgument(f'User {argument} is not banned.')
         return entity
 
-#FetchMemberConverter
+#FetchUserConverter
 class FetchUserConverter(commands.Converter):
     async def convert(self, ctx, argument):
         if not argument.isdigit():
-            u = await commands.MemberConverter().convert(ctx, argument)
+            return await commands.MemberConverter().convert(ctx, argument)
         try:
-            u = await ctx.bot.fetch_user(argument)
+            return await ctx.bot.fetch_user(int(argument))
         except discord.NotFound:
-            raise commands.BadArgument('ユーザーが見つかりませんでした') from None
-        except discord.HTTPException:
-            raise commands.BadArgument('エラーが発生しました') from None
-        
-        return u
+            raise commands.BadArgument(f'User {argument} not found.') from None
+        except discord.HTTPException as exc:
+            raise commands.BadArgument(f'Error fetching user: {exc}') from None
 
 #MemberConverter
 class MemberConverter(commands.Converter):
     async def convert(self, ctx, argument):
-        try:
-            u = await commands.MemberConverter().convert(ctx, argument)
-        except commands.MemberNotFound:
-            u = discord.utils.get(ctx.bot.users, name=argument) or discord.utils.get(ctx.bot.users, id=argument)
-        except Exception as e:
-            raise commands.BadArgument(e) from None
-        
-        if u is None:
+        if not argument.isdigit():
             try:
-                u = await FetchUserConverter().convert(ctx, argument)
-            except Exception as e:
-                raise Exception(e) from None
-            
-        return u
-
-#get_status_from_url
-async def get_status_from_url(ctx, url=None):
-    if url is None:
-        raise commands.MissingRequiredArgument(url)
-    
-    if url.startswith("http"):
-        url = url
-    else:
-        url = f"http://{url}"
-    
-    bot = ctx.bot
-    
-    async with bot.session.get(url) as resp:
-        status = resp.status
-    
-    return status
+                return await commands.MemberConverter().convert(ctx, argument)
+            except:
+                try:
+                    return await commands.UserConverter().convert(ctx, argument)
+                except:
+                    raise commands.MemberNotFound(argument)
+        else:
+            try:
+                return await commands.MemberConverter().convert(ctx, argument)
+            except:
+                try:
+                    return await commands.UserConverter().convert(ctx, argument)
+                except:
+                    try:
+                        return await FetchUserConverter().convert(ctx, argument)
+                    except:
+                        raise commands.MemberNotFound(argument)
