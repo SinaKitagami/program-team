@@ -8,7 +8,6 @@ import json
 import random
 import wikipedia
 import wikidata.client
-from PIL import Image, ImageDraw, ImageFont
 import time
 import asyncio
 import datetime
@@ -16,14 +15,20 @@ import pickle
 import sys
 import platform
 import re
-from twitter import *
-from dateutil.relativedelta import relativedelta as rdelta
 import traceback
 import os
 import shutil
 import pytz
-import sqlite3
+
 import aiohttp
+import aiosqlite
+import sqlite3
+import aiomysql
+import database
+
+from twitter import *
+from PIL import Image, ImageDraw, ImageFont
+from dateutil.relativedelta import relativedelta as rdelta
 # from discord_slash import SlashCommand
 
 from my_module import dpy_interaction as dpyui
@@ -40,14 +45,21 @@ import config
 
 logging.basicConfig(level=logging.DEBUG)"""
 
+main_loop = asyncio.new_event_loop()
+
 intents:discord.Intents = discord.Intents.default()
+intents.typing = False
 intents.members = True
 intents.presences = True
 
 bot = commands.Bot(command_prefix="s-", status=discord.Status.invisible,
                    allowed_mentions=discord.AllowedMentions(everyone=False),
-                   intents=intents)
-bot.owner_id = 404243934210949120
+                   intents=intents,
+                   loop=main_loop
+                   )
+bot.owner_id = None
+bot.owner_ids = {404243934210949120, 546682137240403984}
+bot.maintenance = False
 
 # slash = SlashCommand(bot,sync_commands=True,sync_on_cog_reload=True)
 
@@ -70,70 +82,28 @@ bot.T_Acs_SToken = config.T_Acs_SToken
 # test
 postcount = {}
 
-sqlite3.register_converter('pickle', pickle.loads)
-sqlite3.register_converter('json', json.loads)
-sqlite3.register_adapter(dict, json.dumps)
-sqlite3.register_adapter(list, pickle.dumps)
-db = sqlite3.connect(
-    "sina_datas.db", detect_types=sqlite3.PARSE_DECLTYPES, isolation_level=None)
-db.row_factory = sqlite3.Row
-bot.cursor = db.cursor()
-bot.cursor.execute(
-    "CREATE TABLE IF NOT EXISTS users(id integer PRIMARY KEY NOT NULL,prefix pickle,gpoint integer,memo json,levcard text,onnotif pickle,lang text,accounts pickle,sinapartner integer,gban integer,gnick text,gcolor integer,gmod integer,gstar integer,galpha integer,gbanhist text)")
-bot.cursor.execute(
-    "CREATE TABLE IF NOT EXISTS guilds(id integer PRIMARY KEY NOT NULL,levels json,commands json,hash pickle,levelupsendto integer,reward json,jltasks json,lockcom pickle,sendlog integer,prefix pickle,lang text)")
+db = None
 
-""" old gchat
-bot.cursor.execute(
-    "CREATE TABLE IF NOT EXISTS globalchs(name text PRIMARY KEY NOT NULL,ids pickle)")
-bot.cursor.execute(
-    "CREATE TABLE IF NOT EXISTS globaldates(id integer PRIMARY KEY NOT NULL,content text,allid pickle,aid integer,gid integer,timestamp text)")
-"""
+async def db_setup():
+    global db
+    try:        
+        #db = await aiomysql.connect(host=config.DB_HOST,
+        #    user=config.DB_USER,
+        #    password=config.DB_PW,
+        #    db=config.DB_NAME,
+        #    loop=main_loop,
+        #    autocommit=True,
+        #    charset="utf8mb4"
+        #    )
+        bot.cursor = database.Database(host=config.DB_HOST, port=3306, user=config.DB_USER, password=config.DB_PW, db=config.DB_NAME)
+        #bot.cursor = await db.cursor(aiomysql.DictCursor)
+        
+    except:
+        traceback.print_exc()
 
-bot.cursor.execute(
-    "CREATE TABLE IF NOT EXISTS invites(id text PRIMARY KEY NOT NULL, guild_id int NOT NULL, uses integer, inviter_id integer NOT NULL);")
-bot.cursor.execute(
-    "CREATE TABLE IF NOT EXISTS gban_settings(id integer PRIMARY KEY NOT NULL,chid integer);")
-bot.cursor.execute(
-    "CREATE TABLE IF NOT EXISTS gban_dates(id integer PRIMARY KEY NOT NULL,reason text NOT NULL,gban_by id NOT NULL);")
-
-bot.cursor.execute(
-    "CREATE TABLE IF NOT EXISTS welcome_auth(id integer PRIMARY KEY NOT NULL,category integer,use integer NOT NULL,can_view pickle NOT NULL,next_reaction NOT NULL,au_w pickle NOT NULL,give_role integer NOT NULL);")
-
-bot.cursor.execute(
-    "CREATE TABLE IF NOT EXISTS role_panels(id integer PRIMARY KEY NOT NULL,roles json NOT NULL);")
-
-bot.cursor.execute(
-    "CREATE TABLE IF NOT EXISTS activity_roles(guild_id integer NOT NULL,activity_type integer NOT NULL,role_id integer NOT NULL , PRIMARY KEY(guild_id,activity_type) );")
-
-bot.cursor.execute(
-    "CREATE TABLE IF NOT EXISTS actrole_optin(id integer PRIMARY KEY NOT NULL, is_enable integer NOT NULL default 0);")
-
-bot.cursor.execute("create table if not exists remaind(\
-    id integer primary key not null,\
-    stext text not null,\
-    mention_role integer,\
-    time real not null,\
-    chid integer not null)")
-
-# re_gchat
-bot.cursor.execute(
-    "CREATE TABLE IF NOT EXISTS gchat_clist(name text PRIMARY KEY NOT NULL,pass text)")
-bot.cursor.execute(
-    "CREATE TABLE IF NOT EXISTS gchat_cinfo(id integer PRIMARY KEY NOT NULL,connected_to text NOT NULL, wh_id integer NOT NULL)")
-bot.cursor.execute(
-    "CREATE TABLE IF NOT EXISTS gchat_pinfo(id integer PRIMARY KEY NOT NULL,content pickle,allids pickle,author_id integer,guild_id integer,timestamp pickle)")
+main_loop.run_until_complete(db_setup())
 
 
-try:
-    bot.cursor.execute("ALTER TABLE users ADD COLUMN online_agreed integer;")
-except:
-    pass
-
-try:
-    bot.cursor.execute("ALTER TABLE guilds ADD COLUMN verified integer NOT NULL default 0;")
-except:
-    pass
 
 bot.session = aiohttp.ClientSession(loop=bot.loop)
 
@@ -144,11 +114,11 @@ async def close_handler():
     await bot._default_close()
     await bot.session.close()
     try:
-        db.commit()
-    except sqlite3.ProgrammingError:
+        await db.commit()
+    except aiosqlite.ProgrammingError:
         pass
     else:
-        db.close()
+        await db.close()
 bot.close = close_handler
 
 bot.translate_handler = TranslateHandler(bot, ["en", "ja"])
@@ -223,9 +193,9 @@ def shares_guild(user_id_a, user_id_b):
 bot.shares_guild = shares_guild
 
 
-def can_use_online(user):
-    enabled = bot.cursor.execute(
-        "SELECT online_agreed FROM users WHERE id = ?", (user.id,)).fetchone()
+async def can_use_online(user):
+    enabled = await bot.cursor.fetchone("SELECT online_agreed FROM users WHERE id = %s", (user.id,))
+    #enabled = await bot.cursor.fetchone()
     return enabled and enabled["online_agreed"]
 
 
@@ -296,9 +266,9 @@ async def repomsg(msg, rs, should_ban=False):
     e.add_field(name="ブロック理由", value=rs or "なし")
     await ch.send(embed=e)
     if should_ban:
-        bot.cursor.execute(
-            "UPDATE users SET gban = ? WHERE id = ?", (1, msg.author.id))
-        bot.cursor.execute("UPDATE users SET gbanhist = ? WHERE id = ?",
+        await bot.cursor.execute(
+            "UPDATE users SET gban = %s WHERE id = %s", (1, msg.author.id))
+        await bot.cursor.execute("UPDATE users SET gbanhist = %s WHERE id = %s",
                            ("予防グローバルチャットBAN: {}".format(rs), msg.author.id))
 
 
@@ -338,8 +308,8 @@ async def globalSend(message):
             return
         if message.is_system():
             return
-        bot.cursor.execute("select * from globalchs")
-        gchs = bot.cursor.fetchall()
+        gchs = await bot.cursor.fetchall("select * from globalchs")
+        #gchs = await bot.cursor.fetchall()
         gchn = None
         for sgch in gchs:
             if message.channel.id in sgch["ids"]:
@@ -355,17 +325,17 @@ async def globalSend(message):
             await repomsg(message, err.reason, err.should_ban)
             return
 
-        bot.cursor.execute("select * from users where id=?",
+        upf = await bot.cursor.fetchone("select * from users where id=%s",
                            (message.author.id,))
-        upf = bot.cursor.fetchone()
-        bot.cursor.execute("select * from guilds where id=?",
+        #upf = await bot.cursor.fetchone()
+        gpf = await bot.cursor.fetchone("select * from guilds where id=%s",
                            (message.guild.id,))
-        gpf = bot.cursor.fetchone()
+        #gpf = await bot.cursor.fetchone()
         if (datetime.datetime.now() - rdelta(hours=9) - rdelta(days=7) >= message.author.created_at) or upf["gmod"] or upf["gstar"] or gchn=="mido_sync_a":
             if upf["gban"] == 1:
                 if not (gchn == "sync_rsp_main_chat" or gchn=="mido_sync_a"):
                     dc = await ut.opendm(message.author)
-                    await dc.send(bot._(message.author, "global-banned", message.author.mention))
+                    await dc.send(await bot._(message.author, "global-banned", message.author.mention))
                     await repomsg(message, "思惟奈ちゃんグローバルチャットの使用禁止")
                     await message.add_reaction("❌")
                     await asyncio.sleep(5)
@@ -476,9 +446,9 @@ async def globalSend(message):
                     ch = bot.get_channel(cid)
                     tasks.append(asyncio.ensure_future(
                         gsended(message, ch, embed)))
-                bot.cursor.execute(
-                    "select * from globalchs where name=?", (gchn.replace("ed-", ""),))
-                nch = bot.cursor.fetchone()
+                nch = await bot.cursor.fetchone(
+                    "select * from globalchs where name=%s", (gchn.replace("ed-", ""),))
+                #nch = await bot.cursor.fetchone()
                 try:
                     if nch["ids"]:
                         for cid in nch["ids"]:
@@ -554,9 +524,9 @@ async def globalSend(message):
                                 gsendwh(message, wch, spicon, upf, ed, fls)))
                     except:
                         pass
-                bot.cursor.execute(
-                    "select * from globalchs where name=?", (f"ed-{gchn}",))
-                och = bot.cursor.fetchone()
+                och = await bot.cursor.fetchone(
+                    "select * from globalchs where name=%s", (f"ed-{gchn}",))
+                #och = await bot.cursor.fetchone()
                 try:
                     if nch["ids"]:
                         for cid in och["ids"]:
@@ -573,7 +543,7 @@ async def globalSend(message):
                         await message.remove_reaction(bot.get_emoji(653161518346534912), bot.user)
                 except:
                     pass
-            bot.cursor.execute("INSERT INTO globaldates(id,content,allid,aid,gid,timestamp) VALUES(?,?,?,?,?,?,?)", (message.id, message.clean_content,
+            await bot.cursor.execute("INSERT INTO globaldates(id,content,allid,aid,gid,timestamp) VALUES(%s,%s,%s,%s,%s,%s,%s)", (message.id, message.clean_content,
                                                                                                                    mids+[message.id], message.author.id, message.guild.id, str(message.created_at.strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))))
             if not (gchn == "sync_rsp_main_chat" or gchn=="mido_sync_a"):
                 await message.add_reaction(bot.get_emoji(653161518195539975))
@@ -607,18 +577,18 @@ async def on_member_update(b, a):
                 "_", "\_").replace("|", "\|").replace("~", "\~").replace("`", "\`").replace(">", "\>"))
             e.add_field(name="変更後", value=anick.replace("\\", "\\\\").replace("*", "\*").replace(
                 "_", "\_").replace("|", "\|").replace("~", "\~").replace("`", "\`").replace(">", "\>"))
-            bot.cursor.execute(
-                "select * from guilds where id=?", (a.guild.id,))
-            gpf = bot.cursor.fetchone()
+            gpf = await bot.cursor.fetchone(
+                "select * from guilds where id=%s", (a.guild.id,))
+            #gpf = await bot.cursor.fetchone()
             if gpf["sendlog"]:
                 ch = bot.get_channel(gpf["sendlog"])
                 if ch.guild.id == a.guild.id:
                     await ch.send(embed=e)
         elif not b.pending == a.pending:
             e.add_field(name="メンバースクリーニングの状態変更",value=f"メンバースクリーニング{'が再度要求されます。' if a.pending else 'を完了しました。'}")
-            bot.cursor.execute(
-                "select * from guilds where id=?", (a.guild.id,))
-            gpf = bot.cursor.fetchone()
+            gpf = await bot.cursor.fetchone(
+                "select * from guilds where id=%s", (a.guild.id,))
+            #gpf = await bot.cursor.fetchone()
             if gpf["sendlog"]:
                 ch = bot.get_channel(gpf["sendlog"])
                 if ch.guild.id == a.guild.id:
@@ -632,9 +602,9 @@ async def on_member_update(b, a):
                 e.add_field(name="変更内容", value="役職付与")
                 e.add_field(name="役職", value=list(
                     set(a.roles)-set(b.roles))[0])
-            bot.cursor.execute(
-                "select * from guilds where id=?", (a.guild.id,))
-            gpf = bot.cursor.fetchone()
+            gpf = await bot.cursor.fetchone(
+                "select * from guilds where id=%s", (a.guild.id,))
+            #gpf = await bot.cursor.fetchone()
             if gpf["sendlog"]:
                 ch = bot.get_channel(gpf["sendlog"])
                 if ch.guild.id == a.guild.id:
@@ -675,10 +645,10 @@ async def nga(m, r):
 @bot.event
 async def on_member_join(member):
     try:
-        bot.cursor.execute(
-            "select * from guilds where id=?", (member.guild.id,))
-        gpf = bot.cursor.fetchone()
-        ctt = gpf["jltasks"]
+        gpf = await bot.cursor.fetchone(
+            "select * from guilds where id=%s", (member.guild.id,))
+        #gpf = await bot.cursor.fetchone()
+        ctt = json.loads(gpf["jltasks"])
         if not ctt.get("welcome") is None:
             if ctt["welcome"]["sendto"] == "sysch":
                 await member.guild.system_channel.send(ctt["welcome"]["content"].format(member.mention))
@@ -694,8 +664,8 @@ async def on_member_join(member):
     e.set_footer(
         text=f"アカウント作成日時(そのままの値:{(member.created_at + rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒')},タイムスタンプ化:")
     e.timestamp = member.created_at
-    bot.cursor.execute("select * from guilds where id=?", (member.guild.id,))
-    gpf = bot.cursor.fetchone()
+    gpf = await bot.cursor.fetchone("select * from guilds where id=%s", (member.guild.id,))
+    #gpf = await bot.cursor.fetchone()
     try:
         if gpf["sendlog"]:
             ch = bot.get_channel(gpf["sendlog"])
@@ -705,8 +675,8 @@ async def on_member_join(member):
         pass
     # 他サーバーでのban通知
     isgban = False
-    bot.cursor.execute("select * from users where id=?", (member.id,))
-    upf = bot.cursor.fetchone()
+    upf = await bot.cursor.fetchone("select * from users where id=%s", (member.id,))
+    #upf = await bot.cursor.fetchone()
     bunotif = 0
     if member.id in bot.team_sina:
         for ch in member.guild.channels:
@@ -739,10 +709,10 @@ async def on_member_join(member):
 @bot.event
 async def on_member_remove(member):
     try:
-        bot.cursor.execute(
-            "select * from guilds where id=?", (member.guild.id,))
-        gpf = bot.cursor.fetchone()
-        ctt = gpf["jltasks"]
+        gpf = await bot.cursor.fetchone(
+            "select * from guilds where id=%s", (member.guild.id,))
+        #gpf = await bot.cursor.fetchone()
+        ctt = json.loads(gpf["jltasks"])
         if not ctt.get("cu") is None:
             if ctt["cu"]["sendto"] == "sysch":
                 await member.guild.system_channel.send(ctt["cu"]["content"].format(str(member)))
@@ -756,8 +726,8 @@ async def on_member_remove(member):
     e.add_field(name="役職", value=[i.name for i in member.roles])
     # e.set_footer(text=f"{member.guild.name}/{member.guild.id}")
     e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-    bot.cursor.execute("select * from guilds where id=?", (member.guild.id,))
-    gpf = bot.cursor.fetchone()
+    gpf = await bot.cursor.fetchone("select * from guilds where id=%s", (member.guild.id,))
+    #gpf = await bot.cursor.fetchone()
     if gpf["sendlog"]:
         ch = bot.get_channel(gpf["sendlog"])
         if ch.guild.id == member.guild.id:
@@ -772,8 +742,8 @@ async def on_webhooks_update(channel):
     e = discord.Embed(title="Webhooksの更新", color=bot.ec)
     e.add_field(name="チャンネル", value=channel.mention)
     e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-    bot.cursor.execute("select * from guilds where id=?", (channel.guild.id,))
-    gpf = bot.cursor.fetchone()
+    gpf = await bot.cursor.fetchone("select * from guilds where id=%s", (channel.guild.id,))
+    #gpf = await bot.cursor.fetchone()
     if gpf["sendlog"]:
         ch = bot.get_channel(gpf["sendlog"])
         if ch.guild.id == channel.guild.id:
@@ -785,8 +755,8 @@ async def on_guild_role_create(role):
     e = discord.Embed(title="役職の作成", color=bot.ec)
     e.add_field(name="役職名", value=role.name)
     e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-    bot.cursor.execute("select * from guilds where id=?", (role.guild.id,))
-    gpf = bot.cursor.fetchone()
+    gpf = await bot.cursor.fetchone("select * from guilds where id=%s", (role.guild.id,))
+    #gpf = await bot.cursor.fetchone()
     if gpf["sendlog"]:
         ch = bot.get_channel(gpf["sendlog"])
         if ch.guild.id == role.guild.id:
@@ -798,8 +768,8 @@ async def on_guild_role_delete(role):
     e = discord.Embed(title="役職の削除", color=bot.ec)
     e.add_field(name="役職名", value=role.name)
     e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-    bot.cursor.execute("select * from guilds where id=?", (role.guild.id,))
-    gpf = bot.cursor.fetchone()
+    gpf = await bot.cursor.fetchone("select * from guilds where id=%s", (role.guild.id,))
+    #gpf = await bot.cursor.fetchone()
     if gpf["sendlog"]:
         ch = bot.get_channel(gpf["sendlog"])
         if ch.guild.id == role.guild.id:
@@ -808,30 +778,6 @@ async def on_guild_role_delete(role):
 
 @bot.event
 async def on_message_edit(before, after):
-    if after.channel.id == 611117238464020490:
-        if after.embeds and before.content == after.content:
-            bot.cursor.execute(
-                "select * from globalchs where name=?", ("防災情報",))
-            chs = bot.cursor.fetchone()
-            es = after.embeds
-            sed = []
-            for e in es:
-                e.color = bot.ec
-                e.title = f'💠{str(e.title).replace("Embed.Empty","防災情報")}'
-                sed.append(e)
-            for chid in chs["ids"]:
-                try:
-                    ch = bot.get_channel(chid)
-                    for wh in await ch.webhooks():
-                        try:
-                            if wh.name == "sina_global":
-                                await wh.send(embeds=sed)
-                                await asyncio.sleep(0.2)
-                                break
-                        except:
-                            continue
-                except:
-                    pass
     # サーバーログ
     if before.content != after.content:
         e = discord.Embed(title="メッセージの編集", color=bot.ec)
@@ -841,9 +787,9 @@ async def on_message_edit(before, after):
         e.add_field(name="メッセージチャンネル", value=after.channel.mention)
         e.add_field(name="メッセージのURL", value=after.jump_url)
         e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-        bot.cursor.execute(
-            "select * from guilds where id=?", (after.guild.id,))
-        gpf = bot.cursor.fetchone()
+        gpf = await bot.cursor.fetchone(
+            "select * from guilds where id=%s", (after.guild.id,))
+        #gpf = await bot.cursor.fetchone()
         if gpf["sendlog"]:
             ch = bot.get_channel(gpf["sendlog"])
             if ch.guild.id == after.guild.id:
@@ -856,8 +802,8 @@ async def on_guild_channel_delete(channel):
     e = discord.Embed(title="チャンネル削除", color=bot.ec)
     e.add_field(name="チャンネル名", value=channel.name)
     e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-    bot.cursor.execute("select * from guilds where id=?", (channel.guild.id,))
-    gpf = bot.cursor.fetchone()
+    gpf = await bot.cursor.fetchone("select * from guilds where id=%s", (channel.guild.id,))
+    #gpf = await bot.cursor.fetchone()
     if gpf["sendlog"]:
         ch = bot.get_channel(gpf["sendlog"])
         if ch.guild.id == channel.guild.id:
@@ -870,8 +816,8 @@ async def on_reaction_clear(message, reactions):
     e.add_field(name="リアクション", value=[str(i) for i in reactions])
     e.add_field(name="除去されたメッセージ", value=message.content or "(本文なし)")
     e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-    bot.cursor.execute("select * from guilds where id=?", (message.guild.id,))
-    gpf = bot.cursor.fetchone()
+    gpf = await bot.cursor.fetchone("select * from guilds where id=%s", (message.guild.id,))
+    #gpf = await bot.cursor.fetchone()
     if gpf["sendlog"]:
         ch = bot.get_channel(gpf["sendlog"])
         if ch.guild.id == message.guild.id:
@@ -887,9 +833,9 @@ async def on_message_delete(message):
         e.add_field(name="メッセージチャンネル", value=message.channel.mention)
         e.add_field(name="メッセージのid", value=message.id)
         e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-        bot.cursor.execute("select * from guilds where id=?",
+        gpf = await bot.cursor.fetchone("select * from guilds where id=%s",
                            (message.guild.id,))
-        gpf = bot.cursor.fetchone()
+        #gpf = await bot.cursor.fetchone()
         if gpf["sendlog"]:
             ch = bot.get_channel(gpf["sendlog"])
             if ch.guild.id == message.guild.id:
@@ -923,9 +869,9 @@ async def on_bulk_message_delete(messages):
     e = discord.Embed(title="メッセージ一括削除", color=bot.ec)
     e.add_field(name="件数", value=len(messages))
     e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-    bot.cursor.execute("select * from guilds where id=?",
+    gpf = await bot.cursor.fetchone("select * from guilds where id=%s",
                        (messages[0].guild.id,))
-    gpf = bot.cursor.fetchone()
+    #gpf = await bot.cursor.fetchone()
     if gpf["sendlog"]:
         ch = bot.get_channel(gpf["sendlog"])
         if ch.guild.id == messages[0].guild.id:
@@ -937,8 +883,8 @@ async def on_guild_channel_create(channel):
     e = discord.Embed(title="チャンネル作成", color=bot.ec)
     e.add_field(name="チャンネル名", value=channel.mention)
     e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-    bot.cursor.execute("select * from guilds where id=?", (channel.guild.id,))
-    gpf = bot.cursor.fetchone()
+    gpf = await bot.cursor.fetchone("select * from guilds where id=%s", (channel.guild.id,))
+    #gpf = await bot.cursor.fetchone()
     if gpf["sendlog"]:
         ch = bot.get_channel(gpf["sendlog"])
         if ch.guild.id == channel.guild.id:
@@ -954,9 +900,9 @@ async def on_guild_channel_update(b, a):
             e.add_field(name="変更内容", value="チャンネル名")
             e.add_field(name="変更前", value=b.name)
             e.add_field(name="変更後", value=a.name)
-            bot.cursor.execute(
-                "select * from guilds where id=?", (a.guild.id,))
-            gpf = bot.cursor.fetchone()
+            gpf = await bot.cursor.fetchone(
+                "select %s", (a.guild.id,))
+            #gpf = await bot.cursor.fetchone()
             if gpf["sendlog"]:
                 ch = bot.get_channel(gpf["sendlog"])
                 if ch.guild.id == a.guild.id:
@@ -964,8 +910,8 @@ async def on_guild_channel_update(b, a):
     elif not b.changed_roles == a.changed_roles:
         e.add_field(name="変更内容", value="権限の上書き")
         e.add_field(name="確認:", value="チャンネル設定を見てください。")
-        bot.cursor.execute("select * from guilds where id=?", (a.guild.id,))
-        gpf = bot.cursor.fetchone()
+        gpf = await bot.cursor.fetchone("select * from guilds where id=%s", (a.guild.id,))
+        #gpf = await bot.cursor.fetchone()
         if gpf["sendlog"]:
             ch = bot.get_channel(gpf["sendlog"])
             if ch.guild.id == a.guild.id:
@@ -975,9 +921,9 @@ async def on_guild_channel_update(b, a):
             e.add_field(name="変更内容", value="チャンネルトピック")
             e.add_field(name="変更前", value=b.topic)
             e.add_field(name="変更後", value=a.topic)
-            bot.cursor.execute(
-                "select * from guilds where id=?", (a.guild.id,))
-            gpf = bot.cursor.fetchone()
+            gpf = await bot.cursor.fetchone(
+                "select * from guilds where id=%s", (a.guild.id,))
+            #gpf = await bot.cursor.fetchone()
             if gpf["sendlog"]:
                 ch = bot.get_channel(gpf["sendlog"])
                 if ch.guild.id == a.guild.id:
@@ -992,16 +938,16 @@ async def on_guild_update(b, a):
         e.add_field(name="変更内容", value="サーバー名")
         e.add_field(name="変更前", value=b.name)
         e.add_field(name="変更後", value=a.name)
-        bot.cursor.execute("select * from guilds where id=?", (a.id,))
-        gpf = bot.cursor.fetchone()
+        gpf = await bot.cursor.fetchone("select * from guilds where id=%s", (a.id,))
+        #gpf = await bot.cursor.fetchone()
         if gpf["sendlog"]:
             ch = bot.get_channel(gpf["sendlog"])
             if ch.guild.id == a.id:
                 await ch.send(embed=e)
     elif b.icon != a.icon:
         e.add_field(name="変更内容", value="サーバーアイコン")
-        bot.cursor.execute("select * from guilds where id=?", (a.id,))
-        gpf = bot.cursor.fetchone()
+        gpf = await bot.cursor.fetchone("select * from guilds where id=%s", (a.id,))
+        #gpf = await bot.cursor.fetchone()
         if gpf["sendlog"]:
             ch = bot.get_channel(gpf["sendlog"])
             if ch.guild.id == a.id:
@@ -1010,8 +956,8 @@ async def on_guild_update(b, a):
         e.add_field(name="変更内容", value="サーバー所有者の変更")
         e.add_field(name="変更前", value=b.owner)
         e.add_field(name="変更後", value=a.owner)
-        bot.cursor.execute("select * from guilds where id=?", (a.id,))
-        gpf = bot.cursor.fetchone()
+        gpf = await bot.cursor.fetchone("select * from guilds where id=%s", (a.id,))
+        #gpf = await bot.cursor.fetchone()
         if gpf["sendlog"]:
             ch = bot.get_channel(gpf["sendlog"])
             if ch.guild.id == a.id:
@@ -1027,8 +973,8 @@ async def on_member_ban(g, user):
     # e.add_field(name="実行者", value=str(bl[0].user))
     # e.set_footer(text=f"{g.name}/{g.id}")
     e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-    bot.cursor.execute("select * from guilds where id=?", (g.id,))
-    gpf = bot.cursor.fetchone()
+    gpf = await bot.cursor.fetchone("select * from guilds where id=%s", (g.id,))
+    #gpf = await bot.cursor.fetchone()
     if gpf["sendlog"]:
         ch = bot.get_channel(gpf["sendlog"])
         if ch.guild.id == g.id:
@@ -1040,8 +986,8 @@ async def on_member_unban(guild, user):
     e = discord.Embed(title="ユーザーのban解除", color=bot.ec)
     e.add_field(name="ユーザー名", value=str(user))
     e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-    bot.cursor.execute("select * from guilds where id=?", (guild.id,))
-    gpf = bot.cursor.fetchone()
+    gpf = await bot.cursor.fetchone("select * from guilds where id=%s", (guild.id,))
+    #gpf = await bot.cursor.fetchone()
     if gpf["sendlog"]:
         ch = bot.get_channel(gpf["sendlog"])
         if ch.guild.id == guild.id:
@@ -1070,6 +1016,7 @@ async def on_guild_join(guild):
     e.add_field(name="グローバルBANとその申請",value="`s-gbanlogto [チャンネルID]`でグローバルBANログの送信先を指定することで、グローバルBAN機能が有効化されます(BAN権限が必要)。\n一般のユーザーの方は`s-report`コマンドで申請ができます。詳しくは`s-help gbanlogto`ならびに`s-help report`をご覧ください！")
     e.add_field(name="サーバー/ユーザーの設定変更に関して",value="`s-settings`コマンドで設定できる内容を見て、直接該当コマンドを呼び出すことができます。また、該当コマンドを直接呼び出しても設定を変えることもできます。使いやすい方を使ってください。")
     e.add_field(name="思惟奈ちゃんのお知らせを受け取ろう！",value="`s-rnotify`コマンドで、そのチャンネルに思惟奈ちゃんのお知らせを受け取れるようになります。ぜひ！受信設定をお願いします。")
+    e.add_field(name="クイックコマンド呼び出し",value="`s-shortcut`コマンドで、クイックコマンド呼び出しボタンを作成できます！活用してみましょう！")
     e.add_field(name="その他",value="このほかにもたくさんの機能を備えています。helpの1ページ目にリンクがある「みぃてんのわいがや広場」では、サポートも行っておりますのでお困りの方は一度足を運んでみてください。あなたのサーバーに少しでも役に立てるように頑張りますので思惟奈ちゃんをよろしくお願いします！")
     try:
         await guild.system_channel.send(embed=e)
@@ -1115,8 +1062,8 @@ async def on_invite_create(invite):
     e.add_field(name="チャンネル", value=str(invite.channel.mention))
     e.add_field(name="コード", value=str(invite.code))
     e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-    bot.cursor.execute("select * from guilds where id=?", (invite.guild.id,))
-    gpf = bot.cursor.fetchone()
+    gpf = await bot.cursor.fetchone("select * from guilds where id=%s", (invite.guild.id,))
+    #gpf = await bot.cursor.fetchone()
     if gpf["sendlog"]:
         ch = bot.get_channel(gpf["sendlog"])
         if ch.guild.id == invite.guild.id:
@@ -1130,8 +1077,8 @@ async def on_invite_delete(invite):
     e.add_field(name="チャンネル", value=str(invite.channel.mention))
     e.add_field(name="コード", value=str(invite.code))
     e.timestamp = datetime.datetime.now() - rdelta(hours=9)
-    bot.cursor.execute("select * from guilds where id=?", (invite.guild.id,))
-    gpf = bot.cursor.fetchone()
+    gpf = await bot.cursor.fetchone("select * from guilds where id=%s", (invite.guild.id,))
+    #gpf = await bot.cursor.fetchone()
     if gpf["sendlog"]:
         ch = bot.get_channel(gpf["sendlog"])
         if ch.guild.id == invite.guild.id:
@@ -1162,7 +1109,8 @@ async def on_ready():
             "m10s_partners", "m10s_remainder", "m10s_level_edit", "m10s_set_activity_roles", "m10s_re_gchat",
             # "_m10s_slash_testing","_m10s_music_slash",
             "_m10s_api",
-            "_m10s_ctx_menu"
+            "_m10s_ctx_menu",
+            "_m10s_quick_cmd"
             ]
     
     embed = discord.Embed(title="読み込みに失敗したCog", color=bot.ec)
@@ -1214,29 +1162,42 @@ async def on_message(message):
 
 async def domsg(message):
     global DoServercmd
-
-    bot.cursor.execute("select * from guilds where id=?", (message.guild.id,))
-    gs = bot.cursor.fetchone()
+    
+    if not message.author.id in bot.team_sina:
+        if bot.maintenance:
+            return 
+        else:
+            pass
+    else:
+        pass
+    
+    gs = await bot.cursor.fetchone("select * from guilds where id=%s", (message.guild.id,))
+    #gs = await bot.cursor.fetchone()
     if not gs:
-        guild_lang = bot.translate_handler.get_lang_by_guild(
+        guild_lang = await bot.translate_handler.get_lang_by_guild(
             message.guild, False)
-        bot.cursor.execute("INSERT INTO guilds(id,levels,commands,hash,levelupsendto,reward,jltasks,lockcom,sendlog,prefix,lang,verified) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
-                           (message.guild.id, {}, {}, [], None, {}, {}, [], None, [], guild_lang,0))
+        await bot.cursor.execute("INSERT INTO guilds(id,levels,commands,hash,levelupsendto,reward,jltasks,lockcom,sendlog,prefix,lang,verified) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                           (message.guild.id, "{}", "{}", "[]", None, "{}", "{}", "[]", None, "[]", guild_lang,0))
         try:
             await message.channel.send(f"{bot.get_emoji(653161518153596950)}このサーバーの思惟奈ちゃんサーバープロファイルを作成しました！いくつかの項目はコマンドを使って書き換えることができます。詳しくはヘルプ(`s-help`)をご覧ください。\nまた、不具合や疑問点などがありましたら`mii-10#3110`にお願いします。\n思惟奈ちゃんのお知らせは`s-rnotify [チャンネルid(省略可能)]`で、コマンド等の豆知識は`s-rtopic [チャンネルid(省略可能)]`で受信する設定にできます。(Webhook管理権限が必要です。)\nこのメッセージを見たことがある？\n　長期のメンテナンスによりデータが失われてしまった可能性があります。お手数をおかけしますが、再度設定をお願いします。")
         except:
             pass
-        bot.cursor.execute("select * from guilds where id=?",
+        gs = await bot.cursor.fetchone("select * from guilds where id=%s",
                            (message.guild.id,))
-        gs = bot.cursor.fetchone()
+        #gs = await bot.cursor.fetchone()
 
-    bot.cursor.execute("select * from users where id=?", (message.author.id,))
-    pf = bot.cursor.fetchone()
+    pf = await bot.cursor.fetchone("select * from users where id=%s", (message.author.id,))
+    #pf = await bot.cursor.fetchone()
     if not pf:
         if message.is_system():
             return
-        bot.cursor.execute("INSERT INTO users(id,prefix,gpoint,memo,levcard,onnotif,lang,accounts,sinapartner,gban,gnick,gcolor,gmod,gstar,galpha,gbanhist) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                        (message.author.id, [], 0, {}, "m@ji☆", [], "ja", [], 0, 0, message.author.name, 0, 0, 0, 0, "なし"))
+        
+        try:
+            await bot.cursor.execute("INSERT INTO users(id,prefix,gpoint,memo,levcard,onnotif,lang,sinapartner,gban,gnick,gcolor,gmod,gstar,galpha,gbanhist,online_agreed) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                        (message.author.id, "[]", 0, "{}", "m@ji☆", "[]", "ja", 0, 0, message.author.name, 0, 0, 0, 0, "なし",0))
+        except Exception as exc:
+            print(exc)
+            
         try:
             #if "disable_profile_msg" in gs["lockcom"]:
             await message.add_reaction(bot.get_emoji(653161518153596950))
@@ -1247,20 +1208,20 @@ async def domsg(message):
                     #await message.send(f"> {bot.get_emoji(653161518153596950)} {message.author.mention}さん！あなたの思惟奈ちゃんユーザープロファイルを作成しました！いくつかの項目はコマンドを使って書き換えることができます。詳しくはヘルプ(`s-help`)をご覧ください。\n> なんでこのメッセージが来たの？\n　思惟奈ちゃんのいるサーバーで発言したことにより、プロファイルが作成されました。プロファイルの削除を希望する場合は`mii-10#3110`のDMにご連絡ください。なお、プロファイルを削除後は思惟奈ちゃんをご利用できなくなります。(レベル機能などサーバープロファイルに依存するものを含む)")
         except:
             pass
-        bot.cursor.execute("select * from users where id=?",
+        pf = await bot.cursor.fetchone("select * from users where id=%s",
                         (message.author.id,))
-        pf = bot.cursor.fetchone()
+        #pf = await bot.cursor.fetchone()
 
-    """bot.cursor.execute(
+    """await bot.cursor.execute(
     "CREATE TABLE IF NOT EXISTS actrole_optin(id integer PRIMARY KEY NOT NULL, is_enable integer NOT NULL default 0);")"""
 
-    bot.cursor.execute("select * from actrole_optin where id=?", (message.author.id,))
-    if not bot.cursor.fetchone():
+    data = await bot.cursor.fetchone("select * from actrole_optin where id=%s", (message.author.id,))
+    if not data:
         if message.is_system():
             return
-        bot.cursor.execute("INSERT INTO actrole_optin(id,is_enable) VALUES(?,?)",
+        await bot.cursor.execute("INSERT INTO actrole_optin(id,is_enable) VALUES(%s,%s)",
                         (message.author.id, 0))
-        bot.cursor.execute("select * from actrole_optin where id=?",
+        await bot.cursor.execute("select * from actrole_optin where id=%s",
                         (message.author.id,))
 
 
@@ -1268,15 +1229,15 @@ async def domsg(message):
         gahash(message, gs)), asyncio.ensure_future(runsercmd(message, gs, pf))]
     await asyncio.gather(*tks)
 
-    tpf = pf["prefix"]+gs["prefix"]
-    if not "disable_defprefix" in gs["lockcom"]:
+    tpf = json.loads(pf["prefix"]) + json.loads(gs["prefix"])
+    if not "disable_defprefix" in json.loads(gs["lockcom"]):
         tpf.insert(0,"s-")
     bot.command_prefix = tpf
     ctx = await bot.get_context(message)
     try:
         if ctx.command:
-            if ctx.command.name in gs["lockcom"] and not ctx.author.guild_permissions.administrator and ctx.author.id != 404243934210949120:
-                await ctx.send(ctx._("comlock-locked"))
+            if ctx.command.name in json.loads(gs["lockcom"]) and not ctx.author.guild_permissions.administrator and ctx.author.id != 404243934210949120:
+                await ctx.send(await ctx._("comlock-locked"))
             else:
                 if ctx.command.name in bot.features[0]:
                     await ctx.send("> command locked by admins\n　このコマンドはメンテナンスなどのために一時的な使用制限がかかっています。\n　問題点が解消され次第、再度利用が可能となりますので今しばらくお待ちください。")
@@ -1290,13 +1251,13 @@ async def domsg(message):
 
 async def runsercmd(message, gs, pf):
     # servercmd
-    if "scom" not in gs["lockcom"]:
+    if "scom" not in json.loads(gs["lockcom"]):
         if not message.author.id == bot.user.id and message.webhook_id is None:
-            tpf = pf["prefix"]+gs["prefix"]
+            tpf = json.loads(pf["prefix"]) + json.loads(gs["prefix"])
             tpf.append("s-")
             try:
-                if not gs["commands"] is None:
-                    cmds = gs["commands"]
+                if not json.loads(gs["commands"]) is None:
+                    cmds = json.loads(gs["commands"])
                     ctts = message.content.split(" ")
                     for k, v in cmds.items():
                         for px in tpf:
@@ -1310,17 +1271,17 @@ async def runsercmd(message, gs, pf):
                                     try:
                                         role = message.guild.get_role(v["rep"])
                                     except:
-                                        await message.channel.send(bot._(message.author, "scmd-notfound-role"))
+                                        await message.channel.send(await bot._(message.author, "scmd-notfound-role"))
                                         return
                                     if role < message.author.top_role:
                                         if role in message.author.roles:
                                             await message.author.remove_roles(role)
-                                            await message.channel.send(bot._(message.author, "scmd-delrole"))
+                                            await message.channel.send(await bot._(message.author, "scmd-delrole"))
                                         else:
                                             await message.author.add_roles(role)
-                                            await message.channel.send(bot._(message.author, "scmd-addrole"))
+                                            await message.channel.send(await bot._(message.author, "scmd-addrole"))
                                     else:
-                                        await message.channel.send(bot._(message.author, "scmd-notrole"))
+                                        await message.channel.send(await bot._(message.author, "scmd-notrole"))
                                 break
             except:
                 pass
@@ -1330,27 +1291,27 @@ async def gahash(message, gs):
     # hash
     if "s-noHashSend" in (message.channel.topic or ""):
         return
-    if "shash" not in gs["lockcom"]:
-        ch = gs["hash"]
+    if "shash" not in json.loads(gs["lockcom"]):
+        ch = json.loads(gs["hash"])
         if ch is not []:
             menchan = message.channel_mentions
             for sch in menchan:
                 if sch.id in ch:
                     if message.channel.is_nsfw():
-                        embed = discord.Embed(title="", description=bot.l10n_guild(
+                        embed = discord.Embed(title="", description=await bot.l10n_guild(
                             message.guild, "hash-nsfw"), color=message.author.color)
-                        embed.add_field(name=bot.l10n_guild(message.guild, "hash-from"),
-                                        value=f'{bot.l10n_guild(message.guild,"hash-chmention")}:{message.channel.mention}\n{bot.l10n_guild(message.guild,"hash-chname")}:{message.channel.name}')
-                        embed.add_field(name=bot.l10n_guild(
+                        embed.add_field(name=await bot.l10n_guild(message.guild, "hash-from"),
+                                        value=f'{await bot.l10n_guild(message.guild,"hash-chmention")}:{message.channel.mention}\n{await bot.l10n_guild(message.guild,"hash-chname")}:{message.channel.name}')
+                        embed.add_field(name=await bot.l10n_guild(
                             message.guild, "hash-link"), value=message.jump_url)
                         embed.set_author(name=message.author.display_name, icon_url=message.author.avatar_url_as(
                             static_format='png'))
                     else:
                         embed = discord.Embed(
                             title="", description=message.content, color=message.author.color)
-                        embed.add_field(name=bot.l10n_guild(message.guild, "hash-from"),
-                                        value=f'{bot.l10n_guild(message.guild,"hash-chmention")}:{message.channel.mention}\n{bot.l10n_guild(message.guild,"hash-chname")}:{message.channel.name}')
-                        embed.add_field(name=bot.l10n_guild(
+                        embed.add_field(name=await bot.l10n_guild(message.guild, "hash-from"),
+                                        value=f'{await bot.l10n_guild(message.guild,"hash-chmention")}:{message.channel.mention}\n{await bot.l10n_guild(message.guild,"hash-chname")}:{message.channel.name}')
+                        embed.add_field(name=await bot.l10n_guild(
                             message.guild, "hash-link"), value=message.jump_url)
                         embed.set_author(name=message.author.display_name, icon_url=message.author.avatar_url_as(
                             static_format='png'))
@@ -1360,77 +1321,93 @@ async def gahash(message, gs):
 
 
 async def dlevel(message, gs):
-    if "clevel" in gs["lockcom"]:
+    if "clevel" in json.loads(gs["lockcom"]):
         return
     if message.author.bot:
         return
-    if gs["levels"].get(str(message.author.id), None) is None:
-        gs["levels"][str(message.author.id)] = {
+        
+    lvls = json.loads(gs["levels"])
+    
+    if isinstance(lvls, str):
+        return
+    
+    if lvls.get(str(message.author.id), None) is None:
+        lvls[str(message.author.id)] = {
             "level": 0,
             "exp": random.randint(5, 15),
             "lltime": int(time.time()),
             "dlu": True
         }
-        bot.cursor.execute(
-            "UPDATE guilds SET levels = ? WHERE id = ?", (gs["levels"], message.guild.id))
+        await bot.cursor.execute(
+            "UPDATE guilds SET levels = %s WHERE id = %s", (json.dumps(lvls), message.guild.id))
     else:
-        if gs["levels"][str(message.author.id)]["dlu"]:
-            if (int(time.time())-gs["levels"][str(message.author.id)]["lltime"]) >= 60:
-                gs["levels"][str(message.author.id)
+        if lvls[str(message.author.id)]["dlu"]:
+            if (int(time.time())-json.loads(gs["levels"])[str(message.author.id)]["lltime"]) >= 60:
+                lvls[str(message.author.id)
                              ]["lltime"] = int(time.time())
-                gs["levels"][str(message.author.id)
+                lvls[str(message.author.id)
                              ]["exp"] += random.randint(5, 15)
-                if gs["levels"][str(message.author.id)]["exp"] >= gs["levels"][str(message.author.id)]["level"] ** 3 + 20:
-                    gs["levels"][str(
-                        message.author.id)]["exp"] -= gs["levels"][str(message.author.id)]["level"] ** 3 + 20
-                    gs["levels"][str(message.author.id)]["level"] += 1
+                if lvls[str(message.author.id)]["exp"] >= lvls[str(message.author.id)]["level"] ** 3 + 20:
+                    lvls[str(
+                        message.author.id)]["exp"] -= lvls[str(message.author.id)]["level"] ** 3 + 20
+                    lvls[str(message.author.id)]["level"] += 1
                     aut = str(message.author).replace("\\", "\\\\").replace("*", "\*").replace(
                         "_", "\_").replace("|", "\|").replace("~", "\~").replace("`", "\`").replace(">", "\>")
                     if gs["levelupsendto"]:
-                        c = bot.get_channel(gs["levelupsendto"])
+                        c = bot.get_channel(int(gs["levelupsendto"]))
                         try:
-                            m = await c.send(str(bot.get_emoji(653161518212448266))+bot._(message.author, "levelup-notify", aut, gs["levels"][str(message.author.id)]["level"]))
+                            m = await c.send(str(bot.get_emoji(653161518212448266))+await bot._(message.author, "levelup-notify", aut, lvls[str(message.author.id)]["level"]))
                             await asyncio.sleep(1)
-                            await m.edit(content=str(bot.get_emoji(653161518212448266))+bot._(message.author, "levelup-notify", message.author.mention, gs["levels"][str(message.author.id)]["level"]))
+                            await m.edit(content=str(bot.get_emoji(653161518212448266))+await bot._(message.author, "levelup-notify", message.author.mention, lvls[str(message.author.id)]["level"]))
                         except:
                             pass
                     else:
                         try:
-                            m = await message.channel.send(str(bot.get_emoji(653161518212448266))+bot._(message.author, "levelup-notify", aut, gs["levels"][str(message.author.id)]["level"]))
+                            m = await message.channel.send(str(bot.get_emoji(653161518212448266))+await bot._(message.author, "levelup-notify", aut, lvls[str(message.author.id)]["level"]))
                             await asyncio.sleep(1)
-                            await m.edit(content=str(bot.get_emoji(653161518212448266))+bot._(message.author, "levelup-notify", message.author.mention, gs["levels"][str(message.author.id)]["level"]))
+                            await m.edit(content=str(bot.get_emoji(653161518212448266))+await bot._(message.author, "levelup-notify", message.author.mention, lvls[str(message.author.id)]["level"]))
                         except:
                             pass
                     try:
-                        if gs["reward"].get(str(gs["levels"][str(message.author.id)]["level"]), None):
+                        rwds = json.loads(gs["reward"])
+                        if rwds.get(str(lvls[str(message.author.id)]["level"]), None):
                             rl = message.guild.get_role(
-                                gs["reward"][str(gs["levels"][str(message.author.id)]["level"])])
+                                rwds[str(gs["levels"][str(message.author.id)]["level"])])
                             await message.author.add_roles(rl)
                     except:
                         pass
-                bot.cursor.execute(
-                    "UPDATE guilds SET levels = ? WHERE id = ?", (gs["levels"], message.guild.id))
+                await bot.cursor.execute(
+                    "UPDATE guilds SET levels = %s WHERE id = %s", (json.dumps(lvls), message.guild.id))
 
 
 @commands.is_owner()
 @bot.command()
 async def ldb(ctx, name):
-    bot.cursor.execute(f"select * from {name}")
-    sddb = bot.cursor.fetchall()
+    sddb = await bot.cursor.fetchall(f"select * from {name}")
+    #sddb = await bot.cursor.fetchall()
     await ctx.send(f"{len(sddb)}")
 
 
 @commands.is_owner()
 @bot.command()
 async def mentdb(ctx):
-    bot.cursor.execute(f"select * from users")
-    sddb = bot.cursor.fetchall()
+    sddb = await bot.cursor.fetchall(f"select * from users")
+    #sddb = await bot.cursor.fetchall()
     async with ctx.channel.typing():
         for ctt in sddb:
             if not (ctt["id"] in [i.id for i in bot.users]):
-                bot.cursor.execute(f"delete from users where id = {ctt['id']}")
+                await bot.cursor.execute(f"delete from users where id = {ctt['id']}")
     await ctx.send("完了しました☆")
 
+@commands.is_owner()
+@bot.command()
+async def maintenance(ctx):
+    if bot.maintenance:
+        bot.maintenance = False
+        await ctx.send("falseにしたよ")
+    else:
+        bot.maintenance = True
+        await ctx.send("trueにしたよ")
 
 @bot.command()
 async def vpc(ctx):
@@ -1473,8 +1450,8 @@ async def ehelp(ctx, rcmd=None):
     # 英語ヘルプ用
     if rcmd is None:
         page = 1
-        embed = discord.Embed(title=ctx._("help-1-t"),
-                              description=ctx._("help-1-d"), color=bot.ec)
+        embed = discord.Embed(title=await ctx._("help-1-t"),
+                              description=await ctx._("help-1-d"), color=bot.ec)
         embed.set_footer(text=f"page:{page}")
         msg = await ctx.send(embed=embed)
         await msg.add_reaction(bot.get_emoji(653161518195671041))
@@ -1494,8 +1471,8 @@ async def ehelp(ctx, rcmd=None):
                     page = 1
                 else:
                     page = page + 1
-                embed = discord.Embed(title=ctx._(
-                    f"help-{page}-t"), description=ctx._(f"help-{page}-d"), color=bot.ec)
+                embed = discord.Embed(title=await ctx._(
+                    f"help-{page}-t"), description=await ctx._(f"help-{page}-d"), color=bot.ec)
                 embed.set_footer(text=f"page:{page}")
                 await msg.edit(embed=embed)
             elif str(r) == str(bot.get_emoji(653161518195671041)):
@@ -1503,15 +1480,15 @@ async def ehelp(ctx, rcmd=None):
                     page = 14
                 else:
                     page = page - 1
-                embed = discord.Embed(title=ctx._(
-                    f"help-{page}-t"), description=ctx._(f"help-{page}-d"), color=bot.ec)
+                embed = discord.Embed(title=await ctx._(
+                    f"help-{page}-t"), description=await ctx._(f"help-{page}-d"), color=bot.ec)
                 embed.set_footer(text=f"page:{page}")
                 await msg.edit(embed=embed)
             elif str(r) == "🔍":
                 await msg.remove_reaction(bot.get_emoji(653161518195671041), bot.user)
                 await msg.remove_reaction("🔍", bot.user)
                 await msg.remove_reaction(bot.get_emoji(653161518170505216), bot.user)
-                qm = await ctx.send(ctx._("help-s-send"))
+                qm = await ctx.send(await ctx._("help-s-send"))
                 try:
                     msg = await bot.wait_for('message', check=lambda m: m.author == ctx.author and m.channel == ctx.channel, timeout=60)
                     sewd = msg.content
@@ -1524,11 +1501,11 @@ async def ehelp(ctx, rcmd=None):
                     except:
                         pass
                     async with ctx.message.channel.typing():
-                        lang = ctx.user_lang() or "ja"
+                        lang = await ctx.user_lang() or "ja"
                         with open(f"lang/{lang}.json", "r", encoding="utf-8") as j:
                             f = json.load(j)
-                        sre = discord.Embed(title=ctx._(
-                            "help-s-ret-title"), description=ctx._("help-s-ret-desc", sewd), color=bot.ec)
+                        sre = discord.Embed(title=await ctx._(
+                            "help-s-ret-title"), description=await ctx._("help-s-ret-desc", sewd), color=bot.ec)
                         for k, v in f.items():
                             if k.startswith("h-"):
                                 if sewd in k.replace("h-", "") or sewd in v:
@@ -1542,10 +1519,10 @@ async def ehelp(ctx, rcmd=None):
         except:
             pass
     else:
-        embed = discord.Embed(title=str(rcmd), description=ctx._(
+        embed = discord.Embed(title=str(rcmd), description=await ctx._(
             f"h-{str(rcmd)}"), color=bot.ec)
         if embed.description == "":
-            await ctx.send(ctx._("h-notfound"))
+            await ctx.send(await ctx._("h-notfound"))
         else:
             await ctx.send(embed=embed)
 
@@ -1556,8 +1533,8 @@ async def help(ctx, rcmd=None):
     # ヘルプ内容
     if rcmd is None:
         page = 1
-        embed = discord.Embed(title=ctx._("help-1-t"),
-                              description=ctx._("help-1-d"), color=bot.ec)
+        embed = discord.Embed(title=await ctx._("help-1-t"),
+                              description=await ctx._("help-1-d"), color=bot.ec)
         embed.set_footer(text=f"page:{page}")
         msg = await ctx.send(embed=embed)
         await msg.add_reaction(bot.get_emoji(653161518195671041))
@@ -1577,8 +1554,8 @@ async def help(ctx, rcmd=None):
                     page = 1
                 else:
                     page = page + 1
-                embed = discord.Embed(title=ctx._(
-                    f"help-{page}-t"), description=ctx._(f"help-{page}-d"), color=bot.ec)
+                embed = discord.Embed(title=await ctx._(
+                    f"help-{page}-t"), description=await ctx._(f"help-{page}-d"), color=bot.ec)
                 embed.set_footer(text=f"page:{page}")
                 await msg.edit(embed=embed)
             elif str(r) == str(bot.get_emoji(653161518195671041)):
@@ -1586,15 +1563,15 @@ async def help(ctx, rcmd=None):
                     page = 17
                 else:
                     page = page - 1
-                embed = discord.Embed(title=ctx._(
-                    f"help-{page}-t"), description=ctx._(f"help-{page}-d"), color=bot.ec)
+                embed = discord.Embed(title=await ctx._(
+                    f"help-{page}-t"), description=await ctx._(f"help-{page}-d"), color=bot.ec)
                 embed.set_footer(text=f"page:{page}")
                 await msg.edit(embed=embed)
             elif str(r) == "🔍":
                 await msg.remove_reaction(bot.get_emoji(653161518195671041), bot.user)
                 await msg.remove_reaction("🔍", bot.user)
                 await msg.remove_reaction(bot.get_emoji(653161518170505216), bot.user)
-                qm = await ctx.send(ctx._("help-s-send"))
+                qm = await ctx.send(await ctx._("help-s-send"))
                 try:
                     msg = await bot.wait_for('message', check=lambda m: m.author == ctx.author and m.channel == ctx.channel, timeout=60)
                     sewd = msg.content
@@ -1607,11 +1584,11 @@ async def help(ctx, rcmd=None):
                     except:
                         pass
                     async with ctx.message.channel.typing():
-                        lang = ctx.user_lang() or "ja"
+                        lang = await ctx.user_lang() or "ja"
                         with open(f"lang/{lang}.json", "r", encoding="utf-8") as j:
                             f = json.load(j)
-                        sre = discord.Embed(title=ctx._(
-                            "help-s-ret-title"), description=ctx._("help-s-ret-desc", sewd), color=bot.ec)
+                        sre = discord.Embed(title=await ctx._(
+                            "help-s-ret-title"), description=await ctx._("help-s-ret-desc", sewd), color=bot.ec)
                         for k, v in f.items():
                             if k.startswith("nh-"):
                                 if sewd in k.replace("nh-", "") or sewd in str(v):
@@ -1625,9 +1602,9 @@ async def help(ctx, rcmd=None):
         except:
             pass
     else:
-        dcmd = ctx._(f"nh-{str(rcmd)}")
+        dcmd = await ctx._(f"nh-{str(rcmd)}")
         if str(dcmd) == "":
-            await ctx.send(ctx._("h-notfound"))
+            await ctx.send(await ctx._("h-notfound"))
         else:
             embed = ut.getEmbed(dcmd[0], dcmd[1], bot.ec, *dcmd[2:])
             await ctx.send(embed=embed)
@@ -1653,47 +1630,47 @@ async def on_command_error(ctx, error):
     # global DoServercmd
     """if isinstance(error, commands.CommandNotFound):
         if not DoServercmd:
-            embed = discord.Embed(title=ctx._("cmd-error-t"), description=ctx._("cmd-notfound-d"), color=bot.ec)
+            embed = discord.Embed(title=await ctx._("cmd-error-t"), description=await ctx._("cmd-notfound-d"), color=bot.ec)
             DoServercmd = False
             await ctx.send(embed=embed)
     el"""
     if isinstance(error, commands.CommandOnCooldown):
         # クールダウン
-        embed = discord.Embed(title=ctx._("cmd-error-t"), description=ctx._(
+        embed = discord.Embed(title=await ctx._("cmd-error-t"), description=await ctx._(
             "cmd-cooldown-d", str(error.retry_after)[:4]), color=bot.ec)
         await ctx.send(embed=embed)
     elif isinstance(error, commands.NotOwner):
         # オーナー専用コマンド
-        embed = discord.Embed(title=ctx._("cmd-error-t"),
-                              description=ctx._("only-mii-10"), color=bot.ec)
+        embed = discord.Embed(title=await ctx._("cmd-error-t"),
+                              description=await ctx._("only-mii-10"), color=bot.ec)
         await ctx.send(embed=embed)
         ch = bot.get_channel(652127085598474242)
         await ch.send(embed=ut.getEmbed("エラーログ", f"コマンド:`{ctx.command.name}`\n```{str(error)}```", bot.ec, f"サーバー", ctx.guild.name, "実行メンバー", ctx.author.name, "メッセージ内容", ctx.message.content))
     elif isinstance(error, commands.MissingRequiredArgument):
         # 引数がないよっ☆
-        embed = discord.Embed(title=ctx._("cmd-error-t"),
-                              description=ctx._("pls-arg"), color=bot.ec)
+        embed = discord.Embed(title=await ctx._("cmd-error-t"),
+                              description=await ctx._("pls-arg"), color=bot.ec)
         await ctx.send(embed=embed)
     elif isinstance(error, commands.MissingPermissions):
-        embed = discord.Embed(title=ctx._("cmd-error-t"),
+        embed = discord.Embed(title=await ctx._("cmd-error-t"),
                               description=f"このコマンドの実行には、あなたに次の権限が必要です。\n```py\n{error.missing_perms}```", color=bot.ec)
         try:
             await ctx.send(embed=embed)
         except:
-            await ctx.send(f'> {ctx._("cmd-error-t")}\n　このコマンドの実行には、あなたに次の権限が必要です。\n```py\n{error.missing_perms}```')
+            await ctx.send(f'> {await ctx._("cmd-error-t")}\n　このコマンドの実行には、あなたに次の権限が必要です。\n```py\n{error.missing_perms}```')
     elif isinstance(error, commands.BotMissingPermissions):
-        embed = discord.Embed(title=ctx._("cmd-error-t"),
+        embed = discord.Embed(title=await ctx._("cmd-error-t"),
                               description=f"このコマンドの実行には、Botに次の権限が必要です。\n```py\n{error.missing_perms}```", color=bot.ec)
         try:
             await ctx.send(embed=embed)
         except:
-            await ctx.send(f'> {ctx._("cmd-error-t")}\n　このコマンドの実行には、Botに次の権限が必要です。\n```py\n{error.missing_perms}```')
+            await ctx.send(f'> {await ctx._("cmd-error-t")}\n　このコマンドの実行には、Botに次の権限が必要です。\n```py\n{error.missing_perms}```')
 
     else:
         # その他例外
         ch = bot.get_channel(652127085598474242)
         msg = await ch.send(embed=ut.getEmbed("エラーログ", f"コマンド:`{ctx.command.name}`\n```{str(error)}```", bot.ec, f"サーバー", ctx.guild.name, "実行メンバー", ctx.author.name, "メッセージ内容", ctx.message.content))
-        await ctx.send(embed=ut.getEmbed(ctx._("com-error-t"), ctx._("cmd-other-d", error, bot.ec, "error id", msg.id, "サポートが必要ですか？", "[サポートサーバー](https://discord.gg/vtn2V3v)に参加して、「view-思惟奈ちゃんch」役職をつけて質問してみましょう！")))
+        await ctx.send(embed=ut.getEmbed(await ctx._("com-error-t"), await ctx._("cmd-other-d", error, bot.ec, "error id", msg.id, "サポートが必要ですか？", "[サポートサーバー](https://discord.gg/vtn2V3v)に参加して、「view-思惟奈ちゃんch」役職をつけて質問してみましょう！")))
 
 
 """

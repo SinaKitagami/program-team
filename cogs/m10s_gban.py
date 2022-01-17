@@ -45,15 +45,15 @@ class m10s_gban(commands.Cog):
                 return
 
             if tof:
-                self.bot.cursor.execute(
-                    "select * from gban_dates where id=?", (uid,))
-                gbaninfo = self.bot.cursor.fetchone()
+                gbaninfo = await self.bot.cursor.fetchone(
+                    "select * from gban_dates where id=%s", (uid,))
+                #gbaninfo = await self.bot.cursor.fetchone()
                 if not gbaninfo:
-                    self.bot.cursor.execute(
-                        "INSERT INTO gban_dates(id,reason,gban_by) VALUES(?,?,?)", (uid, reason or "なし", ctx.author.id))
+                    await self.bot.cursor.execute(
+                        "INSERT INTO gban_dates(id,reason,gban_by) VALUES(%s,%s,%s)", (uid, reason or "なし", ctx.author.id))
                     await ctx.send(f"{u.name}のグローバルBANを設定しました。\n登録済みのサーバーでグローバルBANを開始します。")
-                    self.bot.cursor.execute("select * from gban_settings")
-                    gs = self.bot.cursor.fetchall()
+                    gs = await self.bot.cursor.fetchall("select * from gban_settings")
+                    #gs = await self.bot.cursor.fetchall()
                     for gstg in gs:
                         g = self.bot.get_guild(gstg["id"])
                         if g is None:
@@ -79,12 +79,12 @@ class m10s_gban(commands.Cog):
                 else:
                     await ctx.send(f"{u.name}はすでに思惟奈ちゃんのグローバルbanされています。")
             else:
-                self.bot.cursor.execute(
-                    "select * from gban_dates where id=?", (uid,))
-                gbaninfo = self.bot.cursor.fetchone()
+                gbaninfo = await self.bot.cursor.fetchone(
+                    "select * from gban_dates where id=%s", (uid,))
+                #gbaninfo = await self.bot.cursor.fetchone()
                 if gbaninfo:
-                    self.bot.cursor.execute(
-                        f"delete from gban_dates where id = ?", (uid,))
+                    await self.bot.cursor.execute(
+                        f"delete from gban_dates where id = %s", (uid,))
                     await ctx.send(f"{u.name}のグローバルBANを解除しました。")
                 else:
                     await ctx.send(f"{u.name}は思惟奈ちゃんのグローバルbanされていません")
@@ -93,8 +93,8 @@ class m10s_gban(commands.Cog):
 
     @commands.command()
     async def check_gban(self, ctx, uid: int):
-        self.bot.cursor.execute("select * from gban_dates where id=?", (uid,))
-        gbaninfo = self.bot.cursor.fetchone()
+        gbaninfo = await self.bot.cursor.fetchone("select * from gban_dates where id=%s", (uid,))
+        #gbaninfo = await self.bot.cursor.fetchone()
         if gbaninfo:
             u = await self.bot.fetch_user(uid)
             by = await self.bot.fetch_user(gbaninfo["gban_by"])
@@ -107,31 +107,31 @@ class m10s_gban(commands.Cog):
     async def gbanlogto(self, ctx, chid: int=None):
         tch = ctx.guild.get_channel(chid)
         if chid and tch:
-            self.bot.cursor.execute(
-                "select * from gban_settings where id=?", (ctx.guild.id,))
-            gs = self.bot.cursor.fetchone()
+            gs = await self.bot.cursor.fetchone(
+                "select * from gban_settings where id=%s", (ctx.guild.id,))
+            #gs = await self.bot.cursor.fetchone()
             if gs:
-                self.bot.cursor.execute(
-                    "UPDATE gban_settings SET chid = ? WHERE id = ?", (chid, ctx.guild.id))
+                await self.bot.cursor.execute(
+                    "UPDATE gban_settings SET chid = %s WHERE id = %s", (chid, ctx.guild.id))
             else:
-                self.bot.cursor.execute(
-                    "INSERT INTO gban_settings(id,chid) VALUES(?,?)", (ctx.guild.id, chid))
+                await self.bot.cursor.execute(
+                    "INSERT INTO gban_settings(id,chid) VALUES(%s,%s)", (ctx.guild.id, chid))
             await ctx.send("グローバルBANの利用、送信先チャンネルを設定しました。")
         else:
-            self.bot.cursor.execute(
-                f"delete from gban_settings where id = ?", (ctx.guild.id,))
+            await self.bot.cursor.execute(
+                f"delete from gban_settings where id = %s", (ctx.guild.id,))
             await ctx.send("グローバルBANの利用、送信先チャンネルを解除しました。")
 
     @commands.Cog.listener()
     async def on_member_join(self, m):
-        self.bot.cursor.execute("select * from gban_dates where id=?", (m.id,))
-        gbaninfo = self.bot.cursor.fetchone()
+        gbaninfo = await self.bot.cursor.fetchone("select * from gban_dates where id=%s", (m.id,))
+        #gbaninfo = await self.bot.cursor.fetchone()
         if gbaninfo:
             u = await self.bot.fetch_user(gbaninfo["id"])
             by = await self.bot.fetch_user(gbaninfo["gban_by"])
-            self.bot.cursor.execute(
-                "select * from gban_settings where id=?", (m.guild.id,))
-            gs = self.bot.cursor.fetchone()
+            gs = await self.bot.cursor.fetchone(
+                "select * from gban_settings where id=%s", (m.guild.id,))
+            #gs = await self.bot.cursor.fetchone()
             g = m.guild
             ch = g.get_channel(gs["chid"])
             if g:

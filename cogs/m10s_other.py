@@ -8,6 +8,7 @@ import asyncio
 import platform
 import re
 import psutil
+import json
 
 import m10s_util as ut
 
@@ -45,12 +46,12 @@ class other(commands.Cog):
     @commands.command()
     async def rq(self, ctx):
 
-        await ctx.send(f"{ctx.author.mention}"+ctx._("IllQ")+f'\n{random.choice(ctx._("comqest"))}')
+        await ctx.send(f"{ctx.author.mention}"+await ctx._("IllQ")+f'\n{random.choice(await ctx._("comqest"))}')
 
     @commands.command(name="Af")
     async def a_01(self, ctx):
-        if not ctx.user_lang() == "ja":
-            await ctx.send(ctx._("cannot-run"))
+        if not await ctx.user_lang() == "ja":
+            await ctx.send(await ctx._("cannot-run"))
             return
 
         await ctx.send(ctx.author.mention, embed=ut.getEmbed("", f'あなたは「{random.choice(ctx.guild.members).display_name.replace(ctx.guild.me.display_name,"私").replace(ctx.author.display_name,"あなた自身")}」のこと、好きかな？'))
@@ -59,7 +60,7 @@ class other(commands.Cog):
     async def q(self, ctx, title=None, *ctt):
 
         if title is None or ctt == []:
-            await ctx.send(ctx._("q-not"))
+            await ctx.send(await ctx._("q-not"))
         else:
             ky = None
             dct = {}
@@ -89,11 +90,11 @@ class other(commands.Cog):
                         await qes.add_reaction(ej)
                     except:
                         await qes.delete()
-                        await ctx.send(ctx._("q-error"))
+                        await ctx.send(await ctx._("q-error"))
 
     @commands.command(aliases=["クレジット", "クレジットを見せて"])
     async def credit(self, ctx):
-        await ctx.send(ctx._("credit"))
+        await ctx.send(await ctx._("credit"))
 
     @commands.command()
     async def allonline(self, ctx, mus=None):
@@ -106,7 +107,7 @@ class other(commands.Cog):
                 info = ctx.message.mentions[0]
             else:
                 info = ctx.guild.get_member(int(mus))
-            if not self.bot.can_use_online(info):
+            if not await self.bot.can_use_online(info):
                 return await ctx.say("cannot-send-online")
             if not self.bot.shares_guild(info.id, ctx.author.id):
                 return await ctx.say("cannot-send-online")
@@ -119,14 +120,14 @@ class other(commands.Cog):
         embed.set_author(name=f"{str(ctx.message.author)}",
                          icon_url=ctx.message.author.avatar_url_as(static_format='png'))
         await fbc.send(embed=embed)
-        await ctx.send(ctx._("feedback-sended"))
+        await ctx.send(await ctx._("feedback-sended"))
 
     @commands.command(aliases=["レポート", "報告", "通報", "お知らせ"])
     async def report(self, ctx, r_type):
         t_dict = {"脆弱性": 716683830366568470, "荒らし": 716684268973064202, "バグ": 683496852104282127, "その他": 667361501924950036, "vuln": 716683830366568470, "vandalism": 716684268973064202, "bug": 683496852104282127, "other": 667361501924950036}
         channel_id = t_dict.get(r_type, 667361501924950036)
         dc = await ut.opendm(ctx.author)
-        await dc.send(ctx._("send-report-here"))
+        await dc.send(await ctx._("send-report-here"))
         def check(m):
             return m.channel == dc and m.author == ctx.author
         m = await self.bot.wait_for("message", check=check)
@@ -140,7 +141,7 @@ class other(commands.Cog):
         for i in m.attachments:
             files.append(await i.to_file())
         await fbc.send(files=files)
-        await ctx.send(ctx._("thanks-report"))
+        await ctx.send(await ctx._("thanks-report"))
 
     @commands.command(aliases=["ステータス", "あなたの情報を教えて"])
     async def botinfo(self, ctx):
@@ -151,15 +152,15 @@ class other(commands.Cog):
         used = str(mem.used/1000000000)[0:3]
         ava = str(mem.available/1000000000)[0:3]
         memparcent = mem.percent
-        embed = discord.Embed(title=ctx._(
+        embed = discord.Embed(title=await ctx._(
             "status-inserver"), description=f"{len(self.bot.guilds)}", color=self.bot.ec)
-        embed.add_field(name=ctx._("status-prefix"), value="s-")
-        embed.add_field(name=ctx._("status-starttime"), value=self.bot.StartTime.strftime(
+        embed.add_field(name=await ctx._("status-prefix"), value="s-")
+        embed.add_field(name=await ctx._("status-starttime"), value=self.bot.StartTime.strftime(
             '%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
-        embed.add_field(name=ctx._("status-ver"),
+        embed.add_field(name=await ctx._("status-ver"),
                         value=platform.python_version())
-        embed.add_field(name=ctx._("status-pros"), value=platform.processor())
-        embed.add_field(name=ctx._(
+        embed.add_field(name=await ctx._("status-pros"), value=platform.processor())
+        embed.add_field(name=await ctx._(
             "status-os"), value=f"{platform.system()} {platform.release()}({platform.version()})")
         embed.add_field(
             name="メモリ", value=f"全てのメモリ容量:{allmem}GB\n使用量:{used}GB({memparcent}%)\n空き容量{ava}GB({100-memparcent}%)")
@@ -183,13 +184,13 @@ class other(commands.Cog):
     async def eatit(self, ctx, it):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
               ctx.message.content)
-        if ctx.user_lang() == "ja":
-            if ctx._(f"eat-{it}") == "":
-                await ctx.send(ctx._("eat-?"))
+        if await ctx.user_lang() == "ja":
+            if await ctx._(f"eat-{it}") == "":
+                await ctx.send(await ctx._("eat-?"))
             else:
-                await ctx.send(ctx._(f"eat-{it}"))
+                await ctx.send(await ctx._(f"eat-{it}"))
         else:
-            await ctx.send(ctx._("cannot-run"))
+            await ctx.send(await ctx._("cannot-run"))
 
     @commands.command()
     async def QandA(self, ctx):
@@ -211,13 +212,13 @@ class other(commands.Cog):
     async def jscrawiki(self, ctx, un: str):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
               ctx.message.content)
-        await ctx.send(ctx._("jscrawiki-return", un.replace("@", "@ ")))
+        await ctx.send(await ctx._("jscrawiki-return", un.replace("@", "@ ")))
 
     #@commands.command(aliases=["scratchのユーザーurl", "次のScratchユーザーのURL教えて"])
     async def scrauser(self, ctx, un: str):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
               ctx.message.content)
-        await ctx.send(ctx._("scrauser-return", un.replace("@", "@ ")))
+        await ctx.send(await ctx._("scrauser-return", un.replace("@", "@ ")))
 
     @commands.command(name="randomint", liases=["randint", "乱数", "次の条件で乱数を作って"])
     async def randomint(self, ctx, *args):
@@ -236,7 +237,7 @@ class other(commands.Cog):
             e = int(args[1])
             c = int(args[2])
         else:
-            await ctx.send(ctx._("randomint-arg-error"))
+            await ctx.send(await ctx._("randomint-arg-error"))
             return
         # try:
         intcount = []
@@ -252,53 +253,54 @@ class other(commands.Cog):
                 tmp = random.randint(e, s)
                 intcount = intcount + [tmp]
                 rnd = rnd + tmp
-        await ctx.send(ctx._("randomint-return1", str(s), str(e), str(c), str(rnd), str(intcount)))
+        await ctx.send(await ctx._("randomint-return1", str(s), str(e), str(c), str(rnd), str(intcount)))
         # except:
-        # await ctx.send(ctx._("randomint-return2"))
+        # await ctx.send(await ctx._("randomint-return2"))
 
     @commands.command(name="fortune", aliases=["おみくじ", "今日のおみくじをひく"])
     async def fortune(self, ctx):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
               ctx.message.content)
         rnd = random.randint(0, 6)
-        await ctx.send(ctx._("omikuzi-return", ctx._("omikuzi-"+str(rnd))))
+        await ctx.send(await ctx._("omikuzi-return", await ctx._("omikuzi-"+str(rnd))))
 
     @commands.command()
     async def memo(self, ctx, mode="a", mn="def", *, ctt=None):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
               ctx.message.content)
-        self.bot.cursor.execute(
-            "select * from users where id=?", (ctx.author.id,))
-        mmj = self.bot.cursor.fetchone()
+        mmj = await self.bot.cursor.fetchone(
+            "select * from users where id=%s", (ctx.author.id,))
+        #mmj = await self.bot.cursor.fetchone()
+        memos = json.loads(mmj["memo"])
         if mode == "r":
-            if not mmj["memo"] is None:
-                if mmj["memo"].get(mn) is None:
-                    await ctx.send(ctx._("memo-r-notfound1"))
+            if not memos is None:
+                if memos.get(mn) is None:
+                    await ctx.send(await ctx._("memo-r-notfound1"))
                 else:
-                    await ctx.send(mmj["memo"][mn].replace("@everyone", "everyone").replace("@here", "here"))
+                    await ctx.send(memos[mn].replace("@everyone", "everyone").replace("@here", "here"))
             else:
-                await ctx.send(ctx._("memo-r-notfound2"))
+                await ctx.send(await ctx._("memo-r-notfound2"))
         elif mode == "w":
             if ctt is None:
-                mmj["memo"][mn] = None
+                memos[mn] = None
             else:
-                mmj["memo"][mn] = ctt
-            self.bot.cursor.execute(
-                "UPDATE users SET memo = ? WHERE id = ?", (mmj["memo"], ctx.author.id))
+                memos[mn] = ctt
+            await self.bot.cursor.execute(
+                "UPDATE users SET memo = %s WHERE id = %s", (json.dumps(memos), ctx.author.id))
 
-            await ctx.send(ctx._("memo-w-write", str(mn).replace("@everyone", "everyone").replace("@here", "here")))
+            await ctx.send(await ctx._("memo-w-write", str(mn).replace("@everyone", "everyone").replace("@here", "here")))
         elif mode == "a":
-            if mmj["memo"] == {}:
-                await ctx.send(ctx._("memo-a-notfound"))
+            if memos == {}:
+                await ctx.send(await ctx._("memo-a-notfound"))
             else:
-                await ctx.send(str(mmj["memo"].keys()).replace("dict_keys(", ctx._("memo-a-list")).replace(")", ""))
+                await ctx.send(str(memos.keys()).replace("dict_keys(", await ctx._("memo-a-list")).replace(")", ""))
         else:
-            await ctx.send(ctx._("memo-except"))
+            await ctx.send(await ctx._("memo-except"))
 
     @commands.command(name="textlocker")
     async def textlocker(self, ctx):
-        if not ctx.user_lang() == "ja":
-            await ctx.send(ctx._("cannot-run"))
+        if not await ctx.user_lang() == "ja":
+            await ctx.send(await ctx._("cannot-run"))
             return
 
         tl = self.bot.tl
@@ -392,9 +394,9 @@ class other(commands.Cog):
                 tmp = "hoge"
             gtxt = "\n".join([f"{'、'.join(m)}" for m in gl])
             ng = ",".join(ml)
-            await ctx.send(embed=discord.Embed(title=ctx._("rg-title"), description=ctx._("rg-desc", gtxt, ng), color=self.bot.ec))
+            await ctx.send(embed=discord.Embed(title=await ctx._("rg-title"), description=await ctx._("rg-desc", gtxt, ng), color=self.bot.ec))
         else:
-            await ctx.send(ctx._("rg-block"))
+            await ctx.send(await ctx._("rg-block"))
 
     @commands.command(aliases=["一定時間削除"])
     async def timemsg(self, ctx, sec: float):

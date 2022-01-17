@@ -4,6 +4,7 @@ import discord
 from discord.ext import commands
 import asyncio
 import traceback
+import json
 
 import m10s_util as ut
 
@@ -130,13 +131,15 @@ class manage(commands.Cog):
     @commands.command()
     async def lrewardupd(self, ctx):
         async with ctx.channel.typing():
-            self.bot.cursor.execute(
-                "select * from guilds where id=?", (ctx.guild.id,))
-            gs = self.bot.cursor.fetchone()
+            gs = await self.bot.cursor.fetchone(
+                "select * from guilds where id=%s", (ctx.guild.id,))
+            #gs = await self.bot.cursor.fetchone()
+            levels = json.loads(gs["levels"])
+            rewards = json.loads(gs["rewards"])
             rslt = {}
-            for uk, uv in gs["levels"].items():
+            for uk, uv in levels.items():
                 u = ctx.guild.get_member(int(uk))
-                for k, v in gs["reward"].items():
+                for k, v in rewards.items():
                     if int(k) <= uv["level"]:
                         try:
                             rl = ctx.message.guild.get_role(v)
@@ -154,7 +157,7 @@ class manage(commands.Cog):
     async def cemojiorole(self, ctx, name, *rlis):
         ig = await ctx.message.attachments[0].read()
         await ctx.guild.create_custom_emoji(name=name, image=ig, roles=[ctx.guild.get_role(int(i)) for i in rlis])
-        await ctx.send(ctx._("created-text"))
+        await ctx.send(await ctx._("created-text"))
 
     @commands.command()
     async def delm(self, ctx, ctxid):
@@ -178,11 +181,11 @@ class manage(commands.Cog):
                 bmem = await self.bot.fetch_user(mem)
                 await ctx.guild.ban(bmem, delete_message_days=dmd, reason=rs)
             except:
-                await ctx.send(ctx._("mem-up"))
+                await ctx.send(await ctx._("mem-up"))
             else:
-                await ctx.send(ctx._("mem-banned"))
+                await ctx.send(await ctx._("mem-banned"))
         else:
-            await ctx.send(ctx._("mem-don'thasper"))
+            await ctx.send(await ctx._("mem-don'thasper"))
 
     @commands.command(aliases=["キック", "次のメンバーをこのサーバーから追い出して"])
     @commands.cooldown(1, 5, type=commands.BucketType.guild)
@@ -194,11 +197,11 @@ class manage(commands.Cog):
             try:
                 await mem.kick()
             except:
-                await ctx.send(ctx._("mem-up"))
+                await ctx.send(await ctx._("mem-up"))
             else:
-                await ctx.send(ctx._("mem-kicked"))
+                await ctx.send(await ctx._("mem-kicked"))
         else:
-            await ctx.send(ctx._("mem-don'thasper"))
+            await ctx.send(await ctx._("mem-don'thasper"))
 
     @commands.command(aliases=["ピン留め切替", "次のメッセージをピン留めして"])
     @commands.bot_has_permissions(manage_messages=True)
@@ -207,10 +210,10 @@ class manage(commands.Cog):
         msg = await ctx.message.channel.fetch_message(mid)
         if msg.pinned:
             await msg.unpin()
-            await ctx.send(ctx._("pin-unpinned"))
+            await ctx.send(await ctx._("pin-unpinned"))
         else:
             await msg.pin()
-            await ctx.send(ctx._("pin-pinned"))
+            await ctx.send(await ctx._("pin-pinned"))
 
     @commands.command(aliases=["メッセージ一括削除", "次の件数分、メッセージを消して"])
     @commands.cooldown(1, 15, type=commands.BucketType.guild)
@@ -223,7 +226,7 @@ class manage(commands.Cog):
                 dmc = ctx.message
                 await dmc.delete()
                 dr = await dmc.channel.purge(limit=int(msgcount))
-                await ctx.send(ctx._("delmsgs-del", len(dr)))
+                await ctx.send(await ctx._("delmsgs-del", len(dr)))
 
     @commands.command()
     async def Wecall(self, ctx, us=None, name=None):
@@ -233,22 +236,22 @@ class manage(commands.Cog):
         if us is not None and name is not None:
             if not ctx.message.mentions[0].id == ctx.author.id:
                 if ctx.message.mentions[0].bot is False:
-                    ok = await ctx.send(ctx._("Wecall-areyouok", ctx.message.mentions[0].mention, ctx.message.author.mention, name))
+                    ok = await ctx.send(await ctx._("Wecall-areyouok", ctx.message.mentions[0].mention, ctx.message.author.mention, name))
                     await ok.add_reaction('⭕')
                     await ok.add_reaction('❌')
                     reaction, user = await self.bot.wait_for("reaction_add", check=lambda r, u: r.message.id == ok.id and u.id == ctx.message.mentions[0].id)
                     if str(reaction.emoji) == "⭕":
                         try:
                             await ctx.message.mentions[0].edit(nick=name)
-                            await ctx.send(ctx._("Wecall-changed"))
+                            await ctx.send(await ctx._("Wecall-changed"))
                         except:
-                            await ctx.send(ctx._("Wecall-notchanged1"))
+                            await ctx.send(await ctx._("Wecall-notchanged1"))
                     else:
-                        await ctx.send(ctx._("Wecall-notchanged2"))
+                        await ctx.send(await ctx._("Wecall-notchanged2"))
                 else:
-                    await ctx.send(ctx._("Wecall-bot"))
+                    await ctx.send(await ctx._("Wecall-bot"))
             else:
-                await ctx.send(ctx._("Wecall-not"))
+                await ctx.send(await ctx._("Wecall-not"))
 
 
 def setup(bot):

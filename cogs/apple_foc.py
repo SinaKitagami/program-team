@@ -10,9 +10,10 @@ class AppleFOCCog(commands.Cog):
         self.db = bot.cursor
         self.guild_throttle = {}
 
-    def get_log_channel(self, guild_id):
-        guild = self.db.execute(
-            "SELECT * FROM guilds WHERE id=?", (guild_id,)).fetchone()
+    async def get_log_channel(self, guild_id):
+        guild = await self.db.fetchone(
+            "SELECT * FROM guilds WHERE id=%s", (guild_id,))
+        #guild = await self.bot.cursor.fetchone()
         if not guild:
             return None
         if guild["sendlog"]:
@@ -29,18 +30,19 @@ class AppleFOCCog(commands.Cog):
             self.guild_throttle[member_id].use()
             return True
 
-    def is_offline(self, member):
-        return member.status is discord.Status.offline and self.bot.can_use_online(member)
+    async def is_offline(self, member):
+        return member.status is discord.Status.offline and await self.bot.can_use_online(member)
 
     async def send(self, member, logc):
         e = discord.Embed(title="オンライン隠し", description=member.mention,
                           timestamp=datetime.datetime.utcnow())
+        return
         await logc.send(embed=e)
 
     async def run(self, member):
-        if member.bot or not self.is_offline(member):
+        if member.bot or not await self.is_offline(member):
             return
-        logc = self.get_log_channel(member.guild.id)
+        logc = await self.get_log_channel(member.guild.id)
         if not logc:
             return
         if self.should_check(member):

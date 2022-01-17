@@ -23,13 +23,13 @@ class search(commands.Cog):
 
     @commands.command()
     async def getby(self, ctx, k: str):
-        await ctx.send(embed=ut.getEmbed("", ctx._(k)))
+        await ctx.send(embed=ut.getEmbed("", await ctx._(k)))
 
     @commands.command(name="checkscrauname")
     @commands.cooldown(1, 5, type=commands.BucketType.user)
     async def scrauname(self, ctx, un: str):
-        if not ctx.user_lang() == "ja":
-            await ctx.send(ctx._("cannot-run"))
+        if not await ctx.user_lang() == "ja":
+            await ctx.send(await ctx._("cannot-run"))
             return
 
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
@@ -60,11 +60,11 @@ class search(commands.Cog):
                         url=tweet["entities"]["media"][0]["media_url_https"])
                 except:
                     pass
-                embed.add_field(name=ctx._(
+                embed.add_field(name=await ctx._(
                     "twi-see"), value=f'{self.bot.get_emoji(653161518451392512)} https://twitter.com/{tweet["user"]["screen_name"]}/status/{tweet["id"]}')
             await ctx.send(embed=embed)
         except:
-            await ctx.send(ctx._("twi-error"))
+            await ctx.send(await ctx._("twi-error"))
             # await ctx.send(embed=ut.getEmbed("traceback",traceback.format_exc(3)))
 
     @commands.command(aliases=["wikipedia", "次の言葉でwikipedia調べて"])
@@ -78,7 +78,7 @@ class search(commands.Cog):
                 sr = wikipedia.page(sw1)
                 embed = discord.Embed(
                     title=sw1, description=sr.summary, color=self.bot.ec)
-                embed.add_field(name=ctx._("jwp-seemore"),
+                embed.add_field(name=await ctx._("jwp-seemore"),
                                 value=f"https://ja.wikipedia.org/wiki/{sw1}")
                 try:
                     embed.set_image(url=sr.images[0])
@@ -89,9 +89,9 @@ class search(commands.Cog):
             try:
                 async with ctx.message.channel.typing():
                     if not sw is None:
-                        await ctx.send(ctx._("jwp-found", wd, sw1))
+                        await ctx.send(await ctx._("jwp-found", wd, sw1))
             except:
-                await ctx.send(ctx._("jwp-notfound"))
+                await ctx.send(await ctx._("jwp-notfound"))
 
     @commands.command(aliases=["天気", "今日の天気は"])
     @commands.cooldown(1, 15, type=commands.BucketType.user)
@@ -106,14 +106,14 @@ class search(commands.Cog):
                     with open("imgs/weather.png", 'wb') as f:
                         f.write(content)
                     await ctx.send(file=discord.File("imgs/weather.png"))
-                    await ctx.send(ctx._("jpwt-credit"))
+                    await ctx.send(await ctx._("jpwt-credit"))
             except:
-                await ctx.send(ctx._("jpwt-error"))
+                await ctx.send(await ctx._("jpwt-error"))
         else:
             try:
-                await ctx.send(embed=discord.Embed(title=ctx._("dhaveper"), description=ctx._("per-sendfile")))
+                await ctx.send(embed=discord.Embed(title=await ctx._("dhaveper"), description=await ctx._("per-sendfile")))
             except:
-                await ctx.send(f"{ctx._('dhaveper')}\n{ctx._('per-sendfile')}")
+                await ctx.send(f"{await ctx._('dhaveper')}\n{await ctx._('per-sendfile')}")
 
     @commands.command(aliases=["ニュース", "ニュースを見せて"])
     @commands.cooldown(1, 15, type=commands.BucketType.user)
@@ -171,9 +171,9 @@ class search(commands.Cog):
                 vsd = sret.replace("+", "")
                 vsd = vsd.replace("-", "/")
                 vsd = vsd.replace("T00:00:00Z", "")
-            await ctx.send(ctx._("gwd-return1", str1, vsd, purl))
+            await ctx.send(await ctx._("gwd-return1", str1, vsd, purl))
         except:
-            await ctx.send(ctx._("gwd-return2"))
+            await ctx.send(await ctx._("gwd-return2"))
 
     @commands.command()
     @commands.cooldown(1, 80)
@@ -181,29 +181,29 @@ class search(commands.Cog):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
               ctx.message.content)
         content = await self.bot.apple_util.get_as_json('https://ja.scratch-wiki.info/w/api.php?action=query&list=recentchanges&rcprop=title|timestamp|user|comment|flags|sizes&format=json')
-        await ctx.send(ctx._("gupd-send"))
+        await ctx.send(await ctx._("gupd-send"))
         for i in range(5):
             try:
-                embed = discord.Embed(title=ctx._(
+                embed = discord.Embed(title=await ctx._(
                     "gupd-page"), description=content["query"]['recentchanges'][i]["title"], color=self.bot.ec)
-                embed.add_field(name=ctx._("gupd-editor"),
+                embed.add_field(name=await ctx._("gupd-editor"),
                                 value=content["query"]['recentchanges'][i]["user"])
-                embed.add_field(name=ctx._("gupd-size"), value=str(content["query"]['recentchanges'][i]["oldlen"])+"→"+str(
+                embed.add_field(name=await ctx._("gupd-size"), value=str(content["query"]['recentchanges'][i]["oldlen"])+"→"+str(
                     content["query"]['recentchanges'][i]["newlen"])+"("+str(content["query"]['recentchanges'][i]["newlen"]-content["query"]['recentchanges'][i]["oldlen"])+")")
-                embed.add_field(name=ctx._(
+                embed.add_field(name=await ctx._(
                     "gupd-type"), value=content["query"]['recentchanges'][i]["type"])
                 if not content["query"]['recentchanges'][i]["comment"] == "":
-                    embed.add_field(name=ctx._(
+                    embed.add_field(name=await ctx._(
                         "gupd-comment"), value=content["query"]['recentchanges'][i]["comment"])
                 else:
-                    embed.add_field(name=ctx._("gupd-comment"),
-                                    value=ctx._("gupd-notcomment"))
-                embed.add_field(name=ctx._("gupd-time"), value=content["query"]['recentchanges'][i]["timestamp"].replace(
+                    embed.add_field(name=await ctx._("gupd-comment"),
+                                    value=await ctx._("gupd-notcomment"))
+                embed.add_field(name=await ctx._("gupd-time"), value=content["query"]['recentchanges'][i]["timestamp"].replace(
                     "T", " ").replace("Z", "").replace("-", "/"))
                 await ctx.send(embed=embed)
             except:
-                eembed = discord.Embed(title=ctx._(
-                    "gupd-unknown"), description=ctx._("gupd-url"), color=self.bot.ec)
+                eembed = discord.Embed(title=await ctx._(
+                    "gupd-unknown"), description=await ctx._("gupd-url"), color=self.bot.ec)
                 await ctx.send(embed=eembed)
 
     @commands.command(aliases=["次の言葉でyoutube調べて"])
@@ -217,14 +217,14 @@ class search(commands.Cog):
                 youtube = build('youtube', 'v3',
                                 developerKey=self.bot.GAPI_TOKEN)
                 search_response = youtube.search().list(
-                    part='snippet',
+                    part="id",
                     q=wd,
                     type='video'
                 ).execute()
                 id = search_response['items'][0]['id']['videoId']
-                await ctx.send(ctx._("youtube-found", id))
+                await ctx.send(await ctx._("youtube-found", id))
         except:
-            await ctx.send(ctx._("youtube-notfound"))
+            await ctx.send(await ctx._("youtube-notfound"))
 
     @commands.command(name="scranotif", aliases=["snotify", "Scratchの通知", "Scratchの通知を調べて"])
     @commands.cooldown(1, 5, type=commands.BucketType.user)
@@ -236,15 +236,15 @@ class search(commands.Cog):
             async with ctx.message.channel.typing():
                 url = 'https://api.scratch.mit.edu/users/'+un+'/messages/count'
                 content = await self.bot.apple_util.get_as_json(url)
-                await ctx.send(ctx._("scranotif-notify", un, str(content['count'])))
+                await ctx.send(await ctx._("scranotif-notify", un, str(content['count'])))
         except:
-            await ctx.send(ctx._("scranotif-badrequest"))
+            await ctx.send(await ctx._("scranotif-badrequest"))
 
     @commands.command()
     @commands.cooldown(2, 10, type=commands.BucketType.user)
     async def wid(self, ctx, inid):
-        if not ctx.user_lang() == "ja":
-            await ctx.send(ctx._("cannot-run"))
+        if not await ctx.user_lang() == "ja":
+            await ctx.send(await ctx._("cannot-run"))
             return
 
         async with ctx.message.channel.typing():
@@ -266,14 +266,14 @@ class search(commands.Cog):
                 return
             idis = self.bot.get_guild(id)
             if idis:
-                self.bot.cursor.execute("select * from guilds where id = ?",(ctx.guild.id,))
-                gp = self.bot.cursor.fetchone()
+                gp = await self.bot.cursor.fetchone("select * from guilds where id = %s",(ctx.guild.id,))
+                #gp = await self.bot.cursor.fetchone()
                 if gp["verified"]:
-                    ptn = f'{ctx._("sina_verified_guild")}:'
+                    ptn = f'{await ctx._("sina_verified_guild")}:'
                 else:
                     ptn = ""
                 if "PARTNER" in ctx.guild.features:
-                    ptn = ptn+f'{ctx._("discord_partner_guild")}:'
+                    ptn = ptn+f'{await ctx._("discord_partner_guild")}:'
                 await ctx.send(embed=ut.getEmbed("サーバー", f"{ptn}\n名前:{idis.name}\nid:{idis.id}"))
                 return
             try:
@@ -281,9 +281,9 @@ class search(commands.Cog):
                 u = idis
                 info = ""
                 if u.id in self.bot.team_sina:
-                    info = f',({ctx._("team_sina-chan")})'
+                    info = f',({await ctx._("team_sina-chan")})'
                 if u.id in cf.partner_ids:
-                        info = info+f"、(🔗{ctx._('sina_parnter_bot')})"
+                        info = info+f"、(🔗{await ctx._('sina_parnter_bot')})"
                 e = discord.Embed(title="ユーザー", description=info, color=self.bot.ec)
                 if u.system:
                     e.add_field(

@@ -2,6 +2,7 @@
 
 import discord
 from discord.ext import commands
+import json
 
 from typing import Union
 
@@ -25,16 +26,17 @@ class m10s_level_edit(commands.Cog):
             targets = target.members
         else:
             return await ctx.reply("> サーバーレベル編集-追加\n　引数が正しくありません。\n　`[メンバーor役職を特定できるもの] [追加するレベル] [オプション:追加する経験値]`")
-        pf = self.bot.cursor.execute("SELECT * from guilds WHERE id = ?", (ctx.guild.id,)).fetchone()
-        levels = pf["levels"]
+        pf = await self.bot.cursor.fetchone("SELECT * from guilds WHERE id = %s", (ctx.guild.id,))
+        #pf = await self.bot.cursor.fetchone()
+        levels = json.loads(pf["levels"])
         for m in targets:
             try:
                 levels[str(m.id)]["level"] += lev
                 if not exp is None:
                     levels[str(m.id)]["exp"] += exp
             except:pass
-        self.bot.cursor.execute(
-            "UPDATE guilds SET levels = ? WHERE id = ?", (levels, ctx.guild.id))
+        await self.bot.cursor.execute(
+            "UPDATE guilds SET levels = %s WHERE id = %s", (json.dumps(levels), ctx.guild.id))
         await ctx.reply(f"> サーバーレベル編集\n　{len(targets)}人のレベルを編集しました。(レベルがないメンバーには干渉していません。)")
 
     @edit_level.command(name="set")
@@ -45,7 +47,8 @@ class m10s_level_edit(commands.Cog):
             targets = target.members
         else:
             return await ctx.reply("> サーバーレベル編集-設定\n　引数が正しくありません。\n　`[メンバーor役職を特定できるもの] [設定するレベル] [オプション:設定する経験値]`")
-        pf = self.bot.cursor.execute("SELECT * from guilds WHERE id = ?", (ctx.guild.id,)).fetchone()
+        pf = await self.bot.cursor.fetchone("SELECT * from guilds WHERE id = %s", (ctx.guild.id,))
+        #pf = await self.bot.cursor.fetchone()
         levels = pf["levels"]
         for m in targets:
             try:
@@ -53,8 +56,8 @@ class m10s_level_edit(commands.Cog):
                 if not exp is None:
                     levels[str(m.id)]["exp"] = exp
             except:pass
-        self.bot.cursor.execute(
-            "UPDATE guilds SET levels = ? WHERE id = ?", (levels, ctx.guild.id))
+        await self.bot.cursor.execute(
+            "UPDATE guilds SET levels = %s WHERE id = %s", (json.dumps(levels), ctx.guild.id))
         await ctx.reply(f"> サーバーレベル編集\n　{len(targets)}人のレベルを設定しました。(レベルがないメンバーには干渉していません。)")
         
 

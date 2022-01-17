@@ -4,6 +4,7 @@ import discord
 from discord.ext import commands
 import asyncio
 import re
+import json
 
 import m10s_util as ut
 """↑様々な便利コマンド詰め合わせ
@@ -50,7 +51,7 @@ class m10s_role_panel(commands.Cog):
             if r.emoji == self.e_check:
                 pd={}
                 pm = await ctx.send(embed=ut.getEmbed("思惟奈ちゃん役職パネル",f"このパネルは{ctx.author.mention}によって作成されました。",self.bot.ec,))
-                self.bot.cursor.execute("INSERT INTO role_panels(id,roles) VALUES(?,?)", (pm.id,pd))
+                await self.bot.cursor.execute("INSERT INTO role_panels(id,roles) VALUES(%s,%s)", (pm.id,json.dumps(pd)))
                 await m.edit(content=f"> パネルを発行しました！\n　パネルのIDは`{pm.id}`です。編集や削除時に使用します。(紛失時はパネルのメッセージIDを取り出してください。)")
             else:
                 await m.edit(content="> パネルは発行されていません！\n作成はキャンセルされました。")
@@ -62,7 +63,8 @@ class m10s_role_panel(commands.Cog):
         except:
             await ctx.send("> パネルIDが数字ではありません！")
             return
-        if self.bot.cursor.execute("select * from role_panels where id = ?",(pid,)).fetchone():
+        p = await self.bot.cursor.fetchone("select * from role_panels where id = %s",(pid,))
+        if p:
 
             m = await ctx.send("> パネル削除の確認\n該当パネルを削除してもよろしいですか？")
             await m.add_reaction(self.e_check)
@@ -72,7 +74,7 @@ class m10s_role_panel(commands.Cog):
                 await m.edit(content="> パネルは削除されていません！\n時間内に応答がなかったため、削除はキャンセルされました。")
             else:
                 if r.emoji == self.e_check:
-                    self.bot.cursor.execute("DELETE FROM role_panels WHERE id == ?", (pid,))
+                    await self.bot.cursor.execute("DELETE FROM role_panels WHERE id == %s", (pid,))
                     try:
                         msg = await ctx.channel.fetch_mesasge(pid)
                         await msg.delete()
@@ -91,13 +93,14 @@ class m10s_role_panel(commands.Cog):
         except:
             await ctx.send("> パネルIDが数字ではない、またはパネルがこのチャンネルに見つかりません。")
             return
-        pd = self.bot.cursor.execute("select * from role_panels where id = ?",(pid,)).fetchone()
+        pd = await self.bot.cursor.fetchone("select * from role_panels where id = %s",(pid,))
+        #pd = await self.bot.cursor.fetchone()
         if pd:
-            pj = pd["roles"]
+            pj = json.loads(pd["roles"])
             if pj.get(str(emoji),None) is None:
                 pj[str(emoji)] = role.id
                 try:
-                    self.bot.cursor.execute("UPDATE role_panels SET roles = ? WHERE id = ?", (pj, pid))
+                    await self.bot.cursor.execute("UPDATE role_panels SET roles = %s WHERE id = %s", (json.dumps(pj), pid))
                 except:await ctx.send("DB!")
                 e:discord.Embed =  pmsg.embeds[0]
                 e.add_field(name=str(emoji),value=role.mention)
@@ -131,12 +134,13 @@ class m10s_role_panel(commands.Cog):
         except:
             await ctx.send("> パネルIDが数字ではない、またはパネルがこのチャンネルに見つかりません。")
             return
-        pd = self.bot.cursor.execute("select * from role_panels where id = ?",(pid,)).fetchone()
+        pd = await self.bot.cursor.fetchone("select * from role_panels where id = %s",(pid,))
+        #pd = await self.bot.cursor.fetchone()
         if pd:
-            pj = pd["roles"]
+            pj = json.loads(pd["roles"])
             if pj.get(str(emoji),None):
                 del pj[str(emoji)]
-                self.bot.cursor.execute("UPDATE role_panels SET roles = ? WHERE id = ?", (pj, pid))
+                await self.bot.cursor.execute("UPDATE role_panels SET roles = %s WHERE id = %s", (json.dumps(pj), pid))
                 e:discord.Embed =  pmsg.embeds[0]
                 e.clear_fields()
                 for k,v in pj.items():
@@ -170,10 +174,10 @@ class m10s_role_panel(commands.Cog):
     @commands.Cog.listener()
     async def on_raw_reaction_add(self,pr):
         
-        self.bot.cursor.execute("select roles from role_panels where id = ?",(pr.message_id,))
-        rs = self.bot.cursor.fetchone()
+        rs = await self.bot.cursor.fetchone("select roles from role_panels where id = %s",(pr.message_id,))
+        #rs = await self.bot.cursor.fetchone()
         if rs:
-            rid = rs["roles"].get(str(pr.emoji),None)
+            rid = json.loads(rs["roles"]).get(str(pr.emoji),None)
             if rid:
                 g = self.bot.get_guild(pr.guild_id)
                 ch = g.get_channel(pr.channel_id)
