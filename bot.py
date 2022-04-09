@@ -29,7 +29,6 @@ import database
 from twitter import *
 from PIL import Image, ImageDraw, ImageFont
 from dateutil.relativedelta import relativedelta as rdelta
-# from discord_slash import SlashCommand
 
 from my_module import dpy_interaction as dpyui
 
@@ -45,17 +44,17 @@ import config
 
 logging.basicConfig(level=logging.DEBUG)"""
 
-main_loop = asyncio.new_event_loop()
 
 intents:discord.Intents = discord.Intents.default()
 intents.typing = False
 intents.members = True
 intents.presences = True
+intents.message_content = True
 
 bot = commands.Bot(command_prefix="s-", status=discord.Status.invisible,
                    allowed_mentions=discord.AllowedMentions(everyone=False),
                    intents=intents,
-                   loop=main_loop
+                   enable_debug_events=True
                    )
 bot.owner_id = None
 bot.owner_ids = {404243934210949120, 546682137240403984}
@@ -101,11 +100,24 @@ async def db_setup():
     except:
         traceback.print_exc()
 
-main_loop.run_until_complete(db_setup())
+async def main():
+    async with bot:
+        await db_setup()
 
+        # await bot.load_extension("cogs.apple_misc")
+        await bot.load_extension("cogs.apple_onlinenotif")
 
+        await apple_invite.setup(bot)
+        await apple_foc.setup(bot)
 
-bot.session = aiohttp.ClientSession(loop=bot.loop)
+        bot.session = aiohttp.ClientSession(loop=bot.loop)
+
+        # 通常トークン
+        await bot.start(bot.BOT_TOKEN)
+
+        # テストトークン
+        # await bot.start(bot.BOT_TEST_TOKEN)
+
 
 bot._default_close = bot.close
 
@@ -127,7 +139,7 @@ bot._get_context = bot.get_context
 
 async def get_context(msg, cls=LocalizedContext):
     ctx = await bot._get_context(msg, cls=cls)
-    ctx.context_at = datetime.datetime.utcnow().timestamp()
+    ctx.context_at = datetime.datetime.now(datetime.timezone.utc).timestamp()
     return ctx
 bot.get_context = get_context
 
@@ -158,12 +170,11 @@ rpcs = [
     "サーバー数:{0}",
     "ユーザー数:{1}",
     "作成:チーム☆思惟奈ちゃん",
-    "制作リーダー:mii-10#3110",
     "help:s-help",
     "icon:しおさばきゅー",
     "{0}guilds",
     "{1}users",
-    "created by mii-10#3110"
+    "created by team-sina"
 ]
 """db = dropbox.Dropbox(DROP_TOKEN)
 db.users_get_current_account()"""
@@ -171,7 +182,7 @@ bot.twi = Twitter(auth=OAuth(
     bot.T_Acs_Token, bot.T_Acs_SToken, bot.T_API_key, bot.T_API_SKey))
 bot.ec = 0x42bcf4
 Donotif = False
-bot.StartTime = datetime.datetime.now()
+bot.StartTime = datetime.datetime.now(datetime.timezone.utc)
 
 aglch = None
 
@@ -240,9 +251,6 @@ bot.gguide = """思惟奈ちゃんのグローバルチャット利用規約 最
   ・予告して改定した場合も、同じように改定後に報告する。
 """
 
-bot.load_extension("cogs.apple_misc")
-bot.load_extension("cogs.apple_onlinenotif")
-
 
 @tasks.loop(minutes=20.0)
 async def cRPC():
@@ -259,9 +267,12 @@ async def repomsg(msg, rs, should_ban=False):
     e = discord.Embed(title="グローバルメッセージブロック履歴",
                       description=f"メッセージ内容:{msg.clean_content}", color=bot.ec)
     e.set_author(name=f"{msg.author}(id:{msg.author.id})",
-                 icon_url=msg.author.avatar_url_as(static_format="png"))
-    e.set_footer(text=f"サーバー:{msg.guild.name}(id:{msg.guild.id})",
-                 icon_url=msg.guild.icon_url_as(static_format="png"))
+                 icon_url=msg.author.display_avatar.replace(static_format="png").url)
+    if msg.guild.icon:
+        e.set_footer(text=f"サーバー:{msg.guild.name}(id:{msg.guild.id})",
+                    icon_url=msg.guild.icon.replace(static_format="png").url)
+    else:
+        e.set_footer(text=f"サーバー:{msg.guild.name}(id:{msg.guild.id})")
     e.timestamp = msg.created_at
     e.add_field(name="ブロック理由", value=rs or "なし")
     await ch.send(embed=e)
@@ -292,9 +303,9 @@ async def gsendwh(message, wch, spicon, pf, ed, fls):
                     for at in fls:
                         sdfl.append(discord.File(
                             f"globalsends/{at.filename}", filename=at.filename, spoiler=at.is_spoiler()))
-                    tmp = await wh.send(content=message.clean_content, wait=True, username=f"[{spicon}]{pf['gnick']}", avatar_url=message.author.avatar_url_as(static_format='png'), embeds=ed, files=sdfl)
+                    tmp = await wh.send(content=message.clean_content, wait=True, username=f"[{spicon}]{pf['gnick']}", avatar_url=message.author.display_avatar.replace(static_format='png'), embeds=ed, files=sdfl)
                 else:
-                    tmp = await wh.send(content=message.clean_content, wait=True, username=f"[{spicon}]{pf['gnick']}", avatar_url=message.author.avatar_url_as(static_format='png'), embeds=ed)
+                    tmp = await wh.send(content=message.clean_content, wait=True, username=f"[{spicon}]{pf['gnick']}", avatar_url=message.author.display_avatar.replace(static_format='png'), embeds=ed)
                 return tmp.id
     except:
         pass
@@ -331,7 +342,7 @@ async def globalSend(message):
         gpf = await bot.cursor.fetchone("select * from guilds where id=%s",
                            (message.guild.id,))
         #gpf = await bot.cursor.fetchone()
-        if (datetime.datetime.now() - rdelta(hours=9) - rdelta(days=7) >= message.author.created_at) or upf["gmod"] or upf["gstar"] or gchn=="mido_sync_a":
+        if (datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9) - rdelta(days=7) >= message.author.created_at) or upf["gmod"] or upf["gstar"] or gchn=="mido_sync_a":
             if upf["gban"] == 1:
                 if not (gchn == "sync_rsp_main_chat" or gchn=="mido_sync_a"):
                     dc = await ut.opendm(message.author)
@@ -371,21 +382,21 @@ async def globalSend(message):
                     ne.set_author(
                         name=f"{ut.ondevicon(message.author)},({str(message.author.id)})")
                     if gpf["verified"]:
-                        ne.set_footer(text=f"✅:{message.guild.name}(id:{message.guild.id})", icon_url=message.guild.icon_url_as(
-                            static_format="png"))
+                        ne.set_footer(text=f"✅:{message.guild.name}(id:{message.guild.id})", icon_url=message.guild.icon.replace(
+                            static_format="png").url)
                     else:
                         ne.set_footer(text=f"{message.guild.name}(id:{message.guild.id})",
-                                      icon_url=message.guild.icon_url_as(static_format="png"))
-                    ne.timestamp = datetime.datetime.now() - rdelta(hours=9)
+                                      icon_url=message.guild.icon.replace(static_format="png").url)
+                    ne.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
                     embed = discord.Embed(
                         title="本文", description=message.content, color=upf["gcolor"])
                     embed.set_footer(text=f"{message.guild.name}(id:{message.guild.id})",
-                                     icon_url=message.guild.icon_url_as(static_format="png"))
+                                     icon_url=message.guild.icon.replace(static_format="png").url)
                     if message.application is not None:
                         embed.add_field(
                             name=message.application["name"]+"へのRPC招待", value="RPC招待はグローバル送信できません。")
 
-                    if message.type == discord.MessageType.default and message.reference:
+                    if message.type == discord.MessageType.reply:
                         ref = message.reference
                         if ref.cached_message:
                             m = ref.cached_message
@@ -423,7 +434,7 @@ async def globalSend(message):
                         spicon = "👤"
 
                     embed.set_author(name=f"{upf['gnick']}({spicon}):{str(message.author.id)}",
-                                     icon_url=message.author.avatar_url_as(static_format="png"))
+                                     icon_url=message.author.display_avatar.replace(static_format="png").url)
                     if not message.attachments == []:
                         embed.set_image(url=message.attachments[0].url)
                         for atc in message.attachments:
@@ -479,11 +490,11 @@ async def globalSend(message):
                         if message.stickers:
                             sticker = message.stickers[0]
                             sembed = discord.Embed(title=f"スタンプ:{sticker.name}",)
-                            if sticker.format == discord.StickerType.png:
-                                sembed.set_image(url=sticker.image_url)
-                            elif sticker.format == discord.StickerType.apng:
-                                sembed.set_image(url=f"https://dsticker.herokuapp.com/convert.gif?url={sticker.image_url}")
-                            elif sticker.format == discord.StickerType.lottie:
+                            if sticker.format == discord.StickerFormatType.png:
+                                sembed.set_image(url=sticker.url)
+                            elif sticker.format == discord.StickerFormatType.apng:
+                                sembed.set_image(url=f"https://dsticker.herokuapp.com/convert.gif?url={sticker.url}")
+                            elif sticker.format == discord.StickerFormatType.lottie:
                                 # メモ: https://cdn.discordapp.com/stickers/{id}/{hash}.json?size=1024
                                 sembed.description = "画像取得非対応のスタンプです。"
                             ed.append(sembed)
@@ -562,7 +573,7 @@ async def on_member_update(b, a):
     try:
         e = discord.Embed(
             title="メンバーの更新", description=f"変更メンバー:{str(a)}", color=bot.ec)
-        e.timestamp = datetime.datetime.now() - rdelta(hours=9)
+        e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
         if not b.nick == a.nick:
             e.add_field(name="変更内容", value="ニックネーム")
             if b.nick:
@@ -674,6 +685,7 @@ async def on_member_join(member):
     except:
         pass
     # 他サーバーでのban通知
+    """
     isgban = False
     upf = await bot.cursor.fetchone("select * from users where id=%s", (member.id,))
     #upf = await bot.cursor.fetchone()
@@ -704,7 +716,7 @@ async def on_member_join(member):
             for ch in member.guild.channels:
                 if ch.name == "sina-user-check":
                     await ch.send(embed=discord.Embed(title=f"{member}の安全性評価", description=f"そのユーザーは、思惟奈ちゃんのいる{bunotif}のサーバーでbanされています。注意してください。"))
-
+    """
 
 @bot.event
 async def on_member_remove(member):
@@ -725,7 +737,7 @@ async def on_member_remove(member):
     e.add_field(name="退出メンバー", value=str(member))
     e.add_field(name="役職", value=[i.name for i in member.roles])
     # e.set_footer(text=f"{member.guild.name}/{member.guild.id}")
-    e.timestamp = datetime.datetime.now() - rdelta(hours=9)
+    e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
     gpf = await bot.cursor.fetchone("select * from guilds where id=%s", (member.guild.id,))
     #gpf = await bot.cursor.fetchone()
     if gpf["sendlog"]:
@@ -741,7 +753,7 @@ async def on_member_remove(member):
 async def on_webhooks_update(channel):
     e = discord.Embed(title="Webhooksの更新", color=bot.ec)
     e.add_field(name="チャンネル", value=channel.mention)
-    e.timestamp = datetime.datetime.now() - rdelta(hours=9)
+    e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
     gpf = await bot.cursor.fetchone("select * from guilds where id=%s", (channel.guild.id,))
     #gpf = await bot.cursor.fetchone()
     if gpf["sendlog"]:
@@ -754,7 +766,7 @@ async def on_webhooks_update(channel):
 async def on_guild_role_create(role):
     e = discord.Embed(title="役職の作成", color=bot.ec)
     e.add_field(name="役職名", value=role.name)
-    e.timestamp = datetime.datetime.now() - rdelta(hours=9)
+    e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
     gpf = await bot.cursor.fetchone("select * from guilds where id=%s", (role.guild.id,))
     #gpf = await bot.cursor.fetchone()
     if gpf["sendlog"]:
@@ -767,7 +779,7 @@ async def on_guild_role_create(role):
 async def on_guild_role_delete(role):
     e = discord.Embed(title="役職の削除", color=bot.ec)
     e.add_field(name="役職名", value=role.name)
-    e.timestamp = datetime.datetime.now() - rdelta(hours=9)
+    e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
     gpf = await bot.cursor.fetchone("select * from guilds where id=%s", (role.guild.id,))
     #gpf = await bot.cursor.fetchone()
     if gpf["sendlog"]:
@@ -779,14 +791,14 @@ async def on_guild_role_delete(role):
 @bot.event
 async def on_message_edit(before, after):
     # サーバーログ
-    if before.content != after.content:
+    if before.content != after.content and before.author.id != 462885760043843584:
         e = discord.Embed(title="メッセージの編集", color=bot.ec)
         e.add_field(name="編集前", value=before.content)
         e.add_field(name="編集後", value=after.content)
         e.add_field(name="メッセージ送信者", value=after.author.mention)
         e.add_field(name="メッセージチャンネル", value=after.channel.mention)
         e.add_field(name="メッセージのURL", value=after.jump_url)
-        e.timestamp = datetime.datetime.now() - rdelta(hours=9)
+        e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
         gpf = await bot.cursor.fetchone(
             "select * from guilds where id=%s", (after.guild.id,))
         #gpf = await bot.cursor.fetchone()
@@ -801,7 +813,7 @@ async def on_guild_channel_delete(channel):
     # bl = await channel.guild.audit_logs(limit=1, action=discord.AuditLogAction.channel_delete).flatten()
     e = discord.Embed(title="チャンネル削除", color=bot.ec)
     e.add_field(name="チャンネル名", value=channel.name)
-    e.timestamp = datetime.datetime.now() - rdelta(hours=9)
+    e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
     gpf = await bot.cursor.fetchone("select * from guilds where id=%s", (channel.guild.id,))
     #gpf = await bot.cursor.fetchone()
     if gpf["sendlog"]:
@@ -815,7 +827,7 @@ async def on_reaction_clear(message, reactions):
     e = discord.Embed(title="リアクションの一斉除去", color=bot.ec)
     e.add_field(name="リアクション", value=[str(i) for i in reactions])
     e.add_field(name="除去されたメッセージ", value=message.content or "(本文なし)")
-    e.timestamp = datetime.datetime.now() - rdelta(hours=9)
+    e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
     gpf = await bot.cursor.fetchone("select * from guilds where id=%s", (message.guild.id,))
     #gpf = await bot.cursor.fetchone()
     if gpf["sendlog"]:
@@ -832,7 +844,7 @@ async def on_message_delete(message):
         e.add_field(name="メッセージ送信者", value=message.author.mention)
         e.add_field(name="メッセージチャンネル", value=message.channel.mention)
         e.add_field(name="メッセージのid", value=message.id)
-        e.timestamp = datetime.datetime.now() - rdelta(hours=9)
+        e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
         gpf = await bot.cursor.fetchone("select * from guilds where id=%s",
                            (message.guild.id,))
         #gpf = await bot.cursor.fetchone()
@@ -851,7 +863,7 @@ async def on_bulk_message_delete(messages):
         logs.append(f"message id(メッセージid):{m.id}\n")
         c_at = (m.created_at + rdelta(hours=9)).strftime("%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}").format(*"年月日時分秒")
         logs.append(f"created_at(送信日時):{c_at}\n")
-        if m.type == discord.MessageType.default and m.reference:
+        if m.type == discord.MessageType.reply:
             rfm = m.reference
             if rfm.cached_message:
                 logs.append(f"返信メッセージ:(送信者)-{rfm.cached_message.author.display_name}({rfm.cached_message.author}/{rfm.cached_message.author.id})\n")
@@ -868,7 +880,7 @@ async def on_bulk_message_delete(messages):
 
     e = discord.Embed(title="メッセージ一括削除", color=bot.ec)
     e.add_field(name="件数", value=len(messages))
-    e.timestamp = datetime.datetime.now() - rdelta(hours=9)
+    e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
     gpf = await bot.cursor.fetchone("select * from guilds where id=%s",
                        (messages[0].guild.id,))
     #gpf = await bot.cursor.fetchone()
@@ -882,7 +894,7 @@ async def on_bulk_message_delete(messages):
 async def on_guild_channel_create(channel):
     e = discord.Embed(title="チャンネル作成", color=bot.ec)
     e.add_field(name="チャンネル名", value=channel.mention)
-    e.timestamp = datetime.datetime.now() - rdelta(hours=9)
+    e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
     gpf = await bot.cursor.fetchone("select * from guilds where id=%s", (channel.guild.id,))
     #gpf = await bot.cursor.fetchone()
     if gpf["sendlog"]:
@@ -894,7 +906,7 @@ async def on_guild_channel_create(channel):
 @bot.event
 async def on_guild_channel_update(b, a):
     e = discord.Embed(title="チャンネル更新", description=a.mention, color=bot.ec)
-    e.timestamp = datetime.datetime.now() - rdelta(hours=9)
+    e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
     if not b.name == a.name:
         if not a.guild.id == 461789442743468073:
             e.add_field(name="変更内容", value="チャンネル名")
@@ -933,7 +945,7 @@ async def on_guild_channel_update(b, a):
 @bot.event
 async def on_guild_update(b, a):
     e = discord.Embed(title="サーバーの更新", color=bot.ec)
-    e.timestamp = datetime.datetime.now() - rdelta(hours=9)
+    e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
     if b.name != a.name:
         e.add_field(name="変更内容", value="サーバー名")
         e.add_field(name="変更前", value=b.name)
@@ -967,12 +979,12 @@ async def on_guild_update(b, a):
 @bot.event
 async def on_member_ban(g, user):
     guild = bot.get_guild(g.id)
-    bl = await guild.audit_logs(limit=1, action=discord.AuditLogAction.ban).flatten()
+    # bl = await guild.audit_logs(limit=1, action=discord.AuditLogAction.ban).flatten()
     e = discord.Embed(title="ユーザーのban", color=bot.ec)
     e.add_field(name="ユーザー名", value=str(user))
     # e.add_field(name="実行者", value=str(bl[0].user))
     # e.set_footer(text=f"{g.name}/{g.id}")
-    e.timestamp = datetime.datetime.now() - rdelta(hours=9)
+    e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
     gpf = await bot.cursor.fetchone("select * from guilds where id=%s", (g.id,))
     #gpf = await bot.cursor.fetchone()
     if gpf["sendlog"]:
@@ -985,7 +997,7 @@ async def on_member_ban(g, user):
 async def on_member_unban(guild, user):
     e = discord.Embed(title="ユーザーのban解除", color=bot.ec)
     e.add_field(name="ユーザー名", value=str(user))
-    e.timestamp = datetime.datetime.now() - rdelta(hours=9)
+    e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
     gpf = await bot.cursor.fetchone("select * from guilds where id=%s", (guild.id,))
     #gpf = await bot.cursor.fetchone()
     if gpf["sendlog"]:
@@ -1061,7 +1073,7 @@ async def on_invite_create(invite):
     e.add_field(name="使用可能時間", value=str(invite.max_age))
     e.add_field(name="チャンネル", value=str(invite.channel.mention))
     e.add_field(name="コード", value=str(invite.code))
-    e.timestamp = datetime.datetime.now() - rdelta(hours=9)
+    e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
     gpf = await bot.cursor.fetchone("select * from guilds where id=%s", (invite.guild.id,))
     #gpf = await bot.cursor.fetchone()
     if gpf["sendlog"]:
@@ -1076,7 +1088,7 @@ async def on_invite_delete(invite):
     e.add_field(name="作成ユーザー", value=str(invite.inviter))
     e.add_field(name="チャンネル", value=str(invite.channel.mention))
     e.add_field(name="コード", value=str(invite.code))
-    e.timestamp = datetime.datetime.now() - rdelta(hours=9)
+    e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
     gpf = await bot.cursor.fetchone("select * from guilds where id=%s", (invite.guild.id,))
     #gpf = await bot.cursor.fetchone()
     if gpf["sendlog"]:
@@ -1084,7 +1096,6 @@ async def on_invite_delete(invite):
         if ch.guild.id == invite.guild.id:
             await ch.send(embed=e)
 
-discord.abc.Messageable
 
 @bot.event
 async def on_ready():
@@ -1098,8 +1109,7 @@ async def on_ready():
     cRPC.start()
     """invite_tweet.start()
     now_sina_tweet.start()"""
-    bot.application_id = (await bot.application_info()).id
-    bot.load_extension("jishaku")
+    await bot.load_extension("jishaku")
     
     files = [
             "m10s_music", "m10s_info", "m10s_owner", "m10s_settings", "m10s_manage", "m10s_levels",
@@ -1110,20 +1120,35 @@ async def on_ready():
             # "_m10s_slash_testing","_m10s_music_slash",
             "_m10s_api",
             "_m10s_ctx_menu",
-            "_m10s_quick_cmd"
+            "_m10s_quick_cmd",
+            # "__part_pjsekai_music_select"
+            "slash.music", "slash.hashtag", "slash.level_card", 
+            "slash.pjsekai_music_select", # 思惟奈ちゃんパートナー向け機能-ぱすこみゅ
+            "slash.mini_features"
             ]
     
     embed = discord.Embed(title="読み込みに失敗したCog", color=bot.ec)
     txt = ""
     for file in files:
         try:
-            bot.load_extension(f"cogs.{file}")
+            await bot.load_extension(f"cogs.{file}")
         except:
+
+            traceback.print_exc()
             print(f"Extension {file} Load Failed.")
             txt += f"`{file}`, "
         else:
             print(f"Extension {file} Load.")
     embed.description = txt
+
+    # テストサバ
+    # await bot.tree.sync(guild=discord.Object(id=560434525277126656))
+
+    # パートナーコマンド
+    await bot.tree.sync(guild=discord.Object(id=764088457785638922))
+
+    # グローバルコマンド
+    await bot.tree.sync()
 
     try:
         ch = bot.get_channel(595526013031546890)
@@ -1289,8 +1314,11 @@ async def runsercmd(message, gs, pf):
 
 async def gahash(message, gs):
     # hash
-    if "s-noHashSend" in (message.channel.topic or ""):
-        return
+    try:
+        if "s-noHashSend" in (message.channel.topic or ""):
+            return
+    except:
+        pass
     if "shash" not in json.loads(gs["lockcom"]):
         ch = json.loads(gs["hash"])
         if ch is not []:
@@ -1304,7 +1332,7 @@ async def gahash(message, gs):
                                         value=f'{await bot.l10n_guild(message.guild,"hash-chmention")}:{message.channel.mention}\n{await bot.l10n_guild(message.guild,"hash-chname")}:{message.channel.name}')
                         embed.add_field(name=await bot.l10n_guild(
                             message.guild, "hash-link"), value=message.jump_url)
-                        embed.set_author(name=message.author.display_name, icon_url=message.author.avatar_url_as(
+                        embed.set_author(name=message.author.display_name, icon_url=message.author.display_avatar.replace(
                             static_format='png'))
                     else:
                         embed = discord.Embed(
@@ -1313,7 +1341,7 @@ async def gahash(message, gs):
                                         value=f'{await bot.l10n_guild(message.guild,"hash-chmention")}:{message.channel.mention}\n{await bot.l10n_guild(message.guild,"hash-chname")}:{message.channel.name}')
                         embed.add_field(name=await bot.l10n_guild(
                             message.guild, "hash-link"), value=message.jump_url)
-                        embed.set_author(name=message.author.display_name, icon_url=message.author.avatar_url_as(
+                        embed.set_author(name=message.author.display_name, icon_url=message.author.display_avatar.replace(
                             static_format='png'))
                         if not message.attachments == [] and (not message.attachments[0].is_spoiler()):
                             embed.set_image(url=message.attachments[0].url)
@@ -1613,14 +1641,32 @@ async def help(ctx, rcmd=None):
 @bot.event
 async def on_command(ctx):
     ch = bot.get_channel(693048961107230811)
-    e = discord.Embed(title=f"{ctx.command.name}の実行",
+    e = discord.Embed(title=f"prefixコマンド:{ctx.command.name}の実行",
                       description=f"実行文:`{ctx.message.clean_content}`", color=bot.ec)
     e.set_author(name=f"実行者:{str(ctx.author)}({ctx.author.id})",
-                 icon_url=ctx.author.avatar_url_as(static_format="png"))
-    e.set_footer(text=f"実行サーバー:{ctx.guild.name}({ctx.guild.id})",
-                 icon_url=ctx.guild.icon_url_as(static_format="png"))
+                 icon_url=ctx.author.display_avatar.replace(static_format="png").url)
+    if ctx.guild.icon:
+        e.set_footer(text=f"実行サーバー:{ctx.guild.name}({ctx.guild.id})",
+                    icon_url=ctx.guild.icon.replace(static_format="png").url)
+    else:
+        e.set_footer(text=f"実行サーバー:{ctx.guild.name}({ctx.guild.id})")
     e.add_field(name="実行チャンネル", value=ctx.channel.name)
     e.timestamp = ctx.message.created_at
+    await ch.send(embed=e)
+
+@bot.event
+async def on_interaction(interaction:discord.Interaction):
+    ch = bot.get_channel(693048961107230811)
+    e = discord.Embed(title=f"スラッシュコマンド:{interaction.command.name}の実行",color=bot.ec)
+    e.set_author(name=f"実行者:{str(interaction.user)}({interaction.user.id})",
+                 icon_url=interaction.user.display_avatar.replace(static_format="png").url)
+    if interaction.guild.icon:
+        e.set_footer(text=f"実行サーバー:{interaction.guild.name}({interaction.guild.id})",
+                    icon_url=interaction.guild.icon.replace(static_format="png").url)
+    else:
+        e.set_footer(text=f"実行サーバー:{interaction.guild.name}({interaction.guild.id})")
+    e.add_field(name="実行チャンネル", value=interaction.channel.name)
+    e.timestamp = interaction.created_at
     await ch.send(embed=e)
 
 
@@ -1693,12 +1739,5 @@ async def now_sina_tweet():
 
 """
 
-apple_invite.setup(bot)
-apple_foc.setup(bot)
 
-# 通常トークン
-bot.run(bot.BOT_TOKEN)
-
-# テストトークン
-# bot.run(bot.BOT_TEST_TOKEN)
-
+asyncio.run(main())

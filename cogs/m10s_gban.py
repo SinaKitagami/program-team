@@ -143,5 +143,5 @@ class m10s_gban(commands.Cog):
                     await ch.send(embed=ut.getEmbed("グローバルBANに基づく、BANの実行", f"{u}({u.id})は、`{gbaninfo['reason']}`として思惟奈ちゃんのグローバルBANを受けています。\nよって、このサーバーからBANを行いました。\nグローバルBAN実行者:{by}({by.id})"))
 
 
-def setup(bot):
-    bot.add_cog(m10s_gban(bot))
+async def setup(bot):
+    await bot.add_cog(m10s_gban(bot))

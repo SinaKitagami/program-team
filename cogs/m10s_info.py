@@ -81,8 +81,8 @@ class info(commands.Cog):
 
             elif cb.selected_value[0] == "avatar":
                 e.description="ユーザーアバターページ"
-                e.add_field(name="アバターURL",value=target.avatar_url)
-                e.set_image(url=target.avatar_url)
+                e.add_field(name="アバターURL",value=target.display_avatar.url)
+                e.set_image(url=target.display_avatar.url)
             
             elif cb.selected_value[0] == "badges":
                 e.description="ユーザーバッジページ"
@@ -162,7 +162,7 @@ class info(commands.Cog):
         e = discord.Embed(title=await ctx._(
             "cinvite-title"), description=await ctx._("cinvite-from", str(i.inviter)), color=self.bot.ec)
         e.set_author(name=f'{i.guild.name}({i.guild.id})',
-                     icon_url=i.guild.icon_url_as(format="png"))
+                     icon_url=i.guild.icon.replace(format="png"))
         e.add_field(name=await ctx._("cinvite-memcount"),
                     value=f'{i.approximate_member_count}\n({await ctx._("cinvite-onmemcount")}{i.approximate_presence_count})')
         e.add_field(name=await ctx._("cinvite-ch"),
@@ -210,7 +210,7 @@ class info(commands.Cog):
                 "serverinfo-name"), description=sevinfo.name, color=self.bot.ec)
             if sevinfo.icon_url is not None:
                 embed.set_thumbnail(
-                    url=sevinfo.icon_url_as(static_format='png'))
+                    url=sevinfo.icon.replace(static_format='png'))
             embed.add_field(name=await ctx._("serverinfo-role"),
                             value=len(sevinfo.roles))
             embed.add_field(name=await ctx._("serverinfo-emoji"),
@@ -391,6 +391,8 @@ class info(commands.Cog):
             embed.add_field(name=await ctx._("roleinfo-hasper"), value=hasper or "(権限なし)")
             embed.add_field(name=await ctx._("roleinfo-created"), value=(role.created_at + rdelta(
                 hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))
+            if role.icon:
+                embed.set_thumbnail(role.icon.url)
 
             await ctx.send(embed=embed)
         else:
@@ -457,7 +459,7 @@ class info(commands.Cog):
                         activs.append("なにもしてない…のかな？")
             activ = info.activity
             embed.set_author(name=info.display_name,
-                             icon_url=info.avatar_url_as(static_format='png'))
+                             icon_url=info.display_avatar.replace(static_format='png'))
             spflag = True
             embeds.append(embed)
         else:
@@ -478,7 +480,7 @@ class info(commands.Cog):
                     "playinginfo-doing"), description=activName, color=info.color)
                 activ = anactivity
                 embed.set_author(name=info.display_name,
-                                 icon_url=info.avatar_url_as(static_format='png'))
+                                 icon_url=info.display_avatar.replace(static_format='png'))
                 if anactivity.name == "Spotify":
                     activs.append("Spotifyでの音楽鑑賞")
                     try:
@@ -491,8 +493,8 @@ class info(commands.Cog):
                         embed.add_field(
                             name="URL", value=f"https://open.spotify.com/track/{activ.track_id}")
                         tmp = str(
-                            int((datetime.datetime.utcnow() - activ.start).seconds % 60))
-                        pnow = f"{int((datetime.datetime.utcnow() - activ.start).seconds/60)}:{tmp if len(tmp)==2 else f'0{tmp}'}"
+                            int((datetime.datetime.now(datetime.timezone.utc) - activ.start).seconds % 60))
+                        pnow = f"{int((datetime.datetime.now(datetime.timezone.utc) - activ.start).seconds/60)}:{tmp if len(tmp)==2 else f'0{tmp}'}"
                         tmp = str(int(activ.duration.seconds % 60))
                         pml = f"{int(activ.duration.seconds/60)}:{tmp if len(tmp)==2 else f'0{tmp}'}"
                         embed.add_field(name="経過時間", value=f"{pnow}/{pml}")
@@ -506,8 +508,8 @@ class info(commands.Cog):
                             embed.add_field(name=await ctx._(
                                 "playinginfo-artist"), value=activ.state)
                             tmp = str(
-                                int((datetime.datetime.utcnow() - activ.start).seconds % 60))
-                            pnow = f"{int((datetime.datetime.utcnow() - activ.start).seconds/60)}:{tmp if len(tmp)==2 else f'0{tmp}'}"
+                                int((datetime.datetime.now(datetime.timezone.utc) - activ.start).seconds % 60))
+                            pnow = f"{int((datetime.datetime.now(datetime.timezone.utc) - activ.start).seconds/60)}:{tmp if len(tmp)==2 else f'0{tmp}'}"
                             deua = activ.end - activ.start
                             tmp = str(int(deua.seconds % 60))
                             pml = f"{int(deua.seconds/60)}:{tmp if len(tmp)==2 else f'0{tmp}'}"
@@ -517,7 +519,7 @@ class info(commands.Cog):
                             embed = discord.Embed(title="していること", description=activName, color=info.color)
                             activ = anactivity
                             embed.set_author(name=info.display_name,
-                                            icon_url=info.avatar_url_as(static_format='png'))
+                                            icon_url=info.display_avatar.replace(static_format='png'))
                             activs.append(f"{activ.name}をプレイ中")
                             try:
                                 vl = ""
@@ -571,7 +573,7 @@ class info(commands.Cog):
         doingdis = f"{len(activs)}件のアクティビティ"
         e = discord.Embed(title=doingdis,description="```\n"+f"\n".join(activs)+"```",color = self.bot.ec)
         e.set_author(name=info.display_name,
-                        icon_url=info.avatar_url_as(static_format='png'))
+                        icon_url=info.display_avatar.replace(static_format='png'))
         embeds.insert(0,e)
         page = 0
         msg = await ctx.send(embed=embeds[page])
@@ -614,8 +616,8 @@ class info(commands.Cog):
         page = 0
         e = discord.Embed(title=await ctx._("ginfo-ov-title"), color=self.bot.ec)
         e.set_author(name=f"{ptn}{ctx.guild.name}",
-                     icon_url=ctx.guild.icon_url_as(static_format='png'))
-        e.add_field(name=await ctx._("ginfo-region"), value=ctx.guild.region)
+                     icon_url=ctx.guild.icon.replace(static_format='png'))
+        #e.add_field(name=await ctx._("ginfo-region"), value=ctx.guild.region)
         e.add_field(name=await ctx._("ginfo-afkch"), value=ctx.guild.afk_channel)
         if ctx.guild.afk_channel:
             e.add_field(name=await ctx._("ginfo-afktout"),
@@ -634,14 +636,14 @@ class info(commands.Cog):
         else:
             e.add_field(name=await ctx._("ginfo-defnotif"),
                         value=await ctx._("ginfo-omention"))
-        if "INVITE_SPLASH" in ctx.guild.features:
+        if "INVITE_SPLASH" in ctx.guild.features and ctx.guild.splash:
             e.add_field(name=await ctx._("ginfo-invitesp"),
                         value=await ctx._("ginfo-invitesp-pos"))
-            e.set_image(url=ctx.guild.splash_url_as(format="png"))
-        if "BANNER" in ctx.guild.features:
+            e.set_image(url=ctx.guild.splash.replace(static_format="png").url)
+        if "BANNER" in ctx.guild.features and ctx.guild.banner:
             e.add_field(name=await ctx._("ginfo-banner"),
                         value=await ctx._("ginfo-banner-pos"))
-            e.set_thumbnail(url=ctx.guild.banner_url_as(format="png"))
+            e.set_thumbnail(url=ctx.guild.banner.replace(static_format="png").url)
         mp = await ctx.send(embed=e)
         await mp.add_reaction(self.bot.get_emoji(653161518195671041))
         await mp.add_reaction(self.bot.get_emoji(653161518170505216))
@@ -669,7 +671,7 @@ class info(commands.Cog):
                     # 概要
                     e = discord.Embed(title=await ctx._(
                         "ginfo-ov-title"), color=self.bot.ec)
-                    e.set_author(name=f"{ptn}{ctx.guild.name}", icon_url=ctx.guild.icon_url_as(
+                    e.set_author(name=f"{ptn}{ctx.guild.name}", icon_url=ctx.guild.icon.replace(
                         static_format='png'))
                     e.add_field(name=await ctx._("ginfo-region"),
                                 value=ctx.guild.region)
@@ -719,7 +721,7 @@ class info(commands.Cog):
                     elif ctx.guild.verification_level == discord.VerificationLevel.high:
                         e.add_field(name=await ctx._("ginfo-vlevel"),
                                     value=await ctx._("ginfo-vl3"))
-                    elif ctx.guild.verification_level == discord.VerificationLevel.extreme:
+                    elif ctx.guild.verification_level == discord.VerificationLevel.highest:
                         e.add_field(name=await ctx._("ginfo-vlevel"),
                                     value=await ctx._("ginfo-vl4"))
                     if ctx.guild.explicit_content_filter == discord.ContentFilter.disabled:
@@ -904,17 +906,17 @@ class info(commands.Cog):
                 e=discord.Embed(title="bot招待リンク",description=ilink,color=self.bot.ec)
                 e.add_field(name="このリンクで導入した際の権限",
                                 value=f"`{'`,`'.join([await ctx._(f'p-{i[0]}') for i in list(target.guild_permissions) if i[1]])}`")
-                e.set_author(name=f"{target}({target.id})",icon_url=target.avatar_url_as(static_format="png"))
+                e.set_author(name=f"{target}({target.id})",icon_url=target.display_avatar.replace(static_format="png").url)
             else:
                 ilink = discord.utils.oauth_url(str(target.id),permissions=ctx.guild.me.guild_permissions,scopes=("bot","applications.commands"))
                 e=discord.Embed(title="bot招待リンク",description=ilink,color=self.bot.ec)
                 e.add_field(name="このリンクで導入した際の権限",
                                 value=f"`{'`,`'.join([await ctx._(f'p-{i[0]}') for i in list(ctx.guild.me.guild_permissions) if i[1]])}`")
-                e.set_author(name=f"{target}({target.id})",icon_url=target.avatar_url_as(static_format="png"))
+                e.set_author(name=f"{target}({target.id})",icon_url=target.display_avatar.replace(static_format="png").url)
             await ctx.send(embed=e)
         else:
             await ctx.send(embed=discord.Embed(title="エラー",description="ユーザーアカウントの導入リンクは作成できません！",color=self.bot.ec))
 
 
-def setup(bot):
-    bot.add_cog(info(bot))
+async def setup(bot):
+    await bot.add_cog(info(bot))

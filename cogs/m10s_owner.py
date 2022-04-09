@@ -128,7 +128,7 @@ class owner(commands.Cog):
         embed.add_field(
             name="思惟奈ちゃん導入日時", value=f"{(guilds[page].me.joined_at+ rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒')}")
         embed.add_field(name="オーナー", value=f"{guilds[page].owner}")
-        embed.set_thumbnail(url=guilds[page].icon_url_as(static_format="png"))
+        embed.set_thumbnail(url=guilds[page].icon.replace(static_format="png").url)
         embed.set_footer(text=f"{page+1}/{gcount+1}")
 
         msg = await ctx.send(embed=embed)
@@ -169,7 +169,7 @@ class owner(commands.Cog):
                 name="思惟奈ちゃん導入日時", value=f"{guilds[page].me.joined_at.strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒')}")
             embed.add_field(name="オーナー", value=f"{guilds[page].owner}")
             embed.set_thumbnail(
-                url=guilds[page].icon_url_as(static_format="png"))
+                url=guilds[page].icon.replace(static_format="png").url)
             embed.set_footer(text=f"{page+1}/{gcount+1}")
             await msg.edit(embed=embed)
 
@@ -226,14 +226,10 @@ class owner(commands.Cog):
                 for r in info.roles:
                     hasroles = hasroles + f"{r.mention},"
                 embed.add_field(name=await ctx._("userinfo-roles"), value=hasroles)
-                if info.avatar_url is not None:
-                    embed.set_thumbnail(
-                        url=info.avatar_url_as(static_format='png'))
-                    embed.add_field(name=await ctx._("userinfo-iconurl"),
-                                    value=info.avatar_url_as(static_format='png'))
-                else:
-                    embed.set_image(
-                        url=info.default_avatar_url_as(static_format='png'))
+                embed.set_thumbnail(
+                    url=info.display_avatar.replace(static_format='png'))
+                embed.add_field(name=await ctx._("userinfo-iconurl"),
+                                value=info.display_avatar.replace(static_format='png').url)
             await ctx.send(embed=embed)
         else:
             await ctx.send("一致するユーザーが、共通サーバーに見つかりませんでした。")
@@ -244,19 +240,11 @@ class owner(commands.Cog):
             "select * from users where id=%s", (ctx.author.id,))
         #upf = await self.bot.cursor.fetchone()
         if upf["gmod"] is True:
-            chs = await self.bot.cursor.fetchall("select * from globalchs")
-            #chs = await self.bot.cursor.fetchall()
             async with ctx.channel.typing():
                 for cid in [int(i) for i in cids]:
                     await asyncio.sleep(0.5)
                     try:
-                        for ch in chs:
-                            if cid in ch["ids"]:
-                                clt = ch["ids"]
-                                clt.remove(cid)
-                                await self.bot.cursor.execute(
-                                    "UPDATE globalchs SET ids = %s WHERE name = %s", (clt, ch["name"]))
-                                break
+                        await self.bot.cursor.execute("delete from gchat_cinfo where id = %s", (cid,))
                     except:
                         pass
             await ctx.send("強制切断できてるか確認してねー")
@@ -335,5 +323,5 @@ class owner(commands.Cog):
         self.bot.features = config.sp_features
         await ctx.message.add_reaction(self.bot.get_emoji(653161518103265291))
 
-def setup(bot):
-    bot.add_cog(owner(bot))
+async def setup(bot):
+    await bot.add_cog(owner(bot))

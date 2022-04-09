@@ -273,5 +273,5 @@ class m10s_auth_wiz(commands.Cog):
             await m.delete()
 
 
-def setup(bot):
-    bot.add_cog(m10s_auth_wiz(bot))
+async def setup(bot):
+    await bot.add_cog(m10s_auth_wiz(bot))

@@ -133,5 +133,5 @@ class m10s_remainder(commands.Cog):
                 await self.bot.cursor.execute("delete from remaind where id = %s",(i["id"],))
 
 
-def setup(bot):
-    bot.add_cog(m10s_remainder(bot))
+async def setup(bot):
+    await bot.add_cog(m10s_remainder(bot))

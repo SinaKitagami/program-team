@@ -60,5 +60,5 @@ class Symmetry(commands.Cog):
             await ctx.send("サイドの指定が間違っています!")
 
 
-def setup(bot):
-    bot.add_cog(Symmetry(bot))
+async def setup(bot):
+    await bot.add_cog(Symmetry(bot))

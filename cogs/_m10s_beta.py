@@ -31,5 +31,5 @@ class m10s_beta(commands.Cog):
         
 
 
-def setup(bot):
-    bot.add_cog(m10s_beta(bot))
+async def setup(bot):
+    await bot.add_cog(m10s_beta(bot))

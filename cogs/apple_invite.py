@@ -179,5 +179,5 @@ class AppleInviteCog(commands.Cog):
         await ctx.author.send(f"オンライン隠し: {pc - online}人")
 
 
-def setup(bot):
-    bot.add_cog(AppleInviteCog(bot))
+async def setup(bot):
+    await bot.add_cog(AppleInviteCog(bot))

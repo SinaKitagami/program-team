@@ -41,7 +41,7 @@ class m10s_bmail(commands.Cog):
             e = ut.getEmbed("ボトルメールログ", msg.clean_content, self.bot.ec,
                             "送信先サーバー:チャンネル", f"{smg.guild.name}({smg.guild.id}):{smg.channel.name}({smg.channel.id})", "メッセージID", str(smg.id))
             e.set_author(name=f"{msg.author}({msg.author.id})",
-                            icon_url=msg.author.avatar_url_as(static_format="png"))
+                            icon_url=msg.author.display_avatar.replace(static_format="png").url)
             await bmaillog.send(embed=e)
             #except:
                 #pass
@@ -49,5 +49,5 @@ class m10s_bmail(commands.Cog):
             await dch.send("手紙とボトルはどこかへ消えてしまった…")
 
 
-def setup(bot):
-    bot.add_cog(m10s_bmail(bot))
+async def setup(bot):
+    await bot.add_cog(m10s_bmail(bot))

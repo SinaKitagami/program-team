@@ -139,9 +139,9 @@ class gcoms(commands.Cog):
             await ctx.send("そのIDをもつユーザーがいません！")
         else:
             if upf["gmod"] == 1:
-                await self.bot.cursor.execute(
+                bpf = await self.bot.cursor.fetchone(
                     "select * from users where id=%s", (uid,))
-                bpf = await self.bot.cursor.fetchone()
+                # bpf = await self.bot.cursor.fetchone()
                 if bpf:
                     await self.bot.cursor.execute(
                         "UPDATE users SET gban = %s WHERE id = %s", (int(ban), uid))
@@ -205,7 +205,7 @@ class gcoms(commands.Cog):
     """@commands.command()
     @commands.cooldown(1, 20, type=commands.BucketType.guild)
     async def gdconnect(self, ctx):
-        if ctx.author.permissions_in(ctx.channel).administrator is True or ctx.author.id == 404243934210949120:
+        if ctx.chennel.permissions_for(ctx.author).administrator is True or ctx.author.id == 404243934210949120:
             if ctx.channel.permissions_for(ctx.guild.me).manage_webhooks:
                 await self.bot.cursor.execute("select * from globalchs")
                 chs = await self.bot.cursor.fetchall()
@@ -243,7 +243,7 @@ class gcoms(commands.Cog):
         if upf["gban"] == 1:
             await ctx.send("あなたは使用禁止なのでコネクトは使えません。")
             return
-        if ctx.author.permissions_in(ctx.channel).administrator is True or ctx.author.id == 404243934210949120:
+        if ctx.channel.permissions_for(ctx.author).administrator is True or ctx.author.id == 404243934210949120:
             if ctx.channel.permissions_for(ctx.guild.me).manage_webhooks:
                 await self.bot.cursor.execute("select * from globalchs")
                 chs = await self.bot.cursor.fetchall()
@@ -348,5 +348,5 @@ class gcoms(commands.Cog):
             await ctx.send(embed=embed)
 
 
-def setup(bot):
-    bot.add_cog(gcoms(bot))
+async def setup(bot):
+    await bot.add_cog(gcoms(bot))

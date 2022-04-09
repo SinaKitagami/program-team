@@ -144,11 +144,8 @@ class m10s_chinfo_rw(commands.Cog):
             await ctx.send(embed=e)
         else:
             await ctx.send("> エラー\n予期しないタイプのチャンネルです。チーム☆思惟奈ちゃんメンバーに報告してください。")
-        
-        
-            
-    
 
 
-def setup(bot):
-    bot.add_cog(m10s_chinfo_rw(bot))
+
+async def setup(bot):
+    await bot.add_cog(m10s_chinfo_rw(bot))

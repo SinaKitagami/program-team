@@ -293,7 +293,7 @@ class search(commands.Cog):
                 e.add_field(name="ディスクリミネータ", value=u.discriminator)
                 e.add_field(name="botかどうか", value=u.bot)
 
-                e.set_thumbnail(url=u.avatar_url)
+                e.set_thumbnail(url=u.display_avater.replace(static_format="png").url)
                 e.set_footer(
                     text=f"アカウント作成日時(そのままの値:{(u.created_at+ rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒')},タイムスタンプ化:")
                 e.timestamp = u.created_at
@@ -339,5 +339,5 @@ class search(commands.Cog):
             await ctx.send(embed=ut.getEmbed("そのidでは見つかりませんでした。", "(現在メッセージidの検索は無効化されています。)"))
 
 
-def setup(bot):
-    bot.add_cog(search(bot))
+async def setup(bot):
+    await bot.add_cog(search(bot))

@@ -37,7 +37,7 @@ class AppleUtil(object):
             raise TypeError(
                 "has_all_perms take a Member as its first argument")
         if channel:
-            perm = member.permissions_in(channel)
+            perm = channel.permissions_for(member)
         else:
             perm = member.guild_permissions
         for p in perms:
@@ -66,7 +66,7 @@ class AppleUtil(object):
 
     @staticmethod
     def within(dt, minutes):
-        return (datetime.datetime.utcnow() - dt) < datetime.timedelta(minutes=minutes)
+        return (datetime.datetime.now(datetime.timezone.utc) - dt) < datetime.timedelta(minutes=minutes)
 
 
 def setup(bot):

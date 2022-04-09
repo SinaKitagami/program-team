@@ -100,7 +100,7 @@ class levels(commands.Cog):
                     nextl = str(nextl)
                     tonextexp = str(tonextexp)
                     try:
-                        await u.avatar_url_as(static_format="png").save("imgs/usericon.png")
+                        await u.display_avatar.replace(static_format="png").save("imgs/usericon.png")
                         dlicon = Image.open('imgs/usericon.png', 'r')
                     except:
                         dlicon = Image.open('imgs/noimg.png', 'r')
@@ -170,5 +170,5 @@ class levels(commands.Cog):
                 await ctx.send(f"{await ctx._('dhaveper')}\n{await ctx._('per-sendfile')}")
 
 
-def setup(bot):
-    bot.add_cog(levels(bot))
+async def setup(bot):
+    await bot.add_cog(levels(bot))

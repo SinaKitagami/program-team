@@ -24,6 +24,9 @@ class ClassName(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    async def cog_load(self):
+        pass
+
     @commands.command(name="pass")
     async def command(self, ctx, args):
         pass
@@ -33,5 +36,5 @@ class ClassName(commands.Cog):
         pass
 
 
-def setup(bot):
-    bot.add_cog(ClassName(bot))
+async def setup(bot):
+    await bot.add_cog(ClassName(bot))
