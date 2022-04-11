@@ -35,7 +35,7 @@ class AppleFOCCog(commands.Cog):
 
     async def send(self, member, logc):
         e = discord.Embed(title="オンライン隠し", description=member.mention,
-                          timestamp=datetime.datetime.utcnow())
+                          timestamp=datetime.datetime.now(datetime.timezone.utc))
         return
         await logc.send(embed=e)
 
@@ -66,5 +66,5 @@ class AppleFOCCog(commands.Cog):
             await self.run(m)
 
 
-def setup(bot):
-    bot.add_cog(AppleFOCCog(bot))
+async def setup(bot):
+    await bot.add_cog(AppleFOCCog(bot))

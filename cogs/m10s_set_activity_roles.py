@@ -90,7 +90,7 @@ class m10s_act_role(commands.Cog):
 
 
     @commands.Cog.listener()
-    async def on_member_update(self, b,a):
+    async def on_presence_update(self, b,a):
         try:
             gpf = await self.bot.cursor.fetchone("select * from actrole_optin where id = %s", (b.id,))
             #gpf = await self.bot.cursor.fetchone()
@@ -114,5 +114,5 @@ class m10s_act_role(commands.Cog):
         except:
             pass
 
-def setup(bot):
-    bot.add_cog(m10s_act_role(bot))
+async def setup(bot):
+    await bot.add_cog(m10s_act_role(bot))

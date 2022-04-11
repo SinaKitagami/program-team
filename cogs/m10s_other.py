@@ -39,7 +39,7 @@ class other(commands.Cog):
         e.add_field(name=f"引用投稿(引用された投稿の送信者:{m.author.display_name})",
                     value=f"{m.content}\n[{self.bot.get_emoji(653161518451392512)} この投稿に飛ぶ]({m.jump_url})")
         e.set_author(name=ctx.author.display_name,
-                     icon_url=ctx.author.avatar_url_as(static_format='png'))
+                     icon_url=ctx.author.display_avatar.replace(static_format='png'))
         await ctx.send(embed=e)
         await ctx.message.delete()
 
@@ -118,7 +118,7 @@ class other(commands.Cog):
         embed = discord.Embed(title=ttl, description=ctt, color=self.bot.ec)
         fbc = self.bot.get_channel(667361484283707393)
         embed.set_author(name=f"{str(ctx.message.author)}",
-                         icon_url=ctx.message.author.avatar_url_as(static_format='png'))
+                         icon_url=ctx.message.author.display_avatar.replace(static_format='png'))
         await fbc.send(embed=embed)
         await ctx.send(await ctx._("feedback-sended"))
 
@@ -135,7 +135,7 @@ class other(commands.Cog):
         embed = discord.Embed(title=ttl, description=ctt, color=self.bot.ec)
         fbc = self.bot.get_channel(channel_id)
         embed.set_author(name=f"{str(ctx.message.author)}",
-                         icon_url=ctx.message.author.avatar_url_as(static_format='png'))
+                         icon_url=ctx.message.author.display_avatar.replace(static_format='png'))
         await fbc.send(embed=embed)
         files = []
         for i in m.attachments:
@@ -175,7 +175,7 @@ class other(commands.Cog):
     @commands.cooldown(1, 5, type=commands.BucketType.user)
     async def rettext(self, ctx, *, te):
         e=discord.Embed(color=self.bot.ec)
-        e.set_footer(text=f"requested by {ctx.author.nick or ctx.author}({ctx.author.id})",icon_url=ctx.author.avatar_url_as(static_format="png"))
+        e.set_footer(text=f"requested by {ctx.author.nick or ctx.author}({ctx.author.id})",icon_url=ctx.author.display_avatar.replace(static_format="png").url)
         await ctx.send(te.replace("@everyone", "[at]everyone").replace("@here", "[at]here"),embed=e)
         await ctx.message.delete()
 
@@ -412,5 +412,5 @@ class other(commands.Cog):
         await mes.edit(content=str(round(time.time()-startt, 3)*1000)+"ms")
 
 
-def setup(bot):
-    bot.add_cog(other(bot))
+async def setup(bot):
+    await bot.add_cog(other(bot))

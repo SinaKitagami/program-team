@@ -29,5 +29,5 @@ class MEE6(commands.Cog):
                 await ctx.send(embed=discord.Embed(title="MEE6 LeaderBoard", description="\n".join(l), color=0x05FF05))
 
 
-def setup(bot):
-    bot.add_cog(MEE6(bot))
+async def setup(bot):
+    await bot.add_cog(MEE6(bot))

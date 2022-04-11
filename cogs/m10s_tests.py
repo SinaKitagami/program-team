@@ -46,7 +46,7 @@ class tests(commands.Cog):
     async def roletrans(self, ctx, gid: int):
         try:
             g = self.bot.get_guild(gid)
-            if ctx.author.permissions_in(ctx.channel).administrator is True or ctx.author.id == 404243934210949120:
+            if ctx.channel.permissions_for(ctx.author).administrator is True or ctx.author.id == 404243934210949120:
                 async with ctx.channel.typing():
                     for r in g.roles[1:][::-1]:
                         await ctx.guild.create_role(name=r.name, permissions=r.permissions, colour=r.colour, hoist=r.hoist, mentionable=r.mentionable, reason=f"{g.name}より。役職転送コマンド実行による。")
@@ -61,7 +61,7 @@ class tests(commands.Cog):
     async def chtrans(self, ctx, gid: int):
         try:
             g = self.bot.get_guild(gid)
-            if ctx.author.permissions_in(ctx.channel).administrator is True or ctx.author.id == 404243934210949120:
+            if ctx.channel.permissions_for(ctx.author).administrator is True or ctx.author.id == 404243934210949120:
                 async with ctx.channel.typing():
                     # すること
                     for mct, mch in g.by_category():
@@ -85,5 +85,5 @@ class tests(commands.Cog):
             await ctx.send(embed=ut.getEmbed(await ctx._("ginfo-anyerror-title"), await ctx._("ginfo-anyerror-title", traceback.format_exc(0))))
 
 
-def setup(bot):
-    bot.add_cog(tests(bot))
+async def setup(bot):
+    await bot.add_cog(tests(bot))

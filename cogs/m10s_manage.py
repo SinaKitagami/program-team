@@ -21,7 +21,7 @@ class manage(commands.Cog):
             return
         try:
             g = self.bot.get_guild(gid)
-            if ctx.author.permissions_in(ctx.channel).administrator is True or ctx.author.id == 404243934210949120:
+            if ctx.channel.permissions_for(ctx.author).administrator is True or ctx.author.id == 404243934210949120:
                 pgs = await ctx.send(f"役職\n進行度:0/{len(g.roles)}")
                 tk = 0
                 rlid = {}
@@ -88,7 +88,7 @@ class manage(commands.Cog):
                             break
                         print("looping")
                         try:
-                            ei = await e.url.read()
+                            ei = await e.read()
                             await ctx.guild.create_custom_emoji(name=e.name, image=ei)
                             await asyncio.sleep(5)
                             print("done")
@@ -106,7 +106,7 @@ class manage(commands.Cog):
 
                     await pgs.edit(content="ban状況完了\nnext:サーバー設定")
                     # サーバー設定
-                    icn = await g.icon_url_as(static_format="png").read()
+                    icn = await g.icon.replace(static_format="png").read()
                     await ctx.guild.edit(name=g.name, icon=icn, region=g.region, verification_level=g.verification_level, default_notifications=g.default_notifications, explicit_content_filter=g.explicit_content_filter)
                     # afk
                     if g.afk_channel:
@@ -161,7 +161,7 @@ class manage(commands.Cog):
 
     @commands.command()
     async def delm(self, ctx, ctxid):
-        if ctx.message.author.permissions_in(ctx.message.channel).manage_messages is True or ctx.author.id == 404243934210949120:
+        if ctx.channel.permissions_for(ctx.author).manage_messages is True or ctx.author.id == 404243934210949120:
             print(
                 f'{ctx.message.author.name}({ctx.message.guild.name})_' + ctx.message.content)
             dctx = await ctx.message.channel.fetch_message(ctxid)
@@ -219,7 +219,7 @@ class manage(commands.Cog):
     @commands.cooldown(1, 15, type=commands.BucketType.guild)
     @commands.bot_has_permissions(manage_messages=True)
     async def delmsgs(self, ctx, msgcount):
-        if ctx.message.author.permissions_in(ctx.message.channel).manage_messages is True or ctx.author.id == 404243934210949120:
+        if ctx.channel.permissions_for(ctx.author).manage_messages is True or ctx.author.id == 404243934210949120:
             async with ctx.message.channel.typing():
                 print(
                     f'{ctx.message.author.name}({ctx.message.guild.name})_' + ctx.message.content)
@@ -254,5 +254,5 @@ class manage(commands.Cog):
                 await ctx.send(await ctx._("Wecall-not"))
 
 
-def setup(bot):
-    bot.add_cog(manage(bot))
+async def setup(bot):
+    await bot.add_cog(manage(bot))

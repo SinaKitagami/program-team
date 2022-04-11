@@ -21,7 +21,7 @@ class _m10s_ctx_menu(commands.Cog):
     @commands.command()
     async def add_slash_cmd(self, ctx):
         try:
-            await self.bot.dpyui.register_guild_app_command(764088457785638922, "random_music", 1, "プロセカの楽曲抽選を行います。(データベース更新が手動なので、反映が遅れます。)", options=[
+            """await self.bot.dpyui.register_guild_app_command(764088457785638922, "random_music", 1, "プロセカの楽曲抽選を行います。(データベース更新が手動なので、反映が遅れます。)", options=[
                 dpyui.interaction_register_option("difficult", "楽曲の難易度を選択します。", 4,True, choices=[
                     dpyui.interaction_register_choice(name="easy",value=0),
                     dpyui.interaction_register_choice(name="normal",value=1),
@@ -32,7 +32,8 @@ class _m10s_ctx_menu(commands.Cog):
                 dpyui.interaction_register_option("min_level", "選出する最低難易度を指定します。",4),
                 dpyui.interaction_register_option("max_level", "選出する最高難易度を指定します。",4),
                 dpyui.interaction_register_option("count", "選出する楽曲数を指定します。",4, min_value=1)
-            ])
+            ])"""
+            await self.bot.dpyui.register_global_app_command("spread spoiler",3)
         except:
             traceback.print_exc()
         await ctx.send("登録しました。")
@@ -69,6 +70,10 @@ class _m10s_ctx_menu(commands.Cog):
     async def del_ctx_global(self, ctx, command_id):
         await self.bot.dpyui.delete_global_app_command(command_id)
 
+    # @commands.Cog.listener()
+    async def on_message_command_interaction(self, mccb:dpyui.message_command_callback):
+        if mccb.command_name == "spread spoiler":
+            await mccb.send_response_with_ui(embed=discord.Embed(title="スポイラー展開", description=f"{mccb.target_message.content.replace('||','')}", color=self.bot.ec), hidden=True)
 
     @commands.Cog.listener()
     async def on_user_command_interaction(self, uccb:dpyui.user_command_callback):
@@ -348,5 +353,5 @@ class _m10s_ctx_menu(commands.Cog):
                 ctx.guild.id, "userinfo", 1, "該当ユーザーのユーザー情報を表示します。", [dpyui.interaction_register_option("target","あなた以外のユーザーについて表示する場合に、ほかのユーザーを指定してください。",6)]
             )
 
-def setup(bot):
-    bot.add_cog(_m10s_ctx_menu(bot))
+async def setup(bot):
+    await bot.add_cog(_m10s_ctx_menu(bot))

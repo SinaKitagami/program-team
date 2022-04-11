@@ -181,7 +181,7 @@ class settings(commands.Cog):
                 pass
             await ctx.send(embed=embed)
         elif mode == "set":
-            if ctx.author.permissions_in(ctx.channel).administrator is True or ctx.author.id == 404243934210949120:
+            if ctx.channel.permissions_for(ctx.author).administrator is True or ctx.author.id == 404243934210949120:
                 try:
                     sm[when] = {}
                     sm[when]["content"] = content
@@ -204,7 +204,7 @@ class settings(commands.Cog):
               ctx.message.content)
         if mode == "add":
             if not cmds.get(name, None) is None:
-                if not(ctx.author.permissions_in(ctx.channel).manage_guild is True and ctx.author.permissions_in(ctx.channel).manage_roles is True or ctx.author.id == 404243934210949120):
+                if not(ctx.channel.permissions_for(ctx.author).manage_guild is True and ctx.channel.permissions_for(ctx.author).manage_roles is True or ctx.author.id == 404243934210949120):
                     await ctx.send(await ctx._("need-manage"))
                     return
             dc = ctx.author.dm_channel
@@ -262,7 +262,7 @@ class settings(commands.Cog):
                 cmds[name]["createdBy"] = ctx.author.id
                 cmds[name]["guide"] = guide
             elif msg.content == "role":
-                if ctx.author.permissions_in(ctx.channel).manage_guild is True and ctx.author.permissions_in(ctx.channel).manage_roles is True or ctx.author.id == 404243934210949120:
+                if ctx.channel.permissions_for(ctx.author).manage_guild is True and ctx.channel.permissions_for(ctx.author).manage_roles is True or ctx.author.id == 404243934210949120:
                     await dc.send(await ctx._("scmd-add-guide2"))
                     mes = await self.bot.wait_for('message', check=check)
                     guide = mes.content
@@ -299,7 +299,7 @@ class settings(commands.Cog):
             else:
                 await ctx.send(str(cmds.keys()).replace("dict_keys(", await ctx._("scmd-all-list")).replace(")", ""))
         elif mode == "del":
-            if ctx.author.permissions_in(ctx.channel).manage_guild is True and ctx.author.permissions_in(ctx.channel).manage_roles is True or ctx.author.id == 404243934210949120:
+            if ctx.channel.permissions_for(ctx.author).manage_guild is True and ctx.channel.permissions_for(ctx.author).manage_roles is True or ctx.author.id == 404243934210949120:
                 if not cmds is None:
                     del cmds[name]
                 await ctx.send(await ctx._("scmd-del"))
@@ -343,7 +343,7 @@ class settings(commands.Cog):
 
     @commands.command()
     async def levelreward(self, ctx, lv: int, rl=None):
-        if not(ctx.author.permissions_in(ctx.channel).manage_guild is True and ctx.author.permissions_in(ctx.channel).manage_roles is True or ctx.author.id == 404243934210949120):
+        if not(ctx.channel.permissions_for(ctx.author).manage_guild is True and ctx.channel.permissions_for(ctx.author).manage_roles is True or ctx.author.id == 404243934210949120):
             await ctx.send(await ctx._("need-admin"))
             return
         gs = await self.bot.cursor.fetchone(
@@ -364,5 +364,5 @@ class settings(commands.Cog):
         await ctx.send(await ctx._("changed"))
 
 
-def setup(bot):
-    bot.add_cog(settings(bot))
+async def setup(bot):
+    await bot.add_cog(settings(bot))

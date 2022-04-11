@@ -592,9 +592,9 @@ class music_slash(commands.Cog):
         ch = self.bot.get_channel(693048961107230811)
         e = discord.Embed(title=f"スラッシュコマンド:{ctx.command}の実行", color=self.bot.ec)
         e.set_author(name=f"実行者:{str(ctx.author)}({ctx.author.id})",
-                    icon_url=ctx.author.avatar_url_as(static_format="png"))
+                    icon_url=ctx.author.display_avatar.replace(static_format="png").url)
         e.set_footer(text=f"実行サーバー:{ctx.guild.name}({ctx.guild.id})",
-                    icon_url=ctx.guild.icon_url_as(static_format="png"))
+                    icon_url=ctx.guild.icon.replace(static_format="png").url)
         e.add_field(name="実行チャンネル", value=ctx.channel.name)
         await ch.send(embed=e)
         
@@ -604,5 +604,5 @@ class music_slash(commands.Cog):
             await ch.send(embed=ut.getEmbed("エラーログ", f"コマンド:`{ctx.command}`\n```{str(error)}```", self.bot.ec, f"サーバー", ctx.guild.name, "実行メンバー", ctx.author.name))
 
 
-def setup(bot):
-    bot.add_cog(music_slash(bot))
+async def setup(bot):
+    await bot.add_cog(music_slash(bot))

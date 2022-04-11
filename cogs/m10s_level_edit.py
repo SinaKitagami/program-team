@@ -49,7 +49,7 @@ class m10s_level_edit(commands.Cog):
             return await ctx.reply("> サーバーレベル編集-設定\n　引数が正しくありません。\n　`[メンバーor役職を特定できるもの] [設定するレベル] [オプション:設定する経験値]`")
         pf = await self.bot.cursor.fetchone("SELECT * from guilds WHERE id = %s", (ctx.guild.id,))
         #pf = await self.bot.cursor.fetchone()
-        levels = pf["levels"]
+        levels = json.loads(pf["levels"])
         for m in targets:
             try:
                 levels[str(m.id)]["level"] = lev
@@ -62,5 +62,5 @@ class m10s_level_edit(commands.Cog):
         
 
 
-def setup(bot):
-    bot.add_cog(m10s_level_edit(bot))
+async def setup(bot):
+    await bot.add_cog(m10s_level_edit(bot))

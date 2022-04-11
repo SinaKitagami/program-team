@@ -43,7 +43,7 @@ class OnlineNotif(commands.Cog):
         ]
 
     @commands.Cog.listener()
-    async def on_member_update(self, before, after):
+    async def on_presence_update(self, before, after):
         if before.status == after.status:
             return
         if discord.Status.offline not in (before.status, after.status):
@@ -105,5 +105,5 @@ class OnlineNotif(commands.Cog):
         await ctx.say("onlinenotif-settings")
 
 
-def setup(bot):
-    bot.add_cog(OnlineNotif(bot))
+async def setup(bot):
+    await bot.add_cog(OnlineNotif(bot))

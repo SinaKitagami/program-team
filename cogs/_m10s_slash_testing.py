@@ -53,5 +53,5 @@ class m10s_slash_testing(commands.Cog):
         await ctx.send("こんにちは！思惟奈だよ！",hidden=False)
 
 
-def setup(bot):
-    bot.add_cog(m10s_slash_testing(bot))
+async def setup(bot):
+    await bot.add_cog(m10s_slash_testing(bot))

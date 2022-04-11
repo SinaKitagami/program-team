@@ -190,5 +190,5 @@ class games(commands.Cog):
         await ctx.send(embed=ut.getEmbed("fish", await ctx._("fish-get", fs, gp)))
 
 
-def setup(bot):
-    bot.add_cog(games(bot))
+async def setup(bot):
+    await bot.add_cog(games(bot))

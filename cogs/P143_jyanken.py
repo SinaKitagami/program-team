@@ -75,5 +75,5 @@ class jyanken(commands.Cog):
                         await msg.remove_reaction("\N{RAISED HAND WITH FINGERS SPLAYED}", ctx.author)
 
 
-def setup(bot):
-    bot.add_cog(jyanken(bot))
+async def setup(bot):
+    await bot.add_cog(jyanken(bot))

@@ -39,7 +39,7 @@ ytdlopts = {
 }
 
 
-class music(commands.Cog):
+class m10s_music(commands.Cog):
     """music in discord.py"""
 
     def __init__(self, bot):
@@ -203,7 +203,7 @@ class music(commands.Cog):
                 vurls = [text[1:-1]]
             elif text.startswith("http://") or text.startswith("https://"):
                 vurls = [text]
-            elif text.startswith("dl:http://") or text.startswith("stream:https://"):
+            elif text.startswith("dl:http://") or text.startswith("dl:https://"):
                 vdl = True
                 vurls = [text[7:]]
             elif text.startswith("memo:"):
@@ -676,5 +676,5 @@ class music(commands.Cog):
             pass
 
 
-def setup(bot):
-    bot.add_cog(music(bot))
+async def setup(bot):
+    await bot.add_cog(m10s_music(bot))

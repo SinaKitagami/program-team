@@ -33,7 +33,7 @@ class m10s_messageinfo(commands.Cog):
             fetch_from = "引数"
             msg = target
         else:
-            if ctx.message.reference and ctx.message.type == discord.MessageType.default:
+            if ctx.message.type == discord.MessageType.reply:
                 if ctx.message.reference.cached_message:
                     fetch_from = "返信"
                     msg = ctx.message.reference.cached_message
@@ -49,7 +49,7 @@ class m10s_messageinfo(commands.Cog):
                 msg = ctx.message
         #msgに入ったメッセージで詳細情報Embedを作成して送信。
         e = discord.Embed(title=f"メッセージ情報({fetch_from}より取得)", description=msg.system_content, color=self.bot.ec)
-        e.set_author(name=f"{msg.author.display_name}({msg.author.id}){'[bot]' if msg.author.bot else ''}のメッセージ",icon_url=msg.author.avatar_url_as(static_format="png"))
+        e.set_author(name=f"{msg.author.display_name}({msg.author.id}){'[bot]' if msg.author.bot else ''}のメッセージ",icon_url=msg.author.display_avatar.replace(static_format="png").url)
 
         post_time = (msg.created_at + rdelta(hours=9)
                     ).strftime("%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}").format(*"年月日時分秒")
@@ -96,5 +96,5 @@ class m10s_messageinfo(commands.Cog):
 
 
 
-def setup(bot):
-    bot.add_cog(m10s_messageinfo(bot))
+async def setup(bot):
+    await bot.add_cog(m10s_messageinfo(bot))
