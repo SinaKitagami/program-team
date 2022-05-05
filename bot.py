@@ -40,7 +40,8 @@ from checker import MaliciousInput, content_checker
 # tokens
 import config
 
-"""import logging
+"""
+import logging
 
 logging.basicConfig(level=logging.DEBUG)"""
 
@@ -51,7 +52,7 @@ intents.members = True
 intents.presences = True
 intents.message_content = True
 
-bot = commands.Bot(command_prefix="s-", status=discord.Status.invisible,
+bot = commands.AutoShardedBot(command_prefix="s-", status=discord.Status.invisible,
                    allowed_mentions=discord.AllowedMentions(everyone=False),
                    intents=intents,
                    enable_debug_events=True
@@ -104,7 +105,7 @@ async def main():
     async with bot:
         await db_setup()
 
-        # await bot.load_extension("cogs.apple_misc")
+        await bot.load_extension("cogs.apple_misc")
         await bot.load_extension("cogs.apple_onlinenotif")
 
         await apple_invite.setup(bot)
@@ -1142,13 +1143,13 @@ async def on_ready():
     embed.description = txt
 
     # テストサバ
-    # await bot.tree.sync(guild=discord.Object(id=560434525277126656))
+    await bot.tree.sync(guild=discord.Object(id=560434525277126656))
 
     # パートナーコマンド
-    await bot.tree.sync(guild=discord.Object(id=764088457785638922))
+    # await bot.tree.sync(guild=discord.Object(id=764088457785638922))
 
     # グローバルコマンド
-    await bot.tree.sync()
+    # await bot.tree.sync()
 
     try:
         ch = bot.get_channel(595526013031546890)
@@ -1174,6 +1175,11 @@ async def on_message(message):
         postcount[str(message.guild.id)] = 1
     else:
         postcount[str(message.guild.id)] += 1
+    if message.content == "check_msgs":
+        # on_messageを呼ぶだけの処理がすぐに終わるかの確認
+        with open("post_count.json", mode="w", encoding="utf-8") as f:
+            json.dump(postcount, f, indent=4)
+        await message.channel.send(file=discord.File("post_count.json"))
     # db.files_download_to_file( "guildsetting.json" , "/guildsetting.json" )
     # db.files_download_to_file( "profiles.json" , "/profiles.json" )
     tks = [

@@ -20,5 +20,11 @@ class mini_features(commands.Cog):
 
         bot.tree.add_command(spread_spoiler)
 
+        @app_commands.command(name="shutdown")
+        async def bot_exit(interaction:discord.Interaction):
+            await interaction.response.send_message("自動的に終了されます…", ephemeral=True)
+
+        bot.tree.add_command(bot_exit, guild=discord.Object(id=582545206017261598))
+
 async def setup(bot):
     await bot.add_cog(mini_features(bot))
