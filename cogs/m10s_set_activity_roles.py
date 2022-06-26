@@ -3,7 +3,9 @@
 import discord
 from discord.ext import commands
 import asyncio
-from typing import Union
+from typing import Optional
+
+from discord import app_commands
 
 import m10s_util as ut
 """↑様々な便利コマンド詰め合わせ
@@ -56,13 +58,25 @@ class m10s_act_role(commands.Cog):
             "competing":5
         }
 
-    @commands.command(name="activrole")
-    async def actrole_set(self, ctx, is_enable=True):
+    @commands.hybrid_command(name="activity_role_setting", description="プレイ中ステータスに応じた役職付与を受け付けるかどうか")
+    @app_commands.describe(is_enable="有効化するかどうか")
+    async def actrole_set(self, ctx, is_enable:bool):
         await self.bot.cursor.execute("UPDATE actrole_optin SET is_enable = %s WHERE id = %s",(int(is_enable),ctx.author.id))
         await ctx.reply(f"プレイ中に応じた役職設定を、{is_enable}に設定したよ！")
 
-    @commands.command(name="prole")
-    async def playing_roles(self, ctx, activity_type:str, role_id:Union[int,None]):
+    @commands.hybrid_command(aliases=["prole"], description="特定アクティビティタイプで付与する役職設定")
+    @app_commands.describe(activity_type="検出するアクティビティタイプ")
+    @app_commands.describe(role="付与するロール")
+    @discord.app_commands.choices(activity_type=[
+            discord.app_commands.Choice(name="unknown(不明)", value=-1),
+            discord.app_commands.Choice(name="playing(プレイ中)", value=0),
+            discord.app_commands.Choice(name="streaming(配信中)", value=1),
+            discord.app_commands.Choice(name="listening(再生中)", value=2),
+            discord.app_commands.Choice(name="watching(視聴中)", value=3),
+            discord.app_commands.Choice(name="custom(カスタムステータス)", value=4),
+            discord.app_commands.Choice(name="competing(競争中)", value=5)
+        ])
+    async def playing_roles(self, ctx, activity_type:int, role:Optional[discord.Role]):
         try:
             act_id = self.cvtdict.get(activity_type,None)
             if act_id is None:
@@ -71,16 +85,16 @@ class m10s_act_role(commands.Cog):
                 except:
                     await ctx.send("> エラー\n　アクティビティタイプが不明です。`s-help prole`を参考にしてください。")
             else:
-                await self.bot.cursor.execute("select * from activity_roles where guild_id = %s AND activity_type = %s", (ctx.guild.id,act_id))
-                rtn = await self.bot.cursor.fetchone()
+                rtn = await self.bot.cursor.fetchone("select * from activity_roles where guild_id = %s AND activity_type = %s", (ctx.guild.id,act_id))
+                # await self.bot.cursor.execute()
                 if rtn:
-                    if role_id:
-                        await self.bot.cursor.execute("UPDATE activity_roles SET role_id = %s WHERE guild_id = %s AND activity_type = %s",(role_id,ctx.guild.id,act_id))
+                    if role:
+                        await self.bot.cursor.execute("UPDATE activity_roles SET role_id = %s WHERE guild_id = %s AND activity_type = %s",(role.id,ctx.guild.id,act_id))
                     else:
                         await self.bot.cursor.execute("DELETE FROM activity_roles WHERE guild_id = %s AND activity_type = %s",(ctx.guild.id,act_id))
                 else:
-                    if role_id:
-                        await self.bot.cursor.execute("INSERT INTO activity_roles(guild_id,activity_type,role_id) VALUES(%s,%s,%s)",(ctx.guild.id,act_id,role_id))
+                    if role:
+                        await self.bot.cursor.execute("INSERT INTO activity_roles(guild_id,activity_type,role_id) VALUES(%s,%s,%s)",(ctx.guild.id,act_id,role.id))
                 try:
                     await ctx.reply("> アクティビティロール\n　正常に登録/更新/削除が完了しました。")
                 except:

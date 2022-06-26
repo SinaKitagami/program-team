@@ -8,6 +8,10 @@ from youtube_dl import YoutubeDL
 
 from apiclient.discovery import build
 
+from typing import Optional
+
+from discord import app_commands
+
 import os
 import shutil
 import re
@@ -134,24 +138,25 @@ class m10s_music(commands.Cog):
                 "requester":ctx.author.id
             }
 
-    @commands.command(name="join", aliases=["invc"])
+    @commands.hybrid_group(name="music", description="音楽機能です。")
+    async def music_group(self, ctx):pass
+
+    @music_group.command(name="join", aliases=["invc"],description="あなたが参加しているVCに接続します。")
     async def join_(self, ctx):
         if ctx.author.voice:
             if ctx.voice_client:
-                    await ctx.send(f"すでに{ctx.guild.voice_client.channel.name}に接続しています。")
+                    await ctx.send(f"すでに{ctx.guild.voice_client.channel.name}に接続しています。", ephemeral=True)
             else:
                 try:
                     await ctx.author.voice.channel.connect()
                 except asyncio.TimeoutError:
                     await ctx.send("接続のタイムアウト！")
                 else:
-                    e=discord.Embed(title="スラッシュコマンドのご案内", description="音楽機能はスラッシュコマンドでも使用できます。[このリンク](https://discord.com/oauth2/authorize?client_id=462885760043843584&scope=applications.commands)から有効化することで使うことができます。", color=self.bot.ec)
-                    e.set_image(url="https://media.discordapp.net/attachments/667351221106901042/820635535935537182/unknown.png")
-                    await ctx.send(f"{ctx.voice_client.channel.name}に接続しました。",embed=e)
+                    await ctx.send(f"{ctx.voice_client.channel.name}に接続しました。", ephemeral=True)
         else:
             await ctx.send("あなたがボイスチャンネルに接続していません！")
 
-    @commands.command(name="stop", aliases=["leave"])
+    @music_group.command(name="stop", aliases=["leave"], description="再生をやめ、VCから切断します。")
     async def stop_(self, ctx):
         if ctx.voice_client and ctx.author.voice:
             if ctx.voice_client.channel == ctx.author.voice.channel:
@@ -166,19 +171,20 @@ class m10s_music(commands.Cog):
                 except:
                     pass
                 await ctx.voice_client.disconnect()
-                await ctx.send("切断しました。")
+                await ctx.send("切断しました。",ephemeral=True)
 
-    @commands.command(name="pause")
+    @music_group.command(name="pause", description="再生中の曲を一時停止します。")
     async def pause_(self, ctx):
         if ctx.voice_client and ctx.author.voice:
             ctx.voice_client.pause()
             await ctx.send("一時停止しました。ボイスチャットを出ても構いません。")
             await self.panel_update(ctx.guild.id, ctx.voice_client)
 
-    @commands.command(name="play", aliases=["p"])
-    async def play_(self, ctx, *, text: str=""):
+    @music_group.command(name="play", aliases=["p"], description="楽曲を再生します。")
+    @app_commands.describe(text = "楽曲を特定するためのもの(検索ワード/URL/memo:[メモ名]/activity:[ユーザーID] ([]は省略))")
+    async def play_(self, ctx, *, text: Optional[str]=""):
         if not ctx.voice_client:
-            await ctx.invoke(self.bot.get_command("join"))
+            await ctx.invoke(self.join_)
             if not ctx.voice_client:
                 return
         if ctx.voice_client.is_paused():
@@ -437,26 +443,27 @@ class m10s_music(commands.Cog):
                 await loop.run_in_executor(None, lambda: os.remove(f'musicfile/{poped_item["video_id"]}'))
         await ctx.invoke(self.bot.get_command("stop"))
 
-    @commands.command()
+    @music_group.command(description="曲をスキップします。")
     async def skip(self, ctx):
         if ctx.author.voice and ctx.voice_client.is_playing():
             lp = self.bot.lp[str(ctx.guild.id)]
             self.bot.lp[str(ctx.guild.id)] = False
             ctx.voice_client.stop()
             self.bot.lp[str(ctx.guild.id)] = lp
-            await ctx.send("曲をスキップしました。")
+            await ctx.send("曲をスキップしました。",ephemeral = True)
 
-    @commands.command(aliases=["vol"])
+    @music_group.command(name="volume",aliases=["chvol","vol"], description="ボリュームを変更します。")
+    @app_commands.describe(vol="調整する音量(0-200)")
     async def chvol(self, ctx, vol: float):
         if ctx.author.voice and ctx.voice_client.is_playing():
             ctx.voice_client.source.volume = vol/100.0
-            await ctx.send("ボリュームを調節しました。")
+            await ctx.send("ボリュームを調節しました。",ephemeral = True)
             await self.panel_update(ctx.guild.id, ctx.voice_client)
 
-    @commands.command(aliases=["np"])
+    @music_group.command(aliases=["np"], description="再生中楽曲について表示します。")
     async def playingmusic(self, ctx):
         if ctx.voice_client is None:
-            return await ctx.send("ボイスチャンネルに参加していません。")
+            return await ctx.send("ボイスチャンネルに参加していません。", ephemeral=True)
         if ctx.voice_client.is_playing():
             e = discord.Embed(
                 title="再生中の曲", description=f'[{self.bot.qu[str(ctx.guild.id)][0]["video_title"]}]({self.bot.qu[str(ctx.guild.id)][0]["video_url"]})\nアップロードチャンネル:[{self.bot.qu[str(ctx.guild.id)][0]["video_up_name"]}]({self.bot.qu[str(ctx.guild.id)][0]["video_up_url"]})\nソース:{self.bot.qu[str(ctx.guild.id)][0]["video_source"]}')
@@ -464,10 +471,11 @@ class m10s_music(commands.Cog):
                 url=self.bot.qu[str(ctx.guild.id)][0]["video_thumbnail"])
             await ctx.send(embed=e)
         else:
-            await ctx.send("再生中の曲はありません。")
+            await ctx.send("再生中の曲はありません。", ephemeral = True)
 
-    @commands.command(aliases=["plist", "queue"])
-    async def view_q(self, ctx, pg=1):
+    @music_group.command(aliases=["plist", "view_q"], description="楽曲キューを表示します。")
+    @app_commands.describe(pg="始めに表示するページ(1ページ当たり5項目)")
+    async def queue(self, ctx, pg:Optional[int]=1):
         if ctx.voice_client is None:
             return await ctx.send("ボイスチャンネルに参加していません。")
         if ctx.voice_client.is_playing():
@@ -512,8 +520,10 @@ class m10s_music(commands.Cog):
         else:
             await ctx.send("現在キューには何もありません。")
 
-    @commands.command(aliases=["loop", "repeat"])
-    async def loop_q(self, ctx, torf: bool=None):
+    @music_group.command(aliases=["loop", "repeat"], description="ループ状況の確認や変更ができます。")
+    @app_commands.describe(is_enable="ループを有効にするかどうか")
+    async def loop_q(self, ctx, is_enable:Optional[bool]=None):
+        torf = is_enable
         if ctx.author.voice:
             if torf is None:
                 await ctx.send(f"今のキューのループ状態:{self.bot.lp[str(ctx.guild.id)]}")
@@ -522,26 +532,27 @@ class m10s_music(commands.Cog):
                 await ctx.send(f"きりかえました。\n今のキューのループ状態:{self.bot.lp[str(ctx.guild.id)]}")
                 await self.panel_update(ctx.guild.id, ctx.voice_client)
 
-    @commands.command()
+    @music_group.command(name="panel_update", aliases=["pupdate"], description="楽曲パネルの更新を行います。")
     async def pupdate(self, ctx):
         await self.panel_update(ctx.guild.id, ctx.voice_client)
 
     async def panel_update(self, guild_id, voice_client):
         ebd = discord.Embed(title="思惟奈ちゃん-ミュージック操作パネル",
-                            description=f"キューの曲数:{len(self.bot.qu[str(guild_id)])}曲\nリアクションで操作でき、そのたびに操作パネルが更新されます。\n▶:(一時停止中)再生の再開,⏸:(再生中)一時停止,⏹:ストップ,⏭:スキップ,🔁:ループ切替,🔀次以降の曲のシャッフル,🔼:ボリュームを上げる,🔽:ボリュームを下げる,⬇:パネルを下に持ってくる", color=self.bot.ec)
+                            description=f"キューの曲数:{len(self.bot.qu[str(guild_id)])}曲", color=self.bot.ec)
+        ebd.set_footer("⬇:パネルを下に持ってくる")
         if voice_client.is_paused():
             ebd.add_field(name="現在一時停止中",
                           value="再開には`s-play`か▶リアクション", inline=False)
         ebd.add_field(
-            name="再生中の曲:", value=f"[{self.bot.qu[str(guild_id)][0]['video_title']}]({self.bot.qu[str(guild_id)][0]['video_url']})(from {self.bot.qu[str(guild_id)][0]['video_source']})(再生方式:{self.bot.qu[str(guild_id)][0]['type']})(追加者:{self.bot.get_user(self.bot.qu[str(guild_id)][0]['requester']).mention})")
+            name="再生中の曲:", value=f"[{self.bot.qu[str(guild_id)][0]['video_title']}]({self.bot.qu[str(guild_id)][0]['video_url']})", inline=False)
         if len(self.bot.qu[str(guild_id)]) > 1:
             ebd.add_field(
-                name="次の曲:", value=f"[{self.bot.qu[str(guild_id)][1]['video_title']}]({self.bot.qu[str(guild_id)][1]['video_url']})(from {self.bot.qu[str(guild_id)][1]['video_source']})(再生方式:{self.bot.qu[str(guild_id)][1]['type']})(追加者:{self.bot.get_user(self.bot.qu[str(guild_id)][1]['requester']).mention})")
+                name="次の曲:", value=f"[{self.bot.qu[str(guild_id)][1]['video_title']}]({self.bot.qu[str(guild_id)][1]['video_url']})", inline=False)
         elif self.bot.lp[str(guild_id)]:
             ebd.add_field(
-                name="次の曲:", value=f"[{self.bot.qu[str(guild_id)][0]['video_title']}]({self.bot.qu[str(guild_id)][0]['video_url']})(from {self.bot.qu[str(guild_id)][0]['video_source']})(再生方式:{self.bot.qu[str(guild_id)][0]['type']})(追加者:{self.bot.get_user(self.bot.qu[str(guild_id)][0]['requester']).mention})(スキップでキューから削除され、再生が止まります。)")
+                name="次の曲:", value=f"[{self.bot.qu[str(guild_id)][0]['video_title']}]({self.bot.qu[str(guild_id)][0]['video_url']})", inline=False)
         else:
-            ebd.add_field(name="次の曲:", value=f"再生終了")
+            ebd.add_field(name="次の曲:", value=f"再生終了", inline=False)
         ebd.add_field(name="ループ:", value=self.bot.lp[str(guild_id)])
         try:
             ebd.add_field(name="ボリューム:", value=int(
@@ -557,7 +568,7 @@ class m10s_music(commands.Cog):
             pass
 
 
-    @commands.command(name="shuffle")
+    @music_group.command(name="shuffle", description="キューの中身をシャッフルします。")
     async def shuffle_(self, ctx):
         if self.bot.qu.get(str(ctx.guild.id), None) is not None and len(self.bot.qu[str(ctx.guild.id)]) > 2:
             tmplist = self.bot.qu[str(ctx.guild.id)][1:]
@@ -567,8 +578,9 @@ class m10s_music(commands.Cog):
         else:
             await ctx.send("> シャッフルエラー\n　シャッフルに必要要件を満たしていません。(VCで音楽再生中で、3曲以上キューに入っている)")
 
-    @commands.command(name="move_panel")
-    async def move_panel(self, ctx, move_to:commands.TextChannelConverter):
+    @music_group.command(name="move_panel", description="音楽パネルをほかのサーバーに移動させます。")
+    @app_commands.describe(move_to="移動先チャンネル")
+    async def move_panel(self, ctx, move_to:discord.TextChannel):
         ebd = discord.Embed(title="思惟奈ちゃん-ミュージック操作パネル", color=self.bot.ec)
         ebd.add_field(name="再生中の曲:", value="未読み込み")
         ebd.add_field(name="次の曲:", value="未読み込み")
@@ -611,24 +623,24 @@ class m10s_music(commands.Cog):
             r = pr
             u = pr.member
             if str(r.emoji) == "▶":
-                await ctx.invoke(self.bot.get_command("play"))
+                await ctx.invoke(self.play_)
             elif str(r.emoji) == "⏸":
-                await ctx.invoke(self.bot.get_command("pause"))
+                await ctx.invoke(self.pause_)
             elif str(r.emoji) == "⏹":
-                await ctx.invoke(self.bot.get_command("stop"))
+                await ctx.invoke(self.stop_)
             elif str(r.emoji) == "⏭":
-                await ctx.invoke(self.bot.get_command("skip"))
+                await ctx.invoke(self.skip)
             elif str(r.emoji) == "🔁":
                 if self.bot.lp[str(u.guild.id)]:
-                    await ctx.invoke(self.bot.get_command("loop"), False)
+                    await ctx.invoke(self.loop_q, False)
                 else:
-                    await ctx.invoke(self.bot.get_command("loop"), True)
+                    await ctx.invoke(self.loop_q, True)
             elif str(r.emoji) == "🔀":
-                await ctx.invoke(self.bot.get_command("shuffle"))
+                await ctx.invoke(self.shuffle_)
             elif str(r.emoji) == "🔼":
-                await ctx.invoke(self.bot.get_command("chvol"), int(ctx.voice_client.source.volume*100+10))
+                await ctx.invoke(self.chvol, int(ctx.voice_client.source.volume*100+10))
             elif str(r.emoji) == "🔽":
-                await ctx.invoke(self.bot.get_command("chvol"), int(ctx.voice_client.source.volume*100-10))
+                await ctx.invoke(self.chvol, int(ctx.voice_client.source.volume*100-10))
             elif str(r.emoji) == "⬇":
                 op = self.bot.mp[str(u.guild.id)]
                 self.bot.mp[str(u.guild.id)] = await msg.channel.send(embed=self.bot.mp[str(u.guild.id)].embeds[0])

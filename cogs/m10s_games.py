@@ -4,6 +4,8 @@ import discord
 from discord.ext import commands
 import random
 import time
+from typing import Optional
+from discord import app_commands
 import asyncio
 
 import m10s_util as ut
@@ -14,7 +16,10 @@ class games(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.hybrid_group(description="ゲーム関連コマンド")
+    async def game(self, ctx):pass
+
+    @game.command(name="hit_target", description="1から100までの数当てゲームです。")
     async def game2(self, ctx):
         answer = random.randint(1, 100)
         await ctx.send(await ctx._("game2-ready"))
@@ -39,9 +44,10 @@ class games(commands.Cog):
                 await ctx.send(f'{ctx.author.mention}\n{await ctx._("game2-clear", i)}')
                 break
 
-    @commands.command(name="near21")
+    @game.command(name="near21", description="ブラックジャック風ゲームです。21に近づけた方の勝ちです。1or2人プレイ")
     @commands.bot_has_permissions(manage_messages=True, embed_links=True)
-    async def game1(self, ctx, user2: commands.MemberConverter=None):
+    @app_commands.describe(user2="2player-gameを遊ぶ相手(自分自身をメンションすることで誰でも参加可能な形で募集)")
+    async def game1(self, ctx, user2: Optional[discord.Member]):
 
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
               ctx.message.content)
@@ -174,9 +180,9 @@ class games(commands.Cog):
             except:
                 await ctx.send(f'{await ctx._("dhaveper")}\n{await ctx._("per-manamsg")}')
 
-    @commands.command(name="fish")
+    @game.command(name="fish",description="魚釣りです。")
     @commands.cooldown(1, 5, type=commands.BucketType.user)
-    async def fishany(self, ctx):
+    async def fishany(self, ctx: commands.Context):
         lt = ["🦑", "🦐", "🐙", "🦀", "🐡", "🐠", "🐟"] + \
             [i.id for i in ctx.guild.emojis]
         fs = random.choice(lt)
@@ -187,7 +193,7 @@ class games(commands.Cog):
             "select * from users where id=%s", (ctx.author.id,))
         await self.bot.cursor.execute(
             "UPDATE users SET gpoint = %s WHERE id = %s", (upf["gpoint"]+gp, ctx.author.id))
-        await ctx.send(embed=ut.getEmbed("fish", await ctx._("fish-get", fs, gp)))
+        await ctx.send(embed=ut.getEmbed("fish", await ctx._("fish-get", fs, gp)), ephemeral=True)
 
 
 async def setup(bot):

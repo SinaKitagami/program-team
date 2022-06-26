@@ -58,7 +58,7 @@ class m10s_auth_wiz(commands.Cog):
                 await m.add_roles(m.guild.get_role(auths["give_role"]))
                 await ch.send("> サーバーユーザー認証\n あなたの認証が完了しました！")
 
-    @commands.command(name="Authsetting", aliases=["Auth","Authsettings"])
+    @commands.hybrid_command(name="authsetting", aliases=["Auth","Authsettings"], description="簡易メンバー認証を作成できます。")
     @commands.has_permissions(administrator=True)
     @commands.bot_has_permissions(manage_messages=True,manage_roles=True)
     async def _setting(self, ctx):

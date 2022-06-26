@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from typing import Optional
 import discord
 from discord.ext import commands
 import random
@@ -10,6 +11,8 @@ import re
 import psutil
 import json
 
+from discord import app_commands
+
 import m10s_util as ut
 
 
@@ -18,18 +21,9 @@ class other(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="sina-guild", aliases=["思惟奈ちゃん公式サーバー", "思惟奈ちゃんのサーバーに行きたい"])
+    @commands.hybrid_command(name="support_server", description="思惟奈ちゃんサポートサーバーのURLを表示します。")
     async def sinaguild(self, ctx):
-        print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
-              ctx.message.content)
-        await ctx.send("https://discord.gg/vtn2V3v")
-
-    @commands.command()
-    async def mas(self, ctx, *, text):
-        st = ""
-        for i in text:
-            st = st+f"\|\|{i}\|\|"
-        await ctx.send(st)
+        await ctx.send("サポートサーバー → https://discord.gg/vtn2V3v")
 
     @commands.command(aliases=["r", "返信", "引用"])
     async def reply(self, ctx, id: int, *, text):
@@ -43,18 +37,6 @@ class other(commands.Cog):
         await ctx.send(embed=e)
         await ctx.message.delete()
 
-    @commands.command()
-    async def rq(self, ctx):
-
-        await ctx.send(f"{ctx.author.mention}"+await ctx._("IllQ")+f'\n{random.choice(await ctx._("comqest"))}')
-
-    @commands.command(name="Af")
-    async def a_01(self, ctx):
-        if not await ctx.user_lang() == "ja":
-            await ctx.send(await ctx._("cannot-run"))
-            return
-
-        await ctx.send(ctx.author.mention, embed=ut.getEmbed("", f'あなたは「{random.choice(ctx.guild.members).display_name.replace(ctx.guild.me.display_name,"私").replace(ctx.author.display_name,"あなた自身")}」のこと、好きかな？'))
 
     @commands.command(aliases=["アンケート", "次のアンケートを開いて"])
     async def q(self, ctx, title=None, *ctt):
@@ -113,37 +95,7 @@ class other(commands.Cog):
                 return await ctx.say("cannot-send-online")
         await ctx.send(f"Status:{str(info.status)}(PC:{str(info.desktop_status)},Mobile:{str(info.mobile_status)},Web:{str(info.web_status)})")
 
-    @commands.command(aliases=["フィードバック", "開発者にフィードバックを送って"])
-    async def feedback(self, ctx, ttl, ctt=None):
-        embed = discord.Embed(title=ttl, description=ctt, color=self.bot.ec)
-        fbc = self.bot.get_channel(667361484283707393)
-        embed.set_author(name=f"{str(ctx.message.author)}",
-                         icon_url=ctx.message.author.display_avatar.replace(static_format='png'))
-        await fbc.send(embed=embed)
-        await ctx.send(await ctx._("feedback-sended"))
-
-    @commands.command(aliases=["レポート", "報告", "通報", "お知らせ"])
-    async def report(self, ctx, r_type):
-        t_dict = {"脆弱性": 716683830366568470, "荒らし": 716684268973064202, "バグ": 683496852104282127, "その他": 667361501924950036, "vuln": 716683830366568470, "vandalism": 716684268973064202, "bug": 683496852104282127, "other": 667361501924950036}
-        channel_id = t_dict.get(r_type, 667361501924950036)
-        dc = await ut.opendm(ctx.author)
-        await dc.send(await ctx._("send-report-here"))
-        def check(m):
-            return m.channel == dc and m.author == ctx.author
-        m = await self.bot.wait_for("message", check=check)
-        ttl, ctt = m.content.split(" ", 1)
-        embed = discord.Embed(title=ttl, description=ctt, color=self.bot.ec)
-        fbc = self.bot.get_channel(channel_id)
-        embed.set_author(name=f"{str(ctx.message.author)}",
-                         icon_url=ctx.message.author.display_avatar.replace(static_format='png'))
-        await fbc.send(embed=embed)
-        files = []
-        for i in m.attachments:
-            files.append(await i.to_file())
-        await fbc.send(files=files)
-        await ctx.send(await ctx._("thanks-report"))
-
-    @commands.command(aliases=["ステータス", "あなたの情報を教えて"])
+    @commands.hybrid_command(aliases=["ステータス", "あなたの情報を教えて"], description="思惟奈ちゃんについての色々を表示します。")
     async def botinfo(self, ctx):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
               ctx.message.content)
@@ -167,23 +119,25 @@ class other(commands.Cog):
         embed.add_field(name="全ユーザー数", value=len(self.bot.users))
         embed.add_field(name="全チャンネル", value=len(
             [i for i in self.bot.get_all_channels()]))
-        embed.add_field(name="思惟奈ちゃんをほかのサーバーに！",
-                        value="https://discordapp.com/api/oauth2/authorize?client_id=462885760043843584&permissions=8&scope=bot")
         await ctx.send(embed=embed)
 
-    @commands.command(aliases=["rt"])
+    @commands.hybrid_command(name="return_text",aliases=["rt"], description="オウム返しします。")
+    @app_commands.describe(te="オウム返しするテキスト")
     @commands.cooldown(1, 5, type=commands.BucketType.user)
-    async def rettext(self, ctx, *, te):
+    async def rettext(self, ctx:commands.Context, *, te):
         e=discord.Embed(color=self.bot.ec)
         e.set_footer(text=f"requested by {ctx.author.nick or ctx.author}({ctx.author.id})",icon_url=ctx.author.display_avatar.replace(static_format="png").url)
-        await ctx.send(te.replace("@everyone", "[at]everyone").replace("@here", "[at]here"),embed=e)
-        await ctx.message.delete()
+        if ctx.interaction:
+            await ctx.send(te, allowed_mentions=discord.AllowedMentions.none())
+        else:
+            await ctx.send(te, embed=e, allowed_mentions=discord.AllowedMentions.none())
+            await ctx.message.delete()
 
-    @commands.command()
+    @commands.hybrid_command(description="食べ物の絵文字に応じたリアクションをとります。(一部絵文字のみ対応)")
+    @app_commands.describe(food_emoji="食べ物の絵文字")
     @commands.cooldown(1, 5, type=commands.BucketType.user)
-    async def eatit(self, ctx, it):
-        print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
-              ctx.message.content)
+    async def eatit(self, ctx, food_emoji:str):
+        it = food_emoji.replace(" ","")
         if await ctx.user_lang() == "ja":
             if await ctx._(f"eat-{it}") == "":
                 await ctx.send(await ctx._("eat-?"))
@@ -192,33 +146,6 @@ class other(commands.Cog):
         else:
             await ctx.send(await ctx._("cannot-run"))
 
-    @commands.command()
-    async def QandA(self, ctx):
-        print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
-              ctx.message.content)
-        quest = len(ctx.message.content.replace("s-QandA ", "")) % 5
-        if quest == 0:
-            await ctx.send("yes")
-        elif quest == 1:
-            await ctx.send("no")
-        elif quest == 2:
-            await ctx.send("no")
-        elif quest == 3:
-            await ctx.send("yes")
-        elif quest == 4:
-            await ctx.send("?")
-
-    #@commands.command(aliases=["scratchwikiのurl", "次のページのScratchwikiのURL教えて"])
-    async def jscrawiki(self, ctx, un: str):
-        print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
-              ctx.message.content)
-        await ctx.send(await ctx._("jscrawiki-return", un.replace("@", "@ ")))
-
-    #@commands.command(aliases=["scratchのユーザーurl", "次のScratchユーザーのURL教えて"])
-    async def scrauser(self, ctx, un: str):
-        print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
-              ctx.message.content)
-        await ctx.send(await ctx._("scrauser-return", un.replace("@", "@ ")))
 
     @commands.command(name="randomint", liases=["randint", "乱数", "次の条件で乱数を作って"])
     async def randomint(self, ctx, *args):
@@ -257,22 +184,30 @@ class other(commands.Cog):
         # except:
         # await ctx.send(await ctx._("randomint-return2"))
 
-    @commands.command(name="fortune", aliases=["おみくじ", "今日のおみくじをひく"])
+    @commands.hybrid_command(name="fortune", aliases=["おみくじ", "今日のおみくじをひく"], description="おみくじです。一日に何度でも引けます。")
     async def fortune(self, ctx):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
               ctx.message.content)
         rnd = random.randint(0, 6)
         await ctx.send(await ctx._("omikuzi-return", await ctx._("omikuzi-"+str(rnd))))
 
-    @commands.command()
-    async def memo(self, ctx, mode="a", mn="def", *, ctt=None):
-        print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
-              ctx.message.content)
+    @commands.hybrid_command(description="簡易メモ機能。音楽機能のプレイリストも兼ねています。(各行に1URLでプレイリスト扱い)")
+    @discord.app_commands.choices(mode=[
+            discord.app_commands.Choice(name="read_a_memo", value=0),
+            discord.app_commands.Choice(name="write", value=1),
+            discord.app_commands.Choice(name="check_all_memo", value=2),
+        ])
+    @app_commands.describe(mode="メモのモード")
+    @app_commands.describe(memo_name="メモの名前")
+    @app_commands.describe(memo_content="メモに書き込む内容")
+    async def memo(self, ctx, mode:int, memo_name:Optional[str]="default", *, memo_content:Optional[str]):
+        mn = memo_name
+        ctt = memo_content
         mmj = await self.bot.cursor.fetchone(
             "select * from users where id=%s", (ctx.author.id,))
         #mmj = await self.bot.cursor.fetchone()
         memos = json.loads(mmj["memo"])
-        if mode == "r":
+        if mode == 0:
             if not memos is None:
                 if memos.get(mn) is None:
                     await ctx.send(await ctx._("memo-r-notfound1"))
@@ -280,7 +215,7 @@ class other(commands.Cog):
                     await ctx.send(memos[mn].replace("@everyone", "everyone").replace("@here", "here"))
             else:
                 await ctx.send(await ctx._("memo-r-notfound2"))
-        elif mode == "w":
+        elif mode == 1:
             if ctt is None:
                 memos[mn] = None
             else:
@@ -289,7 +224,7 @@ class other(commands.Cog):
                 "UPDATE users SET memo = %s WHERE id = %s", (json.dumps(memos), ctx.author.id))
 
             await ctx.send(await ctx._("memo-w-write", str(mn).replace("@everyone", "everyone").replace("@here", "here")))
-        elif mode == "a":
+        elif mode == 2:
             if memos == {}:
                 await ctx.send(await ctx._("memo-a-notfound"))
             else:
@@ -297,7 +232,7 @@ class other(commands.Cog):
         else:
             await ctx.send(await ctx._("memo-except"))
 
-    @commands.command(name="textlocker")
+    @commands.hybrid_command(name="textlocker", description="簡易テキスト暗号化/復号ツール")
     async def textlocker(self, ctx):
         if not await ctx.user_lang() == "ja":
             await ctx.send(await ctx._("cannot-run"))
@@ -374,8 +309,10 @@ class other(commands.Cog):
         else:
             await ctx.send("絵文字が違います。")
 
-    @commands.command()
-    async def rg(self, ctx, cou: int, role: commands.RoleConverter=None):
+    @commands.hybrid_command(name="create_random_group", description="ランダムなグループ分けを行えます。")
+    @app_commands.describe(cou="ひとグループあたりの人数")
+    @app_commands.describe(role="グループ分けするロール")
+    async def rg(self, ctx, cou: int, role: Optional[discord.Role]):
 
         if role is None:
             role = ctx.guild.default_role
@@ -397,19 +334,6 @@ class other(commands.Cog):
             await ctx.send(embed=discord.Embed(title=await ctx._("rg-title"), description=await ctx._("rg-desc", gtxt, ng), color=self.bot.ec))
         else:
             await ctx.send(await ctx._("rg-block"))
-
-    @commands.command(aliases=["一定時間削除"])
-    async def timemsg(self, ctx, sec: float):
-        await asyncio.sleep(sec)
-        await ctx.message.delete()
-
-    # @commands.command() - moved to apple_misc
-    async def ping(self, ctx):
-        print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
-              ctx.message.content)
-        startt = time.time()
-        mes = await ctx.send("please wait")
-        await mes.edit(content=str(round(time.time()-startt, 3)*1000)+"ms")
 
 
 async def setup(bot):

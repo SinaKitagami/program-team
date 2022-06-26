@@ -1,6 +1,7 @@
 from datetime import datetime
 import discord
 from discord.ext import commands
+from discord import app_commands
 
 import json
 
@@ -59,7 +60,7 @@ class OnlineNotif(commands.Cog):
                 user = self.bot.get_user(subsc)
                 await user.send(await self.bot._(user, msg, str(before)))
 
-    @commands.group(invoke_without_command=True)
+    @commands.hybrid_group(invoke_without_command=True)
     async def onlinenotif(self, ctx):
         """Returns the name of the users you are receiving online notifications of."""
         users = [

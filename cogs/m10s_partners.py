@@ -7,6 +7,8 @@ import config as cf
 
 import m10s_util as ut
 
+from discord import app_commands
+
 
 class m10s_partner(commands.Cog):
 
@@ -15,7 +17,7 @@ class m10s_partner(commands.Cog):
         self.partner_ids = cf.partner_ids
         self.partners = cf.partners
 
-    @commands.command(name="partners")
+    @commands.hybrid_command(name="partners",description="思惟奈ちゃんのパートナーを表示します。")
     async def view_partners(self, ctx):
         pmax = len(self.partner_ids)-1
         page = 0

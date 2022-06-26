@@ -107,7 +107,7 @@ class m10s_badges:
         self.raw_flags = flags
         flags = format(flags, "b")
 
-        flags = flags.zfill(19)[::-1]
+        flags = flags.zfill(20)[::-1]
         self.staff = flags[0] == "1"
         self.partner = flags[1] == "1"
         self.hypesquad_events = flags[2] == "1"
@@ -122,6 +122,7 @@ class m10s_badges:
         self.verified_bot = flags[16] == "1"
         self.early_verified_bot_developer = flags[17] == "1"
         self.discord_certified_moderator = flags[18] == "1"
+        self.http_interaction_bot = flags[19] == "1"
 
         self.dict_flags = {
             "Discord Staff": self.staff,
@@ -137,7 +138,8 @@ class m10s_badges:
             "Bug Hunter Level 2": self.bug_hunter_2,
             "Verified Bot": self.verified_bot,
             "Early Verified Bot Developer": self.early_verified_bot_developer,
-            "Discord Certified Moderator":self.discord_certified_moderator
+            "Discord Certified Moderator":self.discord_certified_moderator,
+            "Http Interaction Bot":self.http_interaction_bot
         }
 
         self.n = 0

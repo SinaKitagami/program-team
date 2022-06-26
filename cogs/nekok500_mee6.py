@@ -2,6 +2,10 @@ import discord
 import aiohttp
 from discord.ext import commands
 
+from typing import Optional
+
+from discord import app_commands
+
 import m10s_util as ut
 
 
@@ -9,10 +13,12 @@ class MEE6(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.hybrid_command(description="「mee6のレベルランキング」を一覧表示します。")
     @commands.guild_only()
+    @app_commands.describe(start="最高順位")
+    @app_commands.describe(end="最低順位")
     @commands.cooldown(1, 5, commands.BucketType.guild)
-    async def levels(self, ctx, start=1, end=10):
+    async def levels(self, ctx, start:Optional[int]=1, end:Optional[int]=10):
         start -= 1
         async with self.bot.session.get("https://mee6.xyz/api/plugins/levels/leaderboard/{0}".format(ctx.guild.id)) as resp:
             js = await resp.json()

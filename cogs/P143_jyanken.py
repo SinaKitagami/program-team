@@ -5,13 +5,14 @@ from discord.ext import commands
 import random
 import asyncio
 
+from discord import app_commands
 
 class jyanken(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="jyanken")
+    @commands.hybrid_command(name="jyanken", description="じゃんけんできます。")
     async def command(self, ctx,):
         def win(hand):
             embed = discord.Embed(
