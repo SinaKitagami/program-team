@@ -24,11 +24,6 @@ class m10s_remainder(commands.Cog):
     @app_commands.describe(send_text="リマインダーの文面")
     @app_commands.describe(mention_at="メンションする役職")
     async def set(self,ctx,send_text:str, mention_at:Optional[discord.Role]):
-        if mention_at:
-            try:
-                mention_at = await commands.RoleConverter().convert(ctx,mention_at)
-            except:
-                mention_at = None
         rid = int(time.time())
         if mention_at:
             mention_at = mention_at.id

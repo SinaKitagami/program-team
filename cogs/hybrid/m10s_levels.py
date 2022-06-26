@@ -337,19 +337,19 @@ class levels(commands.Cog):
         pass
 
     @group_user.command(name="add", description="ユーザーレベルに、特定の値を加算します。")
-    async def user_add(self, ctx, target:commands.MemberConverter, lev:int, exp:Optional[int]):
+    async def user_add(self, ctx, target:discord.Member, lev:int, exp:Optional[int]):
         level_add(self, ctx, target, lev, exp)
 
     @group_user.command(name="set", description="ユーザーレベルを、特定の値に設定します。")
-    async def user_add(self, ctx, target:commands.MemberConverter, lev:int, exp:Optional[int]):
+    async def user_add(self, ctx, target:discord.Member, lev:int, exp:Optional[int]):
         level_set(self, ctx, target, lev, exp)
 
     @group_role.command(name="add", description="そのロールを持つメンバーのレベルに、特定の値を加算します。")
-    async def role_add(self, ctx, target:commands.RoleConverter, lev:int, exp:Optional[int]):
+    async def role_add(self, ctx, target:discord.Role, lev:int, exp:Optional[int]):
         level_add(self, ctx, target, lev, exp)
 
     @group_role.command(name="set", description="そのロールを持つメンバーのレベルを、特定の値に設定します。")
-    async def role_add(self, ctx, target:commands.RoleConverter, lev:int, exp:Optional[int]):
+    async def role_add(self, ctx, target:discord.Role, lev:int, exp:Optional[int]):
         level_add(self, ctx, target, lev, exp)
 
 

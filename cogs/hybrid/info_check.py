@@ -822,7 +822,7 @@ class info_check(commands.Cog):
 
     @info_group.command(name="emoji",description="絵文字に関して表示します。")
     @app_commands.describe(emj="詳細表示する絵文字")
-    async def emojiinfo(self, ctx, *, emj: commands.EmojiConverter=None):
+    async def emojiinfo(self, ctx, *, emj: discord.Emoji=None):
 
         if emj is None:
             await ctx.send(await ctx._("einfo-needarg"))
