@@ -141,7 +141,7 @@ class m10s_music(commands.Cog):
     @commands.hybrid_group(name="music", description="音楽機能です。")
     async def music_group(self, ctx):pass
 
-    @music_group.command(name="join", aliases=["invc"],description="あなたが参加しているVCに接続します。")
+    @music_group.command(name="join", aliases=["invc"], description="あなたが参加しているVCに接続します。")
     async def join_(self, ctx):
         if ctx.author.voice:
             if ctx.voice_client:
@@ -184,9 +184,10 @@ class m10s_music(commands.Cog):
     @app_commands.describe(text = "楽曲を特定するためのもの(検索ワード/URL/memo:[メモ名]/activity:[ユーザーID] ([]は省略))")
     async def play_(self, ctx, *, text: Optional[str]=""):
         if not ctx.voice_client:
-            await ctx.invoke(self.join_)
+            """await ctx.invoke(self.join_)
             if not ctx.voice_client:
-                return
+                return"""
+            await ctx.send("再生前に`/music join`コマンドでVCに参加させてください！")
         if ctx.voice_client.is_paused():
             await ctx.send("再生を再開しました。")
             ctx.voice_client.resume()
@@ -417,7 +418,7 @@ class m10s_music(commands.Cog):
                 await ctx.send("> ステージチャンネルのため、自動的にスピーカーに移動しました。")
             except:
                 await ctx.send("> ステージチャンネルのため、音楽を再生するためにはスピーカーに移動させる必要があります。")
-        while self.bot.qu.get(str(ctx.guild.id),None):
+        while self.bot.qu.get(str(ctx.guild.id), None):
             if self.bot.qu[str(ctx.guild.id)][0]["type"] == "download":
                 ctx.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(
                 f'musicfile/{self.bot.qu[str(ctx.guild.id)][0]["video_id"]}'), volume=v or vl))
@@ -441,7 +442,7 @@ class m10s_music(commands.Cog):
             if can_delete and (not poped_item["video_id"] in self.bot.am) and poped_item["type"] == "download":
                 loop = self.bot.loop or asyncio.get_event_loop()
                 await loop.run_in_executor(None, lambda: os.remove(f'musicfile/{poped_item["video_id"]}'))
-        await ctx.invoke(self.bot.get_command("stop"))
+        await ctx.invoke(self.stop_)
 
     @music_group.command(description="曲をスキップします。")
     async def skip(self, ctx):
@@ -535,11 +536,12 @@ class m10s_music(commands.Cog):
     @music_group.command(name="panel_update", aliases=["pupdate"], description="楽曲パネルの更新を行います。")
     async def pupdate(self, ctx):
         await self.panel_update(ctx.guild.id, ctx.voice_client)
+        await ctx.send("パネルを強制的に更新しました。", )
 
     async def panel_update(self, guild_id, voice_client):
         ebd = discord.Embed(title="思惟奈ちゃん-ミュージック操作パネル",
                             description=f"キューの曲数:{len(self.bot.qu[str(guild_id)])}曲", color=self.bot.ec)
-        ebd.set_footer("⬇:パネルを下に持ってくる")
+        ebd.set_footer(text="⬇:パネルを下に持ってくる")
         if voice_client.is_paused():
             ebd.add_field(name="現在一時停止中",
                           value="再開には`s-play`か▶リアクション", inline=False)
@@ -659,6 +661,7 @@ class m10s_music(commands.Cog):
                     await m.pin()
                 except:
                     pass
+                await self.panel_update(u.guild.id, u.guild.voice_client)
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):

@@ -844,10 +844,10 @@ async def on_ready():
     embed.description = txt
 
     # テストサバ
-    await bot.tree.sync(guild=discord.Object(id=560434525277126656))
+    # await bot.tree.sync(guild=discord.Object(id=560434525277126656))
 
     # パートナーコマンド
-    await bot.tree.sync(guild=discord.Object(id=764088457785638922))
+    # await bot.tree.sync(guild=discord.Object(id=764088457785638922))
 
     # グローバルコマンド
     await bot.tree.sync()

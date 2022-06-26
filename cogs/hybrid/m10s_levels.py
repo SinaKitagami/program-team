@@ -29,7 +29,7 @@ class levels(commands.Cog):
     @commands.is_owner()
     async def level_transfer(self, ctx):
         async with ctx.channel.typing():
-            gs = await self.bot.cursor.fetchone("select * from guilds")
+            gs = await self.bot.cursor.fetchall("select * from guilds")
             for s in gs:
                 ls = json.loads(s["levels"])
                 for k,v in ls.items():

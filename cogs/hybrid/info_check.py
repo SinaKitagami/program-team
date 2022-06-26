@@ -24,7 +24,7 @@ class info_check(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_group(name="infomation")
+    @commands.hybrid_group(name="information")
     async def info_group(self, ctx):
         pass
 
