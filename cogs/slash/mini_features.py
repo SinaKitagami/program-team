@@ -33,7 +33,7 @@ class mini_features(commands.Cog):
         st = ""
         for i in text:
             st = st+f"\|\|{i}\|\|"
-        await ctx.send(discord.Embed(title="スポイラー化テキスト",description=f"{st}", color=self.bot.ec), ephemeral=True)
+        await ctx.send(embed=discord.Embed(title="スポイラー化テキスト",description=f"{st}", color=self.bot.ec), ephemeral=True)
 
 async def setup(bot):
     await bot.add_cog(mini_features(bot))

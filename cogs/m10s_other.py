@@ -133,16 +133,17 @@ class other(commands.Cog):
             await ctx.send(te, embed=e, allowed_mentions=discord.AllowedMentions.none())
             await ctx.message.delete()
 
-    @commands.hybrid_command(description="食べ物の絵文字に応じたリアクションをとります。(一部絵文字のみ対応)")
-    @app_commands.describe(food_emoji="食べ物の絵文字")
+    @commands.hybrid_command(name="emoji_reaction",description="絵文字に応じたリアクションをとります。(一部絵文字のみ対応。存在しないものは運営に自動送信されて、いつか増えます。)")
+    @app_commands.describe(emoji="絵文字")
     @commands.cooldown(1, 5, type=commands.BucketType.user)
-    async def eatit(self, ctx, food_emoji:str):
-        it = food_emoji.replace(" ","")
+    async def eatit(self, ctx, emoji:str):
+        it = emoji.replace(" ","")
         if await ctx.user_lang() == "ja":
-            if await ctx._(f"eat-{it}") == "":
-                await ctx.send(await ctx._("eat-?"))
+            if await ctx._(f"emoji_react-{it}") == "":
+                await ctx.send(await ctx._("emoji_react-?"))
+                await self.bot.get_channel(993565802030698627).send(f"> 思惟奈のわからない絵文字があったよ。`{str(emoji)}`")
             else:
-                await ctx.send(await ctx._(f"eat-{it}"))
+                await ctx.send(await ctx._(f"emoji_react-{it}"))
         else:
             await ctx.send(await ctx._("cannot-run"))
 
@@ -310,7 +311,7 @@ class other(commands.Cog):
             await ctx.send("絵文字が違います。")
 
     @commands.hybrid_command(name="create_random_group", description="ランダムなグループ分けを行えます。")
-    @app_commands.describe(cou="ひとグループあたりの人数")
+    @app_commands.describe(cou="1グループあたりの人数")
     @app_commands.describe(role="グループ分けするロール")
     async def rg(self, ctx, cou: int, role: Optional[discord.Role]):
 

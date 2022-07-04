@@ -44,7 +44,8 @@ class syouma(commands.Cog):
             # print(HrfUrl)
         # myDict = {}
         # 住所からhrefを取得
-        # if not(HrfUrl is None):
+        if HrfUrl is None:
+            return await ctx.send("> 天気確認\n　その地域では見つかりませんでした。")
         await asyncio.sleep(1)  # 一回requestを投げているので1秒待つ
         Req = await self.bot.apple_util.get_as_text(Url + HrfUrl)
         # print(Req)

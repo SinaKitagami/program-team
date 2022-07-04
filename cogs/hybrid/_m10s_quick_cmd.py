@@ -22,7 +22,7 @@ class m10s_quick_cmd(commands.Cog):
     @commands.hybrid_command(name="shortcut", description="クイックコマンド呼び出しのパネルを作成します。")
     @app_commands.describe(label="呼び出しボタンの表示名")
     @app_commands.describe(run_command="呼び出すコマンド")
-    async def quick_command_create(self, ctx, label:str, *, run_command:str):
+    async def quick_command_create(self, ctx:commands.Context, label:str, *, run_command:str):
         if run_command == "":
             await ctx.send("> 実行コマンドの指定がありません！")
             return
@@ -36,7 +36,7 @@ class m10s_quick_cmd(commands.Cog):
         embed.set_footer(text="使用しなくなった場合は、このメッセージを削除してください。")
         await self.bot.dpyui.send_with_ui(ctx.channel, "", embed=embed, ui = act_button)
         if ctx.interaction:
-            await ctx.interaction.response.pong()
+            await ctx.interaction.response.send_message("> 設定しました。", ephemeral=True)
 
     @commands.Cog.listener()
     async def on_button_click(self, cb:dpyui.interaction_button_callback):

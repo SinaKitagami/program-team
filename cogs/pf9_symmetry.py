@@ -24,41 +24,41 @@ class Symmetry(commands.Cog):
     @app_commands.describe(side="どの面をシンメトリーにするか")
     @app_commands.describe(image="シンメトリー加工する画像")
     async def symmetry(self, ctx, side: int, image: discord.Attachment):
-        await ctx.channel.trigger_typing()
-        await image.save("image.png")
-        img = Image.open('image.png')
-        if side == 0:
-            tmp1 = img.crop((0, 0, img.size[0] // 2, img.size[1]))
-        elif side == 1:
-            tmp1 = img.crop(
-                (img.size[0] // 2, 0, img.size[0], img.size[1]))
-        elif side == 2:
-            tmp1 = img.crop((0, 0, img.size[0], img.size[1] // 2))
-        elif side == 3:
-            tmp1 = img.crop(
-                (0, img.size[0] // 2, img.size[0], img.size[1]))
-        if side == 0 or side == 1:
-            tmp2 = ImageOps.mirror(tmp1)
-            dst = Image.new(
-                'RGB', (tmp1.width + tmp2.width, tmp1.height))
-        else:
-            tmp2 = ImageOps.flip(tmp1)
-            dst = Image.new(
-                'RGB', (tmp1.width, tmp1.height + tmp2.height))
-        if side == 0:
-            dst.paste(tmp1, (0, 0))
-            dst.paste(tmp2, (tmp1.width, 0))
-        if side == 1:
-            dst.paste(tmp1, (tmp2.width, 0))
-            dst.paste(tmp2, (0, 0))
-        if side == 2:
-            dst.paste(tmp1, (0, 0))
-            dst.paste(tmp2, (0, tmp1.height))
-        if side == 3:
-            dst.paste(tmp1, (0, tmp2.height))
-            dst.paste(tmp2, (0, 0))
-        dst.save('ts2.png')
-        await ctx.channel.send(file=discord.File('ts2.png'))
+        async with ctx.channel.typing():
+            await image.save("image.png")
+            img = Image.open('image.png')
+            if side == 0:
+                tmp1 = img.crop((0, 0, img.size[0] // 2, img.size[1]))
+            elif side == 1:
+                tmp1 = img.crop(
+                    (img.size[0] // 2, 0, img.size[0], img.size[1]))
+            elif side == 2:
+                tmp1 = img.crop((0, 0, img.size[0], img.size[1] // 2))
+            elif side == 3:
+                tmp1 = img.crop(
+                    (0, img.size[0] // 2, img.size[0], img.size[1]))
+            if side == 0 or side == 1:
+                tmp2 = ImageOps.mirror(tmp1)
+                dst = Image.new(
+                    'RGB', (tmp1.width + tmp2.width, tmp1.height))
+            else:
+                tmp2 = ImageOps.flip(tmp1)
+                dst = Image.new(
+                    'RGB', (tmp1.width, tmp1.height + tmp2.height))
+            if side == 0:
+                dst.paste(tmp1, (0, 0))
+                dst.paste(tmp2, (tmp1.width, 0))
+            if side == 1:
+                dst.paste(tmp1, (tmp2.width, 0))
+                dst.paste(tmp2, (0, 0))
+            if side == 2:
+                dst.paste(tmp1, (0, 0))
+                dst.paste(tmp2, (0, tmp1.height))
+            if side == 3:
+                dst.paste(tmp1, (0, tmp2.height))
+                dst.paste(tmp2, (0, 0))
+            dst.save('ts2.png')
+        await ctx.send(file=discord.File('ts2.png'))
 
 
 async def setup(bot):

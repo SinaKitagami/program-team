@@ -31,17 +31,22 @@ class info_check(commands.Cog):
     @info_group.command(name="user", aliases=["ui", "anyuserinfo"], description="ユーザーに関する情報を表示します。")
     @app_commands.describe(target="表示するメンバー")
     @app_commands.describe(uid="表示する外部ユーザーのID")
-    async def _info_of_user(self, ctx, target:Optional[discord.Member], uid:Optional[int]):
+    async def _info_of_user(self, ctx, target:Optional[discord.Member], uid:Optional[str]):
+        if uid:
+            uid = int(uid)
         if target:
             in_guild = True
         elif uid:
             try:
-                target = await self.bot.fetch_member(uid)
+                target = await self.bot.fetch_user(uid)
                 in_guild = False
             except:
                 return await ctx.send("> 存在しないIDの指定です。")
         else:
-            target = ctx.author
+            if ctx.interaction:
+                target = ctx.guild.get_member(ctx.author.id)
+            else:
+                target = ctx.author
             in_guild = True
 
         upf = await self.bot.cursor.fetchone("select * from users where id=%s", (target.id,))
@@ -68,8 +73,11 @@ class info_check(commands.Cog):
             menu.add_option("サーバー内基本情報","server_basic","サーバー内での基本的な情報を表示します。")
             menu.add_option("プレゼンス情報","presence","ユーザーのオンライン状況やトップ表示されているアクティビティについて表示します。")
             menu.add_option("役職情報","roles","所有している役職/権限情報を表示します。")
-        if target.voice:
-            menu.add_option("ボイス情報", "voice", "ユーザーのボイス/ステージチャンネルでの状態を表示します。")
+            if target.voice:
+                menu.add_option("ボイス情報", "voice", "ユーザーのボイス/ステージチャンネルでの状態を表示します。")
+        
+        if ctx.interaction:
+            await ctx.send("下のパネルで情報を閲覧できます。")
         msg = await self.bot.dpyui.send_with_ui(ctx.channel, "下から表示したい情報を選んでください。タイムアウトは30秒です。",ui=menu)
         while True:
             try:
@@ -143,6 +151,8 @@ class info_check(commands.Cog):
                             acttype = "配信中"
                         elif a.type == discord.ActivityType.custom:
                             acttype = "カスタムステータス"
+                        elif a.type == discord.ActivityType.competing:
+                            acttype = "競争中"
                         else:
                             acttype = "不明"
                         e.add_field(name=a.name, value=acttype)
@@ -227,8 +237,11 @@ class info_check(commands.Cog):
         pmax = 12 if "COMMUNITY" in ctx.guild.features else 11
         page = 0
         e = discord.Embed(title=await ctx._("ginfo-ov-title"), color=self.bot.ec)
-        e.set_author(name=f"{ptn}{ctx.guild.name}",
-                     icon_url=ctx.guild.icon.replace(static_format='png'))
+        if ctx.guild.icon:
+            e.set_author(name=f"{ptn}{ctx.guild.name}",
+                        icon_url=ctx.guild.icon.replace(static_format='png'))
+        else:
+            e.set_author(name=f"{ptn}{ctx.guild.name}")
         #e.add_field(name=await ctx._("ginfo-region"), value=ctx.guild.region)
         e.add_field(name=await ctx._("ginfo-afkch"), value=ctx.guild.afk_channel)
         if ctx.guild.afk_channel:
@@ -519,7 +532,10 @@ class info_check(commands.Cog):
     async def infoactivity(self, ctx, user: Optional[discord.Member]):
         mus = user
         if mus is None:
-            info = ctx.message.author
+            if ctx.interaction:
+                info = ctx.guild.get_member(ctx.author.id)
+            else:
+                info = ctx.author
         else:
             info = mus
         lmsc = ut.get_vmusic(self.bot, info)
@@ -589,6 +605,8 @@ class info_check(commands.Cog):
                     activName = await ctx._("playinginfo-streaming")+anactivity.name
                 elif anactivity.type == discord.ActivityType.custom:
                     activName = await ctx._("playinginfo-custom_status")
+                elif anactivity.type == discord.ActivityType.competing:
+                    activName = "競争中"
                 else:
                     activName = await ctx._("playinginfo-unknown")+anactivity.name
                 embed = discord.Embed(title=await ctx._(
@@ -718,7 +736,7 @@ class info_check(commands.Cog):
 
     @info_group.command(name="channel", description="特定チャンネルについて表示する")
     @app_commands.describe(channel="表示するチャンネル")
-    async def chinfo(self, ctx:commands.Context, channel:discord.abc.GuildChannel):
+    async def chinfo(self, ctx:commands.Context, channel:commands.GuildChannelConverter):
         try:
             if channel:
                 channel = await channel.fetch()
@@ -822,23 +840,19 @@ class info_check(commands.Cog):
 
     @info_group.command(name="emoji",description="絵文字に関して表示します。")
     @app_commands.describe(emj="詳細表示する絵文字")
-    async def emojiinfo(self, ctx, *, emj: discord.Emoji=None):
-
-        if emj is None:
-            await ctx.send(await ctx._("einfo-needarg"))
-        else:
-            embed = discord.Embed(
-                title=emj.name, description=f"id:{emj.id}", color=self.bot.ec)
-            embed.add_field(name=await ctx._("einfo-animated"), value=emj.animated)
-            embed.add_field(name=await ctx._("einfo-manageout"), value=emj.managed)
-            if emj.user:
-                embed.add_field(name=await ctx._("einfo-adduser"),
-                                value=str(emj.user))
-            embed.add_field(name="url", value=emj.url)
-            embed.set_footer(text=await ctx._("einfo-addday"))
-            embed.set_thumbnail(url=emj.url)
-            embed.timestamp = emj.created_at
-            await ctx.send(embed=embed)
+    async def emojiinfo(self, ctx, *, emj: discord.Emoji):
+        embed = discord.Embed(
+            title=emj.name, description=f"id:{emj.id}", color=self.bot.ec)
+        embed.add_field(name=await ctx._("einfo-animated"), value=emj.animated)
+        embed.add_field(name=await ctx._("einfo-manageout"), value=emj.managed)
+        if emj.user:
+            embed.add_field(name=await ctx._("einfo-adduser"),
+                            value=str(emj.user))
+        embed.add_field(name="url", value=emj.url)
+        embed.set_footer(text=await ctx._("einfo-addday"))
+        embed.set_thumbnail(url=emj.url)
+        embed.timestamp = emj.created_at
+        await ctx.send(embed=embed)
 
 
 

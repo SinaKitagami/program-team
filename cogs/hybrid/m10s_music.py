@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import asyncio
+import json
 import discord
 from discord.ext import commands
 
@@ -181,13 +182,13 @@ class m10s_music(commands.Cog):
             await self.panel_update(ctx.guild.id, ctx.voice_client)
 
     @music_group.command(name="play", aliases=["p"], description="楽曲を再生します。")
-    @app_commands.describe(text = "楽曲を特定するためのもの(検索ワード/URL/memo:[メモ名]/activity:[ユーザーID] ([]は省略))")
-    async def play_(self, ctx, *, text: Optional[str]=""):
+    @app_commands.describe(text = "楽曲を特定するためのもの(検索ワード/URL/memo:[メモ名]/list:[リスト名]/activity:[ユーザーID] ([]は省略))")
+    async def play_(self, ctx, *, text: Optional[str]="", file:Optional[discord.Attachment]):
         if not ctx.voice_client:
             """await ctx.invoke(self.join_)
             if not ctx.voice_client:
                 return"""
-            await ctx.send("再生前に`/music join`コマンドでVCに参加させてください！")
+            return await ctx.send("再生前に`/music join`コマンドでVCに参加させてください！")
         if ctx.voice_client.is_paused():
             await ctx.send("再生を再開しました。")
             ctx.voice_client.resume()
@@ -213,17 +214,33 @@ class m10s_music(commands.Cog):
             elif text.startswith("dl:http://") or text.startswith("dl:https://"):
                 vdl = True
                 vurls = [text[7:]]
-            elif text.startswith("memo:"):
-                await self.bot.cursor.execute(
+            elif text.startswith("list:"):
+                pf = await self.bot.cursor.fetchone(
                     "select * from users where id=%s", (ctx.author.id,))
-                pf = await self.bot.cursor.fetchone()
-                mn = text[5:]
-                if pf["memo"] is not None and pf["memo"].get(mn,None) is not None:
-                    for i in pf["memo"][mn].split("\n"):
+                listname = text[5:]
+                playlist = json.loads(pf["music_list"]).get(listname, None)
+                vurls = []
+                if playlist:
+                    for i in playlist:
                         if (i.startswith("<http://") and i.endswith(">")) or (i.startswith("<https://") and i.endswith(">")):
-                            vurls = [i[1:-1]]
+                            vurls.append(i[1:-1])
                         elif i.startswith("http://") or i.startswith("https://"):
-                            vurls = [i]
+                            vurls.append(i)
+                else:
+                    await ctx.send("> 音楽再生\n　該当名称のプレイリストが見つかりません。\n　`/music playlist_manager`で管理できます。")
+                    return
+            elif text.startswith("memo:"):
+                pf = await self.bot.cursor.fetchone(
+                    "select * from users where id=%s", (ctx.author.id,))
+                mn = text[5:]
+                memos = json.loads(pf["memo"])
+                vurls = []
+                if memos is not None and memos.get(mn,None) is not None:
+                    for i in memos[mn].split("\n"):
+                        if (i.startswith("<http://") and i.endswith(">")) or (i.startswith("<https://") and i.endswith(">")):
+                            vurls.append(i[1:-1])
+                        elif i.startswith("http://") or i.startswith("https://"):
+                            vurls.append(i)
                 else:
                     await ctx.send("> 音楽再生\n　該当名称のメモが見つかりません。")
                     return
@@ -246,21 +263,21 @@ class m10s_music(commands.Cog):
                         return await ctx.send("動画が見つかりませんでした。")
                 else:
                     return await ctx.send("プレイ中のActivityがSpotifyではありません。")
-            elif text.startswith("file:"):
+            elif file:
                 c_info = True
-                await ctx.message.attachments[0].save(f"musicfile/{ctx.message.id}")
+                await file.save(f"musicfile/{ctx.message.id}")
                 vinfo = {
-                        "type": "download",
-                        "stream_url":str(ctx.message.attachments[0].url),
-                        "video_id": ctx.message.id,
-                        "video_url": "",
-                        "video_title": ctx.message.attachments[0].filename,
-                        "video_thumbnail": "",
-                        "video_up_name": f"{ctx.author}({ctx.author.id})",
-                        "video_up_url": f"https://discord.com/users/{ctx.author.id}",
-                        "video_source": "Direct Upload",
-                        "requester":ctx.author.id
-                        }
+                    "type": "download",
+                    "stream_url":str(ctx.message.attachments[0].url),
+                    "video_id": ctx.message.id,
+                    "video_url": "",
+                    "video_title": ctx.message.attachments[0].filename,
+                    "video_thumbnail": "",
+                    "video_up_name": f"{ctx.author}({ctx.author.id})",
+                    "video_up_url": f"https://discord.com/users/{ctx.author.id}",
+                    "video_source": "Direct Upload",
+                    "requester":ctx.author.id
+                }
             else:
                 try:
                     search_response = self.youtube.search().list(
@@ -397,7 +414,7 @@ class m10s_music(commands.Cog):
             ebd.add_field(name="次の曲:", value="未読み込み")
             ebd.add_field(name="ループ:", value="未読み込み")
             ebd.add_field(name="ボリューム:", value="未読み込み")
-            m = await ctx.send(embed=ebd)
+            m = await ctx.channel.send(embed=ebd)
             self.bot.mp[str(ctx.guild.id)] = m
             await m.add_reaction("▶")
             await m.add_reaction("⏸")
@@ -606,6 +623,67 @@ class m10s_music(commands.Cog):
             pass
         await self.panel_update(ctx.guild.id, ctx.voice_client)
         await ctx.send(f"> 音楽再生パネルの移動\n　{move_to.mention}に移動しました。")
+
+    @music_group.group(name="playlist_manager", description="音楽再生リストを管理できます。")
+    async def plist(self, ctx:commands.Context):
+        pass
+
+    @plist.command(name="check", description="すべてのプレイリストや、その中身を確認できます。")
+    @app_commands.describe(name="プレイリスト名")
+    async def check_list(self, ctx:commands.Context, name:Optional[str]):
+        pf = await self.bot.cursor.fetchone(
+            "select * from users where id=%s", (ctx.author.id,))
+        lists:dict = json.loads(pf["music_list"])
+        if name:
+            if lists.get(name,None):
+                rt = '\n'
+                await ctx.send(f"> プレイリスト`{name}`:\n```\n{rt.join(lists[name])}```", ephemeral = True)
+        else:
+            await ctx.send(f"> プレイリスト一覧:\n```\n{','.join([k for k in lists.keys()])}```", ephemeral = True)
+
+    @plist.command(name="add", description="指定されたプレイリスト(存在しない場合は作成されます。)に、URLを追加できます。")
+    @app_commands.describe(name="プレイリスト名")
+    @app_commands.describe(url="追加するURL")
+    async def add_list(self, ctx:commands.Context, name:str, url:str):
+        URL = url
+        pf = await self.bot.cursor.fetchone(
+            "select * from users where id=%s", (ctx.author.id,))
+        lists:dict = json.loads(pf["music_list"])
+        if lists.get(name,None):
+            lists[name].append(URL)
+            await self.bot.cursor.execute("UPDATE users SET music_list = %s WHERE id = %s", (json.dumps(lists), ctx.author.id))
+            await ctx.send(f"> プレイリスト`{name}`に、`{URL}`を追加しました！", ephemeral = True)
+        else:
+            lists[name] = [URL]
+            await self.bot.cursor.execute("UPDATE users SET music_list = %s WHERE id = %s", (json.dumps(lists), ctx.author.id))
+            await ctx.send(f"> プレイリスト`{name}`を作成し、`{URL}`を追加しました！\n　再生時には、`/play list:{name}`と指定してください。", ephemeral = True)
+
+    @plist.command(name="remove", description="指定されたプレイリスト(存在しない場合は作成されます。)から、項目を取り除きます。")
+    @app_commands.describe(name="プレイリスト名")
+    @app_commands.describe(index="削除する項目の番目")
+    async def remove_list(self, ctx:commands.Context, name:str, index:int):
+        pf = await self.bot.cursor.fetchone(
+            "select * from users where id=%s", (ctx.author.id,))
+        lists:dict = json.loads(pf["music_list"])
+        if lists.get(name,None):
+            lists[name].pop(index-1)
+            await ctx.send(f"> プレイリスト`{name}`の、`{index}`番目を削除しました。", ephemeral = True)
+            await self.bot.cursor.execute("UPDATE users SET music_list = %s WHERE id = %s", (json.dumps(lists), ctx.author.id))
+        else:
+            await ctx.send(f"> プレイリスト`{name}`は、存在しません。", ephemeral = True)
+
+    @plist.command(name="delete", description="指定されたプレイリストを削除します。")
+    @app_commands.describe(name="プレイリスト名")
+    async def delete_list(self, ctx:commands.Context, name:str):
+        pf = await self.bot.cursor.fetchone(
+            "select * from users where id=%s", (ctx.author.id,))
+        lists:dict = json.loads(pf["music_list"])
+        if lists.get(name,None):
+            del lists[name]
+            await ctx.send(f"> プレイリスト`{name}`を削除しました。", ephemeral = True)
+            await self.bot.cursor.execute("UPDATE users SET music_list = %s WHERE id = %s", (json.dumps(lists), ctx.author.id))
+        else:
+            await ctx.send(f"> プレイリスト`{name}`は、存在しません。", ephemeral = True)
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, pr):

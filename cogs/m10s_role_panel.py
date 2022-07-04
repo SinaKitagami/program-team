@@ -59,7 +59,7 @@ class m10s_role_panel(commands.Cog):
                 await m.edit(content="> パネルは発行されていません！\n作成はキャンセルされました。")
         
     @role_panel.command(name="delete", description="役職パネルを削除します。")
-    async def p_delete(self, ctx, pid:int):
+    async def p_delete(self, ctx, pid:str):
         try:
             pid = int(pid)
         except:
@@ -91,7 +91,7 @@ class m10s_role_panel(commands.Cog):
     @app_commands.describe(pid="役職パネルのID")
     @app_commands.describe(emoji="付与するときに使う絵文字")
     @app_commands.describe(role="付与する役職")
-    async def p_add(self,ctx,pid:int,emoji:str,role:discord.Role):
+    async def p_add(self,ctx,pid:str,emoji:str,role:discord.Role):
         try:
             pid = int(pid)
             pmsg = await ctx.channel.fetch_message(pid)
@@ -134,7 +134,7 @@ class m10s_role_panel(commands.Cog):
     @role_panel.command(name="remove",description="パネルから役職を取り除きます。")
     @app_commands.describe(pid="役職パネルのID")
     @app_commands.describe(emoji="取り除きたい役職に紐づいている絵文字")
-    async def p_remove(self,ctx,pid:int,emoji:str):
+    async def p_remove(self,ctx,pid:str,emoji:str):
         try:
             pid = int(pid)
             pmsg = await ctx.channel.fetch_message(pid)

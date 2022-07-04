@@ -55,9 +55,10 @@ class m10s_messageinfo(commands.Cog):
 
             e.set_footer(text=f"メッセージ送信時間:{post_time}/最終編集時間:{edit_time}")
             
-            e.add_field(name="含まれる埋め込みの数",value=f"{len(msg.embeds)}個")
-            e.add_field(name="含まれる添付ファイルの数",value=f"{len(msg.attachments)}個")
-            e.add_field(name="システムメッセージかどうか",value=msg.is_system())
+            e.add_field(name="含まれる埋め込みの数",value=f"{len(msg.embeds)}個", inline=False)
+            attach_url = '\n'.join([f'{i.url}\n' for i in msg.attachments])
+            e.add_field(name="含まれる添付ファイルの数",value=f"{len(msg.attachments)}個\n{attach_url.replace('cdn.discordapp.com','media.discordapp.net')}", inline=False)
+            e.add_field(name="システムメッセージかどうか",value=msg.is_system(), inline=False)
 
 
             if isinstance(msg.channel, discord.TextChannel):
@@ -71,21 +72,21 @@ class m10s_messageinfo(commands.Cog):
                 chtype = f"{msg.channel.name}({msg.channel.id}):ボイスチャンネル内テキストチャット"
             elif isinstance(msg.channel, discord.Thread):
                 chtype = f"{msg.channel.name}({msg.channel.id}):テキストチャンネル内スレッド"
-            e.add_field(name="メッセージの送信先チャンネル", value=chtype)
+            e.add_field(name="メッセージの送信先チャンネル", value=chtype, inline=False)
 
             if msg.type == discord.MessageType.reply:
-                e.add_field(name="メッセージへの返信等", value=f"返信元確認用:`{msg.reference.channel_id}-{msg.reference.message_id}`")
+                e.add_field(name="メッセージへの返信等", value=f"返信元確認用:`{msg.reference.channel_id}-{msg.reference.message_id}`", inline=False)
 
-            e.add_field(name="メンションの内訳", value=f"全員あてメンション:{msg.mention_everyone}\nユーザーメンション:{len(msg.mentions)}個\n役職メンション:{len(msg.role_mentions)}個\nチャンネルメンション:{len(msg.channel_mentions)}個")
-            e.add_field(name="メッセージID", value=str(msg.id))
+            e.add_field(name="メンションの内訳", value=f"全員あてメンション:{msg.mention_everyone}\nユーザーメンション:{len(msg.mentions)}個\n役職メンション:{len(msg.role_mentions)}個\nチャンネルメンション:{len(msg.channel_mentions)}個", inline=False)
+            e.add_field(name="メッセージID", value=str(msg.id), inline=False)
             if msg.webhook_id:
-                e.add_field(name="Webhook投稿", value=f"ID:{msg.webhook_id}")
-            e.add_field(name="ピン留めされているかどうか", value=str(msg.pinned))
+                e.add_field(name="Webhook投稿", value=f"ID:{msg.webhook_id}", inline=False)
+            e.add_field(name="ピン留めされているかどうか", value=str(msg.pinned), inline=False)
             if msg.reactions:
-                e.add_field(name="リアクション",value=",".join([f"{r.emoji}:{r.count}" for r in msg.reactions]))
-            e.add_field(name="メッセージのフラグ", value=[i[0] for i in iter(msg.flags) if i[1]])
+                e.add_field(name="リアクション",value=",".join([f"{r.emoji}:{r.count}" for r in msg.reactions]), inline=False)
+            e.add_field(name="メッセージのフラグ", value=[i[0] for i in iter(msg.flags) if i[1]], inline=False)
 
-            e.add_field(name="このメッセージに飛ぶ", value=msg.jump_url)
+            e.add_field(name="このメッセージに飛ぶ", value=msg.jump_url, inline=False)
             
             await interaction.response.send_message(embed=e, ephemeral=True)
         

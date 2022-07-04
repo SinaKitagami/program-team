@@ -881,10 +881,6 @@ async def on_message(message):
         with open("post_count.json", mode="w", encoding="utf-8") as f:
             json.dump(postcount, f, indent=4)
         await message.channel.send(file=discord.File("post_count.json"))
-    if message.content.startswith("s-"):
-        await message.channel.send("> 重要なお知らせ\n\
-大半のコマンドがスラッシュコマンドでも使えるようになった影響で、今までの方法では使えなくなったコマンドが多く存在します。\n\
-できる限りスラッシュコマンドでの使用をお願いします。(スラッシュコマンドと同じ書き方であれば`s-`等から始めるprefixコマンドでも使用できます。)")
     # db.files_download_to_file( "guildsetting.json" , "/guildsetting.json" )
     # db.files_download_to_file( "profiles.json" , "/profiles.json" )
     tks = [

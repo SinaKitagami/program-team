@@ -143,10 +143,11 @@ class manage(commands.Cog):
     async def delmsgs(self, ctx:commands.Context, msgcount:int):
         if  ctx.channel.permissions_for(ctx.guild.me).manage_messages and (ctx.channel.permissions_for(ctx.author).manage_messages or ctx.author.id == 404243934210949120):
             async with ctx.message.channel.typing():
-                dmc = ctx.message
-                await dmc.delete()
-                dr = await dmc.channel.purge(limit=int(msgcount))
-                await ctx.send(await ctx._("delmsgs-del", len(dr)), ephemeral=True)
+                if not ctx.interaction:
+                    dmc = ctx.message
+                    await dmc.delete()
+                dr = await ctx.channel.purge(limit=int(msgcount))
+                await ctx.send(await ctx._("delmsgs-del", len(dr)), ephemeral=True, delete_after=15)
         else:
             await ctx.send("> メッセージ一括削除\n　あなたか私に権限がありません！", ephemeral=True)
 

@@ -240,7 +240,7 @@ class owner(commands.Cog):
         upf = await self.bot.cursor.fetchone(
             "select * from users where id=%s", (ctx.author.id,))
         #upf = await self.bot.cursor.fetchone()
-        if upf["gmod"] is True:
+        if upf["gmod"] == 1:
             async with ctx.channel.typing():
                 for cid in [int(i) for i in cids]:
                     await asyncio.sleep(0.5)
