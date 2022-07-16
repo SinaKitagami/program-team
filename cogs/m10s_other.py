@@ -139,11 +139,11 @@ class other(commands.Cog):
     async def eatit(self, ctx, emoji:str):
         it = emoji.replace(" ","")
         if await ctx.user_lang() == "ja":
-            if await ctx._(f"emoji_react-{it}") == "":
-                await ctx.send(await ctx._("emoji_react-?"))
+            if await ctx._(f"er-{it}") == "":
+                await ctx.send(await ctx._("er-?"))
                 await self.bot.get_channel(993565802030698627).send(f"> 思惟奈のわからない絵文字があったよ。`{str(emoji)}`")
             else:
-                await ctx.send(await ctx._(f"emoji_react-{it}"))
+                await ctx.send(await ctx._(f"er-{it}"))
         else:
             await ctx.send(await ctx._("cannot-run"))
 

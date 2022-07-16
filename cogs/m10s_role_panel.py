@@ -108,7 +108,7 @@ class m10s_role_panel(commands.Cog):
                     await self.bot.cursor.execute("UPDATE role_panels SET roles = %s WHERE id = %s", (json.dumps(pj), pid))
                 except:await ctx.send("DB!")
                 e:discord.Embed =  pmsg.embeds[0]
-                e.add_field(name=str(emoji),value=role.mention)
+                e.add_field(name=str(emoji), value=role.mention)
                 e.set_footer(text=f"最終更新者:{ctx.author}")
                 await pmsg.edit(embed=e)
 
@@ -148,11 +148,11 @@ class m10s_role_panel(commands.Cog):
             if pj.get(str(emoji),None):
                 del pj[str(emoji)]
                 await self.bot.cursor.execute("UPDATE role_panels SET roles = %s WHERE id = %s", (json.dumps(pj), pid))
-                e:discord.Embed =  pmsg.embeds[0]
+                e:discord.Embed = pmsg.embeds[0]
                 e.clear_fields()
-                for k,v in pj.items():
-                    rl = ctx.guild.get_role(v)
-                    e.add_field(name=str(k),value=rl.mention)
+                for k, v in pj.items():
+                    rl = ctx.guild.get_role(int(v))
+                    e.add_field(name=str(k), value=getattr(rl,"mention", "(ロール取得失敗)"))
 
                 e.set_footer(text=f"最終更新者:{ctx.author}")
                 await pmsg.edit(embed=e)

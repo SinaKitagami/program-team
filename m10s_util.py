@@ -65,13 +65,13 @@ def get_vmusic(bot, member):
             try:
                 mg = v.guild
                 mn = bot.qu.get(str(v.guild.id), [])
-                ml = bot.lp.get(str(v.guild.id), [])
+                ml = bot.lp.get(str(v.guild.id), False)
                 mvc = v
                 break
             except:
                 pass
     if mg and mn:
-        return {
+        rtn = {
             "name": mn[0]["video_title"],
             "url": mn[0]["video_url"],
             "uploader":mn[0]["video_up_name"],
@@ -81,8 +81,12 @@ def get_vmusic(bot, member):
             "queue":mn,
             "isPlaying":mvc.is_playing(),
             "loop":ml,
-            "volume":mvc.source.volume
         }
+        if mvc.source:
+            rtn["volume"] = mvc.source.volume
+        else:
+            rtn["volume"] = 0.5
+        return rtn
     else:
         return None
 
@@ -94,7 +98,7 @@ async def get_badges(bot, user):
     }
     uid = user.id
 
-    async with bot.session.get(f"https://discord.com/api/v8/users/{uid}", headers=headers) as resp:
+    async with bot.session.get(f"https://discord.com/api/v10/users/{uid}", headers=headers) as resp:
         resp.raise_for_status()
         rq = await resp.json()
     return m10s_badges(rq["public_flags"])

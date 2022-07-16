@@ -494,18 +494,27 @@ class m10s_re_gchat(commands.Cog):
                 if m.stickers:
                     sticker = m.stickers[0]
                     sembed = discord.Embed(title=f"スタンプ:{sticker.name}",)
-                    if sticker.format == discord.StickerFormatType.png:
+                    if sticker.format == discord.StickerFormatType.png or sticker.format == discord.StickerFormatType.apng:
                         sembed.set_image(url=sticker.url)
-                    elif sticker.format == discord.StickerFormatType.apng:
-                        sembed.set_image(url=f"https://dsticker.herokuapp.com/convert.gif?url={sticker.url}")
                     elif sticker.format == discord.StickerFormatType.lottie:
                         # メモ: https://cdn.discordapp.com/stickers/{id}/{hash}.json?size=1024
                         sembed.description = "画像取得非対応のスタンプです。"
                     embeds.append(sembed)
 
+                file_links = []
+                attachments = []
+                for a in m.attachments:
+                    if a.size > 8388608:
+                        file_links.append(a.url)
+                    else:
+                        attachments.append(a)
+                
+                if file_links:
+                    eb = discord.Embed(title="アップロードサイズオーバーの添付ファイル",description='\n'.join(file_links))
+                    eb.set_footer(text="リンク先の安全性はチーム☆思惟奈ちゃんでは保証しません！自己責任でお願いします。")
+                    embeds.append(eb)
                 
                 embeds = embeds + m.embeds[0:10-len(embeds)]
-                attachments = m.attachments
                 spicon = ""
 
                 if m.author.id in self.bot.team_sina:  # チーム☆思惟奈ちゃん
@@ -520,6 +529,8 @@ class m10s_re_gchat(commands.Cog):
                     spicon = spicon + "🔧"
                 if upf["gstar"]:
                     spicon = spicon + "🌟"
+                if m.author.id in [404243934210949120,694213580517802054,602680118519005184,525658651713601536,524872647042007067,732893750778527764]:
+                    spicon = spicon + "🎶"
                 if spicon == "":
                     spicon = "👤"
                 

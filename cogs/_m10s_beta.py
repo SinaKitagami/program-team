@@ -28,6 +28,7 @@ class m10s_beta(commands.Cog):
         cb:dpyui.interaction_menu_callback = await self.bot.wait_for("menu_select", check=lambda icb:icb.custom_id=="test_1" and icb.message.id==msg.id and icb.clicker_id == ctx.author.id)
         await cb.edit_with_ui(content=f"選択された項目の内部識別文字列一覧:\n{cb.selected_value}", ui=[])
 
+
         
 
 

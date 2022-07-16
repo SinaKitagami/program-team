@@ -105,7 +105,7 @@ class settings(commands.Cog):
         if ctx.author.guild_permissions.administrator or ctx.author.id == 404243934210949120:
             if to:
                 await self.bot.cursor.execute(
-                    "UPDATE guilds SET sendlog = %s WHERE id = %s", (int(to), ctx.guild.id))
+                    "UPDATE guilds SET sendlog = %s WHERE id = %s", (to.id, ctx.guild.id))
                 n = ctx.guild.me.nick
                 await ctx.guild.me.edit(nick="ニックネーム変更テスト")
                 await asyncio.sleep(1)

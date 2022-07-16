@@ -31,10 +31,12 @@ class info_check(commands.Cog):
     @info_group.command(name="user", aliases=["ui", "anyuserinfo"], description="ユーザーに関する情報を表示します。")
     @app_commands.describe(target="表示するメンバー")
     @app_commands.describe(uid="表示する外部ユーザーのID")
-    async def _info_of_user(self, ctx, target:Optional[discord.Member], uid:Optional[str]):
+    async def _info_of_user(self, ctx:commands.Context, target:Optional[discord.Member], uid:Optional[str]):
         if uid:
             uid = int(uid)
         if target:
+            if ctx.interaction:
+                target = ctx.guild.get_member(target.id)
             in_guild = True
         elif uid:
             try:
@@ -77,15 +79,20 @@ class info_check(commands.Cog):
                 menu.add_option("ボイス情報", "voice", "ユーザーのボイス/ステージチャンネルでの状態を表示します。")
         
         if ctx.interaction:
-            await ctx.send("下のパネルで情報を閲覧できます。")
-        msg = await self.bot.dpyui.send_with_ui(ctx.channel, "下から表示したい情報を選んでください。タイムアウトは30秒です。",ui=menu)
+            ctp:dpyui.slash_command_callback = await dpyui.slash_command_callback.from_dpy_interaction(ctx.interaction)
+            await ctp.send_response_with_ui("下から表示したい情報を選んでください。タイムアウトは30秒です。", ui=menu)
+            ctx.interaction.response._responded = True
+            msg = await ctx.interaction.original_message()
+            
+        else:
+            msg = await self.bot.dpyui.send_with_ui(ctx.channel, "下から表示したい情報を選んでください。タイムアウトは30秒です。",ui=menu)
         while True:
             try:
                 cb:dpyui.interaction_menu_callback = await self.bot.wait_for("menu_select", check=lambda icb:icb.custom_id==f"userinfo_{ctx.message.id}" and icb.message.id==msg.id and icb.user_id == ctx.author.id, timeout=30)
             except:
                 return
             e = discord.Embed(title="ユーザー情報", color=self.bot.ec)
-            e.set_author(name=target.name)
+            e.set_author(name=target.name, icon_url=target.display_avatar.url)
             if cb.selected_value[0] == "user_basic":
                 e.description="基本情報ページ"
                 if target.system:
@@ -225,251 +232,163 @@ class info_check(commands.Cog):
             await msg.edit(content="",embed=e)
 
     @info_group.command(name="server",aliases=["si"], description="サーバーについての情報を表示します。")
-    async def ginfo(self, ctx):
+    async def ginfo(self, ctx:commands.Context):
+        u = ctx.author
+        # b = ctx.guild.me
         gp = await self.bot.cursor.fetchone("select * from guilds where id = %s",(ctx.guild.id,))
         #gp = await self.bot.cursor.fetchone()
-        if gp["verified"]:
-            ptn = f'{await ctx._("sina_verified_guild")}:'
+        menu = dpyui.interaction_menu(f"serverinfo_{ctx.message.id}","表示する項目をここから選択",1,1)
+        menu.add_option("概要","description","サーバー概要を表示します。")
+        menu.add_option("ロール","role","ロール一覧を表示します。")
+        menu.add_option("絵文字","emoji","絵文字一覧を表示します。")
+        menu.add_option("チャンネル","channels","チャンネル一覧を表示します。")
+        if u.guild_permissions.manage_guild and u.guild_permissions.create_instant_invite:
+            menu.add_option("ウィジェット","widget","サーバーウィジェットを表示します。")
+        menu.add_option("カスタム招待リンク","custom_invite","カスタム招待リンクを表示します。")
+        menu.add_option("安全設定","safety_setting","ユーザーの安全性にかかわる設定を表示します。")
+        if u.guild_permissions.ban_members:
+            menu.add_option("BANしたユーザー","banned_user","BANされているメンバー一覧を表示します。")
+        if u.guild_permissions.manage_guild:
+            menu.add_option("コミュニティ設定","community","コミュニティの設定を表示します。")
+            menu.add_option("ようこそ画面","welcome_screen","ようこそ画面の状態を表示します。")
+        menu.add_option("サーバーブースト","boost_status","サーバーブーストと追加要素を表示します。")
+        menu.add_option("メンバー","members","メンバー一覧状態を表示します。")
+        if u.guild_permissions.manage_guild and u.guild_permissions.create_instant_invite:
+            menu.add_option("招待リンク","invites","作成されている招待リンク一覧を表示します。")
+        menu.add_option("思惟奈ちゃんプロファイル","profile","思惟奈ちゃん内での情報を表示します。")
+        menu.add_option("その他","other","その他、サーバーに関する情報を表示します。")
+
+        if ctx.interaction:
+            ctp:dpyui.slash_command_callback = await dpyui.slash_command_callback.from_dpy_interaction(ctx.interaction)
+            await ctp.send_response_with_ui("下から表示したい情報を選んでください。タイムアウトは30秒です。", ui=menu)
+            ctx.interaction.response._responded = True
+            msg = await ctx.interaction.original_message()
         else:
-            ptn = ""
-        if "PARTNER" in ctx.guild.features:
-            ptn = ptn+f'{await ctx._("discord_partner_guild")}:'
-        pmax = 12 if "COMMUNITY" in ctx.guild.features else 11
-        page = 0
-        e = discord.Embed(title=await ctx._("ginfo-ov-title"), color=self.bot.ec)
-        if ctx.guild.icon:
-            e.set_author(name=f"{ptn}{ctx.guild.name}",
-                        icon_url=ctx.guild.icon.replace(static_format='png'))
-        else:
-            e.set_author(name=f"{ptn}{ctx.guild.name}")
-        #e.add_field(name=await ctx._("ginfo-region"), value=ctx.guild.region)
-        e.add_field(name=await ctx._("ginfo-afkch"), value=ctx.guild.afk_channel)
-        if ctx.guild.afk_channel:
-            e.add_field(name=await ctx._("ginfo-afktout"),
-                        value=f"{ctx.guild.afk_timeout/60}min")
-        else:
-            e.add_field(name=await ctx._("ginfo-afktout"),
-                        value=await ctx._("ginfo-afknone"))
-        e.add_field(name=await ctx._("ginfo-sysch"), value=ctx.guild.system_channel)
-        e.add_field(name=await ctx._("ginfo-memjoinnotif"),
-                    value=ctx.guild.system_channel_flags.join_notifications)
-        e.add_field(name=await ctx._("ginfo-serverboostnotif"),
-                    value=ctx.guild.system_channel_flags.premium_subscriptions)
-        if ctx.guild.default_notifications == discord.NotificationLevel.all_messages:
-            e.add_field(name=await ctx._("ginfo-defnotif"),
-                        value=await ctx._("ginfo-allmsg"))
-        else:
-            e.add_field(name=await ctx._("ginfo-defnotif"),
-                        value=await ctx._("ginfo-omention"))
-        if "INVITE_SPLASH" in ctx.guild.features and ctx.guild.splash:
-            e.add_field(name=await ctx._("ginfo-invitesp"),
-                        value=await ctx._("ginfo-invitesp-pos"))
-            e.set_image(url=ctx.guild.splash.replace(static_format="png").url)
-        if "BANNER" in ctx.guild.features and ctx.guild.banner:
-            e.add_field(name=await ctx._("ginfo-banner"),
-                        value=await ctx._("ginfo-banner-pos"))
-            e.set_thumbnail(url=ctx.guild.banner.replace(static_format="png").url)
-        mp = await ctx.send(embed=e)
-        await mp.add_reaction(self.bot.get_emoji(653161518195671041))
-        await mp.add_reaction(self.bot.get_emoji(653161518170505216))
+            msg = await self.bot.dpyui.send_with_ui(ctx.channel, "下から表示したい情報を選んでください。タイムアウトは30秒です。",ui=menu)
         while True:
             try:
-                r, u = await self.bot.wait_for("reaction_add", check=lambda r, u: r.message.id == mp.id and u.id == ctx.message.author.id, timeout=30)
+                cb:dpyui.interaction_menu_callback = await self.bot.wait_for("menu_select", check=lambda icb:icb.custom_id==f"serverinfo_{ctx.message.id}" and icb.message.id==msg.id and icb.user_id == ctx.author.id, timeout=30)
             except:
-                break
-            try:
-                await mp.remove_reaction(r, u)
-            except:
+                return
+            e = discord.Embed(title="サーバー情報", color=self.bot.ec)
+            e.set_author(name=ctx.guild.name, icon_url=getattr(ctx.guild.icon,"id", None))
+            if cb.selected_value[0] == "description":
+                e.add_field(name="AFKチャンネル/タイムアウト時間", value=f"{ctx.guild.afk_channel}/{ctx.guild.afk_timeout}")
+                sysch_setting = []
+                if ctx.guild.system_channel_flags.join_notifications:
+                    sysch_setting.append("メンバー参加時のメッセージ")
+                if ctx.guild.system_channel_flags.join_notification_replies:
+                    sysch_setting.append("ウェルカムメッセージへのスタンプ返信の提案")
+                if ctx.guild.system_channel_flags.premium_subscriptions:
+                    sysch_setting.append("サーバーブースト時のメッセージ")
+                if ctx.guild.system_channel_flags.guild_reminder_notifications:
+                    sysch_setting.append("サーバー設定に役立つヒント")
+                e.add_field(name="システムメッセージチャンネル設定", value=f"{ctx.guild.system_channel}/(`{'`,`'.join(sysch_setting) or '(なし)'})`")
+                e.add_field(name="デフォルト通知設定", value=ctx.guild.default_notifications)
+                e.add_field(name="ブースト進捗バーの表示", value=ctx.guild.premium_progress_bar_enabled)
+            elif cb.selected_value[0] == "role":
+                rl = ctx.guild.roles[::-1]
+                rls = ""
+                for r in rl:
+                    if len(f"{rls}\n{r.name}") >= 1998:
+                        rls = rls+"\n…"
+                        break
+                    else:
+                        rls = f"{rls}\n{r.name}"
+                e.description = rls
+            elif cb.selected_value[0] == "emoji":
+                ejs = ""
+                for i in ctx.guild.emojis:
+                    if len(ejs + "," + str(i)) >= 1998:
+                        ejs = ejs+"など"
+                        break
+                    else:
+                        ejs = ejs + "," + str(i)
+                e.description = ejs
+            elif cb.selected_value[0] == "channels":
+                for mct, mch in ctx.guild.by_category():
+                    chs = "\n".join([i.name for i in mch])
+                    e.add_field(name=str(mct).replace("None", await ctx._(
+                        "ginfo-nocate")), value=f"```{chs}```", inline=True)
+            elif cb.selected_value[0] == "widget":
+                if ctx.guild.widget_enabled:
+                    wd = await ctx.guild.widget()
+                    e.add_field(name="json_url", value=wd.json_url)
+                    e.add_field(name="招待リンク", value=wd.invite_url)
+
+            elif cb.selected_value[0] == "custom_invite":
+                try:
+                    vi = await ctx.guild.vanity_invite()
+                    vi = vi.code
+                except:
+                    vi = "このサーバーには、カスタム招待リンクがありません"
+                e.description = vi
+            elif cb.selected_value[0] == "safety_setting":
+                if ctx.guild.verification_level == discord.VerificationLevel.none:
+                    e.add_field(name=await ctx._("ginfo-vlevel"),
+                                value=await ctx._("ginfo-vlnone"))
+                elif ctx.guild.verification_level == discord.VerificationLevel.low:
+                    e.add_field(name=await ctx._("ginfo-vlevel"),
+                                value=await ctx._("ginfo-vl1"))
+                elif ctx.guild.verification_level == discord.VerificationLevel.medium:
+                    e.add_field(name=await ctx._("ginfo-vlevel"),
+                                value=await ctx._("ginfo-vl2"))
+                elif ctx.guild.verification_level == discord.VerificationLevel.high:
+                    e.add_field(name=await ctx._("ginfo-vlevel"),
+                                value=await ctx._("ginfo-vl3"))
+                elif ctx.guild.verification_level == discord.VerificationLevel.highest:
+                    e.add_field(name=await ctx._("ginfo-vlevel"),
+                                value=await ctx._("ginfo-vl4"))
+                if ctx.guild.explicit_content_filter == discord.ContentFilter.disabled:
+                    e.add_field(name=await ctx._("ginfo-filter"),
+                                value=await ctx._("ginfo-fnone"))
+                elif ctx.guild.explicit_content_filter == discord.ContentFilter.no_role:
+                    e.add_field(name=await ctx._("ginfo-filter"),
+                                value=await ctx._("ginfo-f1"))
+                elif ctx.guild.explicit_content_filter == discord.ContentFilter.all_members:
+                    e.add_field(name=await ctx._("ginfo-filter"),
+                                value=await ctx._("ginfo-f2"))
+            elif cb.selected_value[0] == "banned_user":
+                vbl = await ctx._("ginfo-strlenover")
+                bl = []
+                async for i in ctx.guild.bans():
+                    bl.append(f"{i.user},reason:{i.reason}")
+                if len("\n".join(bl)) <= 1024:
+                    vbl = "\n".join(bl)
+                e.description = vbl
+            elif cb.selected_value[0] == "community":
+                e.description = ctx.guild.description or "概要なし"
+                e.add_field(name="優先言語", value=ctx.guild.preferred_locale)
+                e.add_field(name="ルールチャンネル",
+                            value=ctx.guild.rules_channel.mention)
+                e.add_field(name="コミュニティ更新情報チャンネル",
+                            value=ctx.guild.public_updates_channel.mention)
+            elif cb.selected_value[0] == "welcome_screen":
                 pass
-            if str(r) == str(self.bot.get_emoji(653161518170505216)):
-                if page == pmax:
-                    page = 0
-                else:
-                    page = page + 1
-            elif str(r) == str(self.bot.get_emoji(653161518195671041)):
-                if page == 0:
-                    page = pmax
-                else:
-                    page = page - 1
-            try:
-                if page == 0:
-                    # 概要
-                    e = discord.Embed(title=await ctx._(
-                        "ginfo-ov-title"), color=self.bot.ec)
-                    e.set_author(name=f"{ptn}{ctx.guild.name}", icon_url=ctx.guild.icon.replace(
-                        static_format='png'))
-                    e.add_field(name=await ctx._("ginfo-region"),
-                                value=ctx.guild.region)
-                    e.add_field(name=await ctx._("ginfo-afkch"),
-                                value=ctx.guild.afk_channel)
-                    if ctx.guild.afk_channel:
-                        e.add_field(name=await ctx._("ginfo-afktout"),
-                                    value=f"{ctx.guild.afk_timeout/60}min")
-                    else:
-                        e.add_field(name=await ctx._("ginfo-afktout"),
-                                    value=await ctx._("ginfo-afknone"))
-                    e.add_field(name=await ctx._("ginfo-sysch"),
-                                value=ctx.guild.system_channel)
-                    e.add_field(name=await ctx._("ginfo-memjoinnotif"),
-                                value=ctx.guild.system_channel_flags.join_notifications)
-                    e.add_field(name=await ctx._("ginfo-serverboostnotif"),
-                                value=ctx.guild.system_channel_flags.premium_subscriptions)
-                    if ctx.guild.default_notifications == discord.NotificationLevel.all_messages:
-                        e.add_field(name=await ctx._("ginfo-defnotif"),
-                                    value=await ctx._("ginfo-allmsg"))
-                    else:
-                        e.add_field(name=await ctx._("ginfo-defnotif"),
-                                    value=await ctx._("ginfo-omention"))
-                    if "INVITE_SPLASH" in ctx.guild.features:
-                        e.add_field(name=await ctx._("ginfo-invitesp"),
-                                    value=await ctx._("ginfo-invitesp-pos"))
-                        e.set_image(url=ctx.guild.splash_url_as(format="png"))
-                    if "BANNER" in ctx.guild.features:
-                        e.add_field(name=await ctx._("ginfo-banner"),
-                                    value=await ctx._("ginfo-banner-pos"))
-                        e.set_thumbnail(
-                            url=ctx.guild.banner_url_as(format="png"))
-                    await mp.edit(embed=e)
-                elif page == 1:
-                    # 管理
-                    e = discord.Embed(title=await ctx._(
-                        "ginfo-manage"), color=self.bot.ec)
-                    if ctx.guild.verification_level == discord.VerificationLevel.none:
-                        e.add_field(name=await ctx._("ginfo-vlevel"),
-                                    value=await ctx._("ginfo-vlnone"))
-                    elif ctx.guild.verification_level == discord.VerificationLevel.low:
-                        e.add_field(name=await ctx._("ginfo-vlevel"),
-                                    value=await ctx._("ginfo-vl1"))
-                    elif ctx.guild.verification_level == discord.VerificationLevel.medium:
-                        e.add_field(name=await ctx._("ginfo-vlevel"),
-                                    value=await ctx._("ginfo-vl2"))
-                    elif ctx.guild.verification_level == discord.VerificationLevel.high:
-                        e.add_field(name=await ctx._("ginfo-vlevel"),
-                                    value=await ctx._("ginfo-vl3"))
-                    elif ctx.guild.verification_level == discord.VerificationLevel.highest:
-                        e.add_field(name=await ctx._("ginfo-vlevel"),
-                                    value=await ctx._("ginfo-vl4"))
-                    if ctx.guild.explicit_content_filter == discord.ContentFilter.disabled:
-                        e.add_field(name=await ctx._("ginfo-filter"),
-                                    value=await ctx._("ginfo-fnone"))
-                    elif ctx.guild.explicit_content_filter == discord.ContentFilter.no_role:
-                        e.add_field(name=await ctx._("ginfo-filter"),
-                                    value=await ctx._("ginfo-f1"))
-                    elif ctx.guild.explicit_content_filter == discord.ContentFilter.all_members:
-                        e.add_field(name=await ctx._("ginfo-filter"),
-                                    value=await ctx._("ginfo-f2"))
-                    await mp.edit(embed=e)
-                elif page == 2:
-                    # roles
-                    if ctx.author.guild_permissions.manage_roles or ctx.author.id == 404243934210949120:
-                        rl = ctx.guild.roles[::-1]
-                        rls = ""
-                        for r in rl:
-                            if len(f"{rls}\n{r.name}") >= 1998:
-                                rls = rls+"\n…"
-                                break
-                            else:
-                                rls = f"{rls}\n{r.name}"
-                        await mp.edit(embed=discord.Embed(title=await ctx._("ginfo-roles"), description=rls, color=self.bot.ec))
-                    else:
-                        await mp.edit(embed=discord.Embed(title=await ctx._("ginfo-roles"), description=await ctx._("ginfo-cantview"), color=self.bot.ec))
-                elif page == 3:
-                    # emoji
-                    ejs = ""
-                    for i in ctx.guild.emojis:
-                        if len(ejs + "," + str(i)) >= 1998:
-                            ejs = ejs+"など"
-                            break
-                        else:
-                            ejs = ejs + "," + str(i)
-                    await mp.edit(embed=discord.Embed(title=await ctx._("ginfo-emoji"), description=ejs, color=self.bot.ec))
-                elif page == 4:
-                    # webhooks
-                    if ctx.author.guild_permissions.manage_webhooks or ctx.author.id == 404243934210949120:
-                        await mp.edit(embed=discord.Embed(title="webhooks", description="\n".join([f"{i.name},[link]({i.url}),created by {i.user}" for i in await ctx.guild.webhooks()]), color=self.bot.ec))
-                    else:
-                        await mp.edit(embed=discord.Embed(title="webhooks", description=await ctx._("ginfo-cantview"), color=self.bot.ec))
-                elif page == 5:
-                    # ウィジェット
-                    if ctx.author.guild_permissions.manage_guild or ctx.author.id == 404243934210949120:
-                        try:
-                            wdt = await ctx.guild.widget()
-                            await mp.edit(embed=discord.Embed(title=await ctx._("ginfo-widget"), description=f"URL: {wdt.json_url}", color=self.bot.ec))
-                        except:
-                            await mp.edit(embed=discord.Embed(title=await ctx._("ginfo-widget"), description=await ctx._("ginfo-ctuw"), color=self.bot.ec))
-                    else:
-                        await mp.edit(embed=discord.Embed(title=await ctx._("ginfo-widget"), description=await ctx._("ginfo-cantview"), color=self.bot.ec))
-                elif page == 6:
-                    # Nitro server boost
-                    e = discord.Embed(title=str(self.bot.get_emoji(653161518971617281))+"Nitro Server Boost",
-                                      description=f"Level:{ctx.guild.premium_tier}\n({ctx.guild.premium_subscription_count})", color=self.bot.ec)
-                    e.add_field(name=await ctx._("ginfo-bst-add"),
-                                value=await ctx._(f"ginfo-blev{ctx.guild.premium_tier}"))
-                    await mp.edit(embed=e)
-                elif page == 7:
-                    # member
-                    vml = await ctx._("ginfo-strlenover")
-                    if len("\n".join([f"{str(i)}" for i in ctx.guild.members])) <= 1024:
-                        vml = "\n".join([f"{str(i)}" for i in ctx.guild.members]).replace(
-                            str(ctx.guild.owner), f"👑{str(ctx.guild.owner)}")
-                    await mp.edit(embed=discord.Embed(title="member", description=f"member count:{len(ctx.guild.members)}\n```"+vml+"```"), color=self.bot.ec)
-                elif page == 8:
-                    if ctx.author.guild_permissions.manage_guild or ctx.author.id == 404243934210949120:
-                        try:
-                            vi = await ctx.guild.vanity_invite()
-                            vi = vi.code
-                        except:
-                            vi = "NF_VInvite"
-                        # invites
-                        vil = await ctx._("ginfo-strlenover")
-                        if len("\n".join([f'{i.code},{await ctx._("ginfo-use-invite")}:{i.uses}/{i.max_uses},{await ctx._("ginfo-created-invite")}:{i.inviter}' for i in await ctx.guild.invites()])) <= 1023:
-                            vil = "\n".join([f'{i.code},{await ctx._("ginfo-use-invite")}:{i.uses}/{i.max_uses},{await ctx._("ginfo-created-invite")}:{i.inviter}' for i in await ctx.guild.invites()]).replace(vi, f"{self.bot.get_emoji(653161518103265291)}{vi}")
-                        await mp.edit(embed=discord.Embed(title=await ctx._("ginfo-invites"), description=vil, color=self.bot.ec))
-                    else:
-                        await mp.edit(embed=discord.Embed(title=await ctx._("ginfo-invites"), description=await ctx._("ginfo-cantview"), color=self.bot.ec))
-                elif page == 9:
-                    if ctx.author.guild_permissions.ban_members or ctx.author.id == 404243934210949120:
-                        # ban_user
-                        vbl = await ctx._("ginfo-strlenover")
-                        bl = []
-                        for i in await ctx.guild.bans():
-                            bl.append(f"{i.user},reason:{i.reason}")
-                        if len("\n".join(bl)) <= 1024:
-                            vbl = "\n".join(bl)
-                        await mp.edit(embed=discord.Embed(title=await ctx._("ginfo-banneduser"), description=vbl), color=self.bot.ec)
-                    else:
-                        await mp.edit(embed=discord.Embed(title=await ctx._("ginfo-banneduser"), description=await ctx._("ginfo-cantview"), color=self.bot.ec))
-                elif page == 10:
-                    # サーバーのチャンネル
-                    e = discord.Embed(title=await ctx._(
-                        "ginfo-chlist"), color=self.bot.ec)
-                    for mct, mch in ctx.guild.by_category():
-                        chs = "\n".join([i.name for i in mch])
-                        e.add_field(name=str(mct).replace("None", await ctx._(
-                            "ginfo-nocate")), value=f"```{chs}```", inline=True)
-                    await mp.edit(embed=e)
-                elif page == 11:
-                    gs = await self.bot.cursor.fetchone(
-                        "select * from guilds where id=%s", (ctx.guild.id,))
-                    #gs = await self.bot.cursor.fetchone()
-                    e = discord.Embed(title="other", color=self.bot.ec)
-                    e.add_field(name="owner", value=ctx.guild.owner.mention)
-                    e.add_field(name="features",
-                                value=f"```{','.join(ctx.guild.features)}```")
-                    e.add_field(name=await ctx._("ginfo-sinagprofile"), value=await ctx._(
-                        "ginfo-gprodesc", gs["reward"], gs["sendlog"], gs["prefix"], gs["lang"],))
-                    await mp.edit(embed=e)
-                elif page == 12:
-                    e = discord.Embed(
-                        title="コミュニティサーバー設定", description=ctx.guild.description or "概要なし", color=self.bot.ec)
-                    e.add_field(name="優先言語", value=ctx.guild.preferred_locale)
-                    e.add_field(name="ルールチャンネル",
-                                value=ctx.guild.rules_channel.mention)
-                    e.add_field(name="コミュニティ更新情報チャンネル",
-                                value=ctx.guild.public_updates_channel.mention)
-                    await mp.edit(embed=e)
-            except:
-                await mp.edit(embed=discord.Embed(title=await ctx._("ginfo-anyerror-title"), description=await ctx._("ginfo-anyerror-desc", traceback.format_exc(0)), color=self.bot.ec))
+            elif cb.selected_value[0] == "boost_status":
+                e.description=f"レベル:{ctx.guild.premium_tier}\n({ctx.guild.premium_subscription_count}ブースト)"
+                e.add_field(name=await ctx._("ginfo-bst-add"),
+                            value=await ctx._(f"ginfo-blev{ctx.guild.premium_tier}"))
+            elif cb.selected_value[0] == "members":
+                vml = await ctx._("ginfo-strlenover")
+                if len("\n".join([f"{str(i)}" for i in ctx.guild.members])) <= 1024:
+                    vml = "\n".join([f"{str(i)}" for i in ctx.guild.members]).replace(
+                        str(ctx.guild.owner), f"👑{str(ctx.guild.owner)}")
+                e.description=f"member count:{len(ctx.guild.members)}\n```"+vml+"```"
+            elif cb.selected_value[0] == "invites":
+                vil = await ctx._("ginfo-strlenover")
+                if len("\n".join([f'{i.code},{await ctx._("ginfo-use-invite")}:{i.uses}/{i.max_uses},{await ctx._("ginfo-created-invite")}:{i.inviter}' for i in await ctx.guild.invites()])) <= 1023:
+                    vil = "\n".join([f'{i.code},{await ctx._("ginfo-use-invite")}:{i.uses}/{i.max_uses},{await ctx._("ginfo-created-invite")}:{i.inviter}' for i in await ctx.guild.invites()])
+                e.description=vil
+            elif cb.selected_value[0] == "profile":
+                e.description = await ctx._(
+                    "ginfo-gprodesc", gp["reward"], gp["sendlog"], gp["prefix"], gp["lang"],)
+            elif cb.selected_value[0] == "other":
+                e.add_field(name="owner", value=ctx.guild.owner.mention)
+                e.add_field(name="features", value=f"```{','.join(ctx.guild.features)}```")
+            await cb.response()
+            await msg.edit(content="",embed=e)
+
 
     @info_group.command(name="role", aliases=["役職情報", "次の役職について教えて"], description="特定役職について表示します。")
     @app_commands.describe(role="表示する役職")
@@ -511,7 +430,7 @@ class info_check(commands.Cog):
     @info_group.command(name="invite", description="招待情報を表示します。")
     @app_commands.describe(invite="表示する招待")
     async def cinvite(self, ctx, invite:str):
-        i = await self.bot.fetch_invite(invite)
+        i:discord.Invite = await self.bot.fetch_invite(invite)
         e = discord.Embed(title=await ctx._(
             "cinvite-title"), description=await ctx._("cinvite-from", str(i.inviter)), color=self.bot.ec)
         e.set_author(name=f'{i.guild.name}({i.guild.id})',
@@ -522,9 +441,17 @@ class info_check(commands.Cog):
                     value=f"{i.channel.name}({i.channel.type})")
         e.add_field(name=await ctx._("cinvite-tmp"), value=str(i.temporary))
         e.add_field(name=await ctx._("cinvite-deleted"), value=str(i.revoked))
+        e.add_field(name="サーバーのブースト数", value=i.guild.premium_subscription_count)
         e.add_field(name=await ctx._("cinvite-link"), value=i.url, inline=False)
+        e.add_field(name="サーバーのfeatures",value=f"```{','.join(i.guild.features)}```", inline=False)
+
+
+        if i.guild.splash:
+            e.set_thumbnail(url=i.guild.splash.replace(static_format="png"))
+        if i.guild.banner:
+            e.set_image(url=i.guild.banner.replace(static_format="png"))
         e.set_footer(text=await ctx._("cinvite-createdat"))
-        e.timestamp = i.created_at or discord.Embed.Empty
+        e.timestamp = i.created_at or None
         await ctx.send(embed=e)
 
     @info_group.command(name="activity",description="アクティビティについて表示します。")
@@ -537,7 +464,10 @@ class info_check(commands.Cog):
             else:
                 info = ctx.author
         else:
-            info = mus
+            if ctx.interaction:
+                info = ctx.guild.get_member(mus.id)
+            else:
+                info = mus
         lmsc = ut.get_vmusic(self.bot, info)
         activs = []
         embeds = []

@@ -617,6 +617,8 @@ async def on_guild_channel_update(b, a):
                 ch = bot.get_channel(gpf["sendlog"])
                 if ch.guild.id == a.guild.id:
                     await ch.send(embed=e)
+    elif a.position != b.position:
+        pass
     elif not b.changed_roles == a.changed_roles:
         e.add_field(name="変更内容", value="権限の上書き")
         e.add_field(name="確認:", value="チャンネル設定を見てください。")
@@ -826,7 +828,9 @@ async def on_ready():
             "hybrid._m10s_quick_cmd",
             "hybrid.m10s_levels",
             "hybrid.m10s_music",
-            "hybrid.info_check"
+            "hybrid.info_check",
+            "hybrid.m10s_help",
+            # todo: "m10s_guild_log"
             ]
     
     embed = discord.Embed(title="読み込みに失敗したCog", color=bot.ec)
@@ -1123,95 +1127,6 @@ async def rtopic(ctx, ch:discord.TextChannel=None):
     else:
         await ctx.send("サーバー管理者である必要があります。")
 
-
-bot.remove_command('help')
-
-
-@bot.hybrid_command(description="Botのヘルプを表示します。")
-@app_commands.describe(rcmd="詳細表示するコマンド")
-@commands.bot_has_permissions(embed_links=True, external_emojis=True, add_reactions=True)
-@app_commands.checks.bot_has_permissions(embed_links=True, external_emojis=True, add_reactions=True)
-async def help(ctx, rcmd:str=None):
-    # ヘルプ内容
-    if rcmd is None:
-        page = 1
-        embed = discord.Embed(title=await ctx._("help-1-t"),
-                              description=await ctx._("help-1-d"), color=bot.ec)
-        embed.set_footer(text=f"page:{page}")
-        msg = await ctx.send("> ヘルプと呼び出し方が変更になっている機能が、多くあります。\n\
-それらのコマンドはスラッシュコマンド(`/`を入力することで一覧が表示されます。)での使用を強くお勧めします。\n\
-サポートサーバーの質問チャンネルで、変更に関しての質問はうかがいます。", embed=embed)
-        await msg.add_reaction(bot.get_emoji(653161518195671041))
-        await msg.add_reaction(bot.get_emoji(653161518170505216))
-        await msg.add_reaction("🔍")
-        while True:
-            try:
-                r, u = await bot.wait_for("reaction_add", check=lambda r, u: r.message.id == msg.id and u.id == ctx.message.author.id, timeout=30)
-            except:
-                break
-            try:
-                await msg.remove_reaction(r, u)
-            except:
-                pass
-            if str(r) == str(bot.get_emoji(653161518170505216)):
-                if page == 17:
-                    page = 1
-                else:
-                    page = page + 1
-                embed = discord.Embed(title=await ctx._(
-                    f"help-{page}-t"), description=await ctx._(f"help-{page}-d"), color=bot.ec)
-                embed.set_footer(text=f"page:{page}")
-                await msg.edit(embed=embed)
-            elif str(r) == str(bot.get_emoji(653161518195671041)):
-                if page == 1:
-                    page = 17
-                else:
-                    page = page - 1
-                embed = discord.Embed(title=await ctx._(
-                    f"help-{page}-t"), description=await ctx._(f"help-{page}-d"), color=bot.ec)
-                embed.set_footer(text=f"page:{page}")
-                await msg.edit(embed=embed)
-            elif str(r) == "🔍":
-                await msg.remove_reaction(bot.get_emoji(653161518195671041), bot.user)
-                await msg.remove_reaction("🔍", bot.user)
-                await msg.remove_reaction(bot.get_emoji(653161518170505216), bot.user)
-                qm = await ctx.send(await ctx._("help-s-send"))
-                try:
-                    msg = await bot.wait_for('message', check=lambda m: m.author == ctx.author and m.channel == ctx.channel, timeout=60)
-                    sewd = msg.content
-                except asyncio.TimeoutError:
-                    pass
-                else:
-                    try:
-                        await msg.delete()
-                        await qm.delete()
-                    except:
-                        pass
-                    async with ctx.message.channel.typing():
-                        lang = await ctx.user_lang() or "ja"
-                        with open(f"lang/{lang}.json", "r", encoding="utf-8") as j:
-                            f = json.load(j)
-                        sre = discord.Embed(title=await ctx._(
-                            "help-s-ret-title"), description=await ctx._("help-s-ret-desc", sewd), color=bot.ec)
-                        for k, v in f.items():
-                            if k.startswith("nh-"):
-                                if sewd in k.replace("nh-", "") or sewd in str(v):
-                                    sre.add_field(name=k.replace(
-                                        "nh-", ""), value=f"詳細を見るには`s-help {k.replace('nh-','')}`と送信")
-                    await ctx.send(embed=sre)
-        try:
-            await msg.remove_reaction(bot.get_emoji(653161518195671041), bot.user)
-            await msg.remove_reaction("🔍", bot.user)
-            await msg.remove_reaction(bot.get_emoji(653161518170505216), bot.user)
-        except:
-            pass
-    else:
-        dcmd = await ctx._(f"nh-{str(rcmd)}")
-        if str(dcmd) == "":
-            await ctx.send(await ctx._("h-notfound"))
-        else:
-            embed = ut.getEmbed(dcmd[0], dcmd[1], bot.ec, *dcmd[2:])
-            await ctx.send(embed=embed)
 
 
 @bot.event
