@@ -6,6 +6,8 @@ import asyncio
 import re
 import json
 
+from discord import app_commands
+
 import m10s_util as ut
 """↑様々な便利コマンド詰め合わせ
 ut.ondevicon(Member)
@@ -27,7 +29,7 @@ class m10s_role_panel(commands.Cog):
         self.bot = bot
         self.e_check = self.bot.get_emoji(653161518103265291)
 
-    @commands.group(name="rolepanel",aliases=["paneledit"])
+    @commands.hybrid_group(name="rolepanel",aliases=["paneledit"])
     @commands.has_permissions(administrator=True)
     @commands.bot_has_permissions(manage_messages=True, manage_roles=True)
     async def role_panel(self, ctx:commands.Context):
@@ -39,7 +41,7 @@ class m10s_role_panel(commands.Cog):
             `delete [(このチャンネルにある)パネルID]`:該当パネルを削除します。
             """)
 
-    @role_panel.command(name="create")
+    @role_panel.command(name="create", description="新規役職パネルを発行します。")
     async def p_create(self,ctx):
         m = await ctx.send("> パネル発行の確認\nこのチャンネルにパネルを発行してもよろしいですか？")
         await m.add_reaction(self.e_check)
@@ -56,8 +58,8 @@ class m10s_role_panel(commands.Cog):
             else:
                 await m.edit(content="> パネルは発行されていません！\n作成はキャンセルされました。")
         
-    @role_panel.command(name="delete")
-    async def p_delete(self,ctx,pid):
+    @role_panel.command(name="delete", description="役職パネルを削除します。")
+    async def p_delete(self, ctx, pid:str):
         try:
             pid = int(pid)
         except:
@@ -74,7 +76,7 @@ class m10s_role_panel(commands.Cog):
                 await m.edit(content="> パネルは削除されていません！\n時間内に応答がなかったため、削除はキャンセルされました。")
             else:
                 if r.emoji == self.e_check:
-                    await self.bot.cursor.execute("DELETE FROM role_panels WHERE id == %s", (pid,))
+                    await self.bot.cursor.execute("DELETE FROM role_panels WHERE id = %s", (pid,))
                     try:
                         msg = await ctx.channel.fetch_mesasge(pid)
                         await msg.delete()
@@ -85,8 +87,11 @@ class m10s_role_panel(commands.Cog):
                     await m.edit(content="> パネルは削除されていません！\n削除はキャンセルされました。")
 
 
-    @role_panel.command(name="add")
-    async def p_add(self,ctx,pid,emoji,role:commands.RoleConverter):
+    @role_panel.command(name="add", description="パネルに役職を追加します。")
+    @app_commands.describe(pid="役職パネルのID")
+    @app_commands.describe(emoji="付与するときに使う絵文字")
+    @app_commands.describe(role="付与する役職")
+    async def p_add(self,ctx,pid:str,emoji:str,role:discord.Role):
         try:
             pid = int(pid)
             pmsg = await ctx.channel.fetch_message(pid)
@@ -103,7 +108,7 @@ class m10s_role_panel(commands.Cog):
                     await self.bot.cursor.execute("UPDATE role_panels SET roles = %s WHERE id = %s", (json.dumps(pj), pid))
                 except:await ctx.send("DB!")
                 e:discord.Embed =  pmsg.embeds[0]
-                e.add_field(name=str(emoji),value=role.mention)
+                e.add_field(name=str(emoji), value=role.mention)
                 e.set_footer(text=f"最終更新者:{ctx.author}")
                 await pmsg.edit(embed=e)
 
@@ -126,8 +131,10 @@ class m10s_role_panel(commands.Cog):
         else:
             await ctx.send("> 役職パネル\n　該当IDのパネルがありません！")
 
-    @role_panel.command(name="remove")
-    async def p_remove(self,ctx,pid,emoji):
+    @role_panel.command(name="remove",description="パネルから役職を取り除きます。")
+    @app_commands.describe(pid="役職パネルのID")
+    @app_commands.describe(emoji="取り除きたい役職に紐づいている絵文字")
+    async def p_remove(self,ctx,pid:str,emoji:str):
         try:
             pid = int(pid)
             pmsg = await ctx.channel.fetch_message(pid)
@@ -141,11 +148,11 @@ class m10s_role_panel(commands.Cog):
             if pj.get(str(emoji),None):
                 del pj[str(emoji)]
                 await self.bot.cursor.execute("UPDATE role_panels SET roles = %s WHERE id = %s", (json.dumps(pj), pid))
-                e:discord.Embed =  pmsg.embeds[0]
+                e:discord.Embed = pmsg.embeds[0]
                 e.clear_fields()
-                for k,v in pj.items():
-                    rl = ctx.guild.get_role(v)
-                    e.add_field(name=str(k),value=rl.mention)
+                for k, v in pj.items():
+                    rl = ctx.guild.get_role(int(v))
+                    e.add_field(name=str(k), value=getattr(rl,"mention", "(ロール取得失敗)"))
 
                 e.set_footer(text=f"最終更新者:{ctx.author}")
                 await pmsg.edit(embed=e)
@@ -165,7 +172,7 @@ class m10s_role_panel(commands.Cog):
                             await ctx.send("付与できていないリアクションがあります。該当の役職はリアクションでの付与ができません。")
 
             else:
-                await ctx.send(">役職パネル\n　該当絵文字を使用した役職付与が既に存在します！")
+                await ctx.send(">役職パネル\n　該当絵文字を使用した役職付与が存在しません！")
         else:
             await ctx.send("> 役職パネル\n　該当IDのパネルがありません！")
 

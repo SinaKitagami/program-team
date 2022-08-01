@@ -8,6 +8,7 @@ import traceback
 import m10s_util as ut
 import textwrap
 
+from discord import app_commands
 
 class owner(commands.Cog):
 
@@ -239,7 +240,7 @@ class owner(commands.Cog):
         upf = await self.bot.cursor.fetchone(
             "select * from users where id=%s", (ctx.author.id,))
         #upf = await self.bot.cursor.fetchone()
-        if upf["gmod"] is True:
+        if upf["gmod"] == 1:
             async with ctx.channel.typing():
                 for cid in [int(i) for i in cids]:
                     await asyncio.sleep(0.5)
@@ -295,18 +296,23 @@ class owner(commands.Cog):
     async def manage_features(self, ctx):
         pass
 
-    @manage_features.command(name="view")
+    @manage_features.command(name="view",description="他者のfeaturesを見る")
+    @app_commands.describe(uid="ユーザーのid")
     async def view_(self,ctx,uid:int):
         await ctx.reply(f"```py\n{self.bot.features.get(uid,[])}```")
 
-    @manage_features.command(name="del")
-    async def del_(self,ctx,uid:int,feature):
+    @manage_features.command(name="del", description="feature削除")
+    @app_commands.describe(uid="ユーザーのid")
+    @app_commands.describe(feature="取り除くfeature")
+    async def del_(self,ctx,uid:int,feature:str):
         uf = self.bot.features.get(uid,None)
         if uf and feature in uf:
             self.bot.features[uid].remove(feature)
         await ctx.message.add_reaction(self.bot.get_emoji(653161518103265291))
 
-    @manage_features.command(name="add")
+    @manage_features.command(name="add",description="feature追加")
+    @app_commands.describe(uid="ユーザーのid")
+    @app_commands.describe(feature="追加するfeature")
     async def add_(self,ctx,uid:int,feature):
         uf = self.bot.features.get(uid,None)
         if uf:
@@ -315,7 +321,7 @@ class owner(commands.Cog):
             self.bot.features[uid] = [feature]
         await ctx.message.add_reaction(self.bot.get_emoji(653161518103265291))
 
-    @manage_features.command(name="reload")
+    @manage_features.command(name="reload",description="feature再読み込み")
     async def reload_(self,ctx):
         import importlib
         import config

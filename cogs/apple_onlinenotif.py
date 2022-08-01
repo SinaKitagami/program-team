@@ -1,6 +1,7 @@
 from datetime import datetime
 import discord
 from discord.ext import commands
+from discord import app_commands
 
 import json
 
@@ -52,14 +53,14 @@ class OnlineNotif(commands.Cog):
             return
         if self._last_posted.get(before.id, None) and self.bot.apple_util.within(self._last_posted[before.id], 3):
             return
-        self._last_posted[before.id] = datetime.utcnow()
+        self._last_posted[before.id] = discord.utils.utcnow()
         msg = "onlinenotif-notif" if before.status is discord.Status.offline else "onlinenotif-offlinenotif"
         for subsc in await self.get_subscribed_of_user(before):
             if self.bot.shares_guild(before.id, subsc) and self.bot.get_member(subsc).status != discord.Status.offline:
                 user = self.bot.get_user(subsc)
                 await user.send(await self.bot._(user, msg, str(before)))
 
-    @commands.group(invoke_without_command=True)
+    @commands.hybrid_group(invoke_without_command=True)
     async def onlinenotif(self, ctx):
         """Returns the name of the users you are receiving online notifications of."""
         users = [

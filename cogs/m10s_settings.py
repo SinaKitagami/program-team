@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import discord
+from discord import TextChannel, app_commands
 from discord.ext import commands
 import asyncio
 import m10s_util as ut
+
+from typing import Optional
 
 import json
 
@@ -13,8 +16,18 @@ class settings(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
-    async def userprefix(self, ctx, mode="view", ipf=""):
+    @commands.hybrid_group(name="settings")
+    async def setting_cmds(self, ctx):pass
+
+    @setting_cmds.command(description="prefixのユーザー設定")
+    @app_commands.describe(mode="どうするか")
+    @app_commands.describe(ipf="カスタムprefixの文字列")
+    @app_commands.choices(mode=[
+            app_commands.Choice(name="view", value=0),
+            app_commands.Choice(name="set", value=1),
+            app_commands.Choice(name="delete", value=2),
+        ])
+    async def userprefix(self, ctx, mode:int, ipf:Optional[str]=""):
         if ipf == "@everyone" or ipf == "@here":
             await ctx.send("その文字列はprefixとして使えません。")
             return
@@ -22,14 +35,14 @@ class settings(commands.Cog):
             "select * from users where id=%s", (ctx.author.id,))
         prefixes = json.loads(upf["prefix"])
         #upf = await self.bot.cursor.fetchone()
-        if mode == "view":
+        if mode == 0:
             await ctx.send(embed=ut.getEmbed("ユーザーのprefix", f'```{",".join(prefixes)}```'))
-        elif mode == "set":
+        elif mode == 1:
             spf = prefixes + [ipf]
             await self.bot.cursor.execute(
                 "UPDATE users SET prefix = %s WHERE id = %s", (json.dumps(spf), ctx.author.id))
             await ctx.send(await ctx._("upf-add", ipf))
-        elif mode == "del":
+        elif mode == 2:
             prefixes.remove(ipf)
             await self.bot.cursor.execute(
                 "UPDATE users SET prefix = %s WHERE id = %s", (json.dumps(prefixes), ctx.author.id))
@@ -37,24 +50,15 @@ class settings(commands.Cog):
         else:
             await ctx.send(embed=ut.getEmbed("不適切なモード選択", "`view`または`set`または`del`を指定してください。"))
 
-    @commands.command(aliases=["switchlevelup"])
-    async def switchLevelup(self, ctx):
-        print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
-              ctx.message.content)
-        dor = await self.bot.cursor.fetchone(
-            "select * from guilds where id=%s", (ctx.guild.id,))
-        #dor = await self.bot.cursor.fetchone()
-        if dor["levels"][str(ctx.author.id)]["dlu"]:
-            dor["levels"][str(ctx.author.id)]["dlu"] = False
-            await ctx.send(await ctx._("sLu-off"))
-        else:
-            dor["levels"][str(ctx.author.id)]["dlu"] = True
-            await ctx.send(await ctx._("sLu-on"))
-        await self.bot.cursor.execute(
-            "UPDATE guilds SET levels = %s WHERE id = %s", (json.dumps(dor["levels"]), ctx.guild.id))
-
-    @commands.command()
-    async def guildprefix(self, ctx, mode="view", ipf=""):
+    @setting_cmds.command(description="prefixのサーバー設定")
+    @app_commands.describe(mode="どうするか")
+    @app_commands.describe(ipf="カスタムprefixの文字列")
+    @app_commands.choices(mode=[
+            app_commands.Choice(name="view", value=0),
+            app_commands.Choice(name="set", value=1),
+            app_commands.Choice(name="delete", value=2),
+        ])
+    async def guildprefix(self, ctx, mode:int, ipf:Optional[str]=""):
         if ipf == "@everyone" or ipf == "@here":
             await ctx.send("その文字列はprefixとして使えません。")
             return
@@ -62,14 +66,14 @@ class settings(commands.Cog):
             "select * from guilds where id=%s", (ctx.guild.id,))
         #gs = await self.bot.cursor.fetchone()
         prefixes = gs["prefix"]
-        if mode == "view":
+        if mode == 0:
             await ctx.send(embed=ut.getEmbed("ユーザーのprefix", f'```{",".join(prefixes)}```'))
-        elif mode == "set":
+        elif mode == 1:
             spf = prefixes + [ipf]
             await self.bot.cursor.execute(
                 "UPDATE guilds SET prefix = %s WHERE id = %s", (json.dumps(spf), ctx.guild.id))
             await ctx.send(await ctx._("upf-add", ipf))
-        elif mode == "del":
+        elif mode == 2:
             prefixes.remove(ipf)
             await self.bot.cursor.execute(
                 "UPDATE guilds SET prefix = %s WHERE id = %s", (json.dumps(prefixes), ctx.guild.id))
@@ -78,8 +82,9 @@ class settings(commands.Cog):
             await ctx.send(embed=ut.getEmbed("不適切なモード選択", "`view`または`set`または`del`を指定してください。"))
 
     @commands.cooldown(1, 10, type=commands.BucketType.guild)
-    @commands.command()
-    async def guildlang(self, ctx, lang):
+    @setting_cmds.command(description="思惟奈ちゃんの一部場面でのサーバー言語設定")
+    @app_commands.describe(lang="設定言語")
+    async def guildlang(self, ctx, lang:str):
         gs = await self.bot.cursor.fetchone(
             "select * from guilds where id=%s", (ctx.guild.id,))
         #gs = await self.bot.cursor.fetchone()
@@ -93,15 +98,14 @@ class settings(commands.Cog):
             self.bot.translate_handler.update_language_cache(ctx.guild, lang)
             await ctx.send(await ctx._("setl-set"))
 
-    @commands.command()
-    async def sendlogto(self, ctx, to=None):
+    @setting_cmds.command(description="思惟奈ちゃんのサーバーログの送信設定を行います。")
+    @app_commands.describe(channel="送信先チャンネル")
+    async def sendlogto(self, ctx, channel:Optional[discord.TextChannel]):
+        to = channel
         if ctx.author.guild_permissions.administrator or ctx.author.id == 404243934210949120:
-            gpf = await self.bot.cursor.fetchone(
-                "select * from guilds where id=%s", (ctx.guild.id,))
-            #gpf = await self.bot.cursor.fetchone()
             if to:
                 await self.bot.cursor.execute(
-                    "UPDATE guilds SET sendlog = %s WHERE id = %s", (int(to), ctx.guild.id))
+                    "UPDATE guilds SET sendlog = %s WHERE id = %s", (to.id, ctx.guild.id))
                 n = ctx.guild.me.nick
                 await ctx.guild.me.edit(nick="ニックネーム変更テスト")
                 await asyncio.sleep(1)
@@ -115,9 +119,10 @@ class settings(commands.Cog):
         else:
             await ctx.send("このコマンドの使用には、管理者権限が必要です。")
 
-    @commands.command(aliases=["言語設定", "言語を次の言語に変えて"])
+    @setting_cmds.command(aliases=["言語設定", "言語を次の言語に変えて"],description="思惟奈ちゃんの一部場面でのサーバー言語設定")
+    @app_commands.describe(lang="設定言語")
     @commands.cooldown(1, 10, type=commands.BucketType.user)
-    async def userlang(self, ctx, lang):
+    async def userlang(self, ctx, lang:str):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
               ctx.message.content)
         if lang not in self.bot.translate_handler.supported_locales:
@@ -128,7 +133,7 @@ class settings(commands.Cog):
             self.bot.translate_handler.update_language_cache(ctx.author, lang)
             await ctx.send(await ctx._("setl-set"))
 
-    @commands.command()
+    @commands.command() # スラッシュコマンドの実行は止められない(=誤解防止)のため
     async def comlock(self, ctx, do="view", *comname):
         gs = await self.bot.cursor.fetchone(
             "select * from guilds where id=%s", (ctx.guild.id,))
@@ -160,13 +165,30 @@ class settings(commands.Cog):
         else:
             await ctx.send(await ctx._("comlock-unknown"))
 
-    @commands.command()
-    async def setsysmsg(self, ctx, mode="check", when="welcome", to="sysch", *, content=None):
+    @setting_cmds.command(aliases=["setsysmsg"],description="メンバーの参加、退出時のメッセージ設定")
+    @app_commands.describe(mode="どうするか")
+    @app_commands.describe(when="送信を行うとき")
+    @app_commands.describe(channel="送信先チャンネル")
+    @app_commands.describe(content="送信文字列")
+    @app_commands.choices(mode=[
+            app_commands.Choice(name="view", value=0),
+            app_commands.Choice(name="set", value=1),
+        ])
+    @app_commands.choices(when=[
+            app_commands.Choice(name="join", value="welcome"),
+            app_commands.Choice(name="leave", value="cu")
+        ])
+    @app_commands.choices(channel=[
+            app_commands.Choice(name="system_channel", value="sysch"),
+            app_commands.Choice(name="dm", value="dm")
+        ])
+    async def set_action_msg(self, ctx, mode:int, when:Optional[str]="welcome", channel:Optional[str]="sysch", *, content:Optional[str]):
+        to = channel
         msgs = await self.bot.cursor.fetchone(
             "select * from guilds where id=%s", (ctx.guild.id,))
         #msgs = await self.bot.cursor.fetchone()
         sm = json.loads(msgs["jltasks"])
-        if mode == "check":
+        if mode == 0:
             embed = discord.Embed(title=await ctx._(
                 "ssm-sendcontent"), description=ctx.guild.name, color=self.bot.ec)
             try:
@@ -180,7 +202,7 @@ class settings(commands.Cog):
             except:
                 pass
             await ctx.send(embed=embed)
-        elif mode == "set":
+        elif mode == 1:
             if ctx.channel.permissions_for(ctx.author).administrator is True or ctx.author.id == 404243934210949120:
                 try:
                     sm[when] = {}
@@ -194,15 +216,23 @@ class settings(commands.Cog):
             else:
                 await ctx.send(await ctx._("need-admin"))
 
-    @commands.command(aliases=["サーバーコマンド", "次の条件でサーバーコマンドを開く"])
-    async def servercmd(self, ctx, mode="all", name=None):
+    @setting_cmds.command(aliases=["サーバーコマンド", "次の条件でサーバーコマンドを開く"],description="サーバー独自の応答コマンドを作成できます。(prefixコマンドでのみ呼び出せます。)")
+    @app_commands.describe(mode="どうするか")
+    @app_commands.describe(name="コマンド名")
+    @app_commands.choices(mode=[
+            app_commands.Choice(name="add", value=0),
+            app_commands.Choice(name="help", value=1),
+            app_commands.Choice(name="all", value=2),
+            app_commands.Choice(name="delete", value=3)
+        ])
+    async def servercmd(self, ctx, mode:int, name:Optional[str]):
         mmj = await self.bot.cursor.fetchone(
             "select * from guilds where id=%s", (ctx.guild.id,))
         #mmj = await self.bot.cursor.fetchone()
         cmds = json.loads(mmj["commands"])
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
               ctx.message.content)
-        if mode == "add":
+        if mode == 0:
             if not cmds.get(name, None) is None:
                 if not(ctx.channel.permissions_for(ctx.author).manage_guild is True and ctx.channel.permissions_for(ctx.author).manage_roles is True or ctx.author.id == 404243934210949120):
                     await ctx.send(await ctx._("need-manage"))
@@ -283,7 +313,7 @@ class settings(commands.Cog):
             await self.bot.cursor.execute(
                 "UPDATE guilds SET commands = %s WHERE id = %s", (json.dumps(cmds), ctx.guild.id))
             await ctx.send(await ctx._("scmd-add-fin"))
-        elif mode == "help":
+        elif mode == 1:
             if cmds == {}:
                 await ctx.send(await ctx._("scmd-all-notfound"))
             elif cmds.get(name) is None:
@@ -293,12 +323,12 @@ class settings(commands.Cog):
                     await ctx.send(await ctx._("scmd-help-title", name, await self.bot.fetch_user(cmds[name]['createdBy']), cmds[name]['guide']))
                 else:
                     await ctx.send(await ctx._("scmd-help-title", name, cmds[name]['createdBy'], cmds[name]['guide']))
-        elif mode == "all":
+        elif mode == 2:
             if cmds == {}:
                 await ctx.send(await ctx._("scmd-all-notfound"))
             else:
                 await ctx.send(str(cmds.keys()).replace("dict_keys(", await ctx._("scmd-all-list")).replace(")", ""))
-        elif mode == "del":
+        elif mode == 3:
             if ctx.channel.permissions_for(ctx.author).manage_guild is True and ctx.channel.permissions_for(ctx.author).manage_roles is True or ctx.author.id == 404243934210949120:
                 if not cmds is None:
                     del cmds[name]
@@ -310,8 +340,8 @@ class settings(commands.Cog):
         else:
             await ctx.send(await ctx._("scmd-except"))
 
-    @commands.command()
-    async def hash(self, ctx):
+    @commands.hybrid_command(description="ハッシュタグとしてチャンネルを使用する設定を切り替えます。")
+    async def hashtag(self, ctx):
         d = await self.bot.cursor.fetchone(
             "select * from guilds where id=%s", (ctx.guild.id,))
         #d = await self.bot.cursor.fetchone()
@@ -331,36 +361,15 @@ class settings(commands.Cog):
     # @commands.command(aliases=["オンライン通知"])
     # moved to apple_onlinenotif
 
-    @commands.command()
-    async def levelupsendto(self, ctx, to:discord.TextChannel = None):
+    @setting_cmds.command(description="レベルアップ通知の送信先を変更できます。")
+    @app_commands.describe(to="送信先チャンネル")
+    async def levelupsendto(self, ctx, to:Optional[discord.TextChannel]):
         if to is None:
             await self.bot.cursor.execute(
                 "UPDATE guilds SET levelupsendto = %s WHERE id = %s", (0, ctx.guild.id))
         else:
             await self.bot.cursor.execute(
                 "UPDATE guilds SET levelupsendto = %s WHERE id = %s", (to.id, ctx.guild.id))
-        await ctx.send(await ctx._("changed"))
-
-    @commands.command()
-    async def levelreward(self, ctx, lv: int, rl=None):
-        if not(ctx.channel.permissions_for(ctx.author).manage_guild is True and ctx.channel.permissions_for(ctx.author).manage_roles is True or ctx.author.id == 404243934210949120):
-            await ctx.send(await ctx._("need-admin"))
-            return
-        gs = await self.bot.cursor.fetchone(
-            "select * from guilds where id=%s", (ctx.guild.id,))
-        #gs = await self.bot.cursor.fetchone()
-        rewards = json.loads(gs["reward"])
-        if rl is None:
-            del rewards[str(lv)]
-        else:
-            try:
-                grl = await commands.RoleConverter().convert(ctx, rl)
-            except:
-                return await ctx.send("有効な役職IDを指定してください。")
-            rid = grl.id
-            rewards[str(lv)] = rid
-        await self.bot.cursor.execute(
-            "UPDATE guilds SET reward = %s WHERE id = %s", (json.dumps(rewards), ctx.guild.id))
         await ctx.send(await ctx._("changed"))
 
 

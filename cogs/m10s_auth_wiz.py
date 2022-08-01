@@ -58,7 +58,7 @@ class m10s_auth_wiz(commands.Cog):
                 await m.add_roles(m.guild.get_role(auths["give_role"]))
                 await ch.send("> サーバーユーザー認証\n あなたの認証が完了しました！")
 
-    @commands.command(name="Authsetting", aliases=["Auth","Authsettings"])
+    @commands.hybrid_command(name="authsetting", aliases=["Auth","Authsettings"], description="簡易メンバー認証を作成できます。")
     @commands.has_permissions(administrator=True)
     @commands.bot_has_permissions(manage_messages=True,manage_roles=True)
     async def _setting(self, ctx):
@@ -252,7 +252,7 @@ class m10s_auth_wiz(commands.Cog):
                             tmsg = await ut.wait_message_return(ctx, f"> 作成ウィザード\n最後に、そのページのテキストを送信してください。", udm, 60)
                             tmp["text"] = tmsg.content
                             auth_w.append(tmp)
-                    await self.bot.cursor.execute("insert into welcome_auth (id,category,use,can_view,next_reaction,au_w,give_role) values(%s,%s,%s,%s,%s,%s,%s)", (
+                    await self.bot.cursor.execute("insert into welcome_auth(id,category,uses,can_view,next_reaction,au_w,give_role) values(%s,%s,%s,%s,%s,%s,%s)", (
                         ctx.guild.id, category, 1, json.dumps(cv), nr, json.dumps(auth_w), grole))
                     await udm.send("> 作成ウィザード\n作成が完了しました！設定の確認や変更は、再度`s-Authsetting`コマンドで行えます。")
                 except asyncio.TimeoutError:

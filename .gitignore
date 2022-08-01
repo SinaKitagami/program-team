@@ -21,3 +21,5 @@ ment.py
 trans_db.py
 cogs/_m10s_api.py
 cogs/slash/pjsekai_music_select.py
+pjsekai_musics.json
+api_cf_ssl/

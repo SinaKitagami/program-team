@@ -3,6 +3,7 @@
 from cogs import apple_invite
 from cogs import apple_foc
 import discord
+from discord import app_commands
 from discord.ext import commands, tasks
 import json
 import random
@@ -40,7 +41,8 @@ from checker import MaliciousInput, content_checker
 # tokens
 import config
 
-"""import logging
+"""
+import logging
 
 logging.basicConfig(level=logging.DEBUG)"""
 
@@ -51,7 +53,7 @@ intents.members = True
 intents.presences = True
 intents.message_content = True
 
-bot = commands.Bot(command_prefix="s-", status=discord.Status.invisible,
+bot = commands.AutoShardedBot(command_prefix="s-", status=discord.Status.invisible,
                    allowed_mentions=discord.AllowedMentions(everyone=False),
                    intents=intents,
                    enable_debug_events=True
@@ -104,7 +106,7 @@ async def main():
     async with bot:
         await db_setup()
 
-        # await bot.load_extension("cogs.apple_misc")
+        await bot.load_extension("cogs.apple_misc")
         await bot.load_extension("cogs.apple_onlinenotif")
 
         await apple_invite.setup(bot)
@@ -260,310 +262,6 @@ async def cRPC():
     else:
         rpcct = rpcct+1
     await bot.change_presence(status=discord.Status.online, activity=discord.Game(name=rpcs[rpcct].format(len(bot.guilds), len(bot.users))))
-
-
-async def repomsg(msg, rs, should_ban=False):
-    ch = bot.get_channel(628929788421210144)
-    e = discord.Embed(title="グローバルメッセージブロック履歴",
-                      description=f"メッセージ内容:{msg.clean_content}", color=bot.ec)
-    e.set_author(name=f"{msg.author}(id:{msg.author.id})",
-                 icon_url=msg.author.display_avatar.replace(static_format="png").url)
-    if msg.guild.icon:
-        e.set_footer(text=f"サーバー:{msg.guild.name}(id:{msg.guild.id})",
-                    icon_url=msg.guild.icon.replace(static_format="png").url)
-    else:
-        e.set_footer(text=f"サーバー:{msg.guild.name}(id:{msg.guild.id})")
-    e.timestamp = msg.created_at
-    e.add_field(name="ブロック理由", value=rs or "なし")
-    await ch.send(embed=e)
-    if should_ban:
-        await bot.cursor.execute(
-            "UPDATE users SET gban = %s WHERE id = %s", (1, msg.author.id))
-        await bot.cursor.execute("UPDATE users SET gbanhist = %s WHERE id = %s",
-                           ("予防グローバルチャットBAN: {}".format(rs), msg.author.id))
-
-
-async def gsended(message, ch, embed):
-    try:
-        tmp = await ch.send(embed=embed)
-
-        if not message.embeds[0] is None:
-            await ch.send(embed=message.embeds[0])
-        return tmp.id
-    except:
-        pass
-
-
-async def gsendwh(message, wch, spicon, pf, ed, fls):
-    try:
-        for wh in await wch.webhooks():
-            if wh.name == "sina_global":
-                if not fls == []:
-                    sdfl = []
-                    for at in fls:
-                        sdfl.append(discord.File(
-                            f"globalsends/{at.filename}", filename=at.filename, spoiler=at.is_spoiler()))
-                    tmp = await wh.send(content=message.clean_content, wait=True, username=f"[{spicon}]{pf['gnick']}", avatar_url=message.author.display_avatar.replace(static_format='png'), embeds=ed, files=sdfl)
-                else:
-                    tmp = await wh.send(content=message.clean_content, wait=True, username=f"[{spicon}]{pf['gnick']}", avatar_url=message.author.display_avatar.replace(static_format='png'), embeds=ed)
-                return tmp.id
-    except:
-        pass
-
-
-async def globalSend(message):
-    try:
-        if message.content.startswith("//"):
-            return
-        if message.author.id == bot.user.id:
-            return
-        if message.is_system():
-            return
-        gchs = await bot.cursor.fetchall("select * from globalchs")
-        #gchs = await bot.cursor.fetchall()
-        gchn = None
-        for sgch in gchs:
-            if message.channel.id in sgch["ids"]:
-                gchn = sgch["name"]
-                gchs = sgch["ids"]
-                break
-        if gchn is None:
-            return
-
-        try:
-            content_checker(bot, message)
-        except MaliciousInput as err:
-            await repomsg(message, err.reason, err.should_ban)
-            return
-
-        upf = await bot.cursor.fetchone("select * from users where id=%s",
-                           (message.author.id,))
-        #upf = await bot.cursor.fetchone()
-        gpf = await bot.cursor.fetchone("select * from guilds where id=%s",
-                           (message.guild.id,))
-        #gpf = await bot.cursor.fetchone()
-        if (datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9) - rdelta(days=7) >= message.author.created_at) or upf["gmod"] or upf["gstar"] or gchn=="mido_sync_a":
-            if upf["gban"] == 1:
-                if not (gchn == "sync_rsp_main_chat" or gchn=="mido_sync_a"):
-                    dc = await ut.opendm(message.author)
-                    await dc.send(await bot._(message.author, "global-banned", message.author.mention))
-                    await repomsg(message, "思惟奈ちゃんグローバルチャットの使用禁止")
-                    await message.add_reaction("❌")
-                    await asyncio.sleep(5)
-                    await message.remove_reaction("❌", bot.user)
-            else:
-                try:
-                    if upf["sinapartner"] and message.author.activity:
-                        if message.author.activity.type == discord.ActivityType.playing:
-                            ne = discord.Embed(
-                                title="", description=f"{message.author.activity.name}をプレイしています。", color=upf["gcolor"])
-                        elif message.author.activity.type == discord.ActivityType.watching:
-                            ne = discord.Embed(
-                                title="", description=f"{message.author.activity.name}を視聴しています。", color=upf["gcolor"])
-                        elif message.author.activity.type == discord.ActivityType.listening:
-                            if message.author.activity.name == "Spotify":
-                                ne = discord.Embed(
-                                    title="", description=f"Spotifyで[{message.author.activity.title}](https://open.spotify.com/track/{message.author.activity.track_id})を聞いています。", color=upf["gcolor"])
-                            else:
-                                ne = discord.Embed(
-                                    title="", description=f"{message.author.activity.name}を聞いています。", color=upf["gcolor"])
-                        elif message.author.activity.type == discord.ActivityType.streaming:
-                            ne = discord.Embed(
-                                title="", description=f"{message.author.activity.name}を配信しています。", color=upf["gcolor"])
-                        elif message.author.activity.type == discord.ActivityType.custom:
-                            ne = discord.Embed(
-                                title="", description=f"{message.author.activity.name}", color=upf["gcolor"])
-                        else:
-                            ne = discord.Embed(
-                                title="", description="", color=upf["gcolor"])
-                    else:
-                        ne = discord.Embed(
-                            title="", description="", color=upf["gcolor"])
-                    ne.set_author(
-                        name=f"{ut.ondevicon(message.author)},({str(message.author.id)})")
-                    if gpf["verified"]:
-                        ne.set_footer(text=f"✅:{message.guild.name}(id:{message.guild.id})", icon_url=message.guild.icon.replace(
-                            static_format="png").url)
-                    else:
-                        ne.set_footer(text=f"{message.guild.name}(id:{message.guild.id})",
-                                      icon_url=message.guild.icon.replace(static_format="png").url)
-                    ne.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
-                    embed = discord.Embed(
-                        title="本文", description=message.content, color=upf["gcolor"])
-                    embed.set_footer(text=f"{message.guild.name}(id:{message.guild.id})",
-                                     icon_url=message.guild.icon.replace(static_format="png").url)
-                    if message.application is not None:
-                        embed.add_field(
-                            name=message.application["name"]+"へのRPC招待", value="RPC招待はグローバル送信できません。")
-
-                    if message.type == discord.MessageType.reply:
-                        ref = message.reference
-                        if ref.cached_message:
-                            m = ref.cached_message
-                        else:
-                            try:
-                                m = await bot.get_channel(ref.channel_id).fetch_message(ref.message_id)
-                            except:
-                                m = None
-                        if m:
-                            ne.add_field(name=f"{m.author.display_name}のメッセージへの返信",value=f"{m.clean_content}")
-                            embed.add_field(name=f"{m.author.display_name}のメッセージへの返信",value=f"{m.clean_content}")
-                        else:
-                            ne.add_field(name="メッセージへの返信",value="(このメッセージは削除されている等の理由で取得できません。)")
-                            embed.add_field(name="メッセージへの返信",value="(このメッセージは削除されている等の理由で取得できません。)")
-
-                    spicon = ""
-
-                    if message.author.id == 404243934210949120:  # みぃてん☆
-                        spicon = spicon + "🌈"
-                    if message.author.id in bot.team_sina:  # チーム☆思惟奈ちゃん
-                        spicon = spicon + "🌠"
-                    if message.author.bot:
-                        spicon = spicon + "⚙"
-                    if upf["sinapartner"]:
-                        spicon = spicon + "💠"  # 認証済みアカウント
-                    if message.author.id in config.partner_ids:
-                        spicon = spicon + "🔗"
-                    if upf["gmod"]:
-                        spicon = spicon + "🔧"
-                    if upf["galpha"]:
-                        spicon = spicon + "🔔"
-                    if upf["gstar"]:
-                        spicon = spicon + "🌟"
-                    if spicon == "":
-                        spicon = "👤"
-
-                    embed.set_author(name=f"{upf['gnick']}({spicon}):{str(message.author.id)}",
-                                     icon_url=message.author.display_avatar.replace(static_format="png").url)
-                    if not message.attachments == []:
-                        embed.set_image(url=message.attachments[0].url)
-                        for atc in message.attachments:
-                            temp = f"{atc.url}\n"
-                        embed.add_field(name="添付ファイルのURL一覧", value=temp)
-                except:
-                    traceback.print_exc(0)
-                    await message.add_reaction("❌")
-                    await asyncio.sleep(5)
-                    await message.remove_reaction("❌", bot.user)
-                    return
-                try:
-                    if not (gchn == "sync_rsp_main_chat" or gchn=="mido_sync_a"):
-                        await message.add_reaction(bot.get_emoji(653161518346534912))
-                except:
-                    pass
-            if gchn.startswith("ed-"):
-                tasks = []
-                for cid in gchs:
-                    ch = bot.get_channel(cid)
-                    tasks.append(asyncio.ensure_future(
-                        gsended(message, ch, embed)))
-                nch = await bot.cursor.fetchone(
-                    "select * from globalchs where name=%s", (gchn.replace("ed-", ""),))
-                #nch = await bot.cursor.fetchone()
-                try:
-                    if nch["ids"]:
-                        for cid in nch["ids"]:
-                            try:
-                                if not cid == message.channel.id:
-                                    wch = bot.get_channel(cid)
-                                    tasks.append(asyncio.ensure_future(
-                                        gsendwh(message, wch, spicon, upf, ne, [])))
-                            except:
-                                pass
-                    if message.attachments == []:
-                        await message.delete()
-                except:
-                    pass
-                mids = await asyncio.gather(*tasks)
-                try:
-                    await message.remove_reaction(bot.get_emoji(653161518346534912), bot.user)
-                except:
-                    pass
-            else:
-                try:
-                    sfs = False
-                    fls = []
-                    ed = []
-
-                    #sticker
-                    try:
-                        if message.stickers:
-                            sticker = message.stickers[0]
-                            sembed = discord.Embed(title=f"スタンプ:{sticker.name}",)
-                            if sticker.format == discord.StickerFormatType.png:
-                                sembed.set_image(url=sticker.url)
-                            elif sticker.format == discord.StickerFormatType.apng:
-                                sembed.set_image(url=f"https://dsticker.herokuapp.com/convert.gif?url={sticker.url}")
-                            elif sticker.format == discord.StickerFormatType.lottie:
-                                # メモ: https://cdn.discordapp.com/stickers/{id}/{hash}.json?size=1024
-                                sembed.description = "画像取得非対応のスタンプです。"
-                            ed.append(sembed)
-                    except:
-                        traceback.print_exc(0)
-                        await message.add_reaction("❌")
-                        await asyncio.sleep(5)
-                        await message.remove_reaction("❌", bot.user)
-                        return
-
-                    if not message.attachments == []:
-                        os.makedirs('globalsends/', exist_ok=True)
-                        for at in message.attachments:
-                            await at.save(f"globalsends/{at.filename}")
-                            fls.append(at)
-                        if not gchn == "sync_rsp_main_chat":
-                            ed = ed + message.embeds + [ne]
-                    else:
-                        if not gchn == "sync_rsp_main_chat":
-                            ed = ed + message.embeds + [ne]
-                except:
-                    traceback.print_exc(0)
-                    await message.add_reaction("❌")
-                    await asyncio.sleep(5)
-                    await message.remove_reaction("❌", bot.user)
-                    return
-                try:
-                    if not (gchn == "sync_rsp_main_chat" or gchn=="mido_sync_a"):
-                        await message.add_reaction(bot.get_emoji(653161518346534912))
-                except:
-                    pass
-                tasks = []
-                for cid in gchs:
-                    try:
-                        if not cid == message.channel.id:
-                            wch = bot.get_channel(cid)
-                            tasks.append(asyncio.ensure_future(
-                                gsendwh(message, wch, spicon, upf, ed, fls)))
-                    except:
-                        pass
-                och = await bot.cursor.fetchone(
-                    "select * from globalchs where name=%s", (f"ed-{gchn}",))
-                #och = await bot.cursor.fetchone()
-                try:
-                    if nch["ids"]:
-                        for cid in och["ids"]:
-                            ch = bot.get_channel(cid)
-                            tasks.append(asyncio.ensure_future(
-                                gsended(message, ch, embed)))
-                except:
-                    pass
-                mids = await asyncio.gather(*tasks)
-                if not fls == []:
-                    shutil.rmtree("globalsends/")
-                try:
-                    if not (gchn == "sync_rsp_main_chat" or gchn=="mido_sync_a"):
-                        await message.remove_reaction(bot.get_emoji(653161518346534912), bot.user)
-                except:
-                    pass
-            await bot.cursor.execute("INSERT INTO globaldates(id,content,allid,aid,gid,timestamp) VALUES(%s,%s,%s,%s,%s,%s,%s)", (message.id, message.clean_content,
-                                                                                                                   mids+[message.id], message.author.id, message.guild.id, str(message.created_at.strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒'))))
-            if not (gchn == "sync_rsp_main_chat" or gchn=="mido_sync_a"):
-                await message.add_reaction(bot.get_emoji(653161518195539975))
-                await asyncio.sleep(5)
-                await message.remove_reaction(bot.get_emoji(653161518195539975), bot.user)
-        else:
-            await repomsg(message, "作成後7日に満たないアカウント")
-    except Exception as e:
-        traceback.print_exc()
 
 
 @bot.event
@@ -919,6 +617,8 @@ async def on_guild_channel_update(b, a):
                 ch = bot.get_channel(gpf["sendlog"])
                 if ch.guild.id == a.guild.id:
                     await ch.send(embed=e)
+    elif a.position != b.position:
+        pass
     elif not b.changed_roles == a.changed_roles:
         e.add_field(name="変更内容", value="権限の上書き")
         e.add_field(name="確認:", value="チャンネル設定を見てください。")
@@ -1112,19 +812,25 @@ async def on_ready():
     await bot.load_extension("jishaku")
     
     files = [
-            "m10s_music", "m10s_info", "m10s_owner", "m10s_settings", "m10s_manage", "m10s_levels",
-            "m10s_tests", "m10s_gcoms", "m10s_other", "m10s_search", "m10s_games", "P143_jyanken",
-            "nekok500_mee6", "pf9_symmetry", "syouma", "m10s_gban", "m10s_bmail", "m10s_auth_wiz",
-            "m10s_chinfo_rewrite", "m10s_role_panel", "m10s_messageinfo", "m10s_setting_command",
-            "m10s_partners", "m10s_remainder", "m10s_level_edit", "m10s_set_activity_roles", "m10s_re_gchat",
-            # "_m10s_slash_testing","_m10s_music_slash",
+            "m10s_info", "m10s_owner", "m10s_settings", "m10s_manage",
+            "m10s_other", "m10s_search", "m10s_games", "P143_jyanken",
+            "nekok500_mee6", "pf9_symmetry", "syouma", "m10s_bmail", "m10s_auth_wiz",
+            "m10s_role_panel", "m10s_partners", "m10s_remainder", "m10s_set_activity_roles", 
+
             "_m10s_api",
-            "_m10s_ctx_menu",
-            "_m10s_quick_cmd",
+            
             # "__part_pjsekai_music_select"
-            "slash.music", "slash.hashtag", "slash.level_card", 
             "slash.pjsekai_music_select", # 思惟奈ちゃんパートナー向け機能-ぱすこみゅ
-            "slash.mini_features"
+            "slash.mini_features", # -> スポイラー展開
+            "slash.m10s_messageinfo", # -> メッセージコマンドでの実行
+
+            "hybrid.m10s_re_gchat",
+            "hybrid._m10s_quick_cmd",
+            "hybrid.m10s_levels",
+            "hybrid.m10s_music",
+            "hybrid.info_check",
+            "hybrid.m10s_help",
+            # todo: "m10s_guild_log"
             ]
     
     embed = discord.Embed(title="読み込みに失敗したCog", color=bot.ec)
@@ -1145,7 +851,7 @@ async def on_ready():
     # await bot.tree.sync(guild=discord.Object(id=560434525277126656))
 
     # パートナーコマンド
-    await bot.tree.sync(guild=discord.Object(id=764088457785638922))
+    # await bot.tree.sync(guild=discord.Object(id=764088457785638922))
 
     # グローバルコマンド
     await bot.tree.sync()
@@ -1174,6 +880,11 @@ async def on_message(message):
         postcount[str(message.guild.id)] = 1
     else:
         postcount[str(message.guild.id)] += 1
+    if message.content == "check_msgs":
+        # on_messageを呼ぶだけの処理がすぐに終わるかの確認
+        with open("post_count.json", mode="w", encoding="utf-8") as f:
+            json.dump(postcount, f, indent=4)
+        await message.channel.send(file=discord.File("post_count.json"))
     # db.files_download_to_file( "guildsetting.json" , "/guildsetting.json" )
     # db.files_download_to_file( "profiles.json" , "/profiles.json" )
     tks = [
@@ -1250,8 +961,10 @@ async def domsg(message):
                         (message.author.id,))
 
 
-    tks = [asyncio.ensure_future(dlevel(message, gs)), asyncio.ensure_future(
-        gahash(message, gs)), asyncio.ensure_future(runsercmd(message, gs, pf))]
+    tks = [
+        asyncio.ensure_future(gahash(message, gs)),
+        asyncio.ensure_future(runsercmd(message, gs, pf))
+    ]
     await asyncio.gather(*tks)
 
     tpf = json.loads(pf["prefix"]) + json.loads(gs["prefix"])
@@ -1348,65 +1061,6 @@ async def gahash(message, gs):
                     await sch.send(embed=embed)
 
 
-async def dlevel(message, gs):
-    if "clevel" in json.loads(gs["lockcom"]):
-        return
-    if message.author.bot:
-        return
-        
-    lvls = json.loads(gs["levels"])
-    
-    if isinstance(lvls, str):
-        return
-    
-    if lvls.get(str(message.author.id), None) is None:
-        lvls[str(message.author.id)] = {
-            "level": 0,
-            "exp": random.randint(5, 15),
-            "lltime": int(time.time()),
-            "dlu": True
-        }
-        await bot.cursor.execute(
-            "UPDATE guilds SET levels = %s WHERE id = %s", (json.dumps(lvls), message.guild.id))
-    else:
-        if lvls[str(message.author.id)]["dlu"]:
-            if (int(time.time())-json.loads(gs["levels"])[str(message.author.id)]["lltime"]) >= 60:
-                lvls[str(message.author.id)
-                             ]["lltime"] = int(time.time())
-                lvls[str(message.author.id)
-                             ]["exp"] += random.randint(5, 15)
-                if lvls[str(message.author.id)]["exp"] >= lvls[str(message.author.id)]["level"] ** 3 + 20:
-                    lvls[str(
-                        message.author.id)]["exp"] -= lvls[str(message.author.id)]["level"] ** 3 + 20
-                    lvls[str(message.author.id)]["level"] += 1
-                    aut = str(message.author).replace("\\", "\\\\").replace("*", "\*").replace(
-                        "_", "\_").replace("|", "\|").replace("~", "\~").replace("`", "\`").replace(">", "\>")
-                    if gs["levelupsendto"]:
-                        c = bot.get_channel(int(gs["levelupsendto"]))
-                        try:
-                            m = await c.send(str(bot.get_emoji(653161518212448266))+await bot._(message.author, "levelup-notify", aut, lvls[str(message.author.id)]["level"]))
-                            await asyncio.sleep(1)
-                            await m.edit(content=str(bot.get_emoji(653161518212448266))+await bot._(message.author, "levelup-notify", message.author.mention, lvls[str(message.author.id)]["level"]))
-                        except:
-                            pass
-                    else:
-                        try:
-                            m = await message.channel.send(str(bot.get_emoji(653161518212448266))+await bot._(message.author, "levelup-notify", aut, lvls[str(message.author.id)]["level"]))
-                            await asyncio.sleep(1)
-                            await m.edit(content=str(bot.get_emoji(653161518212448266))+await bot._(message.author, "levelup-notify", message.author.mention, lvls[str(message.author.id)]["level"]))
-                        except:
-                            pass
-                    try:
-                        rwds = json.loads(gs["reward"])
-                        if rwds.get(str(lvls[str(message.author.id)]["level"]), None):
-                            rl = message.guild.get_role(
-                                rwds[str(gs["levels"][str(message.author.id)]["level"])])
-                            await message.author.add_roles(rl)
-                    except:
-                        pass
-                await bot.cursor.execute(
-                    "UPDATE guilds SET levels = %s WHERE id = %s", (json.dumps(lvls), message.guild.id))
-
 
 @commands.is_owner()
 @bot.command()
@@ -1442,13 +1096,15 @@ async def vpc(ctx):
     await ctx.send(embed=ut.getEmbed("post count", str([f"{k}:{v}" for k, v in postcount.items()])))
 
 
-@bot.command()
+@bot.command(description="思惟奈ちゃんの豆知識チャンネルをフォローします。")
+@app_commands.describe(ch="受け取るチャンネル")
 @commands.bot_has_permissions(manage_webhooks=True)
 @commands.has_permissions(administrator=True)
-async def rnotify(ctx, ch: int=None):
+@app_commands.checks.bot_has_permissions(manage_webhooks=True)
+@app_commands.checks.has_permissions(administrator=True)
+async def rnotify(ctx, ch: discord.TextChannel=None):
     if ctx.author.guild_permissions.administrator or ctx.author.id == 404243934210949120:
-        tchid = ch or ctx.channel.id
-        tch = bot.get_channel(tchid)
+        tch = ch or ctx.channel
         fch = bot.get_channel(667351221106901042)
         await fch.follow(destination=tch)
         await ctx.send("フォローが完了しました。")
@@ -1456,13 +1112,15 @@ async def rnotify(ctx, ch: int=None):
         await ctx.send("サーバー管理者である必要があります。")
 
 
-@bot.command()
+@bot.hybrid_command(description="トピックチャンネルをフォローします")
+@app_commands.describe(ch="受け取るチャンネル")
 @commands.bot_has_permissions(manage_webhooks=True)
 @commands.has_permissions(administrator=True)
-async def rtopic(ctx, ch: int=None):
+@app_commands.checks.bot_has_permissions(manage_webhooks=True)
+@app_commands.checks.has_permissions(administrator=True)
+async def rtopic(ctx, ch:discord.TextChannel=None):
     if ctx.author.guild_permissions.administrator or ctx.author.id == 404243934210949120:
-        tchid = ch or ctx.channel.id
-        tch = bot.get_channel(tchid)
+        tch = ch or ctx.channel
         fch = bot.get_channel(677862542298710037)
         await fch.follow(destination=tch)
         await ctx.send("フォローが完了しました。")
@@ -1470,176 +1128,10 @@ async def rtopic(ctx, ch: int=None):
         await ctx.send("サーバー管理者である必要があります。")
 
 
-bot.remove_command('help')
-
-
-@bot.command()
-async def ehelp(ctx, rcmd=None):
-    # 英語ヘルプ用
-    if rcmd is None:
-        page = 1
-        embed = discord.Embed(title=await ctx._("help-1-t"),
-                              description=await ctx._("help-1-d"), color=bot.ec)
-        embed.set_footer(text=f"page:{page}")
-        msg = await ctx.send(embed=embed)
-        await msg.add_reaction(bot.get_emoji(653161518195671041))
-        await msg.add_reaction(bot.get_emoji(653161518170505216))
-        await msg.add_reaction("🔍")
-        while True:
-            try:
-                r, u = await bot.wait_for("reaction_add", check=lambda r, u: r.message.id == msg.id and u.id == ctx.message.author.id, timeout=30)
-            except:
-                break
-            try:
-                await msg.remove_reaction(r, u)
-            except:
-                pass
-            if str(r) == str(bot.get_emoji(653161518170505216)):
-                if page == 14:
-                    page = 1
-                else:
-                    page = page + 1
-                embed = discord.Embed(title=await ctx._(
-                    f"help-{page}-t"), description=await ctx._(f"help-{page}-d"), color=bot.ec)
-                embed.set_footer(text=f"page:{page}")
-                await msg.edit(embed=embed)
-            elif str(r) == str(bot.get_emoji(653161518195671041)):
-                if page == 1:
-                    page = 14
-                else:
-                    page = page - 1
-                embed = discord.Embed(title=await ctx._(
-                    f"help-{page}-t"), description=await ctx._(f"help-{page}-d"), color=bot.ec)
-                embed.set_footer(text=f"page:{page}")
-                await msg.edit(embed=embed)
-            elif str(r) == "🔍":
-                await msg.remove_reaction(bot.get_emoji(653161518195671041), bot.user)
-                await msg.remove_reaction("🔍", bot.user)
-                await msg.remove_reaction(bot.get_emoji(653161518170505216), bot.user)
-                qm = await ctx.send(await ctx._("help-s-send"))
-                try:
-                    msg = await bot.wait_for('message', check=lambda m: m.author == ctx.author and m.channel == ctx.channel, timeout=60)
-                    sewd = msg.content
-                except asyncio.TimeoutError:
-                    pass
-                else:
-                    try:
-                        await msg.delete()
-                        await qm.delete()
-                    except:
-                        pass
-                    async with ctx.message.channel.typing():
-                        lang = await ctx.user_lang() or "ja"
-                        with open(f"lang/{lang}.json", "r", encoding="utf-8") as j:
-                            f = json.load(j)
-                        sre = discord.Embed(title=await ctx._(
-                            "help-s-ret-title"), description=await ctx._("help-s-ret-desc", sewd), color=bot.ec)
-                        for k, v in f.items():
-                            if k.startswith("h-"):
-                                if sewd in k.replace("h-", "") or sewd in v:
-                                    sre.add_field(name=k.replace(
-                                        "h-", ""), value=v.replace(sewd, f"**{sewd}**"))
-                    await ctx.send(embed=sre)
-        try:
-            await msg.remove_reaction(bot.get_emoji(653161518195671041), bot.user)
-            await msg.remove_reaction("🔍", bot.user)
-            await msg.remove_reaction(bot.get_emoji(653161518170505216), bot.user)
-        except:
-            pass
-    else:
-        embed = discord.Embed(title=str(rcmd), description=await ctx._(
-            f"h-{str(rcmd)}"), color=bot.ec)
-        if embed.description == "":
-            await ctx.send(await ctx._("h-notfound"))
-        else:
-            await ctx.send(embed=embed)
-
-
-@bot.command()
-@commands.bot_has_permissions(embed_links=True, external_emojis=True, add_reactions=True)
-async def help(ctx, rcmd=None):
-    # ヘルプ内容
-    if rcmd is None:
-        page = 1
-        embed = discord.Embed(title=await ctx._("help-1-t"),
-                              description=await ctx._("help-1-d"), color=bot.ec)
-        embed.set_footer(text=f"page:{page}")
-        msg = await ctx.send(embed=embed)
-        await msg.add_reaction(bot.get_emoji(653161518195671041))
-        await msg.add_reaction(bot.get_emoji(653161518170505216))
-        await msg.add_reaction("🔍")
-        while True:
-            try:
-                r, u = await bot.wait_for("reaction_add", check=lambda r, u: r.message.id == msg.id and u.id == ctx.message.author.id, timeout=30)
-            except:
-                break
-            try:
-                await msg.remove_reaction(r, u)
-            except:
-                pass
-            if str(r) == str(bot.get_emoji(653161518170505216)):
-                if page == 17:
-                    page = 1
-                else:
-                    page = page + 1
-                embed = discord.Embed(title=await ctx._(
-                    f"help-{page}-t"), description=await ctx._(f"help-{page}-d"), color=bot.ec)
-                embed.set_footer(text=f"page:{page}")
-                await msg.edit(embed=embed)
-            elif str(r) == str(bot.get_emoji(653161518195671041)):
-                if page == 1:
-                    page = 17
-                else:
-                    page = page - 1
-                embed = discord.Embed(title=await ctx._(
-                    f"help-{page}-t"), description=await ctx._(f"help-{page}-d"), color=bot.ec)
-                embed.set_footer(text=f"page:{page}")
-                await msg.edit(embed=embed)
-            elif str(r) == "🔍":
-                await msg.remove_reaction(bot.get_emoji(653161518195671041), bot.user)
-                await msg.remove_reaction("🔍", bot.user)
-                await msg.remove_reaction(bot.get_emoji(653161518170505216), bot.user)
-                qm = await ctx.send(await ctx._("help-s-send"))
-                try:
-                    msg = await bot.wait_for('message', check=lambda m: m.author == ctx.author and m.channel == ctx.channel, timeout=60)
-                    sewd = msg.content
-                except asyncio.TimeoutError:
-                    pass
-                else:
-                    try:
-                        await msg.delete()
-                        await qm.delete()
-                    except:
-                        pass
-                    async with ctx.message.channel.typing():
-                        lang = await ctx.user_lang() or "ja"
-                        with open(f"lang/{lang}.json", "r", encoding="utf-8") as j:
-                            f = json.load(j)
-                        sre = discord.Embed(title=await ctx._(
-                            "help-s-ret-title"), description=await ctx._("help-s-ret-desc", sewd), color=bot.ec)
-                        for k, v in f.items():
-                            if k.startswith("nh-"):
-                                if sewd in k.replace("nh-", "") or sewd in str(v):
-                                    sre.add_field(name=k.replace(
-                                        "nh-", ""), value=f"詳細を見るには`s-help {k.replace('nh-','')}`と送信")
-                    await ctx.send(embed=sre)
-        try:
-            await msg.remove_reaction(bot.get_emoji(653161518195671041), bot.user)
-            await msg.remove_reaction("🔍", bot.user)
-            await msg.remove_reaction(bot.get_emoji(653161518170505216), bot.user)
-        except:
-            pass
-    else:
-        dcmd = await ctx._(f"nh-{str(rcmd)}")
-        if str(dcmd) == "":
-            await ctx.send(await ctx._("h-notfound"))
-        else:
-            embed = ut.getEmbed(dcmd[0], dcmd[1], bot.ec, *dcmd[2:])
-            await ctx.send(embed=embed)
-
 
 @bot.event
-async def on_command(ctx):
+async def on_command(ctx:commands.Context):
+    if ctx.interaction:return
     ch = bot.get_channel(693048961107230811)
     e = discord.Embed(title=f"prefixコマンド:{ctx.command.name}の実行",
                       description=f"実行文:`{ctx.message.clean_content}`", color=bot.ec)
@@ -1691,7 +1183,7 @@ async def on_command_error(ctx, error):
                               description=await ctx._("only-mii-10"), color=bot.ec)
         await ctx.send(embed=embed)
         ch = bot.get_channel(652127085598474242)
-        await ch.send(embed=ut.getEmbed("エラーログ", f"コマンド:`{ctx.command.name}`\n```{str(error)}```", bot.ec, f"サーバー", ctx.guild.name, "実行メンバー", ctx.author.name, "メッセージ内容", ctx.message.content))
+        await ch.send(embed=ut.getEmbed("エラーログ", f"コマンド:`{ctx.command.name}`\n```{str(error)}```", bot.ec, f"サーバー", ctx.guild.name, "実行メンバー", ctx.author.name, "メッセージ内容", ctx.message.content or "(本文なし)"))
     elif isinstance(error, commands.MissingRequiredArgument):
         # 引数がないよっ☆
         embed = discord.Embed(title=await ctx._("cmd-error-t"),
@@ -1715,8 +1207,8 @@ async def on_command_error(ctx, error):
     else:
         # その他例外
         ch = bot.get_channel(652127085598474242)
-        msg = await ch.send(embed=ut.getEmbed("エラーログ", f"コマンド:`{ctx.command.name}`\n```{str(error)}```", bot.ec, f"サーバー", ctx.guild.name, "実行メンバー", ctx.author.name, "メッセージ内容", ctx.message.content))
-        await ctx.send(embed=ut.getEmbed(await ctx._("com-error-t"), await ctx._("cmd-other-d", error, bot.ec, "error id", msg.id, "サポートが必要ですか？", "[サポートサーバー](https://discord.gg/vtn2V3v)に参加して、「view-思惟奈ちゃんch」役職をつけて質問してみましょう！")))
+        msg = await ch.send(embed=ut.getEmbed("エラーログ", f"コマンド:`{ctx.command.name}`\n```{str(error)}```", bot.ec, f"サーバー", ctx.guild.name, "実行メンバー", ctx.author.name, "メッセージ内容", ctx.message.content or "(本文なし)"))
+        await ctx.send(embed=ut.getEmbed(await ctx._("com-error-t"), await ctx._("cmd-other-d", error), bot.ec, "error id", msg.id, "サポートが必要ですか？", "[サポートサーバー](https://discord.gg/vtn2V3v)に参加して、「view-思惟奈ちゃんch」役職をつけて質問してみましょう！"))
 
 
 """

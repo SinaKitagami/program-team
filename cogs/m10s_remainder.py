@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*- #
 
-from typing import Union
+from typing import Optional, Union
 import discord
 from discord.ext import commands, tasks
 import datetime
 import time
+
+from discord import app_commands
 
 import asyncio
 
@@ -14,17 +16,14 @@ class m10s_remainder(commands.Cog):
         self.bot = bot
         self.remainder_check.start()
 
-    @commands.group()
+    @commands.hybrid_group(description="リマインダー機能")
     async def remainder(self,ctx):
         pass
 
-    @remainder.command()
-    async def set(self,ctx,send_text,mention_at=None):
-        if mention_at:
-            try:
-                mention_at = await commands.RoleConverter().convert(ctx,mention_at)
-            except:
-                mention_at = None
+    @remainder.command(description="リマインダーを作成します。")
+    @app_commands.describe(send_text="リマインダーの文面")
+    @app_commands.describe(mention_at="メンションする役職")
+    async def set(self,ctx,send_text:str, mention_at:Optional[discord.Role]):
         rid = int(time.time())
         if mention_at:
             mention_at = mention_at.id
@@ -38,8 +37,9 @@ class m10s_remainder(commands.Cog):
         await self.bot.cursor.execute("insert into remaind (id,stext,mention_role,time,chid) values (%s,%s,%s,%s,%s)", (rid, send_text, mention_at, ts.timestamp(), ctx.channel.id))
         await ctx.send(f"> リマインダー\n　{ts.strftime('%Y/%m/%d %H:%M')}にリマインダーの登録をしました。(リマインダーID:`{rid}`)")
 
-    @remainder.command()
-    async def check(self,ctx,rid=None):
+    @remainder.command(description="リマインダーの確認をします。")
+    @app_commands.describe(rid="リマインダーのID")
+    async def check(self,ctx,rid:Optional[int]):
         if rid:
             i = await self.bot.cursor.fetchone("select * from remaind where id = %s",(int(rid),))
             #i = await self.bot.cursor.fetchone()
@@ -103,7 +103,8 @@ class m10s_remainder(commands.Cog):
                 await ctx.reply("> リマインダー\n　このチャンネルには、まだ実行時間前のリマインダーはありません。")
             
 
-    @remainder.command()
+    @remainder.command(description="リマインダーを削除します。")
+    @app_commands.describe(rid="リマインダーのID")
     async def delete(self,ctx,rid:int):
         await self.bot.cursor.execute("delete from remaind where id = %s",(rid,))
         await ctx.send("> リマインダー\n　該当IDを持ったリマインドがある場合、それを削除しました。")

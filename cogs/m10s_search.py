@@ -10,6 +10,8 @@ import time
 import asyncio
 from dateutil.relativedelta import relativedelta as rdelta
 
+from discord import app_commands
+
 import m10s_util as ut
 
 import config as cf
@@ -25,27 +27,14 @@ class search(commands.Cog):
     async def getby(self, ctx, k: str):
         await ctx.send(embed=ut.getEmbed("", await ctx._(k)))
 
-    @commands.command(name="checkscrauname")
-    @commands.cooldown(1, 5, type=commands.BucketType.user)
-    async def scrauname(self, ctx, un: str):
-        if not await ctx.user_lang() == "ja":
-            await ctx.send(await ctx._("cannot-run"))
-            return
+    @commands.hybrid_group(name="search", description="検索系コマンド")
+    async def search_commands(self,ctx):
+        pass
 
-        print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
-              ctx.message.content)
-        try:
-            async with ctx.message.channel.typing():
-                url = f'https://scratch.mit.edu/accounts/check_username/{un}'
-                content = await self.bot.apple_util.get_as_json(url)
-                print(content)
-            await ctx.send(embed=discord.Embed(title=f"Scratchでのユーザー名:\'{content[0]['username']}\'の使用可能状態", description=f"{content[0]['msg']}({content[0]['msg'].replace('username exists','存在するため使用不可').replace('bad username','検閲により使用不可').replace('invalid username','無効なユーザー名').replace('valid username','使用可能')})"))
-        except:
-            await ctx.send("何らかの例外が発生しました。")
-
-    @commands.command(aliases=["twitter", "twitterで検索して"])
+    @search_commands.command(aliases=["twisearch", "twitterで検索して"], description="Twitter検索")
+    @app_commands.describe(word="検索文字列")
     @commands.cooldown(1, 15, type=commands.BucketType.user)
-    async def twisearch(self, ctx, *, word: str):
+    async def twitter(self, ctx, *, word: str):
         try:
             async with ctx.message.channel.typing():
                 ret = self.bot.twi.search.tweets(
@@ -67,12 +56,13 @@ class search(commands.Cog):
             await ctx.send(await ctx._("twi-error"))
             # await ctx.send(embed=ut.getEmbed("traceback",traceback.format_exc(3)))
 
-    @commands.command(aliases=["wikipedia", "次の言葉でwikipedia調べて"])
+    @search_commands.command(aliases=["jwp", "次の言葉でwikipedia調べて"],description="wikipedia検索")
+    @app_commands.describe(word="検索文字列")
     @commands.cooldown(1, 10, type=commands.BucketType.user)
-    async def jwp(self, ctx):
+    async def wikipedia(self, ctx, *, word:str):
         try:
             async with ctx.message.channel.typing():
-                wd = ctx.message.content.replace("s-jwp ", "")
+                wd = word
                 sw = wikipedia.search(wd, results=1)
                 sw1 = sw[0].replace(" ", "_")
                 sr = wikipedia.page(sw1)
@@ -93,12 +83,10 @@ class search(commands.Cog):
             except:
                 await ctx.send(await ctx._("jwp-notfound"))
 
-    @commands.command(aliases=["天気", "今日の天気は"])
-    @commands.cooldown(1, 15, type=commands.BucketType.user)
-    async def jpwt(self, ctx):
+    # @search_commands.command(aliases=["jpwt", "天気", "今日の天気は"],description="日本の天気予報図を表示します。")
+    # @commands.cooldown(1, 15, type=commands.BucketType.user) -> 形式変更で動かなくなっていましたよ
+    async def weather_in_japan(self, ctx):
 
-        print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
-              ctx.message.content)
         if ctx.channel.permissions_for(ctx.guild.me).attach_files is True:
             try:
                 async with ctx.message.channel.typing():
@@ -115,7 +103,7 @@ class search(commands.Cog):
             except:
                 await ctx.send(f"{await ctx._('dhaveper')}\n{await ctx._('per-sendfile')}")
 
-    @commands.command(aliases=["ニュース", "ニュースを見せて"])
+    @search_commands.command(aliases=["ニュース", "ニュースを見せて"],description="newsapi経由でニュースを表示します。")
     @commands.cooldown(1, 15, type=commands.BucketType.user)
     async def news(self, ctx):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
@@ -154,189 +142,25 @@ class search(commands.Cog):
                     page = page - 1
             await msg.edit(embed=embeds[page])
 
-    @commands.command()
-    @commands.cooldown(1, 5, type=commands.BucketType.user)
-    async def gwd(self, ctx):
-        print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
-              ctx.message.content)
-        try:
-            async with ctx.message.channel.typing():
-                str1 = ctx.message.content.replace("s-gwd ", "")
-                sjson = await self.bot.apple_util.get_as_json("https://www.wikidata.org/w/api.php?action=wbsearchentities&search="+str1+"&language=en&format=json")
-                sid = sjson["search"][0]["id"]
-                purjson = await self.bot.apple_util.get_as_json("https://www.wikidata.org/w/api.php?action=wbsearchentities&search="+str1+"&language=en&format=json")
-                purl = purjson["search"][0]["concepturi"]
-                sret = self.bot.mwc.get(
-                    sid, load=True).attributes["claims"]["P569"][0]["mainsnak"]["datavalue"]["value"]["time"]
-                vsd = sret.replace("+", "")
-                vsd = vsd.replace("-", "/")
-                vsd = vsd.replace("T00:00:00Z", "")
-            await ctx.send(await ctx._("gwd-return1", str1, vsd, purl))
-        except:
-            await ctx.send(await ctx._("gwd-return2"))
 
-    @commands.command()
-    @commands.cooldown(1, 80)
-    async def gupd(self, ctx):
-        print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
-              ctx.message.content)
-        content = await self.bot.apple_util.get_as_json('https://ja.scratch-wiki.info/w/api.php?action=query&list=recentchanges&rcprop=title|timestamp|user|comment|flags|sizes&format=json')
-        await ctx.send(await ctx._("gupd-send"))
-        for i in range(5):
-            try:
-                embed = discord.Embed(title=await ctx._(
-                    "gupd-page"), description=content["query"]['recentchanges'][i]["title"], color=self.bot.ec)
-                embed.add_field(name=await ctx._("gupd-editor"),
-                                value=content["query"]['recentchanges'][i]["user"])
-                embed.add_field(name=await ctx._("gupd-size"), value=str(content["query"]['recentchanges'][i]["oldlen"])+"→"+str(
-                    content["query"]['recentchanges'][i]["newlen"])+"("+str(content["query"]['recentchanges'][i]["newlen"]-content["query"]['recentchanges'][i]["oldlen"])+")")
-                embed.add_field(name=await ctx._(
-                    "gupd-type"), value=content["query"]['recentchanges'][i]["type"])
-                if not content["query"]['recentchanges'][i]["comment"] == "":
-                    embed.add_field(name=await ctx._(
-                        "gupd-comment"), value=content["query"]['recentchanges'][i]["comment"])
-                else:
-                    embed.add_field(name=await ctx._("gupd-comment"),
-                                    value=await ctx._("gupd-notcomment"))
-                embed.add_field(name=await ctx._("gupd-time"), value=content["query"]['recentchanges'][i]["timestamp"].replace(
-                    "T", " ").replace("Z", "").replace("-", "/"))
-                await ctx.send(embed=embed)
-            except:
-                eembed = discord.Embed(title=await ctx._(
-                    "gupd-unknown"), description=await ctx._("gupd-url"), color=self.bot.ec)
-                await ctx.send(embed=eembed)
 
-    @commands.command(aliases=["次の言葉でyoutube調べて"])
+    @search_commands.command(aliases=["次の言葉でyoutube調べて"], description="YouTube検索")
+    @app_commands.describe(word="検索文字列")
     @commands.cooldown(1, 10, type=commands.BucketType.user)
-    async def youtube(self, ctx):
-        print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
-              ctx.message.content)
+    async def youtube(self, ctx, *, word:str):
         try:
             async with ctx.message.channel.typing():
-                wd = ctx.message.content.replace("s-youtube ", "")
                 youtube = build('youtube', 'v3',
                                 developerKey=self.bot.GAPI_TOKEN)
                 search_response = youtube.search().list(
                     part="id",
-                    q=wd,
+                    q=word,
                     type='video'
                 ).execute()
                 id = search_response['items'][0]['id']['videoId']
                 await ctx.send(await ctx._("youtube-found", id))
         except:
             await ctx.send(await ctx._("youtube-notfound"))
-
-    @commands.command(name="scranotif", aliases=["snotify", "Scratchの通知", "Scratchの通知を調べて"])
-    @commands.cooldown(1, 5, type=commands.BucketType.user)
-    async def scranotif(self, ctx, un: str):
-
-        print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
-              ctx.message.content)
-        try:
-            async with ctx.message.channel.typing():
-                url = 'https://api.scratch.mit.edu/users/'+un+'/messages/count'
-                content = await self.bot.apple_util.get_as_json(url)
-                await ctx.send(await ctx._("scranotif-notify", un, str(content['count'])))
-        except:
-            await ctx.send(await ctx._("scranotif-badrequest"))
-
-    @commands.command()
-    @commands.cooldown(2, 10, type=commands.BucketType.user)
-    async def wid(self, ctx, inid):
-        if not await ctx.user_lang() == "ja":
-            await ctx.send(await ctx._("cannot-run"))
-            return
-
-        async with ctx.message.channel.typing():
-            st = time.time()
-            try:
-                id = int(inid)
-            except:
-                id = None
-            idis = self.bot.get_channel(id)
-            if idis:
-                if isinstance(idis, discord.DMChannel):
-                    await ctx.send(embed=ut.getEmbed("DMチャンネル", f"相手:{idis.recipient}"))
-                elif isinstance(idis, discord.GroupChannel):
-                    await ctx.send(embed=ut.getEmbed("グループDMチャンネル", f"メンバー:{','.join(idis.recipients)},\n名前:{idis.name},"))
-                elif isinstance(idis, discord.abc.GuildChannel):
-                    await ctx.send(embed=ut.getEmbed("サーバーチャンネル", f"名前:{idis.name}\nサーバー:{idis.guild}"))
-                else:
-                    await ctx.send(embed=ut.getEmbed("その他チャンネル", f"名前:{idis.name}"))
-                return
-            idis = self.bot.get_guild(id)
-            if idis:
-                gp = await self.bot.cursor.fetchone("select * from guilds where id = %s",(ctx.guild.id,))
-                #gp = await self.bot.cursor.fetchone()
-                if gp["verified"]:
-                    ptn = f'{await ctx._("sina_verified_guild")}:'
-                else:
-                    ptn = ""
-                if "PARTNER" in ctx.guild.features:
-                    ptn = ptn+f'{await ctx._("discord_partner_guild")}:'
-                await ctx.send(embed=ut.getEmbed("サーバー", f"{ptn}\n名前:{idis.name}\nid:{idis.id}"))
-                return
-            try:
-                idis = await self.bot.fetch_user(id)
-                u = idis
-                info = ""
-                if u.id in self.bot.team_sina:
-                    info = f',({await ctx._("team_sina-chan")})'
-                if u.id in cf.partner_ids:
-                        info = info+f"、(🔗{await ctx._('sina_parnter_bot')})"
-                e = discord.Embed(title="ユーザー", description=info, color=self.bot.ec)
-                if u.system:
-                    e.add_field(
-                        name="✅システムアカウント", value="このアカウントは、Discordのシステムアカウントであり、安全です。", inline=False)
-                e.add_field(name="名前", value=u.name)
-                e.add_field(name="id", value=u.id)
-                e.add_field(name="ディスクリミネータ", value=u.discriminator)
-                e.add_field(name="botかどうか", value=u.bot)
-
-                e.set_thumbnail(url=u.display_avater.replace(static_format="png").url)
-                e.set_footer(
-                    text=f"アカウント作成日時(そのままの値:{(u.created_at+ rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒')},タイムスタンプ化:")
-                e.timestamp = u.created_at
-                await ctx.send(embed=e)
-                return
-            except:
-                pass
-            idis = self.bot.get_emoji(id)
-            if idis:
-                await ctx.send(embed=ut.getEmbed("絵文字", f"名前:{str(idis)}\nid:{idis.id}"))
-                return
-            try:
-                idis = await self.bot.fetch_invite(inid)
-                await ctx.send(embed=ut.getEmbed("サーバー招待", f"名前:{str(idis.guild.name)}\nチャンネル:{idis.channel.name}\nmember_count:{idis.approximate_member_count}\npresence_count:{idis.approximate_presence_count}\n[参加]({idis.url})"))
-                return
-            except:
-                pass
-            try:
-                idis = await self.bot.fetch_webhook(id)
-                await ctx.send(embed=ut.getEmbed("webhook", f"デフォルトネーム:{idis.name}\nサーバーid:{idis.guild_id}"))
-                return
-            except:
-                pass
-            try:
-                idis = await self.bot.fetch_widget(inid)
-                await ctx.send(embed=ut.getEmbed("サーバーウィジェット", f"名前:{idis.name}\n招待:{idis.invite_url}"))
-                return
-            except:
-                pass
-            """try:
-                for g in self.bot.guilds:
-                    for ch in g.text_channels:
-                        try:
-                            idis = await ch.fetch_message(id)
-                            await ctx.send(embed=ut.getEmbed("メッセージ",f"送信者:{idis.author}\n内容:{idis.content}"))
-                            return
-                        except:
-                            pass
-                        finally:
-                            await asyncio.sleep(0.5)
-            except:
-                pass"""
-            await ctx.send(embed=ut.getEmbed("そのidでは見つかりませんでした。", "(現在メッセージidの検索は無効化されています。)"))
 
 
 async def setup(bot):

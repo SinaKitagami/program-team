@@ -65,13 +65,13 @@ def get_vmusic(bot, member):
             try:
                 mg = v.guild
                 mn = bot.qu.get(str(v.guild.id), [])
-                ml = bot.lp.get(str(v.guild.id), [])
+                ml = bot.lp.get(str(v.guild.id), False)
                 mvc = v
                 break
             except:
                 pass
     if mg and mn:
-        return {
+        rtn = {
             "name": mn[0]["video_title"],
             "url": mn[0]["video_url"],
             "uploader":mn[0]["video_up_name"],
@@ -81,8 +81,12 @@ def get_vmusic(bot, member):
             "queue":mn,
             "isPlaying":mvc.is_playing(),
             "loop":ml,
-            "volume":mvc.source.volume
         }
+        if mvc.source:
+            rtn["volume"] = mvc.source.volume
+        else:
+            rtn["volume"] = 0.5
+        return rtn
     else:
         return None
 
@@ -94,7 +98,7 @@ async def get_badges(bot, user):
     }
     uid = user.id
 
-    async with bot.session.get(f"https://discord.com/api/v8/users/{uid}", headers=headers) as resp:
+    async with bot.session.get(f"https://discord.com/api/v10/users/{uid}", headers=headers) as resp:
         resp.raise_for_status()
         rq = await resp.json()
     return m10s_badges(rq["public_flags"])
@@ -107,7 +111,7 @@ class m10s_badges:
         self.raw_flags = flags
         flags = format(flags, "b")
 
-        flags = flags.zfill(19)[::-1]
+        flags = flags.zfill(20)[::-1]
         self.staff = flags[0] == "1"
         self.partner = flags[1] == "1"
         self.hypesquad_events = flags[2] == "1"
@@ -122,6 +126,7 @@ class m10s_badges:
         self.verified_bot = flags[16] == "1"
         self.early_verified_bot_developer = flags[17] == "1"
         self.discord_certified_moderator = flags[18] == "1"
+        self.http_interaction_bot = flags[19] == "1"
 
         self.dict_flags = {
             "Discord Staff": self.staff,
@@ -137,7 +142,8 @@ class m10s_badges:
             "Bug Hunter Level 2": self.bug_hunter_2,
             "Verified Bot": self.verified_bot,
             "Early Verified Bot Developer": self.early_verified_bot_developer,
-            "Discord Certified Moderator":self.discord_certified_moderator
+            "Discord Certified Moderator":self.discord_certified_moderator,
+            "Http Interaction Bot":self.http_interaction_bot
         }
 
         self.n = 0
