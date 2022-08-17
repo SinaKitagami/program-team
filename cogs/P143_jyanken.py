@@ -7,12 +7,16 @@ import asyncio
 
 from discord import app_commands
 
+import m10s_util as ut
+
 class jyanken(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
 
     @commands.hybrid_command(name="jyanken", description="じゃんけんできます。")
+    @commands.bot_has_permissions(manage_messages=True)
+    @ut.runnable_check()
     async def command(self, ctx,):
         def win(hand):
             embed = discord.Embed(

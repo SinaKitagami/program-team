@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands, tasks
 
+import m10s_util as ut
 
 class AppleInviteCog(commands.Cog):
     def __init__(self, bot):
@@ -167,6 +168,7 @@ class AppleInviteCog(commands.Cog):
 
     @commands.command(hidden=True)
     @commands.guild_only()
+    @ut.runnable_check()
     @commands.has_permissions(manage_guild=True, create_instant_invite=True)
     async def checkoffline(self, ctx):
         self._lock = True

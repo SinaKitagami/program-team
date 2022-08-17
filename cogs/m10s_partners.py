@@ -18,6 +18,7 @@ class m10s_partner(commands.Cog):
         self.partners = cf.partners
 
     @commands.hybrid_command(name="partners",description="思惟奈ちゃんのパートナーを表示します。")
+    @ut.runnable_check()
     async def view_partners(self, ctx):
         pmax = len(self.partner_ids)-1
         page = 0

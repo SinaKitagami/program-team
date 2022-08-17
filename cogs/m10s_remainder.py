@@ -8,6 +8,8 @@ import time
 
 from discord import app_commands
 
+import m10s_util as ut
+
 import asyncio
 
 class m10s_remainder(commands.Cog):
@@ -17,12 +19,14 @@ class m10s_remainder(commands.Cog):
         self.remainder_check.start()
 
     @commands.hybrid_group(description="リマインダー機能")
+    @ut.runnable_check()
     async def remainder(self,ctx):
         pass
 
     @remainder.command(description="リマインダーを作成します。")
     @app_commands.describe(send_text="リマインダーの文面")
     @app_commands.describe(mention_at="メンションする役職")
+    @ut.runnable_check()
     async def set(self,ctx,send_text:str, mention_at:Optional[discord.Role]):
         rid = int(time.time())
         if mention_at:
@@ -39,6 +43,7 @@ class m10s_remainder(commands.Cog):
 
     @remainder.command(description="リマインダーの確認をします。")
     @app_commands.describe(rid="リマインダーのID")
+    @ut.runnable_check()
     async def check(self,ctx,rid:Optional[int]):
         if rid:
             i = await self.bot.cursor.fetchone("select * from remaind where id = %s",(int(rid),))
@@ -105,6 +110,7 @@ class m10s_remainder(commands.Cog):
 
     @remainder.command(description="リマインダーを削除します。")
     @app_commands.describe(rid="リマインダーのID")
+    @ut.runnable_check()
     async def delete(self,ctx,rid:int):
         await self.bot.cursor.execute("delete from remaind where id = %s",(rid,))
         await ctx.send("> リマインダー\n　該当IDを持ったリマインドがある場合、それを削除しました。")

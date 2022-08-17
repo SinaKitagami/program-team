@@ -5,6 +5,8 @@ import sqlite3
 import pickle
 import discord
 
+from discord.ext import commands
+
 import aiohttp
 
 #sqlite3.register_converter('pickle', pickle.loads)
@@ -90,6 +92,23 @@ def get_vmusic(bot, member):
     else:
         return None
 
+def runnable_check():
+    async def predicate(ctx):
+        if hasattr(ctx, "bot") and hasattr(ctx.bot, "comlocks"):
+            if ctx.bot.comlocks.get(str(ctx.guild.id), []): # comlockが存在するかのチェック(プロファイル発行確認)
+                if ctx.command.name in ctx.bot.comlocks[str(ctx.guild.id)] and not ctx.author.guild_permissions.administrator and ctx.author.id != 404243934210949120: # comlockされているかどうか
+                    return False
+            if ctx.command.name in ctx.bot.features[0] and (not ctx.guild.id in ctx.bot.team_sina): # グローバルfeatureでロックされているかどうか(メンテナンス)
+                return False
+            elif ctx.command.name in ctx.bot.features.get(ctx.author.id, []) or "cu:cmd" in ctx.bot.features.get(ctx.author.id, []): # featuresでのユーザーごとのコマンドロック
+                return False
+            elif ctx.command.name in ctx.bot.features.get(ctx.guild.id, []) or "cu:cmd" in ctx.bot.features.get(ctx.guild.id, []): # featuresでのサーバーごとのコマンドロック
+                return False
+            else:
+                return True
+        else:
+            return True
+    return commands.check(predicate)
 
 async def get_badges(bot, user):
     headers = {
@@ -111,7 +130,7 @@ class m10s_badges:
         self.raw_flags = flags
         flags = format(flags, "b")
 
-        flags = flags.zfill(20)[::-1]
+        flags = flags.zfill(24)[::-1]
         self.staff = flags[0] == "1"
         self.partner = flags[1] == "1"
         self.hypesquad_events = flags[2] == "1"
@@ -127,6 +146,7 @@ class m10s_badges:
         self.early_verified_bot_developer = flags[17] == "1"
         self.discord_certified_moderator = flags[18] == "1"
         self.http_interaction_bot = flags[19] == "1"
+        self.supports_commands = flags[23] == "1"
 
         self.dict_flags = {
             "Discord Staff": self.staff,
@@ -143,7 +163,8 @@ class m10s_badges:
             "Verified Bot": self.verified_bot,
             "Early Verified Bot Developer": self.early_verified_bot_developer,
             "Discord Certified Moderator":self.discord_certified_moderator,
-            "Http Interaction Bot":self.http_interaction_bot
+            "Http Interaction Bot":self.http_interaction_bot,
+            "Supports commands":self.supports_commands
         }
 
         self.n = 0
@@ -168,3 +189,4 @@ class m10s_badges:
 
     def get_list(self):
         return [bn for bn, bl in self.dict_flags.items() if bl]
+

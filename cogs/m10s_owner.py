@@ -17,6 +17,7 @@ class owner(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
+    @ut.runnable_check()
     async def get_ch_id(self, ctx, cnm: str):
         text = [f"{str(ch)} ({ch.id})" for ch in ctx.guild.channels if cnm in str(ch)]
         t = "\n".join(text)
@@ -26,6 +27,7 @@ class owner(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
+    @ut.runnable_check()
     async def chlogs(self, ctx, cid: int, count: int):
         ch = self.bot.get_channel(cid)
         async for m in ch.history(limit=count):
@@ -34,6 +36,7 @@ class owner(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
+    @ut.runnable_check()
     async def dcomrun(self, ctx, cname, *, ags):
         c = ctx
         c.args = list(ags)
@@ -44,19 +47,21 @@ class owner(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
+    @ut.runnable_check()
     async def cu(self, ctx):
         await ctx.send("see you...")
         await self.bot.close()
     
     #check function
     async def is_evalable(ctx):
-        if "eval" in ctx.bot.features.get(ctx.author.id, []):
+        if "allow_eval" in ctx.bot.features.get(ctx.author.id, []):
             return True
         else:
             return False
     
     @commands.command()
     @commands.check(is_evalable)
+    @ut.runnable_check()
     async def sql(self, ctx, *, query):
         await ctx.message.add_reaction(self.bot.get_emoji(653161518346534912))
         try:
@@ -76,6 +81,7 @@ class owner(commands.Cog):
 
     @commands.command()
     @commands.check(is_evalable)
+    @ut.runnable_check()
     async def aev(self, ctx, *, cmd):
         try:
             await eval(cmd)
@@ -85,6 +91,7 @@ class owner(commands.Cog):
 
     @commands.command(name="eval")
     @commands.check(is_evalable)
+    @ut.runnable_check()
     async def eval_(self, ctx, *, cmd):
         await ctx.message.add_reaction(self.bot.get_emoji(653161518346534912))
         rt = "\n"
@@ -112,6 +119,7 @@ class owner(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
+    @ut.runnable_check()
     async def inserver(self, ctx):
         guilds = self.bot.guilds
         gcount = len(guilds)-1
@@ -176,6 +184,7 @@ class owner(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
+    @ut.runnable_check()
     async def dmember(self, ctx, *, mus=None):
         info = None
         tmp2 = None
@@ -236,6 +245,7 @@ class owner(commands.Cog):
             await ctx.send("一致するユーザーが、共通サーバーに見つかりませんでした。")
 
     @commands.command()
+    @ut.runnable_check()
     async def cuglobal(self, ctx, *cids):
         upf = await self.bot.cursor.fetchone(
             "select * from users where id=%s", (ctx.author.id,))
@@ -250,29 +260,10 @@ class owner(commands.Cog):
                         pass
             await ctx.send("強制切断できてるか確認してねー")
 
-    @commands.command()
-    @commands.is_owner()
-    async def retfmt(self, ctx):
-        print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
-              ctx.message.content)
-        try:
-            await ctx.send(ctx.message.clean_content.replace("s-retfmt ", "").format(ctx, self.bot).replace("第三・十勝チャット Japan(beta)", ""))
-        except Exception as e:
-            await ctx.send(e)
 
     @commands.command()
     @commands.is_owner()
-    async def changenick(self, ctx, name=None):
-        print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
-              ctx.message.content)
-        await ctx.message.guild.me.edit(nick=name)
-        if name is None:
-            await ctx.send("私のニックネームをデフォルトの名前に変更したよ。")
-        else:
-            await ctx.send("私のニックネームを"+name+"に変更したよ。")
-
-    @commands.command()
-    @commands.is_owner()
+    @ut.runnable_check()
     async def guserft(self, ctx, *, nandt):
         lt = [f"{str(m)}({m.id})" for m in self.bot.users if nandt in str(m)]
         if lt:
@@ -283,6 +274,7 @@ class owner(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
+    @ut.runnable_check()
     async def guildv(self, ctx, gid: int, bl: bool=True):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
               ctx.message.content)
@@ -293,17 +285,20 @@ class owner(commands.Cog):
 
     @commands.group()
     @commands.is_owner()
+    @ut.runnable_check()
     async def manage_features(self, ctx):
         pass
 
     @manage_features.command(name="view",description="他者のfeaturesを見る")
     @app_commands.describe(uid="ユーザーのid")
+    @ut.runnable_check()
     async def view_(self,ctx,uid:int):
         await ctx.reply(f"```py\n{self.bot.features.get(uid,[])}```")
 
     @manage_features.command(name="del", description="feature削除")
     @app_commands.describe(uid="ユーザーのid")
     @app_commands.describe(feature="取り除くfeature")
+    @ut.runnable_check()
     async def del_(self,ctx,uid:int,feature:str):
         uf = self.bot.features.get(uid,None)
         if uf and feature in uf:
@@ -313,6 +308,7 @@ class owner(commands.Cog):
     @manage_features.command(name="add",description="feature追加")
     @app_commands.describe(uid="ユーザーのid")
     @app_commands.describe(feature="追加するfeature")
+    @ut.runnable_check()
     async def add_(self,ctx,uid:int,feature):
         uf = self.bot.features.get(uid,None)
         if uf:
@@ -322,6 +318,7 @@ class owner(commands.Cog):
         await ctx.message.add_reaction(self.bot.get_emoji(653161518103265291))
 
     @manage_features.command(name="reload",description="feature再読み込み")
+    @ut.runnable_check()
     async def reload_(self,ctx):
         import importlib
         import config

@@ -7,6 +7,7 @@ from PIL import Image, ImageOps
 
 from discord import app_commands
 
+import m10s_util as ut
 
 class Symmetry(commands.Cog):
 
@@ -23,6 +24,7 @@ class Symmetry(commands.Cog):
         ])
     @app_commands.describe(side="どの面をシンメトリーにするか")
     @app_commands.describe(image="シンメトリー加工する画像")
+    @ut.runnable_check()
     async def symmetry(self, ctx, side: int, image: discord.Attachment):
         async with ctx.channel.typing():
             await image.save("image.png")

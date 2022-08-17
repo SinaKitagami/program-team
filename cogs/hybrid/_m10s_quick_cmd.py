@@ -22,6 +22,7 @@ class m10s_quick_cmd(commands.Cog):
     @commands.hybrid_command(name="shortcut", description="クイックコマンド呼び出しのパネルを作成します。")
     @app_commands.describe(label="呼び出しボタンの表示名")
     @app_commands.describe(run_command="呼び出すコマンド")
+    @ut.runnable_check()
     async def quick_command_create(self, ctx:commands.Context, label:str, *, run_command:str):
         if run_command == "":
             await ctx.send("> 実行コマンドの指定がありません！")

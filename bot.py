@@ -68,6 +68,8 @@ bot.dpyui = dpyui.interaction_actions(bot)
 
 bot.team_sina = config.team_sina
 
+bot.comlocks = {}
+
 # トークンたち
 bot.DROP_TOKEN = config.DROP_TOKEN
 bot.BOT_TEST_TOKEN = config.BOT_TEST_TOKEN
@@ -266,6 +268,8 @@ async def cRPC():
 
 @bot.event
 async def on_member_update(b, a):
+    if "cu:auto_sends" in bot.features.get(a.guild.id,[]):
+        return
     global Donotif
     # serverlog
     try:
@@ -353,6 +357,8 @@ async def nga(m, r):
 
 @bot.event
 async def on_member_join(member):
+    if "cu:auto_sends" in bot.features.get(member.guild.id,[]):
+        return
     try:
         gpf = await bot.cursor.fetchone(
             "select * from guilds where id=%s", (member.guild.id,))
@@ -418,6 +424,8 @@ async def on_member_join(member):
 
 @bot.event
 async def on_member_remove(member):
+    if "cu:auto_sends" in bot.features.get(member.guild.id,[]):
+        return
     try:
         gpf = await bot.cursor.fetchone(
             "select * from guilds where id=%s", (member.guild.id,))
@@ -449,6 +457,8 @@ async def on_member_remove(member):
 
 @bot.event
 async def on_webhooks_update(channel):
+    if "cu:auto_sends" in bot.features.get(channel.guild.id,[]):
+        return
     e = discord.Embed(title="Webhooksの更新", color=bot.ec)
     e.add_field(name="チャンネル", value=channel.mention)
     e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
@@ -462,6 +472,8 @@ async def on_webhooks_update(channel):
 
 @bot.event
 async def on_guild_role_create(role):
+    if "cu:auto_sends" in bot.features.get(role.guild.id,[]):
+        return
     e = discord.Embed(title="役職の作成", color=bot.ec)
     e.add_field(name="役職名", value=role.name)
     e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
@@ -475,6 +487,8 @@ async def on_guild_role_create(role):
 
 @bot.event
 async def on_guild_role_delete(role):
+    if "cu:auto_sends" in bot.features.get(role.guild.id,[]):
+        return
     e = discord.Embed(title="役職の削除", color=bot.ec)
     e.add_field(name="役職名", value=role.name)
     e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
@@ -488,6 +502,8 @@ async def on_guild_role_delete(role):
 
 @bot.event
 async def on_message_edit(before, after):
+    if "cu:auto_sends" in bot.features.get(after.guild.id,[]):
+        return
     # サーバーログ
     if before.content != after.content and before.author.id != 462885760043843584:
         e = discord.Embed(title="メッセージの編集", color=bot.ec)
@@ -508,6 +524,8 @@ async def on_message_edit(before, after):
 
 @bot.event
 async def on_guild_channel_delete(channel):
+    if "cu:auto_sends" in bot.features.get(channel.guild.id,[]):
+        return
     # bl = await channel.guild.audit_logs(limit=1, action=discord.AuditLogAction.channel_delete).flatten()
     e = discord.Embed(title="チャンネル削除", color=bot.ec)
     e.add_field(name="チャンネル名", value=channel.name)
@@ -522,6 +540,8 @@ async def on_guild_channel_delete(channel):
 
 @bot.event
 async def on_reaction_clear(message, reactions):
+    if "cu:auto_sends" in bot.features.get(message.guild.id,[]):
+        return
     e = discord.Embed(title="リアクションの一斉除去", color=bot.ec)
     e.add_field(name="リアクション", value=[str(i) for i in reactions])
     e.add_field(name="除去されたメッセージ", value=message.content or "(本文なし)")
@@ -536,6 +556,8 @@ async def on_reaction_clear(message, reactions):
 
 @bot.event
 async def on_message_delete(message):
+    if "cu:auto_sends" in bot.features.get(message.guild.id,[]):
+        return
     if not message.author.bot:
         e = discord.Embed(title="メッセージ削除", color=bot.ec)
         e.add_field(name="メッセージ", value=message.content)
@@ -554,6 +576,8 @@ async def on_message_delete(message):
 
 @bot.event
 async def on_bulk_message_delete(messages):
+    if "cu:auto_sends" in bot.features.get(message.guild.id,[]):
+        return
     logs = ["一括削除ログ\n",f"チャンネル:{messages[0].channel}({messages[0].channel.id})\n","------\n"]
     for m in messages:
         logs.append(f"author(送信者):{m.author.display_name}({m.author}/{m.author.id})\n")
@@ -590,6 +614,8 @@ async def on_bulk_message_delete(messages):
 
 @bot.event
 async def on_guild_channel_create(channel):
+    if "cu:auto_sends" in bot.features.get(channel.guild.id,[]):
+        return
     e = discord.Embed(title="チャンネル作成", color=bot.ec)
     e.add_field(name="チャンネル名", value=channel.mention)
     e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
@@ -603,6 +629,8 @@ async def on_guild_channel_create(channel):
 
 @bot.event
 async def on_guild_channel_update(b, a):
+    if "cu:auto_sends" in bot.features.get(a.guild.id,[]):
+        return
     e = discord.Embed(title="チャンネル更新", description=a.mention, color=bot.ec)
     e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
     if not b.name == a.name:
@@ -644,6 +672,8 @@ async def on_guild_channel_update(b, a):
 
 @bot.event
 async def on_guild_update(b, a):
+    if "cu:auto_sends" in bot.features.get(a.id,[]):
+        return
     e = discord.Embed(title="サーバーの更新", color=bot.ec)
     e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
     if b.name != a.name:
@@ -678,6 +708,8 @@ async def on_guild_update(b, a):
 
 @bot.event
 async def on_member_ban(g, user):
+    if "cu:auto_sends" in bot.features.get(g.id,[]):
+        return
     guild = bot.get_guild(g.id)
     # bl = await guild.audit_logs(limit=1, action=discord.AuditLogAction.ban).flatten()
     e = discord.Embed(title="ユーザーのban", color=bot.ec)
@@ -695,6 +727,8 @@ async def on_member_ban(g, user):
 
 @bot.event
 async def on_member_unban(guild, user):
+    if "cu:auto_sends" in bot.features.get(guild.id,[]):
+        return
     e = discord.Embed(title="ユーザーのban解除", color=bot.ec)
     e.add_field(name="ユーザー名", value=str(user))
     e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
@@ -720,16 +754,13 @@ async def on_guild_join(guild):
     ch = bot.get_channel(693048937304555529)
     await ch.send(embed=e)
 
-    e=discord.Embed(title="思惟奈ちゃんの導入ありがとうございます！",description="ここでは、思惟奈ちゃんの機能を「少しだけ」ご紹介させていただきます。",color=bot.ec)
-    e.add_field(name="コマンドの利用制限",value="`s-comlock`コマンドで、使用してほしくないコマンドや、動いてほしくない一部機能の制限ができます。\n詳しくは`s-help comlock`でご確認ください！")
-    e.add_field(name="グローバルチャット",value="`s-gconnect`コマンドで、実行チャンネルをグローバルチャットに接続できます(Webhooks管理権限が必要)。\n詳しくは`s-help gconnect`でご確認ください！")
-    e.add_field(name="ハッシュタグチャンネル",value="`s-hash`コマンドで、実行チャンネルをハッシュタグチャンネルとして登録できます。登録されたチャンネルにメンションすることで、メッセージの複製を送信し、ハッシュタグのようにあとで一覧確認ができるようになります。詳しくは`s-help hash`でご確認ください。")
-    e.add_field(name="音楽再生機能",value="`s-play [URL/検索ワード]`でボイスチャット内で音楽を再生できます。その他のコマンドはヘルプのページ目で一覧確認できます。詳細は`s-help [コマンド名]`で確認できます。")
-    e.add_field(name="グローバルBANとその申請",value="`s-gbanlogto [チャンネルID]`でグローバルBANログの送信先を指定することで、グローバルBAN機能が有効化されます(BAN権限が必要)。\n一般のユーザーの方は`s-report`コマンドで申請ができます。詳しくは`s-help gbanlogto`ならびに`s-help report`をご覧ください！")
-    e.add_field(name="サーバー/ユーザーの設定変更に関して",value="`s-settings`コマンドで設定できる内容を見て、直接該当コマンドを呼び出すことができます。また、該当コマンドを直接呼び出しても設定を変えることもできます。使いやすい方を使ってください。")
-    e.add_field(name="思惟奈ちゃんのお知らせを受け取ろう！",value="`s-rnotify`コマンドで、そのチャンネルに思惟奈ちゃんのお知らせを受け取れるようになります。ぜひ！受信設定をお願いします。")
-    e.add_field(name="クイックコマンド呼び出し",value="`s-shortcut`コマンドで、クイックコマンド呼び出しボタンを作成できます！活用してみましょう！")
-    e.add_field(name="その他",value="このほかにもたくさんの機能を備えています。helpの1ページ目にリンクがある「みぃてんのわいがや広場」では、サポートも行っておりますのでお困りの方は一度足を運んでみてください。あなたのサーバーに少しでも役に立てるように頑張りますので思惟奈ちゃんをよろしくお願いします！")
+    if "cu:auto_sends" in bot.features.get(guild.id,[]):
+        return
+    
+    if "block:invite" in bot.features.get(guild.id,[]):
+        await guild.leave()
+
+    e=discord.Embed(title="思惟奈ちゃんの導入ありがとうございます！",description="思惟奈ちゃんのコマンドは、原則スラッシュコマンドで使用できます。(`s-`から始まる呼び出しも可)\nまずは`/`と入力して、使ってみましょう！",color=bot.ec)
     try:
         await guild.system_channel.send(embed=e)
     except:
@@ -767,6 +798,8 @@ async def on_guild_remove(guild):
 
 @bot.event
 async def on_invite_create(invite):
+    if "cu:auto_sends" in bot.features.get(invite.guild.id,[]):
+        return
     e = discord.Embed(title="サーバー招待の作成", color=bot.ec)
     e.add_field(name="作成ユーザー", value=str(invite.inviter))
     e.add_field(name="使用可能回数", value=str(invite.max_uses))
@@ -784,6 +817,8 @@ async def on_invite_create(invite):
 
 @bot.event
 async def on_invite_delete(invite):
+    if "cu:auto_sends" in bot.features.get(invite.guild.id,[]):
+        return
     e = discord.Embed(title="サーバー招待の削除", color=bot.ec)
     e.add_field(name="作成ユーザー", value=str(invite.inviter))
     e.add_field(name="チャンネル", value=str(invite.channel.mention))
@@ -814,7 +849,8 @@ async def on_ready():
     files = [
             "m10s_info", "m10s_owner", "m10s_settings", "m10s_manage",
             "m10s_other", "m10s_search", "m10s_games", "P143_jyanken",
-            "nekok500_mee6", "pf9_symmetry", "syouma", "m10s_bmail", "m10s_auth_wiz",
+            "nekok500_mee6", "pf9_symmetry", "syouma", #"m10s_bmail", 
+            "m10s_auth_wiz",
             "m10s_role_panel", "m10s_partners", "m10s_remainder", "m10s_set_activity_roles", 
 
             "_m10s_api",
@@ -870,6 +906,8 @@ async def on_ready():
 async def on_message(message):
     if "cu:on_msg" in bot.features.get(message.author.id, []):
         return
+    if "cu:on_msg" in bot.features.get(message.guild.id, []):
+        return
     if isinstance(message.channel, discord.DMChannel):
         return
     if message.webhook_id:
@@ -880,11 +918,11 @@ async def on_message(message):
         postcount[str(message.guild.id)] = 1
     else:
         postcount[str(message.guild.id)] += 1
-    if message.content == "check_msgs":
+    # if message.content == "check_msgs":
         # on_messageを呼ぶだけの処理がすぐに終わるかの確認
-        with open("post_count.json", mode="w", encoding="utf-8") as f:
-            json.dump(postcount, f, indent=4)
-        await message.channel.send(file=discord.File("post_count.json"))
+        # with open("post_count.json", mode="w", encoding="utf-8") as f:
+            # json.dump(postcount, f, indent=4)
+        # await message.channel.send(file=discord.File("post_count.json"))
     # db.files_download_to_file( "guildsetting.json" , "/guildsetting.json" )
     # db.files_download_to_file( "profiles.json" , "/profiles.json" )
     tks = [
@@ -935,8 +973,8 @@ async def domsg(message):
             print(exc)
             
         try:
-            #if "disable_profile_msg" in gs["lockcom"]:
-            await message.add_reaction(bot.get_emoji(653161518153596950))
+            if not "disable_profile_msg" in json.loads(gs["lockcom"]):
+                await message.add_reaction(bot.get_emoji(653161518153596950))
             #else:
                 #try:
                     #await message.reply(f"> {bot.get_emoji(653161518153596950)} あなたの思惟奈ちゃんユーザープロファイルを作成しました！いくつかの項目はコマンドを使って書き換えることができます。詳しくはヘルプ(`s-help`)をご覧ください。\n> なんでこのメッセージが来たの？\n　思惟奈ちゃんのいるサーバーで発言したことにより、プロファイルが作成されました。プロファイルの削除を希望する場合は`mii-10#3110`のDMにご連絡ください。なお、プロファイルを削除後は思惟奈ちゃんをご利用できなくなります。(レベル機能などサーバープロファイルに依存するものを含む)")
@@ -971,23 +1009,14 @@ async def domsg(message):
     if not "disable_defprefix" in json.loads(gs["lockcom"]):
         tpf.insert(0,"s-")
     bot.command_prefix = tpf
-    ctx = await bot.get_context(message)
-    try:
-        if ctx.command:
-            if ctx.command.name in json.loads(gs["lockcom"]) and not ctx.author.guild_permissions.administrator and ctx.author.id != 404243934210949120:
-                await ctx.send(await ctx._("comlock-locked"))
-            else:
-                if ctx.command.name in bot.features[0]:
-                    await ctx.send("> command locked by admins\n　このコマンドはメンテナンスなどのために一時的な使用制限がかかっています。\n　問題点が解消され次第、再度利用が可能となりますので今しばらくお待ちください。")
-                else:
-                    await bot.process_commands(message)
-    except SystemExit:
-        sys.exit()
-    except Exception:
-        print(traceback.format_exc(0))
-
+    bot.comlocks[str(message.guild.id)] = json.loads(gs["lockcom"])
+    await bot.process_commands(message)
 
 async def runsercmd(message, gs, pf):
+    if "cu:cmd" in bot.features.get(message.author.id,[]):
+        return
+    if "cu:cmd" in bot.features.get(message.guild.id,[]):
+        return
     # servercmd
     if "scom" not in json.loads(gs["lockcom"]):
         if not message.author.id == bot.user.id and message.webhook_id is None:
@@ -1027,6 +1056,10 @@ async def runsercmd(message, gs, pf):
 
 async def gahash(message, gs):
     # hash
+    if "cu:auto_sends" in bot.features.get(message.author.id,[]):
+        return
+    if "cu:auto_sends" in bot.features.get(message.guild.id,[]):
+        return
     try:
         if "s-noHashSend" in (message.channel.topic or ""):
             return
@@ -1063,6 +1096,7 @@ async def gahash(message, gs):
 
 
 @commands.is_owner()
+@ut.runnable_check()
 @bot.command()
 async def ldb(ctx, name):
     sddb = await bot.cursor.fetchall(f"select * from {name}")
@@ -1071,6 +1105,7 @@ async def ldb(ctx, name):
 
 
 @commands.is_owner()
+@ut.runnable_check()
 @bot.command()
 async def mentdb(ctx):
     sddb = await bot.cursor.fetchall(f"select * from users")
@@ -1082,6 +1117,7 @@ async def mentdb(ctx):
     await ctx.send("完了しました☆")
 
 @commands.is_owner()
+@ut.runnable_check()
 @bot.command()
 async def maintenance(ctx):
     if bot.maintenance:
@@ -1092,6 +1128,7 @@ async def maintenance(ctx):
         await ctx.send("trueにしたよ")
 
 @bot.command()
+@ut.runnable_check()
 async def vpc(ctx):
     await ctx.send(embed=ut.getEmbed("post count", str([f"{k}:{v}" for k, v in postcount.items()])))
 
@@ -1102,6 +1139,7 @@ async def vpc(ctx):
 @commands.has_permissions(administrator=True)
 @app_commands.checks.bot_has_permissions(manage_webhooks=True)
 @app_commands.checks.has_permissions(administrator=True)
+@ut.runnable_check()
 async def rnotify(ctx, ch: discord.TextChannel=None):
     if ctx.author.guild_permissions.administrator or ctx.author.id == 404243934210949120:
         tch = ch or ctx.channel
@@ -1118,6 +1156,7 @@ async def rnotify(ctx, ch: discord.TextChannel=None):
 @commands.has_permissions(administrator=True)
 @app_commands.checks.bot_has_permissions(manage_webhooks=True)
 @app_commands.checks.has_permissions(administrator=True)
+@ut.runnable_check()
 async def rtopic(ctx, ch:discord.TextChannel=None):
     if ctx.author.guild_permissions.administrator or ctx.author.id == 404243934210949120:
         tch = ch or ctx.channel
@@ -1203,6 +1242,12 @@ async def on_command_error(ctx, error):
             await ctx.send(embed=embed)
         except:
             await ctx.send(f'> {await ctx._("cmd-error-t")}\n　このコマンドの実行には、Botに次の権限が必要です。\n```py\n{error.missing_perms}```')
+    elif isinstance(error, commands.CheckFailure):
+        embed = discord.Embed(title=await ctx._("cmd-error-t"), description="comlock、メンテナンス、使用制限等、実行時チェックを通過できなかったため、コマンド実行が失敗しました。", color=bot.ec)
+        try:
+            await ctx.send(embed=embed)
+        except:
+            await ctx.send(f'> {await ctx._("cmd-error-t")}\n　comlock、メンテナンス、使用制限等、実行時チェックを通過できなかったため、コマンド実行が失敗しました。')
 
     else:
         # その他例外

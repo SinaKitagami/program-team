@@ -17,6 +17,7 @@ class manage(commands.Cog):
         self.bot = bot
 
     @commands.command()
+    @ut.runnable_check()
     async def backup(self, ctx, gid: int):
         if not ctx.guild.me.guild_permissions.administrator:
             await ctx.send("このサーバーで、わたしが管理者権限を持ってないので使用できません。")
@@ -131,6 +132,7 @@ class manage(commands.Cog):
             await ctx.send(embed=ut.getEmbed("エラー", f"詳細:```{traceback.format_exc(0)}```"))
 
     @commands.command()
+    @ut.runnable_check()
     async def cemojiorole(self, ctx, name, *rlis):
         ig = await ctx.message.attachments[0].read()
         await ctx.guild.create_custom_emoji(name=name, image=ig, roles=[ctx.guild.get_role(int(i)) for i in rlis])
@@ -140,14 +142,16 @@ class manage(commands.Cog):
     @commands.hybrid_command(aliases=["メッセージ一括削除", "次の件数分、メッセージを消して"], description="メッセージ一括削除を行います。")
     @app_commands.describe(msgcount="削除する件数")
     @commands.cooldown(1, 15, type=commands.BucketType.guild)
+    @ut.runnable_check()
     async def delmsgs(self, ctx:commands.Context, msgcount:int):
-        if  ctx.channel.permissions_for(ctx.guild.me).manage_messages and (ctx.channel.permissions_for(ctx.author).manage_messages or ctx.author.id == 404243934210949120):
+        if ctx.channel.permissions_for(ctx.guild.me).manage_messages and (ctx.channel.permissions_for(ctx.author).manage_messages or ctx.author.id == 404243934210949120):
+            await ctx.defer(ephemeral=True)
             async with ctx.message.channel.typing():
                 if not ctx.interaction:
                     dmc = ctx.message
                     await dmc.delete()
                 dr = await ctx.channel.purge(limit=int(msgcount))
-                await ctx.send(await ctx._("delmsgs-del", len(dr)), ephemeral=True, delete_after=15)
+            await ctx.send(await ctx._("delmsgs-del", len(dr)), ephemeral=True, delete_after=15)
         else:
             await ctx.send("> メッセージ一括削除\n　あなたか私に権限がありません！", ephemeral=True)
 

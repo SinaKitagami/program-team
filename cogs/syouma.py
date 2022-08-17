@@ -31,6 +31,7 @@ class syouma(commands.Cog):
 
     @commands.hybrid_command(name="tenki",description="天気情報を表示します。")
     @app_commands.describe(address="表示する市などの名称")
+    @ut.runnable_check()
     async def tenki(self, ctx, address:str):
         color = random.randint(0x000000, 0xffffff)
         Url = "https://tenki.jp"
