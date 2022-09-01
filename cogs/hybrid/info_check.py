@@ -83,7 +83,7 @@ class info_check(commands.Cog):
         if ctx.interaction:
             ctp:dpyui.slash_command_callback = await dpyui.slash_command_callback.from_dpy_interaction(ctx.interaction)
             await ctp.send_response_with_ui("下から表示したい情報を選んでください。タイムアウトは30秒です。", ui=menu)
-            ctx.interaction.response._responded = True
+            ctx.interaction.response._response_type = discord.InteractionResponseType.channel_message
             msg = await ctx.interaction.original_response()
             
         else:
@@ -181,7 +181,6 @@ class info_check(commands.Cog):
 
                 e.add_field(name="権限情報",
                     value=f"`{'`,`'.join([await ctx._(f'p-{i[0]}') for i in list(target.guild_permissions) if i[1]])}`",inline=False)
-
             elif cb.selected_value[0] == "banner":
                 # https://cdn.discordapp.com/banners/404243934210949120/4d22b0afc7bf59810ab3ca44559be8a5.png?size=1024
                 banner_url = f'https://cdn.discordapp.com/banners/{target.id}/{ucb["banner"]}.png?size=1024'
@@ -264,7 +263,7 @@ class info_check(commands.Cog):
         if ctx.interaction:
             ctp:dpyui.slash_command_callback = await dpyui.slash_command_callback.from_dpy_interaction(ctx.interaction)
             await ctp.send_response_with_ui("下から表示したい情報を選んでください。タイムアウトは30秒です。", ui=menu)
-            ctx.interaction.response._responded = True
+            ctx.interaction.response._response_type = discord.InteractionResponseType.channel_message
             msg = await ctx.interaction.original_response()
         else:
             msg = await self.bot.dpyui.send_with_ui(ctx.channel, "下から表示したい情報を選んでください。タイムアウトは30秒です。",ui=menu)
