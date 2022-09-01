@@ -189,7 +189,9 @@ class levels(commands.Cog):
     @ut.runnable_check()
     @commands.cooldown(1, 20, type=commands.BucketType.user)
     @commands.bot_has_permissions(attach_files=True)
-    async def level(self, ctx, tu: Optional[discord.Member]):
+    async def level(self, ctx: commands.Context, tu: Optional[discord.Member]):
+        if ctx.interaction:
+            await ctx.defer()
         if tu:
             u = tu
         else:
