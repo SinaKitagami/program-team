@@ -94,18 +94,20 @@ def get_vmusic(bot, member):
 
 def runnable_check():
     async def predicate(ctx):
-        if hasattr(ctx, "bot") and hasattr(ctx.bot, "comlocks"):
-            if ctx.bot.comlocks.get(str(ctx.guild.id), []): # comlockが存在するかのチェック(プロファイル発行確認)
+        if isinstance(ctx, commands.Context) and hasattr(ctx.bot, "comlocks"):
+            if ctx.bot.comlocks.get(str(ctx.guild.id), []):
                 if ctx.command.name in ctx.bot.comlocks[str(ctx.guild.id)] and not ctx.author.guild_permissions.administrator and ctx.author.id != 404243934210949120: # comlockされているかどうか
                     return False
-            if ctx.command.name in ctx.bot.features[0] and (not ctx.guild.id in ctx.bot.team_sina): # グローバルfeatureでロックされているかどうか(メンテナンス)
-                return False
-            elif ctx.command.name in ctx.bot.features.get(ctx.author.id, []) or "cu:cmd" in ctx.bot.features.get(ctx.author.id, []): # featuresでのユーザーごとのコマンドロック
-                return False
-            elif ctx.command.name in ctx.bot.features.get(ctx.guild.id, []) or "cu:cmd" in ctx.bot.features.get(ctx.guild.id, []): # featuresでのサーバーごとのコマンドロック
-                return False
-            else:
-                return True
+        elif isinstance(ctx, discord.Interaction) and hasattr(ctx.client, "comlocks"):
+            if ctx.client.comlocks.get(str(ctx.guild.id), []):
+                if ctx.command.name in ctx.bot.comlocks[str(ctx.guild.id)] and not ctx.author.guild_permissions.administrator and ctx.author.id != 404243934210949120: # comlockされているかどうか
+                    return False
+        if ctx.command.name in ctx.bot.features[0] and (not ctx.guild.id in ctx.bot.team_sina): # グローバルfeatureでロックされているかどうか(メンテナンス)
+            return False
+        elif ctx.command.name in ctx.bot.features.get(ctx.author.id, []) or "cu:cmd" in ctx.bot.features.get(ctx.author.id, []): # featuresでのユーザーごとのコマンドロック
+            return False
+        elif ctx.command.name in ctx.bot.features.get(ctx.guild.id, []) or "cu:cmd" in ctx.bot.features.get(ctx.guild.id, []): # featuresでのサーバーごとのコマンドロック
+            return False
         else:
             return True
     return commands.check(predicate)
