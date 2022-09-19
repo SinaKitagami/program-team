@@ -137,7 +137,8 @@ class m10s_music(commands.Cog):
     async def join_(self, ctx):
         if ctx.author.voice:
             if ctx.voice_client:
-                    await ctx.send(f"すでに{ctx.guild.voice_client.channel.name}に接続しています。", ephemeral=True)
+                chname = getattr(ctx.guild.voice_client.channel, "name", "(None)")
+                await ctx.send(f"すでに{chname}に接続しています。", ephemeral=True)
             else:
                 try:
                     if ctx.author.voice.channel:
@@ -241,166 +242,166 @@ class m10s_music(commands.Cog):
             await self.add_music_queue(ctx.author, ctx.guild, ctx, ctx.voice_client, ctx.message, text, file)
     
     async def add_music_queue(self, requestor, guild, sender, voice_client, message=None, text="", file=None):
-        try:
-            vurls = [] #処理するURL
-            vdl = False #ビデオダウンロードを行うかどうか
-            c_info = False #再生時の表示情報をカスタム作成するかどうか
-            if (text.startswith("<http://") and text.endswith(">")) or (text.startswith("<https://") and text.endswith(">")):
-                vurls = [text[1:-1]]
-            elif text.startswith("http://") or text.startswith("https://"):
-                vurls = [text]
-            elif text.startswith("dl:http://") or text.startswith("dl:https://"):
-                vdl = True
-                vurls = [text[3:]]
-            elif text.startswith("list:"):
-                pf = await self.bot.cursor.fetchone(
-                    "select * from users where id=%s", (requestor.id,))
-                listname = text[5:]
-                playlist = json.loads(pf["music_list"]).get(listname, None)
-                vurls = []
-                if playlist:
-                    for i in playlist:
-                        if (i.startswith("<http://") and i.endswith(">")) or (i.startswith("<https://") and i.endswith(">")):
-                            vurls.append(i[1:-1])
-                        elif i.startswith("http://") or i.startswith("https://"):
-                            vurls.append(i)
-                else:
-                    await sender.send("> 音楽再生\n　該当名称のプレイリストが見つかりません。\n　`/music playlist_manager`で管理できます。")
-                    return
-            elif text.startswith("memo:"):
-                pf = await self.bot.cursor.fetchone(
-                    "select * from users where id=%s", (requestor.id,))
-                mn = text[5:]
-                memos = json.loads(pf["memo"])
-                vurls = []
-                if memos is not None and memos.get(mn,None) is not None:
-                    for i in memos[mn].split("\n"):
-                        if (i.startswith("<http://") and i.endswith(">")) or (i.startswith("<https://") and i.endswith(">")):
-                            vurls.append(i[1:-1])
-                        elif i.startswith("http://") or i.startswith("https://"):
-                            vurls.append(i)
-                else:
-                    await sender.send("> 音楽再生\n　該当名称のメモが見つかりません。")
-                    return
-            elif text.startswith("activity:"):
-                tar = guild.get_member(int(text[9:])) or guild.get_member(requestor.id)
-                spac = [i for i in tar.activities if i.name == "Spotify"]
+        # try:
+        vurls = [] #処理するURL
+        vdl = False #ビデオダウンロードを行うかどうか
+        c_info = False #再生時の表示情報をカスタム作成するかどうか
+        if (text.startswith("<http://") and text.endswith(">")) or (text.startswith("<https://") and text.endswith(">")):
+            vurls = [text[1:-1]]
+        elif text.startswith("http://") or text.startswith("https://"):
+            vurls = [text]
+        elif text.startswith("dl:http://") or text.startswith("dl:https://"):
+            vdl = True
+            vurls = [text[3:]]
+        elif text.startswith("list:"):
+            pf = await self.bot.cursor.fetchone(
+                "select * from users where id=%s", (requestor.id,))
+            listname = text[5:]
+            playlist = json.loads(pf["music_list"]).get(listname, None)
+            vurls = []
+            if playlist:
+                for i in playlist:
+                    if (i.startswith("<http://") and i.endswith(">")) or (i.startswith("<https://") and i.endswith(">")):
+                        vurls.append(i[1:-1])
+                    elif i.startswith("http://") or i.startswith("https://"):
+                        vurls.append(i)
+            else:
+                await sender.send("> 音楽再生\n　該当名称のプレイリストが見つかりません。\n　`/music playlist_manager`で管理できます。")
+                return
+        elif text.startswith("memo:"):
+            pf = await self.bot.cursor.fetchone(
+                "select * from users where id=%s", (requestor.id,))
+            mn = text[5:]
+            memos = json.loads(pf["memo"])
+            vurls = []
+            if memos is not None and memos.get(mn,None) is not None:
+                for i in memos[mn].split("\n"):
+                    if (i.startswith("<http://") and i.endswith(">")) or (i.startswith("<https://") and i.endswith(">")):
+                        vurls.append(i[1:-1])
+                    elif i.startswith("http://") or i.startswith("https://"):
+                        vurls.append(i)
+            else:
+                await sender.send("> 音楽再生\n　該当名称のメモが見つかりません。")
+                return
+        elif text.startswith("activity:"):
+            tar = guild.get_member(int(text[9:])) or guild.get_member(requestor.id)
+            spac = [i for i in tar.activities if i.name == "Spotify"]
 
-                if spac:
-                    title = getattr(spac[0], "title",None) or spac[0].details
-                    artist = getattr(spac[0], "artist",None) or spac[0].state
-                    search_response = self.youtube.search().list(
-                        part='id',
-                        q=f"{title} {artist}",
-                        type='video'
-                    ).execute()
-                    vid = search_response['items'][0]['id']['videoId']
-                    if vid:
-                        vurls = [f"https://www.youtube.com/watch?v={vid}"]
-                    else:
-                        return await sender.send("動画が見つかりませんでした。")
+            if spac:
+                title = getattr(spac[0], "title",None) or spac[0].details
+                artist = getattr(spac[0], "artist",None) or spac[0].state
+                search_response = self.youtube.search().list(
+                    part='id',
+                    q=f"{title} {artist}",
+                    type='video'
+                ).execute()
+                vid = search_response['items'][0]['id']['videoId']
+                if vid:
+                    vurls = [f"https://www.youtube.com/watch?v={vid}"]
                 else:
-                    return await sender.send("プレイ中のActivityがSpotifyではありません。")
-            elif file:
-                vid = getattr(message,"id", int(time.time()))
-                c_info = True
-                await file.save(f"musicfile/{vid}")
-                with open(f"musicfile/{vid}","rb") as mf:
-                    f:mutagen.FileType = mutagen.File(mf)
-                    music_len = getattr(getattr(f,"info",None), "length", -1)
-                vinfo = {
-                    "type": "download",
-                    "stream_url":str(file.url),
-                    "video_id": vid,
-                    "video_url": "",
-                    "video_title": file.filename,
-                    "video_thumbnail": "",
-                    "video_up_name": f"{requestor}({requestor.id})",
-                    "video_up_url": f"https://discord.com/users/{requestor.id}",
-                    "video_source": "Direct Upload",
-                    "duration": music_len,
-                    "now_position": 0,
-                    "requestor":requestor.id
-                }
+                    return await sender.send("動画が見つかりませんでした。")
             else:
-                try:
-                    search_response = self.youtube.search().list(
-                        part='id',
-                        q=text,
-                        type='video'
-                    ).execute()
-                    vid = search_response['items'][0]['id']['videoId']
-                    if vid:
-                        vurls = [f"https://www.youtube.com/watch?v={vid}"]
-                    else:
-                        return await sender.send("動画が見つかりませんでした。")
-                except:
-                    return await sender.send("> 検索エラー\n　現在検索ワードを用いた検索ができません。URLをお試しください。")
-            if not c_info:
-                if vurls == []:
-                    await sender.send("再生できる楽曲がありません。処理を中止します。")
-                    return
-                sended = False
-                for vurl in vurls:
-                    vinfo = await self.gvinfo(vurl, getattr(message,"id", None),False)
-                    if vinfo.get("_type", "") == "playlist":
-                        tks = []
-                        for c in vinfo["entries"]:
-                            self.bot.am.append(c["id"])
-                            tks.append(self.gpdate(
-                                c["webpage_url"], getattr(message,"id", None), requestor, False if c["id"] in self.bot.am else vdl))
-                        iqlt = [i for i in await asyncio.gather(*tks) if i]
-                        if self.bot.qu.get(str(guild.id), None):
-                            if not sended:
-                                await sender.send(f"キューにプレイリスト内の動画{len(iqlt)}本を追加します。")
-                                sended = True
-                            self.bot.qu[str(guild.id)] = self.bot.qu[str(
-                                guild.id)] + iqlt
-                            await self.panel_update(guild.id, voice_client)
-                        else:
-                            if not sended:
-                                await sender.send(f"プレイリストより、{len(iqlt)}本の再生を開始します。")
-                                sended = True
-                            self.bot.qu[str(guild.id)] = iqlt
-                            await asyncio.sleep(0.3)
-                            self.bot.loop.create_task(self.mplay(guild, sender))
-                    else:
-                        self.bot.am.append(vinfo["id"])
-                        iqim = await self.gpdate(vurl, getattr(message,"id", None), requestor, vdl)
-                        if self.bot.qu.get(str(guild.id), None):
-                            if not sended:
-                                await sender.send(f"`{iqim['video_title']}`をキューに追加します。")
-                                sended = True
-                            self.bot.qu[str(sender.guild.id)] = self.bot.qu[str(
-                                sender.guild.id)] + [iqim]
-                            await self.panel_update(guild.id, voice_client)
-                        else:
-                            if not sended:
-                                await sender.send(f"`{iqim['video_title']}`の再生を開始します。")
-                                sended = True
-                            self.bot.qu[str(guild.id)] = [iqim]
-                            await asyncio.sleep(0.3)
-                            self.bot.loop.create_task(self.mplay(guild, sender))
-            else:
-                sended = False
-                self.bot.am.append(vinfo["video_id"])
-                if self.bot.qu.get(str(guild.id), None):
-                    if not sended:
-                        await sender.send(f"`{vinfo['video_title']}`をキューに追加します。")
-                        sended = True
-                    self.bot.qu[str(guild.id)] = self.bot.qu[str(
-                        guild.id)] + [vinfo]
-                    await self.panel_update(guild.id, voice_client)
+                return await sender.send("プレイ中のActivityがSpotifyではありません。")
+        elif file:
+            vid = getattr(message,"id", int(time.time()))
+            c_info = True
+            await file.save(f"musicfile/{vid}")
+            with open(f"musicfile/{vid}","rb") as mf:
+                f:mutagen.FileType = mutagen.File(mf)
+                music_len = getattr(getattr(f,"info",None), "length", -1)
+            vinfo = {
+                "type": "download",
+                "stream_url":str(file.url),
+                "video_id": vid,
+                "video_url": "",
+                "video_title": file.filename,
+                "video_thumbnail": "",
+                "video_up_name": f"{requestor}({requestor.id})",
+                "video_up_url": f"https://discord.com/users/{requestor.id}",
+                "video_source": "Direct Upload",
+                "duration": music_len,
+                "now_position": 0,
+                "requestor":requestor.id
+            }
+        else:
+            try:
+                search_response = self.youtube.search().list(
+                    part='id',
+                    q=text,
+                    type='video'
+                ).execute()
+                vid = search_response['items'][0]['id']['videoId']
+                if vid:
+                    vurls = [f"https://www.youtube.com/watch?v={vid}"]
                 else:
-                    if not sended:
-                        await sender.send(f"`{vinfo['video_title']}`の再生を開始します。")
-                        sended = True
-                    self.bot.qu[str(guild.id)] = [vinfo]
-                    await asyncio.sleep(0.3)
-                    self.bot.loop.create_task(self.mplay(guild,sender))
-        except:
-            import traceback
-            await sender.send(f"> traceback\n```{traceback.format_exc(2)}```")
+                    return await sender.send("動画が見つかりませんでした。")
+            except:
+                return await sender.send("> 検索エラー\n　現在検索ワードを用いた検索ができません。URLをお試しください。")
+        if not c_info:
+            if vurls == []:
+                await sender.send("再生できる楽曲がありません。処理を中止します。")
+                return
+            sended = False
+            for vurl in vurls:
+                vinfo = await self.gvinfo(vurl, getattr(message,"id", None),False)
+                if vinfo.get("_type", "") == "playlist":
+                    tks = []
+                    for c in vinfo["entries"]:
+                        self.bot.am.append(c["id"])
+                        tks.append(self.gpdate(
+                            c["webpage_url"], getattr(message,"id", None), requestor, False if c["id"] in self.bot.am else vdl))
+                    iqlt = [i for i in await asyncio.gather(*tks) if i]
+                    if self.bot.qu.get(str(guild.id), None):
+                        if not sended:
+                            await sender.send(f"キューにプレイリスト内の動画{len(iqlt)}本を追加します。")
+                            sended = True
+                        self.bot.qu[str(guild.id)] = self.bot.qu[str(
+                            guild.id)] + iqlt
+                        await self.panel_update(guild.id, voice_client)
+                    else:
+                        if not sended:
+                            await sender.send(f"プレイリストより、{len(iqlt)}本の再生を開始します。")
+                            sended = True
+                        self.bot.qu[str(guild.id)] = iqlt
+                        await asyncio.sleep(0.3)
+                        self.bot.loop.create_task(self.mplay(guild, sender))
+                else:
+                    self.bot.am.append(vinfo["id"])
+                    iqim = await self.gpdate(vurl, getattr(message,"id", None), requestor, vdl)
+                    if self.bot.qu.get(str(guild.id), None):
+                        if not sended:
+                            await sender.send(f"`{iqim['video_title']}`をキューに追加します。")
+                            sended = True
+                        self.bot.qu[str(sender.guild.id)] = self.bot.qu[str(
+                            sender.guild.id)] + [iqim]
+                        await self.panel_update(guild.id, voice_client)
+                    else:
+                        if not sended:
+                            await sender.send(f"`{iqim['video_title']}`の再生を開始します。")
+                            sended = True
+                        self.bot.qu[str(guild.id)] = [iqim]
+                        await asyncio.sleep(0.3)
+                        self.bot.loop.create_task(self.mplay(guild, sender))
+        else:
+            sended = False
+            self.bot.am.append(vinfo["video_id"])
+            if self.bot.qu.get(str(guild.id), None):
+                if not sended:
+                    await sender.send(f"`{vinfo['video_title']}`をキューに追加します。")
+                    sended = True
+                self.bot.qu[str(guild.id)] = self.bot.qu[str(
+                    guild.id)] + [vinfo]
+                await self.panel_update(guild.id, voice_client)
+            else:
+                if not sended:
+                    await sender.send(f"`{vinfo['video_title']}`の再生を開始します。")
+                    sended = True
+                self.bot.qu[str(guild.id)] = [vinfo]
+                await asyncio.sleep(0.3)
+                self.bot.loop.create_task(self.mplay(guild,sender))
+        #except:
+            #import traceback
+            #await sender.send(f"> traceback\n```{traceback.format_exc(2)}```")
 
     async def mplay(self, guild, sender, vl=0.5):
         v = None
