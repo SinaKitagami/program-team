@@ -6,7 +6,7 @@ from discord.ext import commands
 import asyncio
 
 import traceback
-from datetime import datetime
+import datetime
 from dateutil.relativedelta import relativedelta as rdelta
 
 import m10s_util as ut
@@ -24,7 +24,7 @@ class m10s_guild_log(commands.Cog):
         try:
             e = discord.Embed(
                 title="メンバーの更新", description=f"変更メンバー:{str(a)}", color=self.bot.ec)
-            e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
+            e.timestamp = datetime.datetime.now(datetime.timezone.utc)
             if not b.nick == a.nick:
                 e.add_field(name="変更内容", value="ニックネーム")
                 if b.nick:
@@ -130,7 +130,7 @@ class m10s_guild_log(commands.Cog):
         e.add_field(name="退出メンバー", value=str(member))
         e.add_field(name="役職", value=[i.name for i in member.roles])
         # e.set_footer(text=f"{member.guild.name}/{member.guild.id}")
-        e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
+        e.timestamp = datetime.datetime.now(datetime.timezone.utc)
         gpf = await self.bot.cursor.fetchone("select * from guilds where id=%s", (member.guild.id,))
         #gpf = await self.bot.cursor.fetchone()
         if gpf["sendlog"]:
@@ -148,7 +148,7 @@ class m10s_guild_log(commands.Cog):
             return
         e = discord.Embed(title="Webhooksの更新", color=self.bot.ec)
         e.add_field(name="チャンネル", value=channel.mention)
-        e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
+        e.timestamp = datetime.datetime.now(datetime.timezone.utc)
         gpf = await self.bot.cursor.fetchone("select * from guilds where id=%s", (channel.guild.id,))
         #gpf = await self.bot.cursor.fetchone()
         if gpf["sendlog"]:
@@ -163,7 +163,7 @@ class m10s_guild_log(commands.Cog):
             return
         e = discord.Embed(title="役職の作成", color=self.bot.ec)
         e.add_field(name="役職名", value=role.name)
-        e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
+        e.timestamp = datetime.datetime.now(datetime.timezone.utc)
         gpf = await self.bot.cursor.fetchone("select * from guilds where id=%s", (role.guild.id,))
         #gpf = await self.bot.cursor.fetchone()
         if gpf["sendlog"]:
@@ -178,7 +178,7 @@ class m10s_guild_log(commands.Cog):
             return
         e = discord.Embed(title="役職の削除", color=self.bot.ec)
         e.add_field(name="役職名", value=role.name)
-        e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
+        e.timestamp = datetime.datetime.now(datetime.timezone.utc)
         gpf = await self.bot.cursor.fetchone("select * from guilds where id=%s", (role.guild.id,))
         #gpf = await self.bot.cursor.fetchone()
         if gpf["sendlog"]:
@@ -199,7 +199,7 @@ class m10s_guild_log(commands.Cog):
             e.add_field(name="メッセージ送信者", value=after.author.mention)
             e.add_field(name="メッセージチャンネル", value=after.channel.mention)
             e.add_field(name="メッセージのURL", value=after.jump_url)
-            e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
+            e.timestamp = datetime.datetime.now(datetime.timezone.utc)
             gpf = await self.bot.cursor.fetchone(
                 "select * from guilds where id=%s", (after.guild.id,))
             #gpf = await self.bot.cursor.fetchone()
@@ -216,7 +216,7 @@ class m10s_guild_log(commands.Cog):
         # bl = await channel.guild.audit_logs(limit=1, action=discord.AuditLogAction.channel_delete).flatten()
         e = discord.Embed(title="チャンネル削除", color=self.bot.ec)
         e.add_field(name="チャンネル名", value=channel.name)
-        e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
+        e.timestamp = datetime.datetime.now(datetime.timezone.utc)
         gpf = await self.bot.cursor.fetchone("select * from guilds where id=%s", (channel.guild.id,))
         #gpf = await self.bot.cursor.fetchone()
         if gpf["sendlog"]:
@@ -232,7 +232,7 @@ class m10s_guild_log(commands.Cog):
         e = discord.Embed(title="リアクションの一斉除去", color=self.bot.ec)
         e.add_field(name="リアクション", value=[str(i) for i in reactions])
         e.add_field(name="除去されたメッセージ", value=message.content or "(本文なし)")
-        e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
+        e.timestamp = datetime.datetime.now(datetime.timezone.utc)
         gpf = await self.bot.cursor.fetchone("select * from guilds where id=%s", (message.guild.id,))
         #gpf = await self.bot.cursor.fetchone()
         if gpf["sendlog"]:
@@ -245,13 +245,13 @@ class m10s_guild_log(commands.Cog):
     async def on_message_delete(self, message):
         if "cu:auto_sends" in self.bot.features.get(message.guild.id,[]):
             return
-        if not message.author.self.bot:
+        if not message.author.bot:
             e = discord.Embed(title="メッセージ削除", color=self.bot.ec)
             e.add_field(name="メッセージ", value=message.content)
             e.add_field(name="メッセージ送信者", value=message.author.mention)
             e.add_field(name="メッセージチャンネル", value=message.channel.mention)
             e.add_field(name="メッセージのid", value=message.id)
-            e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
+            e.timestamp = datetime.datetime.now(datetime.timezone.utc)
             gpf = await self.bot.cursor.fetchone("select * from guilds where id=%s",
                             (message.guild.id,))
             #gpf = await self.bot.cursor.fetchone()
@@ -289,7 +289,7 @@ class m10s_guild_log(commands.Cog):
 
         e = discord.Embed(title="メッセージ一括削除", color=self.bot.ec)
         e.add_field(name="件数", value=len(messages))
-        e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
+        e.timestamp = datetime.datetime.now(datetime.timezone.utc)
         gpf = await self.bot.cursor.fetchone("select * from guilds where id=%s",
                         (messages[0].guild.id,))
         #gpf = await self.bot.cursor.fetchone()
@@ -305,7 +305,7 @@ class m10s_guild_log(commands.Cog):
             return
         e = discord.Embed(title="チャンネル作成", color=self.bot.ec)
         e.add_field(name="チャンネル名", value=channel.mention)
-        e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
+        e.timestamp = datetime.datetime.now(datetime.timezone.utc)
         gpf = await self.bot.cursor.fetchone("select * from guilds where id=%s", (channel.guild.id,))
         #gpf = await self.bot.cursor.fetchone()
         if gpf["sendlog"]:
@@ -319,7 +319,7 @@ class m10s_guild_log(commands.Cog):
         if "cu:auto_sends" in self.bot.features.get(a.guild.id,[]):
             return
         e = discord.Embed(title="チャンネル更新", description=a.mention, color=self.bot.ec)
-        e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
+        e.timestamp = datetime.datetime.now(datetime.timezone.utc)
         if not b.name == a.name:
             if not a.guild.id == 461789442743468073:
                 e.add_field(name="変更内容", value="チャンネル名")
@@ -362,7 +362,7 @@ class m10s_guild_log(commands.Cog):
         if "cu:auto_sends" in self.bot.features.get(a.id,[]):
             return
         e = discord.Embed(title="サーバーの更新", color=self.bot.ec)
-        e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
+        e.timestamp = datetime.datetime.now(datetime.timezone.utc)
         if b.name != a.name:
             e.add_field(name="変更内容", value="サーバー名")
             e.add_field(name="変更前", value=b.name)
@@ -403,7 +403,7 @@ class m10s_guild_log(commands.Cog):
         e.add_field(name="ユーザー名", value=str(user))
         # e.add_field(name="実行者", value=str(bl[0].user))
         # e.set_footer(text=f"{g.name}/{g.id}")
-        e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
+        e.timestamp = datetime.datetime.now(datetime.timezone.utc)
         gpf = await self.bot.cursor.fetchone("select * from guilds where id=%s", (g.id,))
         #gpf = await self.bot.cursor.fetchone()
         if gpf["sendlog"]:
@@ -418,7 +418,7 @@ class m10s_guild_log(commands.Cog):
             return
         e = discord.Embed(title="ユーザーのban解除", color=self.bot.ec)
         e.add_field(name="ユーザー名", value=str(user))
-        e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
+        e.timestamp = datetime.datetime.now(datetime.timezone.utc)
         gpf = await self.bot.cursor.fetchone("select * from guilds where id=%s", (guild.id,))
         #gpf = await self.bot.cursor.fetchone()
         if gpf["sendlog"]:
@@ -434,7 +434,7 @@ class m10s_guild_log(commands.Cog):
         e.add_field(name="サーバー作成日時",
                     value=f"{(guild.created_at+ rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒')}")
         e.add_field(
-            name="メンバー数", value=f"{len([i for i in guild.members if not i.self.bot])}ユーザー、{len([i for i in guild.members if i.self.bot])}self.bot")
+            name="メンバー数", value=f"{len([i for i in guild.members if not i.bot])}ユーザー、{len([i for i in guild.members if i.bot])}bot")
         e.add_field(
             name="チャンネル数", value=f"テキスト:{len(guild.text_channels)}\nボイス:{len(guild.voice_channels)}\nカテゴリー{len(guild.categories)}")
         e.add_field(name="サーバーオーナー",value=f"{guild.owner.mention}({guild.owner}({guild.owner.id}))")
@@ -472,7 +472,7 @@ class m10s_guild_log(commands.Cog):
             except:
                 pass
             e.add_field(
-                name="メンバー数", value=f"{len([i for i in guild.members if not i.self.bot])}ユーザー、{len([i for i in guild.members if i.self.bot])}self.bot")
+                name="メンバー数", value=f"{len([i for i in guild.members if not i.bot])}ユーザー、{len([i for i in guild.members if i.bot])}bot")
             e.add_field(
                 name="チャンネル数", value=f"テキスト:{len(guild.text_channels)}\nボイス:{len(guild.voice_channels)}\nカテゴリー{len(guild.categories)}")
             e.add_field(name="サーバーオーナー",value=f"{guild.owner.mention}({guild.owner}({guild.owner.id}))")
@@ -493,7 +493,7 @@ class m10s_guild_log(commands.Cog):
         e.add_field(name="使用可能時間", value=str(invite.max_age))
         e.add_field(name="チャンネル", value=str(invite.channel.mention))
         e.add_field(name="コード", value=str(invite.code))
-        e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
+        e.timestamp = datetime.datetime.now(datetime.timezone.utc)
         gpf = await self.bot.cursor.fetchone("select * from guilds where id=%s", (invite.guild.id,))
         #gpf = await self.bot.cursor.fetchone()
         if gpf["sendlog"]:
@@ -510,7 +510,7 @@ class m10s_guild_log(commands.Cog):
         e.add_field(name="作成ユーザー", value=str(invite.inviter))
         e.add_field(name="チャンネル", value=str(invite.channel.mention))
         e.add_field(name="コード", value=str(invite.code))
-        e.timestamp = datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9)
+        e.timestamp = datetime.datetime.now(datetime.timezone.utc)
         gpf = await self.bot.cursor.fetchone("select * from guilds where id=%s", (invite.guild.id,))
         #gpf = await self.bot.cursor.fetchone()
         if gpf["sendlog"]:

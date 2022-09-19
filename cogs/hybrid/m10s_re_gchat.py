@@ -457,7 +457,7 @@ class m10s_re_gchat(commands.Cog):
                     await m.remove_reaction("❌", self.bot.user)
                     return
 
-            if (datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9) - rdelta(days=7) >= m.author.created_at) or upf["gmod"] or upf["gstar"]:
+            if (datetime.datetime.now(datetime.timezone.utc) - rdelta(days=7) >= m.author.created_at) or upf["gmod"] or upf["gstar"]:
                 
                 if not gchat_info["connected_to"] in self.without_react:
                     try:

@@ -30,10 +30,12 @@ from checker import MaliciousInput, content_checker
 # tokens
 import config
 
-"""
+
 import logging
 
-logging.basicConfig(level=logging.DEBUG)"""
+# logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
+
 
 
 intents:discord.Intents = discord.Intents.default()
@@ -413,7 +415,7 @@ async def domsg(message):
             return
         await bot.cursor.execute("INSERT INTO actrole_optin(id,is_enable) VALUES(%s,%s)",
                         (message.author.id, 0))
-        await bot.cursor.execute("select * from actrole_optin where id=%s",
+        data = await bot.cursor.execute("select * from actrole_optin where id=%s",
                         (message.author.id,))
 
 
@@ -434,15 +436,15 @@ async def domsg(message):
                 await message.channel.send("> お知らせ\n　メッセージコンテントインテントの特権化に伴い、ご利用の呼び出し方法はサポートされません。\n　スラッシュコマンドで利用していただくよう、お願いします。")
                 break
             else:
-                await message.channel.send("> お知らせ\n　メッセージコンテントインテントの特権化に伴い、ご利用の呼び出し方法は、近日サポートを終了します。\n　スラッシュコマンドで利用していただくよう、お願いします。")
+                await message.channel.send("> お知らせ\n　メッセージコンテントインテントの特権化に伴い、ご利用の呼び出し方法は近日サポートを終了します。\n　スラッシュコマンドで利用していただくよう、お願いします。")
                 break
     if not "disable_prefix_cmd" in bot.features[0]:"""
     await bot.process_commands(message)
 
 async def runsercmd(message, gs, pf):
-    if "cu:cmd" in bot.features.get(message.author.id,[]):
+    if "cu:cmd" in bot.features.get(message.author.id, []):
         return
-    if "cu:cmd" in bot.features.get(message.guild.id,[]):
+    if "cu:cmd" in bot.features.get(message.guild.id, []):
         return
     # servercmd
     if "scom" not in json.loads(gs["lockcom"]):
@@ -593,7 +595,7 @@ async def rtopic(ctx, ch:discord.TextChannel=None):
 async def on_command(ctx:commands.Context):
     if ctx.interaction:return
     ch = bot.get_channel(693048961107230811)
-    e = discord.Embed(title=f"prefixコマンド:{ctx.command.name}の実行",
+    e = discord.Embed(title=f"prefixコマンド:{ctx.command.full_parent_name}の実行",
                       description=f"実行文:`{ctx.message.clean_content}`", color=bot.ec)
     e.set_author(name=f"実行者:{str(ctx.author)}({ctx.author.id})",
                  icon_url=ctx.author.display_avatar.replace(static_format="png").url)
@@ -609,7 +611,7 @@ async def on_command(ctx:commands.Context):
 @bot.event
 async def on_interaction(interaction:discord.Interaction):
     ch = bot.get_channel(693048961107230811)
-    e = discord.Embed(title=f"スラッシュコマンド:{interaction.command.name}の実行",color=bot.ec)
+    e = discord.Embed(title=f"スラッシュコマンド:{interaction.command.qualified_name}の実行",color=bot.ec)
     e.set_author(name=f"実行者:{str(interaction.user)}({interaction.user.id})",
                  icon_url=interaction.user.display_avatar.replace(static_format="png").url)
     if interaction.guild.icon:
@@ -643,7 +645,7 @@ async def on_command_error(ctx, error):
                               description=await ctx._("only-mii-10"), color=bot.ec)
         await ctx.send(embed=embed)
         ch = bot.get_channel(652127085598474242)
-        await ch.send(embed=ut.getEmbed("エラーログ", f"コマンド:`{ctx.command.name}`\n```{str(error)}```", bot.ec, f"サーバー", ctx.guild.name, "実行メンバー", ctx.author.name, "メッセージ内容", ctx.message.content or "(本文なし)"))
+        await ch.send(embed=ut.getEmbed("エラーログ", f"コマンド:`{ctx.command.full_parent_name}`\n```{str(error)}```", bot.ec, f"サーバー", ctx.guild.name, "実行メンバー", ctx.author.name, "メッセージ内容", ctx.message.content or "(本文なし)"))
     elif isinstance(error, commands.MissingRequiredArgument):
         # 引数がないよっ☆
         embed = discord.Embed(title=await ctx._("cmd-error-t"),
@@ -673,7 +675,7 @@ async def on_command_error(ctx, error):
     else:
         # その他例外
         ch = bot.get_channel(652127085598474242)
-        msg = await ch.send(embed=ut.getEmbed("エラーログ", f"コマンド:`{ctx.command.name}`\n```{str(error)}```", bot.ec, f"サーバー", ctx.guild.name, "実行メンバー", ctx.author.name, "メッセージ内容", ctx.message.content or "(本文なし)"))
+        msg = await ch.send(embed=ut.getEmbed("エラーログ", f"コマンド:`{ctx.command.full_parent_name}`\n```{str(error)}```", bot.ec, f"サーバー", ctx.guild.name, "実行メンバー", ctx.author.name, "メッセージ内容", ctx.message.content or "(本文なし)"))
         await ctx.send(embed=ut.getEmbed(await ctx._("com-error-t"), await ctx._("cmd-other-d", error), bot.ec, "error id", msg.id, "サポートが必要ですか？", "[サポートサーバー](https://discord.gg/vtn2V3v)に参加して、「view-思惟奈ちゃんch」役職をつけて質問してみましょう！"))
 
 
