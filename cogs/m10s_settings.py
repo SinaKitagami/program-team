@@ -389,6 +389,36 @@ class settings(commands.Cog):
                 "UPDATE guilds SET levelupsendto = %s WHERE id = %s", (to.id, ctx.guild.id))
         await ctx.send(await ctx._("changed"))
 
+    
+    @setting_cmds.command(description="機能の有効化設定")
+    @ut.runnable_check()
+    @app_commands.describe(feature_name="設定する機能")
+    @app_commands.describe(enable="有効にするかどうか")
+    async def toggle_features(self, ctx, feature_name: Literal["level_count", "send_hashtag", "server_command", "default_prefix", "profile_reaction"], enable: bool = True):
+        text_to_comlock = {
+            "level_count":"clevel",
+            "send_hashtag":"shash",
+            "server_command":"scom",
+            "default_prefix":"disable_defprefix",
+            "profile_reaction":"disable_profile_msg"
+        }
+        # comlockに上記テキストが__含まれると__無効化される
+        gs = await self.bot.cursor.fetchone(
+            "select * from guilds where id=%s", (ctx.guild.id,))
+        locks: list = json.loads(gs["lockcom"])
+        if enable:
+            # 含まれるなら削除する
+            if text_to_comlock[feature_name] in locks:
+                locks.remove(text_to_comlock[feature_name])
+        else:
+            # 含まれないなら追加する
+            if not (text_to_comlock[feature_name] in locks):
+                locks.append(text_to_comlock[feature_name])
+        await self.bot.cursor.execute(
+                "UPDATE guilds SET lockcom = %s WHERE id = %s", (json.dumps(locks), ctx.guild.id))
+        await ctx.send(f"機能`{feature_name}`を{'有効' if enable else '無効'}にしました。")
+
+
 
 async def setup(bot):
     await bot.add_cog(settings(bot))
