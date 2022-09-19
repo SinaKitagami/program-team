@@ -76,7 +76,7 @@ class levels(commands.Cog):
                         if gs["levelupsendto"]:
                             c = self.bot.get_channel(int(gs["levelupsendto"]))
                             try:
-                                m = await c.send(
+                                await c.send(
                                     str(self.bot.get_emoji(653161518212448266)) + await self.bot._(m.author, "levelup-notify", m.author.mention, w_lvl),
                                     allowed_mentions=discord.AllowedMentions(users=False)
                                 )
@@ -84,7 +84,7 @@ class levels(commands.Cog):
                                 pass
                         else:
                             try:
-                                m = await m.channel.send(
+                                await m.channel.send(
                                     str(self.bot.get_emoji(653161518212448266)) + await self.bot._(m.author, "levelup-notify", m.author.mention, w_lvl),
                                     allowed_mentions=discord.AllowedMentions(users=False)
                                 )
