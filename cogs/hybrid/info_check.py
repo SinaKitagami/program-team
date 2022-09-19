@@ -234,7 +234,7 @@ class info_check(commands.Cog):
 
     @info_group.command(name="server",aliases=["si"], description="サーバーについての情報を表示します。")
     @ut.runnable_check()
-    async def ginfo(self, ctx:commands.Context):
+    async def ginfo(self, ctx: commands.Context):
         u = ctx.author
         # b = ctx.guild.me
         gp = await self.bot.cursor.fetchone("select * from guilds where id = %s",(ctx.guild.id,))
@@ -250,7 +250,7 @@ class info_check(commands.Cog):
         menu.add_option("安全設定","safety_setting","ユーザーの安全性にかかわる設定を表示します。")
         if u.guild_permissions.ban_members:
             menu.add_option("BANしたユーザー","banned_user","BANされているメンバー一覧を表示します。")
-        if u.guild_permissions.manage_guild:
+        if u.guild_permissions.manage_guild and "COMMUNITY" in u.guild.features:
             menu.add_option("コミュニティ設定","community","コミュニティの設定を表示します。")
             menu.add_option("ようこそ画面","welcome_screen","ようこそ画面の状態を表示します。")
         menu.add_option("サーバーブースト","boost_status","サーバーブーストと追加要素を表示します。")
