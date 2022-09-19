@@ -130,8 +130,8 @@ class AppleInviteCog(commands.Cog):
                     "UPDATE invites SET uses = %s WHERE id = %s", (invite.uses, invite.code))
                 break
         if not used_invites:
-            await self.self.bot.cursor.execute("SELECT id FROM invites")
-            db_set = set(i["id"] for i in await self.bpt.cursor.fetchall())
+            await self.bot.cursor.execute("SELECT id FROM invites")
+            db_set = set(i["id"] for i in await self.bot.cursor.fetchall())
             api_set = set(i.code for i in invites)
             diff = db_set.difference(api_set)
             used_invites = [
