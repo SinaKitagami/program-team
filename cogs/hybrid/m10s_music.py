@@ -149,7 +149,7 @@ class m10s_music(commands.Cog):
                     await ctx.send("接続のタイムアウト！")
                 else:
                     await ctx.send(f"{ctx.voice_client.channel.name}に接続しました。", ephemeral=True)
-                    e = discord.Embed(title="思惟奈ちゃんミュージックアクティビティビューアーをお試しください。", description="思惟奈ちゃんの音楽機能を、もっと使いやすく。\nキューの確認や音楽コントロール、RPCへの表示をこれ一つで。\nダウンロードは[こちら](https://bit.ly/3yTjEEl)から。\n※Ver 1.1.1がリリースされました。更新をお願いします。")
+                    e = discord.Embed(title="思惟奈ちゃんミュージックアクティビティビューアーをお試しください。", description="思惟奈ちゃんの音楽機能を、もっと使いやすく。\nキューの確認や音楽コントロール、RPCへの表示をこれ一つで。\nダウンロードは[こちら](https://mav.sina-chan-d.xyz/)から。\n※Ver 1.1.2がリリースされました。更新をお願いします。")
                     e.set_image(url="https://cdn.discordapp.com/attachments/667351221106901042/997827447858942042/unknown.png")
                     await ctx.channel.send(embed=e)
         else:
