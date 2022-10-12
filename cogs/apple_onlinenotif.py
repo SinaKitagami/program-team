@@ -45,7 +45,7 @@ class OnlineNotif(commands.Cog):
             if user.id in i["subscribe"]
         ]
 
-    @commands.Cog.listener()
+    # @commands.Cog.listener()
     async def on_presence_update(self, before, after):
         if before.status == after.status:
             return
