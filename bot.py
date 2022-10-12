@@ -34,9 +34,6 @@ import config
 import logging
 
 # logging.basicConfig(level=logging.DEBUG)
-logging.basicConfig(level=logging.INFO)
-
-
 
 intents:discord.Intents = discord.Intents.default()
 intents.typing = False
@@ -426,7 +423,7 @@ async def domsg(message):
     await asyncio.gather(*tks)
 
     tpf = json.loads(pf["prefix"]) + json.loads(gs["prefix"])
-    if not "disable_defprefix" in json.loads(gs["lockcom"]):
+    if not ("disable_defprefix" in json.loads(gs["lockcom"])):
         tpf.insert(0,"s-")
     bot.command_prefix = tpf
     bot.comlocks[str(message.guild.id)] = json.loads(gs["lockcom"])
@@ -676,7 +673,7 @@ async def on_command_error(ctx, error):
         # その他例外
         ch = bot.get_channel(652127085598474242)
         msg = await ch.send(embed=ut.getEmbed("エラーログ", f"コマンド:`{ctx.command.full_parent_name}`\n```{str(error)}```", bot.ec, f"サーバー", ctx.guild.name, "実行メンバー", ctx.author.name, "メッセージ内容", ctx.message.content or "(本文なし)"))
-        await ctx.send(embed=ut.getEmbed(await ctx._("com-error-t"), await ctx._("cmd-other-d", error), bot.ec, "error id", msg.id, "サポートが必要ですか？", "[サポートサーバー](https://discord.gg/vtn2V3v)に参加して、「view-思惟奈ちゃんch」役職をつけて質問してみましょう！"))
+        await ctx.send(embed=ut.getEmbed(await ctx._("com-error-t"), await ctx._("cmd-other-d", "詳細は無効化されています…。"), bot.ec, "error id", msg.id, "サポートが必要ですか？", "[サポートサーバー](https://discord.gg/vtn2V3v)に参加して、「view-思惟奈ちゃんch」役職をつけて質問してみましょう！"))
 
 
 """
