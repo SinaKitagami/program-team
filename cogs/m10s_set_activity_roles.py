@@ -105,7 +105,7 @@ class m10s_act_role(commands.Cog):
             await ctx.send(f"```{e}```")
 
 
-    @commands.Cog.listener()
+    # @commands.Cog.listener()
     async def on_presence_update(self, b,a):
         try:
             gpf = await self.bot.cursor.fetchone("select * from actrole_optin where id = %s", (b.id,))
