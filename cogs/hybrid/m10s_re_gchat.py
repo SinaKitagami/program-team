@@ -432,6 +432,8 @@ class m10s_re_gchat(commands.Cog):
             return
         if m.webhook_id:
             return
+        if m.author.bot:
+            return
         
         if not m.author.id in self.bot.team_sina:
             if self.bot.maintenance:
