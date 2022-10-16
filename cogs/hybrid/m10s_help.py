@@ -28,6 +28,7 @@ class bot_help(commands.Cog):
     @app_commands.describe(rcmd="詳細表示するコマンド")
     @commands.bot_has_permissions(embed_links=True, external_emojis=True, add_reactions=True)
     @app_commands.checks.bot_has_permissions(embed_links=True, external_emojis=True, add_reactions=True)
+    @ut.runnable_check()
     async def help(self, ctx, rcmd:str=None):
         # ヘルプ内容
         if rcmd is None:
@@ -113,6 +114,7 @@ class bot_help(commands.Cog):
                 await ctx.send(embed=embed)
 
     @commands.command()
+    @ut.runnable_check()
     async def help_generate(self, ctx):
         self.bot.tmp_helps = {}
 

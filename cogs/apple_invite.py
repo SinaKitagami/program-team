@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands, tasks
 
+import m10s_util as ut
 
 class AppleInviteCog(commands.Cog):
     def __init__(self, bot):
@@ -129,8 +130,8 @@ class AppleInviteCog(commands.Cog):
                     "UPDATE invites SET uses = %s WHERE id = %s", (invite.uses, invite.code))
                 break
         if not used_invites:
-            await self.self.bot.cursor.execute("SELECT id FROM invites")
-            db_set = set(i["id"] for i in await self.bpt.cursor.fetchall())
+            await self.bot.cursor.execute("SELECT id FROM invites")
+            db_set = set(i["id"] for i in await self.bot.cursor.fetchall())
             api_set = set(i.code for i in invites)
             diff = db_set.difference(api_set)
             used_invites = [
@@ -167,6 +168,7 @@ class AppleInviteCog(commands.Cog):
 
     @commands.command(hidden=True)
     @commands.guild_only()
+    @ut.runnable_check()
     @commands.has_permissions(manage_guild=True, create_instant_invite=True)
     async def checkoffline(self, ctx):
         self._lock = True

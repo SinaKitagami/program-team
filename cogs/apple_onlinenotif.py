@@ -5,6 +5,8 @@ from discord import app_commands
 
 import json
 
+import m10s_util as ut
+
 # This file is copied from TeraAppleBot
 
 
@@ -43,7 +45,7 @@ class OnlineNotif(commands.Cog):
             if user.id in i["subscribe"]
         ]
 
-    @commands.Cog.listener()
+    # @commands.Cog.listener()
     async def on_presence_update(self, before, after):
         if before.status == after.status:
             return
@@ -61,6 +63,7 @@ class OnlineNotif(commands.Cog):
                 await user.send(await self.bot._(user, msg, str(before)))
 
     @commands.hybrid_group(invoke_without_command=True)
+    @ut.runnable_check()
     async def onlinenotif(self, ctx):
         """Returns the name of the users you are receiving online notifications of."""
         users = [
@@ -74,6 +77,7 @@ class OnlineNotif(commands.Cog):
         await ctx.author.send(await ctx._("onlinenotif-subscribing", " ".join(map(str, users))))
 
     @onlinenotif.command(aliases=["add"])
+    @ut.runnable_check()
     async def subscribe(self, ctx, user: discord.User):
         """Subscribes to this user."""
         subscribing = await self.get_subscribing_of_user(ctx.author)
@@ -87,6 +91,7 @@ class OnlineNotif(commands.Cog):
         await ctx.say("onlinenotif-success")
 
     @onlinenotif.command(aliases=["remove", "del"])
+    @ut.runnable_check()
     async def unsubscribe(self, ctx, user: discord.User):
         """Un-subscribes to this user."""
         subscribing = await self.get_subscribing_of_user(ctx.author)
@@ -98,6 +103,7 @@ class OnlineNotif(commands.Cog):
         await ctx.say("onlinenotif-removeSuccess")
 
     @onlinenotif.command()
+    @ut.runnable_check()
     async def settings(self, ctx, enabled: bool=False):
         """Choose whether someone can receive your online notification.
         Note that you have to share server with that user."""

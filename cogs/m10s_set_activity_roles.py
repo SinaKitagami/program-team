@@ -60,6 +60,7 @@ class m10s_act_role(commands.Cog):
 
     @commands.hybrid_command(name="activity_role_setting", description="プレイ中ステータスに応じた役職付与を受け付けるかどうか")
     @app_commands.describe(is_enable="有効化するかどうか")
+    @ut.runnable_check()
     async def actrole_set(self, ctx, is_enable:bool):
         await self.bot.cursor.execute("UPDATE actrole_optin SET is_enable = %s WHERE id = %s",(int(is_enable),ctx.author.id))
         await ctx.reply(f"プレイ中に応じた役職設定を、{is_enable}に設定したよ！")
@@ -76,6 +77,7 @@ class m10s_act_role(commands.Cog):
             discord.app_commands.Choice(name="custom(カスタムステータス)", value=4),
             discord.app_commands.Choice(name="competing(競争中)", value=5)
         ])
+    @ut.runnable_check()
     async def playing_roles(self, ctx, activity_type:int, role:Optional[discord.Role]):
         try:
             act_id = self.cvtdict.get(activity_type,None)
@@ -103,7 +105,7 @@ class m10s_act_role(commands.Cog):
             await ctx.send(f"```{e}```")
 
 
-    @commands.Cog.listener()
+    # @commands.Cog.listener()
     async def on_presence_update(self, b,a):
         try:
             gpf = await self.bot.cursor.fetchone("select * from actrole_optin where id = %s", (b.id,))

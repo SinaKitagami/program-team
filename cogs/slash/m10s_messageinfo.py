@@ -29,6 +29,7 @@ class m10s_messageinfo(commands.Cog):
         self.bot = bot
 
         @app_commands.context_menu(name="message info")
+        @ut.runnable_check()
         async def message_info(interaction:discord.Interaction, msg:discord.Message):
             #msgに入ったメッセージで詳細情報Embedを作成して送信。
             if msg.is_system():

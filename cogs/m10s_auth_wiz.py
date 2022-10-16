@@ -61,6 +61,7 @@ class m10s_auth_wiz(commands.Cog):
     @commands.hybrid_command(name="authsetting", aliases=["Auth","Authsettings"], description="簡易メンバー認証を作成できます。")
     @commands.has_permissions(administrator=True)
     @commands.bot_has_permissions(manage_messages=True,manage_roles=True)
+    @ut.runnable_check()
     async def _setting(self, ctx):
         auths = await self.bot.cursor.fetchone(
             "select * from welcome_auth where id = %s", (ctx.guild.id,))

@@ -6,7 +6,7 @@ from discord.ext import commands
 import asyncio
 import m10s_util as ut
 
-from typing import Optional
+from typing import Optional, Literal
 
 import json
 
@@ -17,9 +17,11 @@ class settings(commands.Cog):
         self.bot = bot
 
     @commands.hybrid_group(name="settings")
+    @ut.runnable_check()
     async def setting_cmds(self, ctx):pass
 
     @setting_cmds.command(description="prefixのユーザー設定")
+    @ut.runnable_check()
     @app_commands.describe(mode="どうするか")
     @app_commands.describe(ipf="カスタムprefixの文字列")
     @app_commands.choices(mode=[
@@ -51,6 +53,7 @@ class settings(commands.Cog):
             await ctx.send(embed=ut.getEmbed("不適切なモード選択", "`view`または`set`または`del`を指定してください。"))
 
     @setting_cmds.command(description="prefixのサーバー設定")
+    @ut.runnable_check()
     @app_commands.describe(mode="どうするか")
     @app_commands.describe(ipf="カスタムprefixの文字列")
     @app_commands.choices(mode=[
@@ -79,9 +82,10 @@ class settings(commands.Cog):
                 "UPDATE guilds SET prefix = %s WHERE id = %s", (json.dumps(prefixes), ctx.guild.id))
             await ctx.send(f"{ipf}を削除しました。")
         else:
-            await ctx.send(embed=ut.getEmbed("不適切なモード選択", "`view`または`set`または`del`を指定してください。"))
+            await ctx.send(embed=ut.getEmbed("不適切なモード選択", "`0`(view)または`1`(set)または`2`(delete)を指定してください。"))
 
     @commands.cooldown(1, 10, type=commands.BucketType.guild)
+    @ut.runnable_check()
     @setting_cmds.command(description="思惟奈ちゃんの一部場面でのサーバー言語設定")
     @app_commands.describe(lang="設定言語")
     async def guildlang(self, ctx, lang:str):
@@ -99,6 +103,7 @@ class settings(commands.Cog):
             await ctx.send(await ctx._("setl-set"))
 
     @setting_cmds.command(description="思惟奈ちゃんのサーバーログの送信設定を行います。")
+    @ut.runnable_check()
     @app_commands.describe(channel="送信先チャンネル")
     async def sendlogto(self, ctx, channel:Optional[discord.TextChannel]):
         to = channel
@@ -120,6 +125,7 @@ class settings(commands.Cog):
             await ctx.send("このコマンドの使用には、管理者権限が必要です。")
 
     @setting_cmds.command(aliases=["言語設定", "言語を次の言語に変えて"],description="思惟奈ちゃんの一部場面でのサーバー言語設定")
+    @ut.runnable_check()
     @app_commands.describe(lang="設定言語")
     @commands.cooldown(1, 10, type=commands.BucketType.user)
     async def userlang(self, ctx, lang:str):
@@ -133,39 +139,47 @@ class settings(commands.Cog):
             self.bot.translate_handler.update_language_cache(ctx.author, lang)
             await ctx.send(await ctx._("setl-set"))
 
-    @commands.command() # スラッシュコマンドの実行は止められない(=誤解防止)のため
-    async def comlock(self, ctx, do="view", *comname):
+    @commands.hybrid_command(description="指定されたコマンドに対して、利用制限をかけることができます。")
+    @app_commands.describe(mode="使用するモード")
+    @app_commands.describe(comname="(add/del)制限をかける/解除するコマンドの名前")
+    @ut.runnable_check()
+    async def comlock(self, ctx, mode: Literal['add', 'del', 'view'], comname:Optional[str]):
         gs = await self.bot.cursor.fetchone(
             "select * from guilds where id=%s", (ctx.guild.id,))
         locks = json.loads(gs["lockcom"])
         #gs = await self.bot.cursor.fetchone()
-        if do == "add":
+        if mode == "add":
+            if not comname:
+                return await ctx.send("コマンド名が指定されていません！")
             if not (ctx.author.guild_permissions.administrator or ctx.author.id == 404243934210949120):
                 await ctx.send(await ctx._("need-admin"))
                 return
-            for i in comname:
-                locks.append(i)
+            # for i in comname:
+            locks.append(comname)
             await self.bot.cursor.execute(
                 "UPDATE guilds SET lockcom = %s WHERE id = %s", (json.dumps(locks), ctx.guild.id))
             await ctx.send(await ctx._("upf-add", str(comname)))
-        elif do == "del":
+        elif mode == "del":
+            if not comname:
+                return await ctx.send("コマンド名が指定されていません！")
             if not (ctx.author.guild_permissions.administrator or ctx.author.id == 404243934210949120):
                 await ctx.send(await ctx._("need-admin"))
                 return
-            for i in comname:
-                try:
-                    locks.remove(i)
-                except:
-                    pass
+            # for i in comname:
+                # try:
+            locks.remove(comname)
+                # except:
+                    # pass
             await self.bot.cursor.execute(
                 "UPDATE guilds SET lockcom = %s WHERE id = %s", (json.dumps(locks), ctx.guild.id))
             await ctx.send(await ctx._("deleted-text"))
-        elif do == "view":
+        elif mode == "view":
             await ctx.send(await ctx._("comlock-view", gs["lockcom"]))
         else:
             await ctx.send(await ctx._("comlock-unknown"))
 
     @setting_cmds.command(aliases=["setsysmsg"],description="メンバーの参加、退出時のメッセージ設定")
+    @ut.runnable_check()
     @app_commands.describe(mode="どうするか")
     @app_commands.describe(when="送信を行うとき")
     @app_commands.describe(channel="送信先チャンネル")
@@ -217,6 +231,7 @@ class settings(commands.Cog):
                 await ctx.send(await ctx._("need-admin"))
 
     @setting_cmds.command(aliases=["サーバーコマンド", "次の条件でサーバーコマンドを開く"],description="サーバー独自の応答コマンドを作成できます。(prefixコマンドでのみ呼び出せます。)")
+    @ut.runnable_check()
     @app_commands.describe(mode="どうするか")
     @app_commands.describe(name="コマンド名")
     @app_commands.choices(mode=[
@@ -341,6 +356,7 @@ class settings(commands.Cog):
             await ctx.send(await ctx._("scmd-except"))
 
     @commands.hybrid_command(description="ハッシュタグとしてチャンネルを使用する設定を切り替えます。")
+    @ut.runnable_check()
     async def hashtag(self, ctx):
         d = await self.bot.cursor.fetchone(
             "select * from guilds where id=%s", (ctx.guild.id,))
@@ -362,6 +378,7 @@ class settings(commands.Cog):
     # moved to apple_onlinenotif
 
     @setting_cmds.command(description="レベルアップ通知の送信先を変更できます。")
+    @ut.runnable_check()
     @app_commands.describe(to="送信先チャンネル")
     async def levelupsendto(self, ctx, to:Optional[discord.TextChannel]):
         if to is None:
@@ -371,6 +388,36 @@ class settings(commands.Cog):
             await self.bot.cursor.execute(
                 "UPDATE guilds SET levelupsendto = %s WHERE id = %s", (to.id, ctx.guild.id))
         await ctx.send(await ctx._("changed"))
+
+    
+    @setting_cmds.command(description="機能の有効化設定")
+    @ut.runnable_check()
+    @app_commands.describe(feature_name="設定する機能")
+    @app_commands.describe(enable="有効にするかどうか")
+    async def toggle_features(self, ctx, feature_name: Literal["level_count", "send_hashtag", "server_command", "default_prefix", "profile_reaction"], enable: bool = True):
+        text_to_comlock = {
+            "level_count":"clevel",
+            "send_hashtag":"shash",
+            "server_command":"scom",
+            "default_prefix":"disable_defprefix",
+            "profile_reaction":"disable_profile_msg"
+        }
+        # comlockに上記テキストが__含まれると__無効化される
+        gs = await self.bot.cursor.fetchone(
+            "select * from guilds where id=%s", (ctx.guild.id,))
+        locks: list = json.loads(gs["lockcom"])
+        if enable:
+            # 含まれるなら削除する
+            if text_to_comlock[feature_name] in locks:
+                locks.remove(text_to_comlock[feature_name])
+        else:
+            # 含まれないなら追加する
+            if not (text_to_comlock[feature_name] in locks):
+                locks.append(text_to_comlock[feature_name])
+        await self.bot.cursor.execute(
+                "UPDATE guilds SET lockcom = %s WHERE id = %s", (json.dumps(locks), ctx.guild.id))
+        await ctx.send(f"機能`{feature_name}`を{'有効' if enable else '無効'}にしました。")
+
 
 
 async def setup(bot):

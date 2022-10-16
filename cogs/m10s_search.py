@@ -24,16 +24,19 @@ class search(commands.Cog):
         self.bot = bot
 
     @commands.command()
+    @ut.runnable_check()
     async def getby(self, ctx, k: str):
         await ctx.send(embed=ut.getEmbed("", await ctx._(k)))
 
     @commands.hybrid_group(name="search", description="検索系コマンド")
+    @ut.runnable_check()
     async def search_commands(self,ctx):
         pass
 
     @search_commands.command(aliases=["twisearch", "twitterで検索して"], description="Twitter検索")
     @app_commands.describe(word="検索文字列")
     @commands.cooldown(1, 15, type=commands.BucketType.user)
+    @ut.runnable_check()
     async def twitter(self, ctx, *, word: str):
         try:
             async with ctx.message.channel.typing():
@@ -59,6 +62,7 @@ class search(commands.Cog):
     @search_commands.command(aliases=["jwp", "次の言葉でwikipedia調べて"],description="wikipedia検索")
     @app_commands.describe(word="検索文字列")
     @commands.cooldown(1, 10, type=commands.BucketType.user)
+    @ut.runnable_check()
     async def wikipedia(self, ctx, *, word:str):
         try:
             async with ctx.message.channel.typing():
@@ -105,6 +109,7 @@ class search(commands.Cog):
 
     @search_commands.command(aliases=["ニュース", "ニュースを見せて"],description="newsapi経由でニュースを表示します。")
     @commands.cooldown(1, 15, type=commands.BucketType.user)
+    @ut.runnable_check()
     async def news(self, ctx):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
               ctx.message.content)
@@ -147,6 +152,7 @@ class search(commands.Cog):
     @search_commands.command(aliases=["次の言葉でyoutube調べて"], description="YouTube検索")
     @app_commands.describe(word="検索文字列")
     @commands.cooldown(1, 10, type=commands.BucketType.user)
+    @ut.runnable_check()
     async def youtube(self, ctx, *, word:str):
         try:
             async with ctx.message.channel.typing():

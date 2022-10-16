@@ -25,12 +25,14 @@ class info_check(commands.Cog):
         self.bot = bot
 
     @commands.hybrid_group(name="information")
+    @ut.runnable_check()
     async def info_group(self, ctx):
         pass
 
     @info_group.command(name="user", aliases=["ui", "anyuserinfo"], description="ユーザーに関する情報を表示します。")
     @app_commands.describe(target="表示するメンバー")
     @app_commands.describe(uid="表示する外部ユーザーのID")
+    @ut.runnable_check()
     async def _info_of_user(self, ctx:commands.Context, target:Optional[discord.Member], uid:Optional[str]):
         if uid:
             uid = int(uid)
@@ -57,7 +59,7 @@ class info_check(commands.Cog):
             "User-Agent": "DiscordBot (sina-chan with discord.py)",
             "Authorization": f"Bot {self.bot.http.token}"
         }
-        async with self.bot.session.get(f"https://discord.com/api/v9/users/{target.id}", headers=headers) as resp:
+        async with self.bot.session.get(f"https://discord.com/api/v10/users/{target.id}", headers=headers) as resp:
             resp.raise_for_status()
             ucb = await resp.json()
         flags = ut.m10s_badges(ucb["public_flags"])
@@ -81,8 +83,8 @@ class info_check(commands.Cog):
         if ctx.interaction:
             ctp:dpyui.slash_command_callback = await dpyui.slash_command_callback.from_dpy_interaction(ctx.interaction)
             await ctp.send_response_with_ui("下から表示したい情報を選んでください。タイムアウトは30秒です。", ui=menu)
-            ctx.interaction.response._responded = True
-            msg = await ctx.interaction.original_message()
+            ctx.interaction.response._response_type = discord.InteractionResponseType.channel_message
+            msg = await ctx.interaction.original_response()
             
         else:
             msg = await self.bot.dpyui.send_with_ui(ctx.channel, "下から表示したい情報を選んでください。タイムアウトは30秒です。",ui=menu)
@@ -179,7 +181,6 @@ class info_check(commands.Cog):
 
                 e.add_field(name="権限情報",
                     value=f"`{'`,`'.join([await ctx._(f'p-{i[0]}') for i in list(target.guild_permissions) if i[1]])}`",inline=False)
-
             elif cb.selected_value[0] == "banner":
                 # https://cdn.discordapp.com/banners/404243934210949120/4d22b0afc7bf59810ab3ca44559be8a5.png?size=1024
                 banner_url = f'https://cdn.discordapp.com/banners/{target.id}/{ucb["banner"]}.png?size=1024'
@@ -232,7 +233,8 @@ class info_check(commands.Cog):
             await msg.edit(content="",embed=e)
 
     @info_group.command(name="server",aliases=["si"], description="サーバーについての情報を表示します。")
-    async def ginfo(self, ctx:commands.Context):
+    @ut.runnable_check()
+    async def ginfo(self, ctx: commands.Context):
         u = ctx.author
         # b = ctx.guild.me
         gp = await self.bot.cursor.fetchone("select * from guilds where id = %s",(ctx.guild.id,))
@@ -248,7 +250,7 @@ class info_check(commands.Cog):
         menu.add_option("安全設定","safety_setting","ユーザーの安全性にかかわる設定を表示します。")
         if u.guild_permissions.ban_members:
             menu.add_option("BANしたユーザー","banned_user","BANされているメンバー一覧を表示します。")
-        if u.guild_permissions.manage_guild:
+        if u.guild_permissions.manage_guild and "COMMUNITY" in u.guild.features:
             menu.add_option("コミュニティ設定","community","コミュニティの設定を表示します。")
             menu.add_option("ようこそ画面","welcome_screen","ようこそ画面の状態を表示します。")
         menu.add_option("サーバーブースト","boost_status","サーバーブーストと追加要素を表示します。")
@@ -261,8 +263,8 @@ class info_check(commands.Cog):
         if ctx.interaction:
             ctp:dpyui.slash_command_callback = await dpyui.slash_command_callback.from_dpy_interaction(ctx.interaction)
             await ctp.send_response_with_ui("下から表示したい情報を選んでください。タイムアウトは30秒です。", ui=menu)
-            ctx.interaction.response._responded = True
-            msg = await ctx.interaction.original_message()
+            ctx.interaction.response._response_type = discord.InteractionResponseType.channel_message
+            msg = await ctx.interaction.original_response()
         else:
             msg = await self.bot.dpyui.send_with_ui(ctx.channel, "下から表示したい情報を選んでください。タイムアウトは30秒です。",ui=menu)
         while True:
@@ -392,6 +394,7 @@ class info_check(commands.Cog):
 
     @info_group.command(name="role", aliases=["役職情報", "次の役職について教えて"], description="特定役職について表示します。")
     @app_commands.describe(role="表示する役職")
+    @ut.runnable_check()
     async def roleinfo(self, ctx, *, role: discord.Role):
         if role.guild == ctx.guild:
             embed = discord.Embed(
@@ -429,6 +432,7 @@ class info_check(commands.Cog):
 
     @info_group.command(name="invite", description="招待情報を表示します。")
     @app_commands.describe(invite="表示する招待")
+    @ut.runnable_check()
     async def cinvite(self, ctx, invite:str):
         i:discord.Invite = await self.bot.fetch_invite(invite)
         e = discord.Embed(title=await ctx._(
@@ -456,6 +460,7 @@ class info_check(commands.Cog):
 
     @info_group.command(name="activity",description="アクティビティについて表示します。")
     @app_commands.describe(user="表示するユーザー")
+    @ut.runnable_check()
     async def infoactivity(self, ctx, user: Optional[discord.Member]):
         mus = user
         if mus is None:
@@ -666,6 +671,7 @@ class info_check(commands.Cog):
 
     @info_group.command(name="channel", description="特定チャンネルについて表示する")
     @app_commands.describe(channel="表示するチャンネル")
+    @ut.runnable_check()
     async def chinfo(self, ctx:commands.Context, channel:commands.GuildChannelConverter):
         try:
             if channel:
@@ -770,6 +776,7 @@ class info_check(commands.Cog):
 
     @info_group.command(name="emoji",description="絵文字に関して表示します。")
     @app_commands.describe(emj="詳細表示する絵文字")
+    @ut.runnable_check()
     async def emojiinfo(self, ctx, *, emj: discord.Emoji):
         embed = discord.Embed(
             title=emj.name, description=f"id:{emj.id}", color=self.bot.ec)
@@ -788,6 +795,7 @@ class info_check(commands.Cog):
 
     @commands.hybrid_command(description="思惟奈ちゃんや他のBotの招待URLを作成できます。")
     @app_commands.describe(target="招待を作るBot")
+    @ut.runnable_check()
     async def invite(self,ctx,*,target:Optional[discord.Member]):
         if target is None:
             target = ctx.guild.me
@@ -809,6 +817,7 @@ class info_check(commands.Cog):
             await ctx.send(embed=discord.Embed(title="エラー",description="ユーザーアカウントの導入リンクは作成できません！",color=self.bot.ec))
 
     @commands.hybrid_command(description="このBotでの特権を表示します。")
+    @ut.runnable_check()
     async def features(self, ctx:commands.Context):
         if ctx.interaction:
             await ctx.send(embed=ut.getEmbed("あなたのfeatures", "```{}```".format(",".join(self.bot.features.get(ctx.author.id, ["(なし)"])))), ephemeral=True)

@@ -5,6 +5,8 @@ import discord
 from discord.ext import commands, tasks
 from discord import app_commands
 
+import m10s_util as ut
+
 import time
 
 LANGUAGE = {"python", "javascript"}
@@ -27,6 +29,7 @@ class AppleMiscCog(commands.Cog):
         self.report_ping.start()
 
     @commands.command()
+    @ut.runnable_check()
     async def code_in(self, ctx, lang):
         if lang in LANGUAGE:
             with open(f"data/programming_info/{lang}.json", "r", encoding="utf-8") as f:
@@ -52,10 +55,12 @@ class AppleMiscCog(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
+    @ut.runnable_check()
     async def clear_l10n_cache(self, ctx):
         self.bot.translate_handler.clean_cache()
 
     @commands.hybrid_command(description="Botの応答速度を返します。")
+    @ut.runnable_check()
     @app_commands.describe(is_debug="詳細情報を表示するかどうか(デバッグ用)")
     async def ping(self, ctx, is_debug: Optional[bool] = False):
         if is_debug:

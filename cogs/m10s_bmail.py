@@ -14,6 +14,7 @@ class m10s_bmail(commands.Cog):
         self.bot = bot
 
     @commands.hybrid_command(name="bottle-mail", aliases=["b-mail","bm"], description="ボトルメールをどこかのサーバーに送ることができます。")
+    @ut.runnable_check()
     async def b_mail(self, ctx):
         dch = await ut.opendm(ctx.author)
         schs = [i for i in self.bot.get_all_channels()

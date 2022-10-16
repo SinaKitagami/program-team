@@ -23,6 +23,7 @@ class info(commands.Cog):
         self.bot = bot            
 
     @commands.command(name="dguild")
+    @ut.runnable_check()
     async def serverinfo(self, ctx, sid=None):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
               ctx.message.content)
@@ -97,10 +98,12 @@ class info(commands.Cog):
 
 
     @commands.hybrid_command(name="team_sina-chan", description="チーム☆思惟奈ちゃんメンバーを表示します。")
+    @ut.runnable_check()
     async def view_teammember(self, ctx):
         await ctx.send(embed=ut.getEmbed(await ctx._("team_sina-chan"), "\n".join([self.bot.get_user(i).name for i in self.bot.team_sina])))
 
     @commands.command()
+    @ut.runnable_check()
     async def mutual_guilds(self, ctx, uid=None):
         if ctx.author.id in self.bot.team_sina:
             try:

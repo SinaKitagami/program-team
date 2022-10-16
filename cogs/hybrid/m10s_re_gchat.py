@@ -81,6 +81,7 @@ class m10s_re_gchat(commands.Cog):
     @commands.cooldown(1, 20, type=commands.BucketType.guild)
     @commands.has_permissions(administrator=True)
     @commands.bot_has_permissions(manage_webhooks=True)
+    @ut.runnable_check()
     async def gchat(self, ctx):
         if ctx.invoked_subcommand is None:
             await ctx.send("""> re_global_chat　
@@ -90,7 +91,9 @@ class m10s_re_gchat(commands.Cog):
 
     @gchat.command(description="グローバルチャットに接続します。")
     @app_commands.describe(name="グローバルチャット名。同じものを指定して接続したチャンネル同士がつながります。(デフォルト:main)")
-    async def connect(self, ctx, *, name:str="main"):
+    @ut.runnable_check()
+    async def connect(self, ctx: commands.Context, *, name:str="main"):
+        await ctx.defer(ephemeral=True)
         upf = await self.bot.cursor.fetchone(
             "select * from users where id=%s", (ctx.author.id,))
         #upf = await self.bot.cursor.fetchone()
@@ -154,7 +157,9 @@ class m10s_re_gchat(commands.Cog):
 
 
     @gchat.command(description="グローバルチャットから切断します。")
+    @ut.runnable_check()
     async def dconnect(self, ctx:commands.Context):
+        await ctx.defer(ephemeral=True)
         cgch = await self.bot.cursor.fetchone("select * from gchat_cinfo where id = %s",(ctx.channel.id,))
         #cgch = await self.bot.cursor.fetchone()
         if cgch:
@@ -178,6 +183,7 @@ class m10s_re_gchat(commands.Cog):
 
     @gchat.command(description="グローバルチャットに投稿されたメッセージについて確認します。")
     @app_commands.describe(globalchat_message_id="グローバルチャットに投稿されたメッセージのid")
+    @ut.runnable_check()
     async def check_post(self, ctx, globalchat_message_id: int):
         gmid = globalchat_message_id
         post = None
@@ -207,6 +213,7 @@ class m10s_re_gchat(commands.Cog):
             await ctx.send(embed=ut.getEmbed("グローバルチャンネル投稿情報", "", self.bot.ec, "送信者id:", str(post['author_id']), "送信者のプロファイルニックネーム", apf['gnick']))
 
     @commands.command(aliases=["オンライン状況", "次の人のオンライン状況を教えて"])
+    @ut.runnable_check()
     async def isonline(self, ctx, uid: int=None):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
               ctx.message.content)
@@ -230,6 +237,7 @@ class m10s_re_gchat(commands.Cog):
 
     @gchat.command(description="グローバルチャットに接続しているチャンネル一覧を返します。")
     @app_commands.describe(name="接続先名(デフォルト:main)")
+    @ut.runnable_check()
     async def gchinfo(self, ctx, name:Optional[str]="main"):
         gch = await self.bot.cursor.fetchone(
             "select * from gchat_clist where name = %s", (name,))
@@ -250,6 +258,7 @@ class m10s_re_gchat(commands.Cog):
 
     @gchat.command(aliases=["グローバルチャットの色を変える"],description="グローバルチャットの埋め込みカラーを変更できます。")
     @app_commands.describe(color="16進数の色コード")
+    @ut.runnable_check()
     async def edit_color(self, ctx, color:str='0x000000'):
         await self.bot.cursor.execute(
             "UPDATE users SET gcolor = %s WHERE id = %s", (int(color, 16), ctx.author.id))
@@ -257,6 +266,7 @@ class m10s_re_gchat(commands.Cog):
 
     @gchat.command(aliases=["グローバルチャットのニックネームを変える"], description="グローバルチャットでの表示名を変更できます。")
     @app_commands.describe(nick="変更するニックネーム")
+    @ut.runnable_check()
     async def edit_nick(self, ctx, nick:str):
         if 1 < len(nick) < 29:
             await self.bot.cursor.execute(
@@ -266,6 +276,7 @@ class m10s_re_gchat(commands.Cog):
             await ctx.send("名前の長さは2文字以上28文字以下にしてください。")
 
     @commands.command()
+    @ut.runnable_check()
     async def gchatban(self, ctx, uid: int, ban: bool=True, *, rea="なし"):
         upf = await self.bot.cursor.fetchone(
             "select * from users where id=%s", (ctx.author.id,))
@@ -293,6 +304,7 @@ class m10s_re_gchat(commands.Cog):
                     await ctx.send("これが呼び出されることは、ありえないっ！")
 
     @commands.command()
+    @ut.runnable_check()
     async def globaltester(self, ctx, uid, bl: bool=True):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
               ctx.message.content)
@@ -306,6 +318,7 @@ class m10s_re_gchat(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
+    @ut.runnable_check()
     async def globalmod(self, ctx, uid, bl: bool=True):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
               ctx.message.content)
@@ -315,6 +328,7 @@ class m10s_re_gchat(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
+    @ut.runnable_check()
     async def userv(self, ctx, uid, bl: bool=True):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
               ctx.message.content)
@@ -323,6 +337,7 @@ class m10s_re_gchat(commands.Cog):
         await ctx.send(f"該当ユーザーの認証状態を{str(bl)}にしました。")
 
     @commands.command()
+    @ut.runnable_check()
     async def globalstar(self, ctx, uid, bl: bool=True):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
               ctx.message.content)
@@ -335,12 +350,14 @@ class m10s_re_gchat(commands.Cog):
             await ctx.send(f"スターユーザーを{str(bl)}にしました。")
 
     @gchat.command(description="グローバルチャットの利用ガイドを表示します。")
+    @ut.runnable_check()
     async def guide(self, ctx):
         embed = discord.Embed(description=self.bot.gguide, color=self.bot.ec)
         await ctx.send(embed=embed)
 
     @commands.command()
     @commands.cooldown(1, 30, type=commands.BucketType.user)
+    @ut.runnable_check()
     async def globaldel(self, ctx, gmid: int):
         upf = await self.bot.cursor.fetchone(
             "select * from users where id=%s", (ctx.author.id,))
@@ -374,6 +391,7 @@ class m10s_re_gchat(commands.Cog):
             await ctx.send("このコマンドは運営のみ実行できます。")
 
     @commands.command()
+    @ut.runnable_check()
     async def viewgban(self, ctx):
         upf = await self.bot.cursor.fetchone(
             "select * from users where id=%s", (ctx.author.id,))
@@ -406,11 +424,15 @@ class m10s_re_gchat(commands.Cog):
             return
         if m.is_system():
             return
-        if "cu:on_msg" in self.bot.features.get(m.author.id, []):
+        if "cu:on_msg" in self.bot.features.get(m.author.id,[]):
+            return
+        if "cu:on_msg" in self.bot.features.get(m.guild.id,[]):
             return
         if isinstance(m.channel, discord.DMChannel):
             return
         if m.webhook_id:
+            return
+        if m.author.bot:
             return
         
         if not m.author.id in self.bot.team_sina:
@@ -437,7 +459,7 @@ class m10s_re_gchat(commands.Cog):
                     await m.remove_reaction("❌", self.bot.user)
                     return
 
-            if (datetime.datetime.now(datetime.timezone.utc) - rdelta(hours=9) - rdelta(days=7) >= m.author.created_at) or upf["gmod"] or upf["gstar"]:
+            if (datetime.datetime.now(datetime.timezone.utc) - rdelta(days=7) >= m.author.created_at) or upf["gmod"] or upf["gstar"]:
                 
                 if not gchat_info["connected_to"] in self.without_react:
                     try:
@@ -530,6 +552,7 @@ class m10s_re_gchat(commands.Cog):
                 if upf["gstar"]:
                     spicon = spicon + "🌟"
                 if m.author.id in [404243934210949120,694213580517802054,602680118519005184,525658651713601536,524872647042007067,732893750778527764]:
+                    # 思惟奈ちゃんミュージックアクティビティビューアー 早期サポーター
                     spicon = spicon + "🎶"
                 if spicon == "":
                     spicon = "👤"

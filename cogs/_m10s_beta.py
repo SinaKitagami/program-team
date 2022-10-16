@@ -17,6 +17,7 @@ class m10s_beta(commands.Cog):
         self.bot:commands.Bot = bot
 
     @commands.command()
+    @ut.runnable_check()
     async def tsts(self, ctx):
         menu = dpyui.interaction_menu("test_1","選択してください",1,3)
         menu.add_option("りくりく","rikuchan","選択項目1")

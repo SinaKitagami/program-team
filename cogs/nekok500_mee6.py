@@ -14,6 +14,7 @@ class MEE6(commands.Cog):
         self.bot = bot
 
     @commands.hybrid_command(description="「mee6のレベルランキング」を一覧表示します。")
+    @ut.runnable_check()
     @commands.guild_only()
     @app_commands.describe(start="最高順位")
     @app_commands.describe(end="最低順位")
