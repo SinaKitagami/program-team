@@ -345,9 +345,9 @@ class m10s_music(commands.Cog):
             for vurl in vurls:
                 vinfo = await self.gvinfo(vurl, getattr(message, "id", None), False)
                 if vinfo["extractor"] in ["youtube"]:
-                    """await sender.send("この動画ソースは、Discordの規約変更の影響でサポートが終了しました。\n各個人でダウンロード→ファイルアップロードを経由して再生することは可能ですが、自己責任となります。")
-                    return"""
-                    await sender.send("この動画ソースは、Discordの規約変更の影響で近日中にサポートが打ち切られます。")
+                    await sender.send("この動画ソースは、Discordの規約変更の影響でサポートが終了しました。\n各個人でダウンロード→ファイルアップロードを経由して再生することは可能ですが、自己責任となります。")
+                    return
+                    # await sender.send("この動画ソースは、Discordの規約変更の影響で近日中にサポートが打ち切られます。")
                 if vinfo.get("_type", "") == "playlist":
                     tks = []
                     for c in vinfo["entries"]:
