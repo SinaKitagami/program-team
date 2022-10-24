@@ -107,7 +107,7 @@ class m10s_re_gchat(commands.Cog):
             gch = await self.bot.cursor.fetchone("select * from gchat_clist where name = %s",(name,))
             #gch = await self.bot.cursor.fetchone()
             check_msg = await ctx.send("""> グローバルチャットに接続する前に
-　・グローバルチャットに接続することで、他のサーバーとチャットすることができます。\n
+　・グローバルチャットに接続することで、他のサーバーとチャットすることができます。
 　・他のサーバーのメンバーは、「ボット」として投稿されます。
 　・詳しい規約は、 `/global_chat guide` よりご覧いただけます。
 　これを読んだうえで、グローバルチャットに接続する場合は、✅のリアクションして下さい。
