@@ -30,7 +30,12 @@ class bot_help(commands.Cog):
     @app_commands.checks.bot_has_permissions(embed_links=True, external_emojis=True, add_reactions=True)
     @ut.runnable_check()
     async def help(self, ctx, rcmd:str=None):
-        # ヘルプ内容
+        e = discord.Embed(title="思惟奈ちゃんの使い方", description="基本的に、`/`を入力すると出てくる候補にあるコマンドのうち、思惟奈ちゃんのアイコンが表示されている物がすべてです。", color=self.bot.ec)
+        e.add_field(name="グローバルチャットのバッジ", value="🌠:チーム☆思惟奈ちゃんメンバー\n💠:認証済みアカウント\n🔗パートナーサーバーオーナー\n🔧:グローバルチャットモデレーター\n🌟:スターユーザー(アカウント作成日制限を受けないユーザー)\n🔔:アルファテスター(一部機能の先行体験)\n🎫:有料支援者バッジ")
+        e.add_field(name="思惟奈ちゃんサポートサーバー", value="https://discord.gg/vtn2V3v", inline=False)
+        e.add_field(name="思惟奈ちゃんを支援する", value="https://linktr.ee/sina_chan", inline=False)
+        await ctx.send(embed =e)
+        """# ヘルプ内容
         if rcmd is None:
             page = 1
             embed = discord.Embed(title=await ctx._("help-1-t"),
@@ -111,7 +116,7 @@ class bot_help(commands.Cog):
                 await ctx.send(await ctx._("h-notfound"))
             else:
                 embed = ut.getEmbed(dcmd[0], dcmd[1], self.bot.ec, *dcmd[2:])
-                await ctx.send(embed=embed)
+                await ctx.send(embed=embed)"""
 
     @commands.command()
     @ut.runnable_check()
