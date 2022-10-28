@@ -20,7 +20,7 @@ class twinotif(commands.Cog):
 
     def gtwi_fu(self,uname):
         ret = self.twi.statuses.user_timeline(screen_name=uname,count=1)
-        return (int(ret[0]["id"]),ret[0])
+        return (int(ret[0]["id"]), ret[0])
 
     @tasks.loop(seconds=10)
     async def loop_task(self):
@@ -40,5 +40,5 @@ class twinotif(commands.Cog):
             embed.add_field(name="Twitterで見る", value=f'https://twitter.com/{tweet["user"]["screen_name"]}/status/{tweet["id"]}')
             await self.ch.send(f"{self.mention}",embed=embed)
 
-def setup(bot):
-    bot.add_cog(twinotif(bot))
+async def setup(bot):
+    await bot.add_cog(twinotif(bot))

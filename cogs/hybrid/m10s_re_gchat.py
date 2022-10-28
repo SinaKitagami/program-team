@@ -93,7 +93,7 @@ class m10s_re_gchat(commands.Cog):
     @app_commands.describe(name="グローバルチャット名。同じものを指定して接続したチャンネル同士がつながります。(デフォルト:main)")
     @ut.runnable_check()
     async def connect(self, ctx: commands.Context, *, name:str="main"):
-        await ctx.defer(ephemeral=True)
+        await ctx.defer(ephemeral=False)
         upf = await self.bot.cursor.fetchone(
             "select * from users where id=%s", (ctx.author.id,))
         #upf = await self.bot.cursor.fetchone()
@@ -106,6 +106,17 @@ class m10s_re_gchat(commands.Cog):
         else:
             gch = await self.bot.cursor.fetchone("select * from gchat_clist where name = %s",(name,))
             #gch = await self.bot.cursor.fetchone()
+            check_msg = await ctx.send("""> グローバルチャットに接続する前に
+　・グローバルチャットに接続することで、他のサーバーとチャットすることができます。
+　・他のサーバーのメンバーは、「ボット」として投稿されます。
+　・詳しい規約は、 `/global_chat guide` よりご覧いただけます。
+　これを読んだうえで、グローバルチャットに接続する場合は、✅のリアクションして下さい。
+""")
+            await check_msg.add_reaction("✅")
+            try:
+                await self.bot.wait_for("reaction_add", check = lambda r,u: ctx.author.id == u.id and r.message.id == check_msg.id and str(r.emoji) == "✅")
+            except asyncio.TimeoutError:
+                return await ctx.send("> グローバルチャットへの接続をキャンセルしました。")
             if gch:
                 if gch["pass"]:
                     try:
@@ -125,8 +136,8 @@ class m10s_re_gchat(commands.Cog):
                             "[🛠💠]思惟奈ちゃんグローバルチャット接続案内", ctx.guild.me.display_avatar.replace(static_format="png").url)
                         return
                 wh = await ctx.channel.create_webhook(name="sina_gchat_webhook",reason=f"思惟奈ちゃんグローバルチャット:{name}への接続が行われたため")
-                await self.bot.cursor.execute("insert into gchat_cinfo(id,connected_to,wh_id) values(%s,%s,%s)",(ctx.channel.id,name,wh.id))
-                sendto = await self.bot.cursor.fetchall("select * from gchat_cinfo where connected_to = %s",(name,))
+                await self.bot.cursor.execute("insert into gchat_cinfo(id,connected_to,wh_id) values(%s,%s,%s)", (ctx.channel.id,name,wh.id))
+                sendto = await self.bot.cursor.fetchall("select * from gchat_cinfo where connected_to = %s", (name,))
                 #sendto = await self.bot.cursor.fetchall()
                 await self.gchat_send(sendto, ctx.channel, f"> グローバルチャットに{ctx.channel.name}({ctx.channel.id})が接続しました！ようこそ！",
                     "[🛠💠]思惟奈ちゃんグローバルチャット接続案内", ctx.guild.me.display_avatar.replace(static_format="png").url)
@@ -135,20 +146,20 @@ class m10s_re_gchat(commands.Cog):
             else:
                 try:
                     m = await ut.wait_message_return(ctx, "グローバルチャットにパスワードを設定する場合は送信してください。(パスワードを設定しない場合はしばらくお待ちください。)",
-                        ctx.author.dm_channel or await ctx.author.create_dm(),tout=30)
+                        ctx.author.dm_channel or await ctx.author.create_dm(), tout=30)
                 except:
                     m = None
                 finally:    
                     await self.bot.cursor.execute("insert into gchat_clist(name,pass) values(%s,%s)", (name, m.content if not m is None else None))
 
                     wh = await ctx.channel.create_webhook(name="sina_gchat_webhook",reason=f"思惟奈ちゃんグローバルチャット:{name}への接続が行われたため")
-                    await self.bot.cursor.execute("insert into gchat_cinfo(id,connected_to,wh_id) values(%s,%s,%s)",(ctx.channel.id,name,wh.id))
+                    await self.bot.cursor.execute("insert into gchat_cinfo(id,connected_to,wh_id) values(%s,%s,%s)", (ctx.channel.id,name,wh.id))
 
                     mch = await self.manage_category.create_text_channel(name=f"gch_{name}",topic=f"接続先名:`{name}`{f',接続パスワード:{m.content}' if not m is None else ''}")
                     mwh = await mch.create_webhook(name="sina_gchat_webhook",reason=f"思惟奈ちゃんグローバルチャット:{name}の作成が行われたため")
-                    await self.bot.cursor.execute("insert into gchat_cinfo(id,connected_to,wh_id) values(%s,%s,%s)",(mch.id,name,mwh.id))
+                    await self.bot.cursor.execute("insert into gchat_cinfo(id,connected_to,wh_id) values(%s,%s,%s)", (mch.id,name,mwh.id))
                     
-                    sendto = await self.bot.cursor.fetchall("select * from gchat_cinfo where connected_to = %s",(name,))
+                    sendto = await self.bot.cursor.fetchall("select * from gchat_cinfo where connected_to = %s", (name,))
                     #sendto = await self.bot.cursor.fetchall()
                     await self.gchat_send(sendto, ctx.channel, f"> グローバルチャットに{ctx.channel.name}({ctx.channel.id})が接続しました！",
                         "[🛠💠]思惟奈ちゃんグローバルチャット接続案内", ctx.guild.me.display_avatar.replace(static_format="png").url)
@@ -541,14 +552,14 @@ class m10s_re_gchat(commands.Cog):
 
                 if m.author.id in self.bot.team_sina:  # チーム☆思惟奈ちゃん
                     spicon = spicon + "🌠"
-                if m.author.bot:
-                    spicon = spicon + "⚙"
                 if upf["sinapartner"]:
                     spicon = spicon + "💠"  # 認証済みアカウント
                 if m.author.id in config.partner_ids:
                     spicon = spicon + "🔗"
                 if upf["gmod"]:
                     spicon = spicon + "🔧"
+                if upf["premium_subscriber"]:
+                    spicon = spicon + "🎫"
                 if upf["gstar"]:
                     spicon = spicon + "🌟"
                 if m.author.id in [404243934210949120,694213580517802054,602680118519005184,525658651713601536,524872647042007067,732893750778527764]:

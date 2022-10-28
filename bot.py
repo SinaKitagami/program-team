@@ -47,7 +47,7 @@ bot = commands.AutoShardedBot(command_prefix="s-", status=discord.Status.invisib
                    enable_debug_events=True
                    )
 bot.owner_id = None
-bot.owner_ids = {404243934210949120, 546682137240403984}
+bot.owner_ids = {404243934210949120, 525658651713601536}
 bot.maintenance = False
 
 

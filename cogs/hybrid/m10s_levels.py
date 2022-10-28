@@ -101,7 +101,7 @@ class levels(commands.Cog):
             
         else:
             await self.bot.cursor.execute("INSERT INTO levels(user_id,guild_id,level,exp,last_level_count,is_level_count_enable) VALUES(%s,%s,%s,%s,%s,%s)",
-                           (m.author.id, m.guild.id, 0, random.randint(5, 15), int(time.time()), True))
+                           (m.author.id, m.guild.id, 0, random.randint(5, 15), int(time.time()), 1))
 
 
     @commands.hybrid_group(name="level", description="レベル関連の機能を表示します。")
@@ -387,7 +387,10 @@ async def level_add(self, ctx, target:Union[commands.MemberConverter,commands.Ro
         return await ctx.reply("> サーバーレベル編集-追加\n　引数が正しくありません。\n　`[メンバーor役職を特定できるもの] [追加するレベル] [オプション:追加する経験値]`")
     for m in targets:
         lvl = await self.bot.cursor.fetchone("select * from levels where guild_id=%s and user_id=%s", (m.guild.id, m.id))
-        await self.bot.cursor.execute("UPDATE levels SET level = %s, exp = %s WHERE guild_id = %s and user_id = %s", (lvl["level"] + lev, lvl["exp"] + exp, m.guild.id, m.id))
+        try:
+            await self.bot.cursor.execute("UPDATE levels SET level = %s, exp = %s WHERE guild_id = %s and user_id = %s", (lvl["level"] + lev, lvl["exp"] + exp, m.guild.id, m.id))
+        except:
+            await self.bot.cursor.execute("INSERT INTO levels(user_id, guild_id, level, exp, last_level_count, is_level_count_enable) VALUE (%s, %s, %s, %s, %s, %s)", (m.id, m.guild.id, lev, exp, int(time.time()), 1))
     await ctx.reply(f"> サーバーレベル編集\n　{len(targets)}人のレベルを編集しました。(レベルがないメンバーには干渉していません。)")
 
 async def level_set(self, ctx, target:Union[commands.MemberConverter,commands.RoleConverter], lev:int, exp:Optional[int]=0):
@@ -399,7 +402,11 @@ async def level_set(self, ctx, target:Union[commands.MemberConverter,commands.Ro
         return await ctx.reply("> サーバーレベル編集-設定\n　引数が正しくありません。\n　`[メンバーor役職を特定できるもの] [設定するレベル] [オプション:設定する経験値]`")
     for m in targets:
         lvl = await self.bot.cursor.fetchone("select * from levels where guild_id=%s and user_id=%s", (m.guild.id, m.id))
-        await self.bot.cursor.execute("UPDATE levels SET level = %s, exp = %s WHERE guild_id = %s and user_id = %s", (lev, exp, m.guild.id, m.id))
+        try:
+            await self.bot.cursor.execute("UPDATE levels SET level = %s, exp = %s WHERE guild_id = %s and user_id = %s", (lev, exp, m.guild.id, m.id))
+        except:
+            await self.bot.cursor.execute("INSERT INTO levels(user_id, guild_id, level, exp, last_level_count, is_level_count_enable) VALUE (%s, %s, %s, %s, %s, %s)", (m.id, m.guild.id, lev, exp, int(time.time()), 1))
+
     await ctx.reply(f"> サーバーレベル編集\n　{len(targets)}人のレベルを設定しました。(レベルがないメンバーには干渉していません。)")
 
 

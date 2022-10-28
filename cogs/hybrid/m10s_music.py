@@ -9,7 +9,7 @@ from discord.ext import commands
 # from youtube_dl import YoutubeDL
 from yt_dlp import YoutubeDL
 
-from apiclient.discovery import build
+from googleapiclient.discovery import build
 
 from typing import Optional
 
@@ -288,8 +288,8 @@ class m10s_music(commands.Cog):
             spac = [i for i in tar.activities if i.name == "Spotify"]
 
             if spac:
-                title = getattr(spac[0], "title",None) or spac[0].details
-                artist = getattr(spac[0], "artist",None) or spac[0].state
+                title = getattr(spac[0], "title", None) or spac[0].details
+                artist = getattr(spac[0], "artist", None) or spac[0].state
                 search_response = self.youtube.search().list(
                     part='id',
                     q=f"{title} {artist}",
@@ -343,7 +343,11 @@ class m10s_music(commands.Cog):
                 return
             sended = False
             for vurl in vurls:
-                vinfo = await self.gvinfo(vurl, getattr(message,"id", None),False)
+                vinfo = await self.gvinfo(vurl, getattr(message, "id", None), False)
+                if vinfo["extractor"] in ["youtube"]:
+                    await sender.send("この動画ソースは、Discordの規約変更の影響でサポートが終了しました。\n各個人でダウンロード→ファイルアップロードを経由して再生することは可能ですが、自己責任となります。")
+                    return
+                    # await sender.send("この動画ソースは、Discordの規約変更の影響で近日中にサポートが打ち切られます。")
                 if vinfo.get("_type", "") == "playlist":
                     tks = []
                     for c in vinfo["entries"]:

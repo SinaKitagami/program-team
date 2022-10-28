@@ -4,7 +4,7 @@ import discord
 from discord.ext import commands
 import json
 import random
-from apiclient.discovery import build
+from googleapiclient.discovery import build
 import wikipedia
 import time
 import asyncio
@@ -154,19 +154,18 @@ class search(commands.Cog):
     @commands.cooldown(1, 10, type=commands.BucketType.user)
     @ut.runnable_check()
     async def youtube(self, ctx, *, word:str):
-        try:
-            async with ctx.message.channel.typing():
-                youtube = build('youtube', 'v3',
-                                developerKey=self.bot.GAPI_TOKEN)
+        #try:
+        async with ctx.message.channel.typing():
+            with build('youtube', 'v3', developerKey=self.bot.GAPI_TOKEN) as youtube:
                 search_response = youtube.search().list(
                     part="id",
                     q=word,
                     type='video'
                 ).execute()
-                id = search_response['items'][0]['id']['videoId']
-                await ctx.send(await ctx._("youtube-found", id))
-        except:
-            await ctx.send(await ctx._("youtube-notfound"))
+            id = search_response['items'][0]['id']['videoId']
+            await ctx.send(await ctx._("youtube-found", id))
+        #except:
+            #await ctx.send(await ctx._("youtube-notfound"))
 
 
 async def setup(bot):
