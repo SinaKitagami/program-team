@@ -28,17 +28,18 @@ class twinotif(commands.Cog):
         if not self.last_id == ret[0]:
             self.last_id = ret[0]
             tweet = ret[1]
-            embed = discord.Embed(description=tweet["text"], color=int(
-                tweet["user"]["profile_background_color"], 16))
-            embed.set_author(name=f'{tweet["user"]["name"]}(@{tweet["user"]["screen_name"]})',
-                                url=f'https://twitter.com/{tweet["user"]["screen_name"]}', icon_url=tweet["user"]["profile_image_url_https"])
-            try:
-                embed.set_image(
-                    url=tweet["entities"]["media"][0]["media_url_https"])
-            except:
-                pass
-            embed.add_field(name="Twitterで見る", value=f'https://twitter.com/{tweet["user"]["screen_name"]}/status/{tweet["id"]}')
-            await self.ch.send(f"{self.mention}",embed=embed)
+            if tweet["text"].startswith("[Status]"):
+                embed = discord.Embed(description=tweet["text"], color=int(
+                    tweet["user"]["profile_background_color"], 16))
+                embed.set_author(name=f'{tweet["user"]["name"]}(@{tweet["user"]["screen_name"]})',
+                                    url=f'https://twitter.com/{tweet["user"]["screen_name"]}', icon_url=tweet["user"]["profile_image_url_https"])
+                try:
+                    embed.set_image(
+                        url=tweet["entities"]["media"][0]["media_url_https"])
+                except:
+                    pass
+                embed.add_field(name="Twitterで見る", value=f'https://twitter.com/{tweet["user"]["screen_name"]}/status/{tweet["id"]}')
+                await self.ch.send(f"{self.mention}",embed=embed)
 
 async def setup(bot):
     await bot.add_cog(twinotif(bot))
