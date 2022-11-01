@@ -12,7 +12,7 @@ class twinotif(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.twi = twitter.Twitter(auth=twitter.OAuth(bot.T_Acs_Token, bot.T_Acs_SToken, bot.T_API_key, bot.T_API_SKey))
-        self.target = "sina_chan_dbot"
+        self.target = "sina_status"
         self.last_id = self.gtwi_fu(self.target)[0]
         self.ch = self.bot.get_channel(1035026381853167676)
         self.mention = "<@&889157660837048350>"
