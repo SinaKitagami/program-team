@@ -232,13 +232,13 @@ class levels(commands.Cog):
                             with open(f"imgs/custom_banner_{u.id}.png", mode="wb")as f:
                                 f.write(bt)
                         cv = Image.open(f"imgs/custom_banner_{u.id}.png", 'r')
+                        cv = cv.resize((640, 235))
                     else:
                         c = await self.bot.cursor.fetchone(
                             "select * from users where id=%s", (u.id,))
                         #c = await self.bot.cursor.fetchone()
                         cb = c["levcard"] or "m@ji☆"
-                        cv = Image.open('imgs/'+cb+'.png', 'r')
-                    cv = cv.resize((640, 235))
+                        cv = Image.open('imgs/'+cb+'.png', 'r') 
                     cv.paste(dlicon, (200, 10))
                     dt = ImageDraw.Draw(cv)
                     fonta = ImageFont.truetype(LEVEL_FONT, 30)
