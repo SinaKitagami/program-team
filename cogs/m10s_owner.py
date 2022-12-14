@@ -8,12 +8,53 @@ import traceback
 import m10s_util as ut
 import textwrap
 
+import config
+import aiohttp
+
 from discord import app_commands
 
 class owner(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+
+    @commands.command()
+    @commands.is_owner()
+    @ut.runnable_check()
+    async def update_role_metadata(self, ctx):
+        json_body = [
+            {
+                "key":"isadmin",
+                "name":"チーム☆思惟奈ちゃん",
+                "description":"思惟奈ちゃん運営である",
+                "type":7
+            },
+            {
+                "key":"isdonate",
+                "name":"思惟奈ちゃんプレミアム会員",
+                "description":"思惟奈ちゃんに寄付を行った、プレミアム会員である",
+                "type":7
+            },
+            {
+                "key":"isverified",
+                "name":"思惟奈ちゃん認証済みアカウント",
+                "description":"思惟奈ちゃん上で、アカウントが認証されている",
+                "type":7
+            },
+            {
+                "key":"gamepoint",
+                "name":"ゲームポイント",
+                "description":"一部ゲームでたまる思惟奈ちゃんゲームポイントを、指定値以上所有している",
+                "type":2
+            }
+        ]
+        headers = {
+            "Authorization": f"Bot {config.BOT_TOKEN}"
+        }
+        async with aiohttp.ClientSession() as session:
+            async with session.put(url=f"https://discord.com/api/v10/applications/{config.DISCORD_CLIENT_ID}/role-connections/metadata", json=json_body, headers=headers) as resp:
+                resp.raise_for_status()
+        await ctx.send("> 設定しました。")
 
     @commands.command()
     @commands.is_owner()
