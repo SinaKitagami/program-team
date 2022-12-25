@@ -87,7 +87,7 @@ async def db_setup():
         #    )
         bot.cursor = database.Database(host=config.DB_HOST, port=3306, user=config.DB_USER, password=config.DB_PW, db=config.DB_NAME)
         #bot.cursor = await db.cursor(aiomysql.DictCursor)
-        
+
     except:
         traceback.print_exc()
 
