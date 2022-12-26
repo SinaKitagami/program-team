@@ -275,6 +275,7 @@ async def on_ready():
             "m10s_role_panel", "m10s_partners", "m10s_remainder", "m10s_set_activity_roles",
 
             "_m10s_api", "takumi_twinotif",
+            "m10s_app_metadata",
             
             # "__part_pjsekai_music_select"
             "slash.pjsekai_music_select", # 思惟奈ちゃんパートナー向け機能-ぱすこみゅ
