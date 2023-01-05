@@ -46,6 +46,13 @@ bot = commands.AutoShardedBot(command_prefix="s-", status=discord.Status.invisib
                    intents=intents,
                    enable_debug_events=True
                    )
+"""bot = commands.Bot(command_prefix="s-", status=discord.Status.invisible,
+                   allowed_mentions=discord.AllowedMentions(everyone=False),
+                   intents=intents,
+                   enable_debug_events=True,
+                   shard_id=0,
+                   shard_count=2
+                   )"""
 bot.owner_id = None
 bot.owner_ids = {404243934210949120, 525658651713601536}
 bot.maintenance = False
@@ -158,13 +165,13 @@ rpcct = 0
 rpcs = [
     "ヘルプ:s-help",
     "アイコン:しおさばきゅーさん",
-    "サーバー数:{0}",
-    "ユーザー数:{1}",
+    "サーバー数:{0}/ユーザー数:{1}",
+    "シャード番号:{2}",
     "作成:チーム☆思惟奈ちゃん",
     "help:s-help",
     "icon:しおさばきゅー",
-    "{0}guilds",
-    "{1}users",
+    "{0}guilds/{1}users",
+    "shard id:{2}",
     "created by team-sina"
 ]
 """db = dropbox.Dropbox(DROP_TOKEN)
@@ -249,7 +256,7 @@ async def cRPC():
         rpcct = 0
     else:
         rpcct = rpcct+1
-    await bot.change_presence(status=discord.Status.online, activity=discord.Game(name=rpcs[rpcct].format(len(bot.guilds), len(bot.users))))
+    await bot.change_presence(status=discord.Status.online, activity=discord.Game(name=rpcs[rpcct].format(len(bot.guilds), len(bot.users), bot.shard_id)))
 
 
 
@@ -274,7 +281,7 @@ async def on_ready():
             "m10s_auth_wiz",
             "m10s_role_panel", "m10s_partners", "m10s_remainder", "m10s_set_activity_roles",
 
-            "_m10s_api", "takumi_twinotif",
+            "m10s_api", "takumi_twinotif",
             "m10s_app_metadata",
             
             # "__part_pjsekai_music_select"
@@ -283,7 +290,7 @@ async def on_ready():
             "slash.m10s_messageinfo", # -> メッセージコマンドでの実行
 
             "hybrid.m10s_re_gchat",
-            "hybrid._m10s_quick_cmd",
+            "hybrid.m10s_quick_cmd",
             "hybrid.m10s_levels",
             "hybrid.m10s_music",
             "hybrid.info_check",
@@ -314,9 +321,16 @@ async def on_ready():
     # グローバルコマンド
     await bot.tree.sync()
 
+    boot_info_channel_id = 595526013031546890
+
     try:
-        ch = bot.get_channel(595526013031546890)
-        e=discord.Embed(title="起動時インフォメーション", description=f"認識ユーザー数:{len(bot.users)}\n認識サーバー数:{len(bot.guilds)}\n認識チャンネル数:{len([c for c in bot.get_all_channels()])}\ndiscord.py ver_{discord.__version__}", color=bot.ec)
+        ch = bot.get_channel(boot_info_channel_id)
+        if ch == None:
+            try:
+                await bot.fetch_channel(boot_info_channel_id)
+            except:
+                return
+        e=discord.Embed(title="起動時インフォメーション", description=f"シャードID:{bot.shard_id}\n認識ユーザー数:{len(bot.users)}\n認識サーバー数:{len(bot.guilds)}\n認識チャンネル数:{len([c for c in bot.get_all_channels()])}\ndiscord.py ver_{discord.__version__}", color=bot.ec)
         await ch.send(f"{bot.get_emoji(653161518531215390)}on_ready!", embed=e)
         if txt:
             await ch.send(embed=embed)
