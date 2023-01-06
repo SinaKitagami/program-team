@@ -82,7 +82,7 @@ class jyanken(commands.Cog):
             hands = [event.content[1], random.randint(0, 2)]  # [ユーザー, Bot]
             if hands[0] == hands[1]:
                 await event.content[0].response.edit_message(embed=discord.Embed(
-                    title="ジャンケン", description=f"ポン!{EMOJIS[hands[1]]}\n{random.choice(self.RESULT_PATTERNS[0])}",
+                    title="ジャンケン", description=f"ポン!{self.EMOJIS[hands[1]]}\n{random.choice(self.RESULT_PATTERNS[0])}",
                     color=self.bot.ec
                 ))
                 event.set()
@@ -94,7 +94,7 @@ class jyanken(commands.Cog):
                 result = random.choice(self.RESULT_PATTERNS[2])  # ユーザーの負け
 
             await event.content[0].response.edit_message(embed=discord.Embed(
-                title="ジャンケン", description=f"ポン!{EMOJIS[hands[1]]}\n{result}",
+                title="ジャンケン", description=f"ポン!{self.EMOJIS[hands[1]]}\n{result}",
                 color=self.bot.ec
             ))
             view.closed = True
