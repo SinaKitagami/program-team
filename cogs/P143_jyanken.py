@@ -41,12 +41,12 @@ class JankenView(discord.ui.View):
 
     @discord.ui.button(emoji="✊")
     async def gu(self, interaction: discord.Interaction, _):
-        self.event.content = (interaction, 0)
+        self.event.content = (interaction, 1)
         self.event.set()
 
     @discord.ui.button(emoji="✌️")
     async def tyoki(self, interaction: discord.Interaction, _):
-        self.event.content = (interaction, 0)
+        self.event.content = (interaction, 2)
         self.event.set()
 
 
@@ -85,7 +85,7 @@ class jyanken(commands.Cog):
                     title="ジャンケン", description=f"ポン!{self.EMOJIS[hands[1]]}\n{random.choice(self.RESULT_PATTERNS[0])}",
                     color=self.bot.ec
                 ))
-                event.set()
+                event.clear()
                 continue
 
             if (hands[0] + 1) % 3 == hands[1]:
@@ -96,7 +96,7 @@ class jyanken(commands.Cog):
             await event.content[0].response.edit_message(embed=discord.Embed(
                 title="ジャンケン", description=f"ポン!{self.EMOJIS[hands[1]]}\n{result}",
                 color=self.bot.ec
-            ))
+            ), view=None)
             view.closed = True
             return
 
