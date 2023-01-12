@@ -557,7 +557,7 @@
     "hash-chmention": "Mentions:",
     "hash-chname": "Name:",
     "hash-link": "Jump to this message",
-    "only-mii-10": "This command can be used only owner of me. You can't run this command.",
+    "only-mii-10": "This command can be used only system administrators. You can't run this command.",
     "pls-arg": "Some arguments are missing! Please check what argument this command need with help.",
     "team_sina-chan": "🌠Team-Sina",
     "partner_guild_o": "🔗Owner of partner server",
