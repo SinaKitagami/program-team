@@ -87,7 +87,7 @@ async def db_setup():
         #    )
         bot.cursor = database.Database(host=config.DB_HOST, port=3306, user=config.DB_USER, password=config.DB_PW, db=config.DB_NAME)
         #bot.cursor = await db.cursor(aiomysql.DictCursor)
-        
+
     except:
         traceback.print_exc()
 
@@ -275,6 +275,7 @@ async def on_ready():
             "m10s_role_panel", "m10s_partners", "m10s_remainder", "m10s_set_activity_roles",
 
             "_m10s_api", "takumi_twinotif",
+            "m10s_app_metadata",
             
             # "__part_pjsekai_music_select"
             "slash.pjsekai_music_select", # 思惟奈ちゃんパートナー向け機能-ぱすこみゅ
@@ -670,8 +671,9 @@ async def on_command_error(ctx, error):
 
     else:
         # その他例外
+        from traceback import format_exception as f_exc
         ch = bot.get_channel(652127085598474242)
-        msg = await ch.send(embed=ut.getEmbed("エラーログ", f"コマンド:`{ctx.command.full_parent_name}`\n```{str(error)}```", bot.ec, f"サーバー", ctx.guild.name, "実行メンバー", ctx.author.name, "メッセージ内容", ctx.message.content or "(本文なし)"))
+        msg = await ch.send(embed=ut.getEmbed("エラーログ", f"コマンド:`{ctx.command.full_parent_name}`\n```py\n{f_exc(error)}```", bot.ec, "サーバー", ctx.guild.name, "実行メンバー", ctx.author.name, "メッセージ内容", ctx.message.content or "(本文なし)"))
         await ctx.send(embed=ut.getEmbed(await ctx._("com-error-t"), await ctx._("cmd-other-d", "詳細は無効化されています…。"), bot.ec, "error id", msg.id, "サポートが必要ですか？", "[サポートサーバー](https://discord.gg/vtn2V3v)に参加して、「view-思惟奈ちゃんch」役職をつけて質問してみましょう！"))
 
 

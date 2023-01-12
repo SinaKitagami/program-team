@@ -8,6 +8,9 @@ import traceback
 import m10s_util as ut
 import textwrap
 
+import config
+import aiohttp
+
 from discord import app_commands
 
 class owner(commands.Cog):

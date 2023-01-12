@@ -1,83 +1,104 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import annotations
+
 import discord
 from discord.ext import commands
+from typing import Any
 import random
 import asyncio
 
-from discord import app_commands
-
 import m10s_util as ut
+
+# このプログラムはPoteto143氏によって作成され、yaakiyuによって改善されています。
+
+
+class ContentEvent(asyncio.Event):
+    content: Any
+
+
+class JankenView(discord.ui.View):
+    msg: discord.Message
+
+    def __init__(self, event: ContentEvent):
+        super().__init__(timeout=15.0)
+        self.event = event
+        self.closed = False
+
+    async def on_timeout(self):
+        if self.closed:
+            return
+        await self.msg.edit(view=None, embed=discord.Embed(
+            title="ジャンケン", description="15秒間操作がされなかったのでゲームを終了しました。",
+            color=0xff0000
+        ))
+        self.event.set()
+
+    @discord.ui.button(emoji="🖐")
+    async def pa(self, interaction: discord.Interaction, _):
+        self.event.content = (interaction, 0)
+        self.event.set()
+
+    @discord.ui.button(emoji="✊")
+    async def gu(self, interaction: discord.Interaction, _):
+        self.event.content = (interaction, 1)
+        self.event.set()
+
+    @discord.ui.button(emoji="✌️")
+    async def tyoki(self, interaction: discord.Interaction, _):
+        self.event.content = (interaction, 2)
+        self.event.set()
+
 
 class jyanken(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
 
+    EMOJIS = ["🖐", "✊", "✌️"]
+
+    RESULT_PATTERNS = [
+        ["あいこで...", "あいこで...", "まだまだ！あいこで..."],
+        ["残念、負けちゃった...", "あーあ、負けちゃった。", "負けた、くやしい！"],
+        ["やった、私の勝ち！", "私の勝ち、残念でした！", "勝った！また挑戦してね！"]
+    ]
+
     @commands.hybrid_command(name="jyanken", description="じゃんけんできます。")
     @commands.bot_has_permissions(manage_messages=True)
     @ut.runnable_check()
-    async def command(self, ctx,):
-        def win(hand):
-            embed = discord.Embed(
-                title="ジャンケン", description="ポイ!" + hand + "\nやった、私の勝ちだね。", color=0xffff00)
-            return embed
-
-        def lose(hand):
-            embed = discord.Embed(
-                title="ジャンケン", description="ポイ!" + hand + "\nあれ、負けちゃった。", color=0xffff00)
-            return embed
-
-        def aiko(hand):
-            embed = discord.Embed(
-                title="ジャンケン", description="ポイ!" + hand + "\nあいこで･･･", color=0xffff00)
-            return embed
+    async def command(self, ctx):
         embed = discord.Embed(
-            title="ジャンケン", description="ジャンケンをするよ。\n最初はグー、ジャンケン…", color=0xffff00)
-        msg = await ctx.send(embed=embed)
-        await msg.add_reaction("\N{RAISED FIST}")
-        await msg.add_reaction("\N{VICTORY HAND}")
-        await msg.add_reaction("\N{RAISED HAND WITH FINGERS SPLAYED}")
-        while(True):
-            try:
-                reaction, user = await self.bot.wait_for("reaction_add", check=lambda r, u: r.message.id == msg.id and u.id == ctx.author.id and (r.emoji == "\N{RAISED FIST}" or r.emoji == "\N{VICTORY HAND}" or r.emoji == "\N{RAISED HAND WITH FINGERS SPLAYED}"), timeout=15)
-            except asyncio.TimeoutError:
-                embed = discord.Embed(
-                    title="ジャンケン", description="15秒間操作がされなかったのでゲームを終了しました。", color=0xffff00)
-                await ctx.send(embed=embed)
-                break
+            title="ジャンケン", description="ジャンケンをするよ。\n最初はグー、ジャンケン…",
+            color=0xffff00
+        )
+        event = ContentEvent()
+        view = JankenView(event)
+        msg = await ctx.send(embed=embed, view=view)
+        view.msg = msg
+
+        while True:
+            await event.wait()
+
+            hands = [event.content[1], random.randint(0, 2)]  # [ユーザー, Bot]
+            if hands[0] == hands[1]:
+                await event.content[0].response.edit_message(embed=discord.Embed(
+                    title="ジャンケン", description=f"ポン!{self.EMOJIS[hands[1]]}\n{random.choice(self.RESULT_PATTERNS[0])}",
+                    color=self.bot.ec
+                ))
+                event.clear()
+                continue
+
+            if (hands[0] + 1) % 3 == hands[1]:
+                result = random.choice(self.RESULT_PATTERNS[1])  # ユーザーの勝ち
             else:
-                hand = random.randint(0, 2)
-                if reaction.emoji == "\N{RAISED FIST}":
-                    if hand == 0:
-                        await msg.edit(embed=aiko("\N{RAISED FIST}"))
-                        await msg.remove_reaction("\N{RAISED FIST}", ctx.author)
-                    elif hand == 1:
-                        await msg.edit(embed=lose("\N{VICTORY HAND}"))
-                        break
-                    elif hand == 2:
-                        await msg.edit(embed=win("\N{RAISED HAND WITH FINGERS SPLAYED}"))
-                        break
-                elif reaction.emoji == "\N{VICTORY HAND}":
-                    if hand == 0:
-                        await msg.edit(embed=win("\N{RAISED FIST}"))
-                        break
-                    elif hand == 1:
-                        await msg.edit(embed=aiko("\N{VICTORY HAND}"))
-                        await msg.remove_reaction("\N{VICTORY HAND}", ctx.author)
-                    elif hand == 2:
-                        await msg.edit(embed=lose("\N{RAISED HAND WITH FINGERS SPLAYED}"))
-                        break
-                elif reaction.emoji == "\N{RAISED HAND WITH FINGERS SPLAYED}":
-                    if hand == 0:
-                        await msg.edit(embed=lose("\N{RAISED FIST}"))
-                        break
-                    elif hand == 1:
-                        await msg.edit(embed=win("\N{VICTORY HAND}"))
-                        break
-                    elif hand == 2:
-                        await msg.edit(embed=aiko("\N{RAISED HAND WITH FINGERS SPLAYED}"))
-                        await msg.remove_reaction("\N{RAISED HAND WITH FINGERS SPLAYED}", ctx.author)
+                result = random.choice(self.RESULT_PATTERNS[2])  # ユーザーの負け
+
+            await event.content[0].response.edit_message(embed=discord.Embed(
+                title="ジャンケン", description=f"ポン!{self.EMOJIS[hands[1]]}\n{result}",
+                color=self.bot.ec
+            ), view=None)
+            view.closed = True
+            return
 
 
 async def setup(bot):
