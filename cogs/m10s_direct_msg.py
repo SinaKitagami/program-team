@@ -21,7 +21,7 @@ class m10s_direct_msg(commands.Cog):
     @commands.command()
     @commands.is_owner()
     @ut.runnable_check()
-    async def fetch_dm(self, ctx, target_id:int, *, content:str):
+    async def send_dm(self, ctx, target_id:int, *, content:str):
         user = self.bot.get_user(target_id)
         if user:
             m  = await ctx.author.send(f"`{str(user)}`に```\n{content}```と送信してもよろしいですか？")
