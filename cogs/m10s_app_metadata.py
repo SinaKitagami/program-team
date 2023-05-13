@@ -32,8 +32,8 @@ class m10s_app_metadata(commands.Cog):
             {
                 "key":"isdonate",
                 "name":"思惟奈ちゃんプレミアム会員",
-                "description":"思惟奈ちゃんプレミアム会員のランクが2(500円/月)以上である",
-                "type":7
+                "description":"思惟奈ちゃんプレミアム会員のランク",
+                "type":2
             },
             {
                 "key":"isverified",
