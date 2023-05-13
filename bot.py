@@ -295,7 +295,8 @@ async def on_ready():
             "hybrid.m10s_music",
             "hybrid.info_check",
             "hybrid.m10s_help",
-            "m10s_guild_log"
+            "m10s_guild_log",
+            "m10s_direct_msg"
             ]
     
     embed = discord.Embed(title="読み込みに失敗したCog", color=bot.ec)
