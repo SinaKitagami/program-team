@@ -100,7 +100,7 @@ class info(commands.Cog):
     @commands.hybrid_command(name="team_sina-chan", description="チーム☆思惟奈ちゃんメンバーを表示します。")
     @ut.runnable_check()
     async def view_teammember(self, ctx):
-        await ctx.send(embed=ut.getEmbed(await ctx._("team_sina-chan"), "\n".join([self.bot.get_user(i).name for i in self.bot.team_sina])))
+        await ctx.send(embed=ut.getEmbed(await ctx._("team_sina-chan"), "\n".join([await self.bot.fetch_user(i).name for i in self.bot.team_sina])))
 
     @commands.command()
     @ut.runnable_check()

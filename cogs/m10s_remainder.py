@@ -81,8 +81,8 @@ class m10s_remainder(commands.Cog):
                     return e
 
                 msg = await ctx.send(embed=get_page(page))
-                await msg.add_reaction(self.bot.get_emoji(653161518195671041))
-                await msg.add_reaction(self.bot.get_emoji(653161518170505216))
+                await msg.add_reaction(self.bot.create_emoji_str("s_move_left",653161518195671041))
+                await msg.add_reaction(self.bot.create_emoji_str('s_move_right',653161518170505216))
 
                 while True:
                     try:
@@ -93,12 +93,12 @@ class m10s_remainder(commands.Cog):
                         await msg.remove_reaction(r, u)
                     except:
                         pass
-                    if str(r) == str(self.bot.get_emoji(653161518170505216)):
+                    if str(r) == str(self.bot.create_emoji_str('s_move_right',653161518170505216)):
                         if page == pmax:
                             page = 0
                         else:
                             page = page + 1
-                    elif str(r) == str(self.bot.get_emoji(653161518195671041)):
+                    elif str(r) == str(self.bot.create_emoji_str("s_move_left",653161518195671041)):
                         if page == 0:
                             page = pmax
                         else:

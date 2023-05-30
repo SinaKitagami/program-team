@@ -66,16 +66,16 @@ class owner(commands.Cog):
     @commands.check(is_evalable)
     @ut.runnable_check()
     async def sql(self, ctx, *, query):
-        await ctx.message.add_reaction(self.bot.get_emoji(653161518346534912))
+        await ctx.message.add_reaction(self.bot.create_emoji_str('s_gch_sending',653161518346534912,True))
         try:
             ret = await self.bot.cursor.fetchall(query)
         except Exception as exc:
-            await ctx.message.remove_reaction(self.bot.get_emoji(653161518346534912), self.bot.user)
+            await ctx.message.remove_reaction(self.bot.create_emoji_str('s_gch_sending',653161518346534912,True), self.bot.user)
             await ctx.message.add_reaction("❌")
             return await ctx.author.send(embed=discord.Embed(title="sql's Error", description=f"```py\n{exc}\n```", color=self.bot.ec))
         else:
-            await ctx.message.remove_reaction(self.bot.get_emoji(653161518346534912), self.bot.user)
-            await ctx.message.add_reaction(self.bot.get_emoji(653161518103265291))
+            await ctx.message.remove_reaction(self.bot.create_emoji_str('s_gch_sending',653161518346534912,True), self.bot.user)
+            await ctx.message.add_reaction(self.bot.create_emoji_str('s_check',653161518103265291))
             
             if ret:
                 await ctx.send(f"```\n{ret}\n```")
@@ -88,7 +88,7 @@ class owner(commands.Cog):
     async def aev(self, ctx, *, cmd):
         try:
             await eval(cmd)
-            await ctx.message.add_reaction(self.bot.get_emoji(653161518103265291))
+            await ctx.message.add_reaction(self.bot.create_emoji_str('s_check',653161518103265291))
         except:
             await ctx.send(embed=discord.Embed(title="awaitEvalエラー", description=traceback.format_exc(0)))
 
@@ -96,7 +96,7 @@ class owner(commands.Cog):
     @commands.check(is_evalable)
     @ut.runnable_check()
     async def eval_(self, ctx, *, cmd):
-        await ctx.message.add_reaction(self.bot.get_emoji(653161518346534912))
+        await ctx.message.add_reaction(self.bot.create_emoji_str('s_gch_sending',653161518346534912,True))
         rt = "\n"
         if cmd.startswith("```py"):
             cmd = cmd[5:-3]
@@ -108,15 +108,15 @@ class owner(commands.Cog):
         try:
             exec(txt)
             rtn = await eval("evdf(ctx,self.bot)")
-            await ctx.message.remove_reaction(self.bot.get_emoji(653161518346534912), self.bot.user)
-            await ctx.message.add_reaction(self.bot.get_emoji(653161518103265291))
+            await ctx.message.remove_reaction(self.bot.create_emoji_str('s_gch_sending',653161518346534912,True), self.bot.user)
+            await ctx.message.add_reaction(self.bot.create_emoji_str('s_check',653161518103265291))
             if rtn:
                 if isinstance(rtn,discord.Embed):
                     await ctx.send(embed=rtn)
                 else:
                     await ctx.send(f"```{rtn}```")
         except:
-            await ctx.message.remove_reaction(self.bot.get_emoji(653161518346534912), self.bot.user)
+            await ctx.message.remove_reaction(self.bot.create_emoji_str('s_gch_sending',653161518346534912,True), self.bot.user)
             await ctx.message.add_reaction("❌")
             await ctx.author.send(embed=discord.Embed(title="eval's Error", description=f"```{traceback.format_exc(3)}```", color=self.bot.ec))
 
@@ -144,8 +144,8 @@ class owner(commands.Cog):
         embed.set_footer(text=f"{page+1}/{gcount+1}")
 
         msg = await ctx.send(embed=embed)
-        await msg.add_reaction(self.bot.get_emoji(653161518195671041))
-        await msg.add_reaction(self.bot.get_emoji(653161518170505216))
+        await msg.add_reaction(self.bot.create_emoji_str("s_move_left",653161518195671041))
+        await msg.add_reaction(self.bot.create_emoji_str('s_move_right',653161518170505216))
         while True:
             try:
                 r, u = await self.bot.wait_for("reaction_add", check=lambda r, u: r.message.id == msg.id and u.id == ctx.message.author.id, timeout=30)
@@ -155,13 +155,13 @@ class owner(commands.Cog):
                 await msg.remove_reaction(r, u)
             except:
                 pass
-            if str(r) == str(self.bot.get_emoji(653161518170505216)):
+            if str(r) == str(self.bot.create_emoji_str('s_move_right',653161518170505216)):
                 if page == gcount:
                     page = 0
                 else:
                     page = page + 1
 
-            elif str(r) == str(self.bot.get_emoji(653161518195671041)):
+            elif str(r) == str(self.bot.create_emoji_str("s_move_left",653161518195671041)):
                 if page == 0:
                     page = gcount
                 else:
@@ -283,7 +283,7 @@ class owner(commands.Cog):
               ctx.message.content)
         await self.bot.cursor.execute(
             "UPDATE guilds SET verified = %s WHERE id = %s", (bl, gid))
-        await ctx.send(f"サーバー`{self.bot.get_guild(gid)}`の認証状態を{str(bl)}にしました。")
+        await ctx.send(f"サーバー`{await self.bot.fetch_guild(gid)}`の認証状態を{str(bl)}にしました。")
 
 
     @commands.group()
@@ -306,7 +306,7 @@ class owner(commands.Cog):
         uf = self.bot.features.get(uid,None)
         if uf and feature in uf:
             self.bot.features[uid].remove(feature)
-        await ctx.message.add_reaction(self.bot.get_emoji(653161518103265291))
+        await ctx.message.add_reaction(self.bot.create_emoji_str('s_check',653161518103265291))
 
     @manage_features.command(name="add",description="feature追加")
     @app_commands.describe(uid="ユーザーのid")
@@ -318,7 +318,7 @@ class owner(commands.Cog):
             self.bot.features[uid].append(feature)
         else:
             self.bot.features[uid] = [feature]
-        await ctx.message.add_reaction(self.bot.get_emoji(653161518103265291))
+        await ctx.message.add_reaction(self.bot.create_emoji_str('s_check',653161518103265291))
 
     @manage_features.command(name="reload",description="feature再読み込み")
     @ut.runnable_check()
@@ -327,7 +327,7 @@ class owner(commands.Cog):
         import config
         importlib.reload(config)
         self.bot.features = config.sp_features
-        await ctx.message.add_reaction(self.bot.get_emoji(653161518103265291))
+        await ctx.message.add_reaction(self.bot.create_emoji_str('s_check',653161518103265291))
 
 async def setup(bot):
     await bot.add_cog(owner(bot))
