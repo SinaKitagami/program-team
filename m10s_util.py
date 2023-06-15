@@ -102,7 +102,7 @@ def runnable_check():
             if ctx.client.comlocks.get(str(ctx.guild.id), []):
                 if ctx.command.name in ctx.bot.comlocks[str(ctx.guild.id)] and not ctx.author.guild_permissions.administrator and ctx.author.id != 404243934210949120: # comlockされているかどうか
                     return False
-        if ctx.command.name in ctx.bot.features[0] and (not ctx.guild.id in ctx.bot.team_sina): # グローバルfeatureでロックされているかどうか(メンテナンス)
+        if ctx.command.name in ctx.bot.features[0] and (not ctx.author.id in ctx.bot.team_sina): # グローバルfeatureでロックされているかどうか(メンテナンス)
             return False
         elif ctx.command.name in ctx.bot.features.get(ctx.author.id, []) or "cu:cmd" in ctx.bot.features.get(ctx.author.id, []): # featuresでのユーザーごとのコマンドロック
             return False

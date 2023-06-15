@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 import asyncio
 from dateutil.relativedelta import relativedelta as rdelta
 import traceback
@@ -32,8 +32,8 @@ class m10s_app_metadata(commands.Cog):
             {
                 "key":"isdonate",
                 "name":"思惟奈ちゃんプレミアム会員",
-                "description":"思惟奈ちゃんに寄付を行った、プレミアム会員である",
-                "type":7
+                "description":"思惟奈ちゃんプレミアム会員のランク",
+                "type":2
             },
             {
                 "key":"isverified",
@@ -58,6 +58,7 @@ class m10s_app_metadata(commands.Cog):
 
     @commands.hybrid_command(description="あなたの接続されているアプリメタデータを更新します。")
     async def sync_metadata(self, ctx:commands.Context):
+        await ctx.defer(ephemeral=True)
         upf = await self.bot.cursor.fetchone("select oauth_ref_token from users where id=%s", (ctx.author.id,))
         if upf["oauth_ref_token"]:
             try:
@@ -67,7 +68,7 @@ class m10s_app_metadata(commands.Cog):
             else:
                 await ctx.send("完了しました。", ephemeral=True)
         else:
-            await ctx.send("失敗しました。\nまだアプリ連携が行われていません。linked-rolesメニューから、思惟奈ちゃんの連携が有効なロールを探して連携してください。", ephemeral=True)
+            await ctx.send("失敗しました。\nまだアプリ連携が行われていません。Linked Rolesメニューから、思惟奈ちゃんの連携が有効なロールを探して連携してください。", ephemeral=True)
 
 
 async def setup(bot):

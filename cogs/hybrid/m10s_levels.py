@@ -388,9 +388,9 @@ async def level_add(self, ctx, target:Union[commands.MemberConverter,commands.Us
         return await ctx.reply("> サーバーレベル編集-追加\n　引数が正しくありません。\n　`[メンバーor役職を特定できるもの] [追加するレベル] [オプション:追加する経験値]`")
     for m in targets:
         lvl = await self.bot.cursor.fetchone("select * from levels where guild_id=%s and user_id=%s", (ctx.guild.id, m.id))
-        try:
+        if lvl:
             await self.bot.cursor.execute("UPDATE levels SET level = %s, exp = %s WHERE guild_id = %s and user_id = %s", (lvl["level"] + lev, lvl["exp"] + exp, ctx.guild.id, m.id))
-        except:
+        else:
             await self.bot.cursor.execute("INSERT INTO levels(user_id, guild_id, level, exp, last_level_count, is_level_count_enable) VALUE (%s, %s, %s, %s, %s, %s)", (m.id, ctx.guild.id, lev, exp, int(time.time()), 1))
     await ctx.reply(f"> サーバーレベル編集\n　{len(targets)}人のレベルを編集しました。(レベルがないメンバーには干渉していません。)")
 
@@ -403,9 +403,9 @@ async def level_set(self, ctx, target:Union[commands.MemberConverter,commands.Us
         return await ctx.reply("> サーバーレベル編集-設定\n　引数が正しくありません。\n　`[メンバーor役職を特定できるもの] [設定するレベル] [オプション:設定する経験値]`")
     for m in targets:
         lvl = await self.bot.cursor.fetchone("select * from levels where guild_id=%s and user_id=%s", (ctx.guild.id, m.id))
-        try:
+        if lvl:
             await self.bot.cursor.execute("UPDATE levels SET level = %s, exp = %s WHERE guild_id = %s and user_id = %s", (lev, exp, ctx.guild.id, m.id))
-        except:
+        else:
             await self.bot.cursor.execute("INSERT INTO levels(user_id, guild_id, level, exp, last_level_count, is_level_count_enable) VALUE (%s, %s, %s, %s, %s, %s)", (m.id, ctx.guild.id, lev, exp, int(time.time()), 1))
 
     await ctx.reply(f"> サーバーレベル編集\n　{len(targets)}人のレベルを設定しました。(レベルがないメンバーには干渉していません。)")

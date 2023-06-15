@@ -125,6 +125,7 @@ class other(commands.Cog):
         embed.add_field(name="全ユーザー数", value=len(self.bot.users))
         embed.add_field(name="全チャンネル", value=len(
             [i for i in self.bot.get_all_channels()]))
+        embed.add_field(name="シャードステータス", value=f"このサーバーのシャード番号:{self.bot.shard_id}(全{self.bot.shard_count}個)")
         await ctx.send(embed=embed)
 
     @commands.hybrid_command(name="return_text",aliases=["rt"], description="オウム返しします。")

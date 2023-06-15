@@ -19,7 +19,7 @@ my_module/dpy_interaction.py
 ment.py
 .gitignore
 trans_db.py
-cogs/_m10s_api.py
+cogs/m10s_api.py
 cogs/slash/pjsekai_music_select.py
 pjsekai_musics.json
 api_cf_ssl/

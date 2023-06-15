@@ -33,6 +33,7 @@ class search(commands.Cog):
     async def search_commands(self,ctx):
         pass
 
+    """ -> twitter APIの仕様変更によるもの
     @search_commands.command(aliases=["twisearch", "twitterで検索して"], description="Twitter検索")
     @app_commands.describe(word="検索文字列")
     @commands.cooldown(1, 15, type=commands.BucketType.user)
@@ -57,7 +58,7 @@ class search(commands.Cog):
             await ctx.send(embed=embed)
         except:
             await ctx.send(await ctx._("twi-error"))
-            # await ctx.send(embed=ut.getEmbed("traceback",traceback.format_exc(3)))
+            # await ctx.send(embed=ut.getEmbed("traceback",traceback.format_exc(3)))"""
 
     @search_commands.command(aliases=["jwp", "次の言葉でwikipedia調べて"],description="wikipedia検索")
     @app_commands.describe(word="検索文字列")
