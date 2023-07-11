@@ -23,12 +23,12 @@ class m10s_partner(commands.Cog):
         pmax = len(self.partner_ids)-1
         page = 0
         
-        def get_page(page):
+        async def get_page(page):
             return discord.Embed(title=f"思惟奈ちゃんパートナー:{await self.bot.fetch_user(self.partner_ids[page])}のご紹介",
             description=self.partners[page],
             color=self.bot.ec)
 
-        msg = await ctx.send(embed=get_page(page))
+        msg = await ctx.send(embed=await get_page(page))
         await msg.add_reaction(self.bot.create_emoji_str("s_move_left",653161518195671041))
         await msg.add_reaction(self.bot.create_emoji_str('s_move_right',653161518170505216))
 
@@ -51,7 +51,7 @@ class m10s_partner(commands.Cog):
                     page = pmax
                 else:
                     page = page - 1
-            await msg.edit(embed=get_page(page))
+            await msg.edit(embed=await get_page(page))
 
 
 
