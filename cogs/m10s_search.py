@@ -125,8 +125,8 @@ class search(commands.Cog):
             embeds.append(e)
         page=0
         msg = await ctx.send(embed=embeds[0])
-        await msg.add_reaction(self.bot.get_emoji(653161518195671041))
-        await msg.add_reaction(self.bot.get_emoji(653161518170505216))
+        await msg.add_reaction(self.bot.create_emoji_str("s_move_left",653161518195671041))
+        await msg.add_reaction(self.bot.create_emoji_str('s_move_right',653161518170505216))
         while True:
             try:
                 r, u = await self.bot.wait_for("reaction_add", check=lambda r, u: r.message.id == msg.id and u.id == ctx.message.author.id, timeout=30)
@@ -136,12 +136,12 @@ class search(commands.Cog):
                 await msg.remove_reaction(r, u)
             except:
                 pass
-            if str(r) == str(self.bot.get_emoji(653161518170505216)):
+            if str(r) == str(self.bot.create_emoji_str('s_move_right',653161518170505216)):
                 if page == 4:
                     page = 0
                 else:
                     page = page + 1
-            elif str(r) == str(self.bot.get_emoji(653161518195671041)):
+            elif str(r) == str(self.bot.create_emoji_str("s_move_left",653161518195671041)):
                 if page == 0:
                     page = 4
                 else:

@@ -25,12 +25,10 @@ class info(commands.Cog):
     @commands.command(name="dguild")
     @ut.runnable_check()
     async def serverinfo(self, ctx, sid=None):
-        print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
-              ctx.message.content)
         if sid is not None:
-            sevinfo = self.bot.get_guild(int(str(sid)))
+            sevinfo: discord.Guild = self.bot.get_guild(int(str(sid)))
         else:
-            sevinfo = ctx.message.guild
+            sevinfo: discord.Guild = ctx.message.guild
         
         if sevinfo is None:
             return await ctx.send("そのサーバーに思惟奈ちゃんがいるかどうか確認してください。")
@@ -38,15 +36,14 @@ class info(commands.Cog):
         try:
             embed = discord.Embed(title=await ctx._(
                 "serverinfo-name"), description=sevinfo.name, color=self.bot.ec)
-            if sevinfo.icon_url is not None:
+            if sevinfo.icon is not None:
                 embed.set_thumbnail(
                     url=sevinfo.icon.replace(static_format='png'))
             embed.add_field(name=await ctx._("serverinfo-role"),
                             value=len(sevinfo.roles))
             embed.add_field(name=await ctx._("serverinfo-emoji"),
                             value=len(sevinfo.emojis))
-            embed.add_field(name=await ctx._("serverinfo-country"),
-                            value=str(sevinfo.region))
+
             bm = 0
             ubm = 0
             for m in sevinfo.members:
@@ -100,7 +97,7 @@ class info(commands.Cog):
     @commands.hybrid_command(name="team_sina-chan", description="チーム☆思惟奈ちゃんメンバーを表示します。")
     @ut.runnable_check()
     async def view_teammember(self, ctx):
-        await ctx.send(embed=ut.getEmbed(await ctx._("team_sina-chan"), "\n".join([self.bot.get_user(i).name for i in self.bot.team_sina])))
+        await ctx.send(embed=ut.getEmbed(await ctx._("team_sina-chan"), "\n".join([(await self.bot.fetch_user(i)).name for i in self.bot.team_sina])))
 
     @commands.command()
     @ut.runnable_check()

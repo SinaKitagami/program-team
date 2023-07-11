@@ -33,7 +33,7 @@ class other(commands.Cog):
         m = await ctx.channel.fetch_message(id)
         e = discord.Embed(description=text, color=self.bot.ec)
         e.add_field(name=f"引用投稿(引用された投稿の送信者:{m.author.display_name})",
-                    value=f"{m.content}\n[{self.bot.get_emoji(653161518451392512)} この投稿に飛ぶ]({m.jump_url})")
+                    value=f"{m.content}\n[{self.bot.create_emoji_str('s_link_jump',653161518451392512)} この投稿に飛ぶ]({m.jump_url})")
         e.set_author(name=ctx.author.display_name,
                      icon_url=ctx.author.display_avatar.replace(static_format='png'))
         await ctx.send(embed=e)
@@ -122,8 +122,8 @@ class other(commands.Cog):
             "status-os"), value=f"{platform.system()} {platform.release()}({platform.version()})")
         embed.add_field(
             name="メモリ", value=f"全てのメモリ容量:{allmem}GB\n使用量:{used}GB({memparcent}%)\n空き容量{ava}GB({100-memparcent}%)")
-        embed.add_field(name="全ユーザー数", value=len(self.bot.users))
-        embed.add_field(name="全チャンネル", value=len(
+        embed.add_field(name="シャード内ユーザー数", value=len(self.bot.users))
+        embed.add_field(name="シャード内チャンネル数", value=len(
             [i for i in self.bot.get_all_channels()]))
         embed.add_field(name="シャードステータス", value=f"このサーバーのシャード番号:{self.bot.shard_id}(全{self.bot.shard_count}個)")
         await ctx.send(embed=embed)
@@ -150,7 +150,7 @@ class other(commands.Cog):
         if await ctx.user_lang() == "ja":
             if await ctx._(f"er-{it}") == "":
                 await ctx.send(await ctx._("er-?"))
-                await self.bot.get_channel(993565802030698627).send(f"> 思惟奈のわからない絵文字があったよ。`{str(emoji)}`")
+                await self.bot.fetch_channel(993565802030698627).send(f"> 思惟奈のわからない絵文字があったよ。`{str(emoji)}`")
             else:
                 await ctx.send(await ctx._(f"er-{it}"))
         else:

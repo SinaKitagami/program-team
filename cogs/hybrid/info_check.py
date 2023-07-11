@@ -192,34 +192,34 @@ class info_check(commands.Cog):
                 vste = ""
                 if target.voice.deaf:
                     # サバスピーカーミュート
-                    vste = vste+str(self.bot.get_emoji(653161518057127937))
+                    vste = vste+str(self.bot.create_emoji_str('s_g_mute_sp',653161518057127937))
                 else:
                     # サバスピーカーオン
-                    vste = vste+str(self.bot.get_emoji(653161518082293770))
+                    vste = vste+str(self.bot.create_emoji_str('s_g_on_sp',653161518082293770))
                 if target.voice.mute:
                     # サバマイクミュート
-                    vste = vste+str(self.bot.get_emoji(653161518086619137))
+                    vste = vste+str(self.bot.create_emoji_str('s_g_mute_mic',653161518086619137))
                 else:
                     # サバマイクオン
-                    vste = vste+str(self.bot.get_emoji(653161518086619137))
+                    vste = vste+str(self.bot.create_emoji_str('s_g_on_mic',653161518086619137))
                 if target.voice.self_deaf:
                     # スピーカーミュート
-                    vste = vste+str(self.bot.get_emoji(653161518258585620))
+                    vste = vste+str(self.bot.create_emoji_str('s_u_mute_sp',653161518258585620))
                 else:
                     # スピーカーオン
-                    vste = vste+str(self.bot.get_emoji(653161517881098272))
+                    vste = vste+str(self.bot.create_emoji_str('s_u_on_sp',653161517881098272))
                 if target.voice.self_mute:
                     # マイクミュート
-                    vste = vste+str(self.bot.get_emoji(653161519143714816))
+                    vste = vste+str(self.bot.create_emoji_str('s_u_mute_mic',653161519143714816))
                 else:
                     # マイクオン
-                    vste = vste+str(self.bot.get_emoji(653161518224900096))
+                    vste = vste+str(self.bot.create_emoji_str('s_u_on_mic',653161518224900096))
                 if target.voice.self_video:
                     # 画面共有
-                    vste = vste+str(self.bot.get_emoji(653161517960658945))
+                    vste = vste+str(self.bot.create_emoji_str('s_screen_share',653161517960658945))
                 elif target.voice.self_stream:
                     # GoLive
-                    vste = vste+str(self.bot.get_emoji(653161518250196992))
+                    vste = vste+str(self.bot.create_emoji_str('s_Golive',653161518250196992))
                 e.add_field(name="ステータス(status)", value=vste)
                 lmusic = ut.get_vmusic(self.bot, target)
                 if lmusic:
@@ -491,17 +491,17 @@ class info_check(commands.Cog):
                 try:
                     if info.voice.self_stream:
                         embed = discord.Embed(title=await ctx._("playinginfo-doing"), description=str(
-                            self.bot.get_emoji(653161518250196992))+await ctx._("playinginfo-GoLive"), color=info.color)
+                            self.bot.create_emoji_str('s_Golive',653161518250196992))+await ctx._("playinginfo-GoLive"), color=info.color)
                         activs.append("GoLiveストリーミング")
                         sete = True
                     elif info.voice.self_video:
                         embed = discord.Embed(title=await ctx._("playinginfo-doing"), description=str(
-                            self.bot.get_emoji(653161517960658945))+await ctx._("playinginfo-screenshare"), color=info.color)
+                            self.bot.create_emoji_str('s_Golive',653161517960658945))+await ctx._("playinginfo-screenshare"), color=info.color)
                         activs.append("サーバービデオ")
                         sete = True
                     elif info.voice:
                         embed = discord.Embed(title=await ctx._("playinginfo-doing"), description=str(
-                            self.bot.get_emoji(653161518082293770))+await ctx._("playinginfo-invc"), color=info.color)
+                            self.bot.create_emoji_str('s_g_on_sp',653161518082293770))+await ctx._("playinginfo-invc"), color=info.color)
                         activs.append("ボイスチャット参加中")
                         sete = True
                 except:
@@ -645,8 +645,8 @@ class info_check(commands.Cog):
         embeds.insert(0,e)
         page = 0
         msg = await ctx.send(embed=embeds[page])
-        await msg.add_reaction(self.bot.get_emoji(653161518195671041))
-        await msg.add_reaction(self.bot.get_emoji(653161518170505216))
+        await msg.add_reaction(self.bot.create_emoji_str("s_move_left",653161518195671041))
+        await msg.add_reaction(self.bot.create_emoji_str('s_move_right',653161518170505216))
         while True:
             try:
                 r, u = await self.bot.wait_for("reaction_add", check=lambda r, u: r.message.id == msg.id and u.id == ctx.message.author.id, timeout=30)
@@ -656,13 +656,13 @@ class info_check(commands.Cog):
                 await msg.remove_reaction(r, u)
             except:
                 pass
-            if str(r) == str(self.bot.get_emoji(653161518170505216)):
+            if str(r) == str(self.bot.create_emoji_str('s_move_right',653161518170505216)):
                 if page == len(embeds) - 1:
                     page = 0
                 else:
                     page = page + 1
                 await msg.edit(embed=embeds[page])
-            elif str(r) == str(self.bot.get_emoji(653161518195671041)):
+            elif str(r) == str(self.bot.create_emoji_str("s_move_left",653161518195671041)):
                 if page == 0:
                     page = len(embeds) - 1
                 else:

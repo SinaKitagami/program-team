@@ -41,18 +41,13 @@ intents.members = True
 intents.presences = True
 intents.message_content = True
 
-bot = commands.AutoShardedBot(command_prefix="s-", status=discord.Status.invisible,
-                   allowed_mentions=discord.AllowedMentions(everyone=False),
-                   intents=intents,
-                   enable_debug_events=True
-                   )
-"""bot = commands.Bot(command_prefix="s-", status=discord.Status.invisible,
+bot = commands.Bot(command_prefix="s-", status=discord.Status.invisible,
                    allowed_mentions=discord.AllowedMentions(everyone=False),
                    intents=intents,
                    enable_debug_events=True,
                    shard_id=0,
                    shard_count=2
-                   )"""
+                   )
 bot.owner_id = None
 bot.owner_ids = {404243934210949120, 525658651713601536}
 bot.maintenance = False
@@ -65,7 +60,6 @@ bot.team_sina = config.team_sina
 bot.comlocks = {}
 
 # トークンたち
-bot.DROP_TOKEN = config.DROP_TOKEN
 bot.BOT_TEST_TOKEN = config.BOT_TEST_TOKEN
 bot.BOT_TOKEN = config.BOT_TOKEN
 bot.NAPI_TOKEN = config.NAPI_TOKEN
@@ -83,7 +77,7 @@ db = None
 
 async def db_setup():
     global db
-    try:        
+    try:
         #db = await aiomysql.connect(host=config.DB_HOST,
         #    user=config.DB_USER,
         #    password=config.DB_PW,
@@ -140,6 +134,11 @@ async def get_context(msg, cls=LocalizedContext):
     ctx.context_at = datetime.datetime.now(datetime.timezone.utc).timestamp()
     return ctx
 bot.get_context = get_context
+
+def create_emoji_str(name:str, id:int, is_animate:bool = False):
+    return f'<{"a" if is_animate else ""}:{name}:{id}>'
+
+bot.create_emoji_str = create_emoji_str
 
 bot._ = bot.translate_handler.get_translation_for
 bot.l10n_guild = bot.translate_handler.get_guild_translation_for
@@ -267,8 +266,8 @@ async def on_ready():
     print(bot.user.name)
     print(bot.user.id)
     print('------------------')
-    aglch = bot.get_channel(659706303521751072)
-    pmsgc = bot.get_channel(676371380111015946)
+    aglch = await bot.fetch_channel(659706303521751072)
+    pmsgc = await bot.fetch_channel(676371380111015946)
     cRPC.start()
     """invite_tweet.start()
     now_sina_tweet.start()"""
@@ -331,8 +330,8 @@ async def on_ready():
                 await bot.fetch_channel(boot_info_channel_id)
             except:
                 return
-        e=discord.Embed(title="起動時インフォメーション", description=f"シャードID:{bot.shard_id}\n認識ユーザー数:{len(bot.users)}\n認識サーバー数:{len(bot.guilds)}\n認識チャンネル数:{len([c for c in bot.get_all_channels()])}\ndiscord.py ver_{discord.__version__}", color=bot.ec)
-        await ch.send(f"{bot.get_emoji(653161518531215390)}on_ready!", embed=e)
+        e=discord.Embed(title="起動時インフォメーション", description=f"シャードID:{bot.shard_id}\nシャード内認識ユーザー数:{len(bot.users)}\nシャード内認識サーバー数:{len(bot.guilds)}\nシャード内認識チャンネル数:{len([c for c in bot.get_all_channels()])}\ndiscord.py ver_{discord.__version__}", color=bot.ec)
+        await ch.send(f"{bot.create_emoji_str('s_online',653161518531215390)}on_ready!", embed=e)
         if txt:
             await ch.send(embed=embed)
     except:
@@ -390,7 +389,7 @@ async def domsg(message):
         await bot.cursor.execute("INSERT INTO guilds(id,levels,commands,hash,levelupsendto,reward,jltasks,lockcom,sendlog,prefix,lang,verified) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
                            (message.guild.id, "{}", "{}", "[]", None, "{}", "{}", "[]", None, "[]", guild_lang, 0))
         try:
-            await message.channel.send(f"{bot.get_emoji(653161518153596950)}このサーバーの思惟奈ちゃんサーバープロファイルを作成しました！いくつかの項目はコマンドを使って書き換えることができます。詳しくはヘルプ(`s-help`)をご覧ください。\nまた、不具合や疑問点などがありましたら`mii-10#3110`にお願いします。\n思惟奈ちゃんのお知らせは`/rnotify [チャンネル(省略可能)]`で、コマンド等の豆知識は`/rtopic [チャンネル(省略可能)]`で受信する設定にできます。(Webhook管理権限が必要です。)")
+            await message.channel.send(f"{bot.create_emoji_str('s_profile_created', 653161518153596950)}このサーバーの思惟奈ちゃんサーバープロファイルを作成しました！いくつかの項目はコマンドを使って書き換えることができます。詳しくはヘルプ(`s-help`)をご覧ください。\nまた、不具合や疑問点などがありましたら`mii-10#3110`にお願いします。\n思惟奈ちゃんのお知らせは`/rnotify [チャンネル(省略可能)]`で、コマンド等の豆知識は`/rtopic [チャンネル(省略可能)]`で受信する設定にできます。(Webhook管理権限が必要です。)")
         except:
             pass
         gs = await bot.cursor.fetchone("select * from guilds where id=%s",
@@ -411,7 +410,7 @@ async def domsg(message):
             
         try:
             if not "disable_profile_msg" in json.loads(gs["lockcom"]):
-                await message.add_reaction(bot.get_emoji(653161518153596950))
+                await message.add_reaction(bot.create_emoji_str("s_profile_created",653161518153596950))
         except:
             pass
         pf = await bot.cursor.fetchone("select * from users where id=%s",
@@ -578,7 +577,7 @@ async def maintenance(ctx):
 async def rnotify(ctx, ch: discord.TextChannel=None):
     if ctx.author.guild_permissions.administrator or ctx.author.id == 404243934210949120:
         tch = ch or ctx.channel
-        fch = bot.get_channel(667351221106901042)
+        fch = await bot.fetch_channel(667351221106901042)
         await fch.follow(destination=tch)
         await ctx.send("フォローが完了しました。")
     else:
@@ -595,7 +594,7 @@ async def rnotify(ctx, ch: discord.TextChannel=None):
 async def rtopic(ctx, ch:discord.TextChannel=None):
     if ctx.author.guild_permissions.administrator or ctx.author.id == 404243934210949120:
         tch = ch or ctx.channel
-        fch = bot.get_channel(677862542298710037)
+        fch = await bot.fetch_channel(677862542298710037)
         await fch.follow(destination=tch)
         await ctx.send("フォローが完了しました。")
     else:
@@ -606,7 +605,7 @@ async def rtopic(ctx, ch:discord.TextChannel=None):
 @bot.event
 async def on_command(ctx:commands.Context):
     if ctx.interaction:return
-    ch = bot.get_channel(693048961107230811)
+    ch = await bot.fetch_channel(693048961107230811)
     e = discord.Embed(title=f"prefixコマンド:{ctx.command.full_parent_name}の実行",
                       description=f"実行文:`{ctx.message.clean_content}`", color=bot.ec)
     e.set_author(name=f"実行者:{str(ctx.author)}({ctx.author.id})",
@@ -622,7 +621,7 @@ async def on_command(ctx:commands.Context):
 
 @bot.event
 async def on_interaction(interaction:discord.Interaction):
-    ch = bot.get_channel(693048961107230811)
+    ch = await bot.fetch_channel(693048961107230811)
     e = discord.Embed(title=f"スラッシュコマンド:{interaction.command.qualified_name}の実行",color=bot.ec)
     e.set_author(name=f"実行者:{str(interaction.user)}({interaction.user.id})",
                  icon_url=interaction.user.display_avatar.replace(static_format="png").url)
@@ -656,7 +655,7 @@ async def on_command_error(ctx, error):
         embed = discord.Embed(title=await ctx._("cmd-error-t"),
                               description=await ctx._("only-mii-10"), color=bot.ec)
         await ctx.send(embed=embed)
-        ch = bot.get_channel(652127085598474242)
+        ch = await bot.fetch_channel(652127085598474242)
         await ch.send(embed=ut.getEmbed("エラーログ", f"コマンド:`{ctx.command.full_parent_name}`\n```{str(error)}```", bot.ec, f"サーバー", ctx.guild.name, "実行メンバー", ctx.author.name, "メッセージ内容", ctx.message.content or "(本文なし)"))
     elif isinstance(error, commands.MissingRequiredArgument):
         # 引数がないよっ☆
@@ -686,8 +685,9 @@ async def on_command_error(ctx, error):
 
     else:
         # その他例外
-        ch = bot.get_channel(652127085598474242)
-        msg = await ch.send(embed=ut.getEmbed("エラーログ", f"コマンド:`{ctx.command.full_parent_name}`\n```{str(error)}```", bot.ec, f"サーバー", ctx.guild.name, "実行メンバー", ctx.author.name, "メッセージ内容", ctx.message.content or "(本文なし)"))
+        from traceback import format_exception as f_exc
+        ch = await bot.fetch_channel(652127085598474242)
+        msg = await ch.send(embed=ut.getEmbed("エラーログ", f"コマンド:`{ctx.command.full_parent_name}`\n```py\n{f_exc(error)}```", bot.ec, "サーバー", ctx.guild.name, "実行メンバー", ctx.author.name, "メッセージ内容", ctx.message.content or "(本文なし)"))
         await ctx.send(embed=ut.getEmbed(await ctx._("com-error-t"), await ctx._("cmd-other-d", "詳細は無効化されています…。"), bot.ec, "error id", msg.id, "サポートが必要ですか？", "[サポートサーバー](https://discord.gg/vtn2V3v)に参加して、「view-思惟奈ちゃんch」役職をつけて質問してみましょう！"))
 
 

@@ -46,8 +46,8 @@ class bot_help(commands.Cog):
 サポートサーバーの質問チャンネルで、変更に関しての質問はうかがいます。\n\
 例:❌`s-level`→⭕`/level card`\
 　 ❌`s-play` →⭕`/music play` など", embed=embed)
-            await msg.add_reaction(self.bot.get_emoji(653161518195671041))
-            await msg.add_reaction(self.bot.get_emoji(653161518170505216))
+            await msg.add_reaction(self.bot.create_emoji_str("s_move_left",653161518195671041))
+            await msg.add_reaction(self.bot.create_emoji_str('s_move_right',653161518170505216))
             await msg.add_reaction("🔍")
             while True:
                 try:
@@ -58,7 +58,7 @@ class bot_help(commands.Cog):
                     await msg.remove_reaction(r, u)
                 except:
                     pass
-                if str(r) == str(self.bot.get_emoji(653161518170505216)):
+                if str(r) == str(self.bot.create_emoji_str('s_move_right',653161518170505216)):
                     if page == 17:
                         page = 1
                     else:
@@ -67,7 +67,7 @@ class bot_help(commands.Cog):
                         f"help-{page}-t"), description=await ctx._(f"help-{page}-d"), color=self.bot.ec)
                     embed.set_footer(text=f"page:{page}")
                     await msg.edit(embed=embed)
-                elif str(r) == str(self.bot.get_emoji(653161518195671041)):
+                elif str(r) == str(self.bot.create_emoji_str("s_move_left",653161518195671041)):
                     if page == 1:
                         page = 17
                     else:
@@ -77,9 +77,9 @@ class bot_help(commands.Cog):
                     embed.set_footer(text=f"page:{page}")
                     await msg.edit(embed=embed)
                 elif str(r) == "🔍":
-                    await msg.remove_reaction(self.bot.get_emoji(653161518195671041), self.bot.user)
+                    await msg.remove_reaction(self.bot.create_emoji_str("s_move_left",653161518195671041), self.bot.user)
                     await msg.remove_reaction("🔍", self.bot.user)
-                    await msg.remove_reaction(self.bot.get_emoji(653161518170505216), self.bot.user)
+                    await msg.remove_reaction(self.bot.create_emoji_str('s_move_right',653161518170505216), self.bot.user)
                     qm = await ctx.send(await ctx._("help-s-send"))
                     try:
                         msg = await self.bot.wait_for('message', check=lambda m: m.author == ctx.author and m.channel == ctx.channel, timeout=60)
@@ -105,9 +105,9 @@ class bot_help(commands.Cog):
                                             "nh-", ""), value=f"詳細を見るには`s-help {k.replace('nh-','')}`と送信")
                         await ctx.send(embed=sre)
             try:
-                await msg.remove_reaction(self.bot.get_emoji(653161518195671041), self.bot.user)
+                await msg.remove_reaction(self.bot.create_emoji_str("s_move_left",653161518195671041), self.bot.user)
                 await msg.remove_reaction("🔍", self.bot.user)
-                await msg.remove_reaction(self.bot.get_emoji(653161518170505216), self.bot.user)
+                await msg.remove_reaction(self.bot.create_emoji_str('s_move_right',653161518170505216), self.bot.user)
             except:
                 pass
         else:
