@@ -62,16 +62,16 @@ class games(commands.Cog):
                                 value=await ctx._("game1-guide2"))
                 embed.add_field(name=await ctx._("game1-now"), value="0")
                 guide = await ctx.send(embed=embed)
-                g1 = await guide.add_reaction(self.bot.get_emoji(653161517927366658))
-                g2 = await guide.add_reaction(self.bot.get_emoji(653161518334214144))
+                g1 = await guide.add_reaction(self.bot.create_emoji_str("s_card_d",653161517927366658))
+                g2 = await guide.add_reaction(self.bot.create_emoji_str('s_card_pass',653161518334214144))
                 uint = 0
                 tmint = 0
                 while(True):
 
-                    reaction, user = await self.bot.wait_for("reaction_add", check=lambda r, u: str(r.emoji) in [str(self.bot.get_emoji(653161517927366658)), str(self.bot.get_emoji(653161518334214144))] and r.message.id == guide.id and u == ctx.message.author)
+                    reaction, user = await self.bot.wait_for("reaction_add", check=lambda r, u: str(r.emoji) in [str(self.bot.create_emoji_str("s_card_d",653161517927366658)), str(self.bot.create_emoji_str('s_card_pass',653161518334214144))] and r.message.id == guide.id and u == ctx.message.author)
 
                     await guide.remove_reaction(reaction, user)
-                    if str(reaction.emoji) == str(self.bot.get_emoji(653161517927366658)):
+                    if str(reaction.emoji) == str(self.bot.create_emoji_str("s_card_d",653161517927366658)):
                         dr = random.randint(1, 11)
                         uint = uint + dr
                         embed = discord.Embed(title="game1", description=await ctx._(
@@ -89,7 +89,7 @@ class games(commands.Cog):
                             embed.add_field(name=await ctx._(
                                 "game1-cpun"), value=await ctx._("game1-cpup"))
                         await guide.edit(embed=embed)
-                    elif str(reaction.emoji) == str(self.bot.get_emoji(653161518334214144)):
+                    elif str(reaction.emoji) == str(self.bot.create_emoji_str('s_card_pass',653161518334214144)):
                         break
                     else:
                         await ctx.send(await ctx._("game1-notr"))
@@ -112,23 +112,23 @@ class games(commands.Cog):
                     return
                 if user2 == ctx.author:
                     join = await ctx.send(await ctx._("game1-join-anyone"))
-                    await join.add_reaction(self.bot.get_emoji(653161519206629386))
-                    await join.add_reaction(self.bot.get_emoji(653161518833074178))
+                    await join.add_reaction(self.bot.create_emoji_str("s_gp_join",653161519206629386))
+                    await join.add_reaction(self.bot.create_emoji_str('s_gp_not',653161518833074178))
                     try:
-                        r, u = await self.bot.wait_for("reaction_add", check=lambda r, u: str(r.emoji) in [str(self.bot.get_emoji(653161519206629386)), str(self.bot.get_emoji(653161518833074178))] and r.message.id == join.id and u.bot is False, timeout=60)
+                        r, u = await self.bot.wait_for("reaction_add", check=lambda r, u: str(r.emoji) in [str(self.bot.create_emoji_str("s_gp_join",653161519206629386)), str(self.bot.create_emoji_str('s_gp_not',653161518833074178))] and r.message.id == join.id and u.bot is False, timeout=60)
                     except:
                         await ctx.send(await ctx._("game1-timeouted"))
                         return
                 else:
                     join = await ctx.send(await ctx._("game1-join", user2.mention))
-                    await join.add_reaction(self.bot.get_emoji(653161519206629386))
-                    await join.add_reaction(self.bot.get_emoji(653161518833074178))
+                    await join.add_reaction(self.bot.create_emoji_str("s_gp_join",653161519206629386))
+                    await join.add_reaction(self.bot.create_emoji_str('s_gp_not',653161518833074178))
                     try:
-                        r, u = await self.bot.wait_for("reaction_add", check=lambda r, u: str(r.emoji) in [str(self.bot.get_emoji(653161519206629386)), str(self.bot.get_emoji(653161518833074178))] and r.message.id == join.id and u == user2, timeout=60)
+                        r, u = await self.bot.wait_for("reaction_add", check=lambda r, u: str(r.emoji) in [str(self.bot.create_emoji_str("s_gp_join",653161519206629386)), str(self.bot.create_emoji_str('s_gp_not',653161518833074178))] and r.message.id == join.id and u == user2, timeout=60)
                     except:
                         await ctx.send(await ctx._("game1-timeouted"))
                         return
-                if str(r.emoji) == str(self.bot.get_emoji(653161519206629386)):
+                if str(r.emoji) == str(self.bot.create_emoji_str("s_gp_join",653161519206629386)):
                     u1 = ctx.message.author
                     u1_dm = await ut.opendm(u1)
                     u1_card = 0
@@ -147,23 +147,23 @@ class games(commands.Cog):
                         u1_pass = False
                         u2_pass = False
                         u1_msg = await u1_dm.send(await ctx._("game1-vs-yourturn", u1_card))
-                        await u1_msg.add_reaction(self.bot.get_emoji(653161517927366658))
-                        await u1_msg.add_reaction(self.bot.get_emoji(653161518334214144))
-                        r, u = await self.bot.wait_for("reaction_add", check=lambda r, u: str(r.emoji) in [str(self.bot.get_emoji(653161517927366658)), str(self.bot.get_emoji(653161518334214144))] and r.message.id == u1_msg.id and u == u1)
-                        if str(r.emoji) == str(self.bot.get_emoji(653161517927366658)):
+                        await u1_msg.add_reaction(self.bot.create_emoji_str("s_card_d",653161517927366658))
+                        await u1_msg.add_reaction(self.bot.create_emoji_str('s_card_pass',653161518334214144))
+                        r, u = await self.bot.wait_for("reaction_add", check=lambda r, u: str(r.emoji) in [str(self.bot.create_emoji_str("s_card_d",653161517927366658)), str(self.bot.create_emoji_str('s_card_pass',653161518334214144))] and r.message.id == u1_msg.id and u == u1)
+                        if str(r.emoji) == str(self.bot.create_emoji_str("s_card_d",653161517927366658)):
                             u1_card = u1_card + random.randint(1, 11)
                             await u1_msg.edit(content=await ctx._("game1-vs-dr", u1_card))
-                        elif str(r.emoji) == str(self.bot.get_emoji(653161518334214144)):
+                        elif str(r.emoji) == str(self.bot.create_emoji_str('s_card_pass',653161518334214144)):
                             u1_pass = True
                             await u1_msg.edit(content=await ctx._("game1-vs-pass", u1_card))
                         u2_msg = await u2_dm.send(await ctx._("game1-vs-yourturn", u2_card))
-                        await u2_msg.add_reaction(self.bot.get_emoji(653161517927366658))
-                        await u2_msg.add_reaction(str(self.bot.get_emoji(653161518334214144)))
-                        r, u = await self.bot.wait_for("reaction_add", check=lambda r, u: str(r.emoji) in [str(self.bot.get_emoji(653161517927366658)), str(self.bot.get_emoji(653161518334214144))] and r.message.id == u2_msg.id and u == u2)
-                        if str(r.emoji) == str(self.bot.get_emoji(653161517927366658)):
+                        await u2_msg.add_reaction(self.bot.create_emoji_str("s_card_d",653161517927366658))
+                        await u2_msg.add_reaction(str(self.bot.create_emoji_str('s_card_pass',653161518334214144)))
+                        r, u = await self.bot.wait_for("reaction_add", check=lambda r, u: str(r.emoji) in [str(self.bot.create_emoji_str("s_card_d",653161517927366658)), str(self.bot.create_emoji_str('s_card_pass',653161518334214144))] and r.message.id == u2_msg.id and u == u2)
+                        if str(r.emoji) == str(self.bot.create_emoji_str("s_card_d",653161517927366658)):
                             u2_card = u2_card + random.randint(1, 11)
                             await u2_msg.edit(content=await ctx._("game1-vs-dr", u2_card))
-                        elif str(r.emoji) == str(self.bot.get_emoji(653161518334214144)):
+                        elif str(r.emoji) == str(self.bot.create_emoji_str('s_card_pass',653161518334214144)):
                             u2_pass = True
                             await u2_msg.edit(content=await ctx._("game1-vs-pass", u2_card))
                     u1_fin = 21 - u1_card

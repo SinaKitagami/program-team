@@ -23,14 +23,14 @@ class m10s_partner(commands.Cog):
         pmax = len(self.partner_ids)-1
         page = 0
         
-        def get_page(page):
-            return discord.Embed(title=f"思惟奈ちゃんパートナー:{self.bot.get_user(self.partner_ids[page])}のご紹介",
+        async def get_page(page):
+            return discord.Embed(title=f"思惟奈ちゃんパートナー:{await self.bot.fetch_user(self.partner_ids[page])}のご紹介",
             description=self.partners[page],
             color=self.bot.ec)
 
-        msg = await ctx.send(embed=get_page(page))
-        await msg.add_reaction(self.bot.get_emoji(653161518195671041))
-        await msg.add_reaction(self.bot.get_emoji(653161518170505216))
+        msg = await ctx.send(embed=await get_page(page))
+        await msg.add_reaction(self.bot.create_emoji_str("s_move_left",653161518195671041))
+        await msg.add_reaction(self.bot.create_emoji_str('s_move_right',653161518170505216))
 
         while True:
             try:
@@ -41,17 +41,17 @@ class m10s_partner(commands.Cog):
                 await msg.remove_reaction(r, u)
             except:
                 pass
-            if str(r) == str(self.bot.get_emoji(653161518170505216)):
+            if str(r) == str(self.bot.create_emoji_str('s_move_right',653161518170505216)):
                 if page == pmax:
                     page = 0
                 else:
                     page = page + 1
-            elif str(r) == str(self.bot.get_emoji(653161518195671041)):
+            elif str(r) == str(self.bot.create_emoji_str("s_move_left",653161518195671041)):
                 if page == 0:
                     page = pmax
                 else:
                     page = page - 1
-            await msg.edit(embed=get_page(page))
+            await msg.edit(embed=await get_page(page))
 
 
 

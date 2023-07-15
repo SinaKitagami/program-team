@@ -22,8 +22,13 @@ class m10s_direct_msg(commands.Cog):
     @commands.is_owner()
     @ut.runnable_check()
     async def send_dm(self, ctx, target_id:int, *, content:str):
-        user = self.bot.get_user(target_id)
-        if user:
+        try:
+            user = await self.bot.fetch_user(target_id)
+        except discord.NotFound:
+            await ctx.author.send("該当ユーザーが見つかりませんでした。")
+        except discord.HTTPException:
+            await ctx.author.send("ユーザーの取得に失敗しました。")
+        else:
             m  = await ctx.author.send(f"`{str(user)}`に```\n{content}```と送信してもよろしいですか？")
             await m.add_reaction("⭕")
             await m.add_reaction("❌")
@@ -40,8 +45,7 @@ class m10s_direct_msg(commands.Cog):
                     await ctx.author.send("送信しました。")
             else:
                 await ctx.author.send("キャンセルしました。")
-        else:
-            await ctx.author.send("該当ユーザーの取得に失敗しました。")
+            
 
 async def setup(bot):
     await bot.add_cog(m10s_direct_msg(bot))

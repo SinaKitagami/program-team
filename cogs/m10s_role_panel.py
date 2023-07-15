@@ -27,7 +27,7 @@ class m10s_role_panel(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.e_check = self.bot.get_emoji(653161518103265291)
+        self.e_check = self.bot.create_emoji_str('s_check',653161518103265291)
 
     @commands.hybrid_group(name="rolepanel",aliases=["paneledit"])
     @commands.has_permissions(administrator=True)

@@ -560,8 +560,8 @@ class m10s_music(commands.Cog):
                         name=i["video_title"], value=f'[動画]({i["video_url"]})/[アップロードチャンネル]({i["video_up_url"]})\nソース:{i["video_source"]}/{i["type"]}\n追加メンバー:{self.bot.get_user(i["requestor"]).mention}')
                 e.set_footer(text=f"page:{page+1}/{len(pls)}")
                 msg = await ctx.send(embed=e)
-                await msg.add_reaction(self.bot.get_emoji(653161518195671041))  # ←
-                await msg.add_reaction(self.bot.get_emoji(653161518170505216))  # →
+                await msg.add_reaction(self.bot.create_emoji_str("s_move_left",653161518195671041))  # ←
+                await msg.add_reaction(self.bot.create_emoji_str('s_move_right',653161518170505216))  # →
                 while True:
                     try:
                         r, u = await self.bot.wait_for("reaction_add", check=lambda r, u: r.message.id == msg.id and u.id == ctx.message.author.id, timeout=30)
@@ -571,12 +571,12 @@ class m10s_music(commands.Cog):
                         await msg.remove_reaction(r, u)
                     except:
                         pass
-                    if str(r) == str(self.bot.get_emoji(653161518170505216)):  # →
+                    if str(r) == str(self.bot.create_emoji_str('s_move_right',653161518170505216)):  # →
                         if page == len(pls)-1:
                             page = 0
                         else:
                             page += 1
-                    elif str(r) == str(self.bot.get_emoji(653161518195671041)):  # ←
+                    elif str(r) == str(self.bot.create_emoji_str("s_move_left",653161518195671041)):  # ←
                         if page == 0:
                             page = len(pls)-1
                         else:

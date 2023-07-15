@@ -33,7 +33,7 @@ class m10s_re_gchat(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.manage_category = bot.get_channel(809280196192108564)
+        self.manage_category_id = 809280196192108564
         self.without_react = ["rsp_main-chat"]
         self.ignore_ch = []
 
@@ -57,7 +57,7 @@ class m10s_re_gchat(commands.Cog):
         return [[m.webhook_id, m.id] for m in await asyncio.gather(*tasks) if not m is None]
 
     async def repomsg(self, msg, rs, should_ban=False):
-        ch = self.bot.get_channel(628929788421210144)
+        ch = await self.bot.fetch_channel(628929788421210144)
         e = discord.Embed(title="グローバルメッセージブロック履歴",
                         description=f"メッセージ内容:{msg.clean_content}", color=self.bot.ec)
         e.set_author(name=f"{msg.author}(id:{msg.author.id})",
@@ -155,7 +155,7 @@ class m10s_re_gchat(commands.Cog):
                     wh = await ctx.channel.create_webhook(name="sina_gchat_webhook",reason=f"思惟奈ちゃんグローバルチャット:{name}への接続が行われたため")
                     await self.bot.cursor.execute("insert into gchat_cinfo(id,connected_to,wh_id) values(%s,%s,%s)", (ctx.channel.id,name,wh.id))
 
-                    mch = await self.manage_category.create_text_channel(name=f"gch_{name}",topic=f"接続先名:`{name}`{f',接続パスワード:{m.content}' if not m is None else ''}")
+                    mch = await (await self.bot.fetch_channel(self.manage_category)).create_text_channel(name=f"gch_{name}",topic=f"接続先名:`{name}`{f',接続パスワード:{m.content}' if not m is None else ''}")
                     mwh = await mch.create_webhook(name="sina_gchat_webhook",reason=f"思惟奈ちゃんグローバルチャット:{name}の作成が行われたため")
                     await self.bot.cursor.execute("insert into gchat_cinfo(id,connected_to,wh_id) values(%s,%s,%s)", (mch.id,name,mwh.id))
                     
@@ -214,13 +214,13 @@ class m10s_re_gchat(commands.Cog):
             apf = await self.bot.cursor.fetchone(
                 "select * from users where id=%s", (post["author_id"],))
             #apf = await self.bot.cursor.fetchone()
-            g = self.bot.get_guild(post["guild_id"])
+            g = await self.bot.fetch_guild(post["guild_id"])
             await ctx.send(embed=ut.getEmbed(f"オリジナルID:'{post['id']}", "", self.bot.ec, "送信者id:", str(post['author_id']), "送信先", str([i[1] for i in json.loads(post["allids"])]), "送信者のプロファイルニックネーム", apf['gnick'], "サーバーid", g.id, "サーバーネーム", g.name))
         else:
             apf = await self.bot.cursor.fetchone(
                 "select * from users where id=%s", (post["author_id"],))
             #apf = await self.bot.cursor.fetchone()
-            g = self.bot.get_guild(post["guild_id"])
+            g = await self.bot.fetch_guild(post["guild_id"])
             await ctx.send(embed=ut.getEmbed("グローバルチャンネル投稿情報", "", self.bot.ec, "送信者id:", str(post['author_id']), "送信者のプロファイルニックネーム", apf['gnick']))
 
     @commands.command(aliases=["オンライン状況", "次の人のオンライン状況を教えて"])
@@ -234,7 +234,7 @@ class m10s_re_gchat(commands.Cog):
             cid = uid
             if not self.bot.shares_guild(uid, ctx.author.id):
                 return await ctx.say("ison-notfound")
-            if not await self.bot.can_use_online(self.bot.get_user(uid)):
+            if not await self.bot.can_use_online(await self.bot.fetch_user(uid)):
                 return await ctx.say("ison-notfound")
         async with ctx.message.channel.typing():
             for guild in self.bot.guilds:
@@ -260,7 +260,7 @@ class m10s_re_gchat(commands.Cog):
             retchs = ""
             for ch in chs:
                 try:
-                    retchs = f"{retchs}{self.bot.get_channel(ch['id']).guild.name} -> {self.bot.get_channel(ch['id']).name}\n"
+                    retchs = f"{retchs}{await self.bot.fetch_channel(ch['id']).guild.name} -> {await self.bot.fetcht_channel(ch['id']).name}\n"
                 except:
                     retchs = f"{retchs}不明なサーバー -> チャンネルID:{ch['id']}\n"
             await ctx.send(embed=ut.getEmbed(f"グローバルチャンネル {name} の詳細", f"コネクトされたサーバーとチャンネル\n{retchs}", self.bot.ec))
@@ -481,7 +481,7 @@ class m10s_re_gchat(commands.Cog):
 
                 try:
                     if not gchat_info["connected_to"] in self.without_react:
-                        await m.add_reaction(self.bot.get_emoji(653161518346534912))
+                        await m.add_reaction(self.bot.create_emoji_str('s_gch_sending',653161518346534912,True))
                 except:
                     pass
 
@@ -511,7 +511,7 @@ class m10s_re_gchat(commands.Cog):
                         msg = ref.cached_message
                     else:
                         try:
-                            msg = await self.bot.get_channel(ref.channel_id).fetch_message(ref.message_id)
+                            msg = await (await self.bot.fetch_channel(ref.channel_id)).fetch_message(ref.message_id)
                         except:
                             msg = None
                     if msg:
@@ -580,10 +580,10 @@ class m10s_re_gchat(commands.Cog):
 
                 try:
                     if not gchat_info["connected_to"] in self.without_react:
-                        await m.remove_reaction(self.bot.get_emoji(653161518346534912),self.bot.user)
-                        await m.add_reaction(self.bot.get_emoji(653161518195539975))
+                        await m.remove_reaction(self.bot.create_emoji_str('s_gch_sending',653161518346534912,True),self.bot.user)
+                        await m.add_reaction(self.bot.create_emoji_str('s_gch_sended',653161518195539975))
                         await asyncio.sleep(5)
-                        await m.remove_reaction(self.bot.get_emoji(653161518195539975), self.bot.user)
+                        await m.remove_reaction(self.bot.create_emoji_str('s_gch_sended',653161518195539975), self.bot.user)
                 except:
                     pass
             else:
