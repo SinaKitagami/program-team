@@ -19,6 +19,8 @@ import time
 
 import random
 
+MAX_EXP = 2147483647
+MAX_LEVEL = 2147483647
 
 class levels(commands.Cog):
 
@@ -67,10 +69,13 @@ class levels(commands.Cog):
                     w_exp = lvl["exp"] + add_exp
                     w_lvl = lvl["level"]
                     is_level_up = False
-                    if w_exp >= w_lvl ** 3 + 20:
-                        w_exp -= w_lvl ** 3 + 20
-                        w_lvl += 1
-                        is_level_up = True
+                    levelup_exp = min(w_lvl ** 3 + 20, MAX_EXP) 
+                    if w_exp >= levelup_exp:
+                        w_exp -= levelup_exp
+                        old_level = w_lvl
+                        w_lvl = min(w_lvl+1,MAX_LEVEL)
+                        if old_level != w_lvl:
+                            is_level_up = True
                     await self.bot.cursor.execute("UPDATE levels SET level = %s, exp = %s, last_level_count = %s WHERE guild_id = %s and user_id = %s", (w_lvl, w_exp, int(time.time()), m.guild.id, m.author.id))
                     if is_level_up:
                         if gs["levelupsendto"]:
@@ -212,7 +217,7 @@ class levels(commands.Cog):
                 async with ctx.message.channel.typing():
                     nowl = lvl['level']
                     exp = lvl['exp']
-                    nextl = nowl ** 3 + 20
+                    nextl = min(nowl ** 3 + 20, MAX_EXP)
                     tonextexp = nextl - exp
                     nextl = str(nextl)
                     tonextexp = str(tonextexp)
@@ -389,9 +394,9 @@ async def level_add(self, ctx, target:Union[commands.MemberConverter,commands.Us
     for m in targets:
         lvl = await self.bot.cursor.fetchone("select * from levels where guild_id=%s and user_id=%s", (ctx.guild.id, m.id))
         if lvl:
-            await self.bot.cursor.execute("UPDATE levels SET level = %s, exp = %s WHERE guild_id = %s and user_id = %s", (lvl["level"] + lev, lvl["exp"] + exp, ctx.guild.id, m.id))
+            await self.bot.cursor.execute("UPDATE levels SET level = %s, exp = %s WHERE guild_id = %s and user_id = %s", (max(min(lvl["level"] + lev, MAX_LEVEL),0), max(min(lvl["exp"] + exp,MAX_EXP),0), ctx.guild.id, m.id))
         else:
-            await self.bot.cursor.execute("INSERT INTO levels(user_id, guild_id, level, exp, last_level_count, is_level_count_enable) VALUE (%s, %s, %s, %s, %s, %s)", (m.id, ctx.guild.id, lev, exp, int(time.time()), 1))
+            await self.bot.cursor.execute("INSERT INTO levels(user_id, guild_id, level, exp, last_level_count, is_level_count_enable) VALUE (%s, %s, %s, %s, %s, %s)", (m.id, ctx.guild.id, max(min(lev, MAX_LEVEL),0), max(min(exp,MAX_EXP),0), int(time.time()), 1))
     await ctx.reply(f"> サーバーレベル編集\n　{len(targets)}人のレベルを編集しました。(レベルがないメンバーには干渉していません。)")
 
 async def level_set(self, ctx, target:Union[commands.MemberConverter,commands.UserConverter,commands.RoleConverter], lev:int, exp:Optional[int]=0):
@@ -404,9 +409,9 @@ async def level_set(self, ctx, target:Union[commands.MemberConverter,commands.Us
     for m in targets:
         lvl = await self.bot.cursor.fetchone("select * from levels where guild_id=%s and user_id=%s", (ctx.guild.id, m.id))
         if lvl:
-            await self.bot.cursor.execute("UPDATE levels SET level = %s, exp = %s WHERE guild_id = %s and user_id = %s", (lev, exp, ctx.guild.id, m.id))
+            await self.bot.cursor.execute("UPDATE levels SET level = %s, exp = %s WHERE guild_id = %s and user_id = %s", (max(min(lev, MAX_LEVEL),0), max(min(exp,MAX_EXP),0), ctx.guild.id, m.id))
         else:
-            await self.bot.cursor.execute("INSERT INTO levels(user_id, guild_id, level, exp, last_level_count, is_level_count_enable) VALUE (%s, %s, %s, %s, %s, %s)", (m.id, ctx.guild.id, lev, exp, int(time.time()), 1))
+            await self.bot.cursor.execute("INSERT INTO levels(user_id, guild_id, level, exp, last_level_count, is_level_count_enable) VALUE (%s, %s, %s, %s, %s, %s)", (m.id, ctx.guild.id, max(min(lev, MAX_LEVEL),0), max(min(exp,MAX_EXP),0), int(time.time()), 1))
 
     await ctx.reply(f"> サーバーレベル編集\n　{len(targets)}人のレベルを設定しました。(レベルがないメンバーには干渉していません。)")
 

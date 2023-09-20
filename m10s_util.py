@@ -148,6 +148,7 @@ class m10s_badges:
         self.early_verified_bot_developer = flags[17] == "1"
         self.discord_certified_moderator = flags[18] == "1"
         self.http_interaction_bot = flags[19] == "1"
+        self.active_developer = flags[22] == "1"
         self.supports_commands = flags[23] == "1"
 
         self.dict_flags = {
@@ -166,6 +167,7 @@ class m10s_badges:
             "Early Verified Bot Developer": self.early_verified_bot_developer,
             "Discord Certified Moderator":self.discord_certified_moderator,
             "Http Interaction Bot":self.http_interaction_bot,
+            "Active Developer":self.active_developer,
             "Supports commands":self.supports_commands
         }
 
@@ -175,7 +177,7 @@ class m10s_badges:
         if isinstance(arg,m10s_badges):
             return self.raw_flags == arg.raw_flags
         else:
-            return False 
+            return False
 
     def __str__(self):
         return ",".join(self.get_list)
