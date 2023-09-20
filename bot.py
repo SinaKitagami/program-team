@@ -656,7 +656,7 @@ async def on_command_error(ctx, error):
                               description=await ctx._("only-mii-10"), color=bot.ec)
         await ctx.send(embed=embed)
         ch = await bot.fetch_channel(652127085598474242)
-        await ch.send(embed=ut.getEmbed("エラーログ", f"コマンド:`{ctx.command.full_parent_name}`\n```{str(error)}```", bot.ec, f"サーバー", ctx.guild.name, "実行メンバー", ctx.author.name, "メッセージ内容", ctx.message.content or "(本文なし)"))
+        await ch.send(embed=ut.getEmbed("エラーログ", f"コマンド:`{ctx.command.full_parent_name}`\n```py\n{''.join(str(error))}\n```", bot.ec, f"サーバー", ctx.guild.name, "実行メンバー", ctx.author.name, "メッセージ内容", ctx.message.content or "(本文なし)"))
     elif isinstance(error, commands.MissingRequiredArgument):
         # 引数がないよっ☆
         embed = discord.Embed(title=await ctx._("cmd-error-t"),
