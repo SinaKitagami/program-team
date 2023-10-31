@@ -338,7 +338,10 @@ class levels(commands.Cog):
         #gs = await self.bot.cursor.fetchone()
         rewards = json.loads(gs["reward"])
         if rl is None:
-            del rewards[str(lv)]
+            if str(lv) in rewards:
+                del rewards[str(lv)]
+            else:
+                return await ctx.send("エラー: そのレベルには報酬が設定されていません。")
         else:
             rid = rl.id
             rewards[str(lv)] = rid
