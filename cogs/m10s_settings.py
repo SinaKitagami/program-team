@@ -70,7 +70,7 @@ class settings(commands.Cog):
         #gs = await self.bot.cursor.fetchone()
         prefixes = gs["prefix"]
         if mode == 0:
-            await ctx.send(embed=ut.getEmbed("ユーザーのprefix", f'```{",".join(prefixes)}```'))
+            await ctx.send(embed=ut.getEmbed("サーバーのprefix", f'```{",".join(prefixes)}```'))
         elif mode == 1:
             spf = prefixes + [ipf]
             await self.bot.cursor.execute(

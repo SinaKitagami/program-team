@@ -97,6 +97,9 @@ class m10s_re_gchat(commands.Cog):
         upf = await self.bot.cursor.fetchone(
             "select * from users where id=%s", (ctx.author.id,))
         #upf = await self.bot.cursor.fetchone()
+        if not upf:
+            await ctx.send("ユーザープロファイルが作成されていません！", ephemeral=True)
+            return
         if upf["gban"] == 1:
             await ctx.send("あなたはグローバルチャットを使えないため、このコマンドは使用できません。")
             return
