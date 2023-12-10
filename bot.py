@@ -41,13 +41,19 @@ intents.members = True
 intents.presences = True
 intents.message_content = True
 
-bot = commands.Bot(command_prefix="s-", status=discord.Status.invisible,
+bot = commands.AutoShardedBot(command_prefix="s-", status=discord.Status.invisible,
+                   allowed_mentions=discord.AllowedMentions(everyone=False),
+                   intents=intents,
+                   enable_debug_events=True,
+                   )
+
+"""bot = commands.Bot(command_prefix="s-", status=discord.Status.invisible,
                    allowed_mentions=discord.AllowedMentions(everyone=False),
                    intents=intents,
                    enable_debug_events=True,
                    shard_id=0,
                    shard_count=2
-                   )
+                   )"""
 bot.owner_id = None
 bot.owner_ids = {404243934210949120, 525658651713601536}
 bot.maintenance = False

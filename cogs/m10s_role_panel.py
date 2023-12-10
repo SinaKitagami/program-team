@@ -35,7 +35,7 @@ class m10s_role_panel(commands.Cog):
     @ut.runnable_check()
     async def role_panel(self, ctx:commands.Context):
         if ctx.invoked_subcommand is None:
-            await ctx.send("""> 役職パネル機能　
+            await ctx.send("""> 役職パネル機能
             `create`:このチャンネルに役職パネルを作成します。
             `add [(このチャンネルにある)パネルID] [絵文字] [役職が特定できるもの]`:パネルに役職を追加します。
             `remove [(このチャンネルにある)パネルID] [絵文字]`:パネルから役職を取り除きます。
