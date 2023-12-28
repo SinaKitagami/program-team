@@ -117,7 +117,7 @@ class m10s_re_gchat(commands.Cog):
 """)
             await check_msg.add_reaction("✅")
             try:
-                await self.bot.wait_for("reaction_add", check = lambda r,u: ctx.author.id == u.id and r.message.id == check_msg.id and str(r.emoji) == "✅")
+                await self.bot.wait_for("reaction_add", check = lambda r,u: ctx.author.id == u.id and r.message.id == check_msg.id and str(r.emoji) == "✅", timeout=30)
             except asyncio.TimeoutError:
                 return await ctx.send("> グローバルチャットへの接続をキャンセルしました。")
             if gch:
@@ -128,22 +128,22 @@ class m10s_re_gchat(commands.Cog):
                             await ctx.author.send("> 接続エラー\n　パスワードが違います。もう一度最初からやり直してください。")
                             sendto = await self.bot.cursor.fetchall("select * from gchat_cinfo where connected_to = %s",(name,))
                             #sendto = await self.bot.cursor.fetchall()
-                            await self.gchat_send(sendto, ctx.channel, f"> {ctx.author}({ctx.author.id})が{ctx.channel.name}({ctx.channel.id})をこのチャンネルに接続しようとしました。(パスワードが違うことにより失敗)",
-                                "[🛠💠]思惟奈ちゃんグローバルチャット接続案内", ctx.guild.me.display_avatar.replace(static_format="png").url)
+                            # await self.gchat_send(sendto, ctx.channel, f"> {ctx.author}({ctx.author.id})が{ctx.channel.name}({ctx.channel.id})をこのチャンネルに接続しようとしました。(パスワードが違うことにより失敗)",
+                            #     "[🛠💠]思惟奈ちゃんグローバルチャット接続案内", ctx.guild.me.display_avatar.replace(static_format="png").url)
                             return
                     except:
                         await ctx.author.send("> 接続エラー\n　パスワードが入力されませんでした。")
                         sendto = await self.bot.cursor.fetchall("select * from gchat_cinfo where connected_to = %s",(name,))
                         #sendto = await self.bot.cursor.fetchall()
-                        await self.gchat_send(sendto, ctx.channel, f"> {ctx.author}({ctx.author.id})が{ctx.channel.name}({ctx.channel.id})をこのチャンネルに接続しようとしました。(パスワード未入力により失敗)",
-                            "[🛠💠]思惟奈ちゃんグローバルチャット接続案内", ctx.guild.me.display_avatar.replace(static_format="png").url)
+                        # await self.gchat_send(sendto, ctx.channel, f"> {ctx.author}({ctx.author.id})が{ctx.channel.name}({ctx.channel.id})をこのチャンネルに接続しようとしました。(パスワード未入力により失敗)",
+                        #     "[🛠💠]思惟奈ちゃんグローバルチャット接続案内", ctx.guild.me.display_avatar.replace(static_format="png").url)
                         return
                 wh = await ctx.channel.create_webhook(name="sina_gchat_webhook",reason=f"思惟奈ちゃんグローバルチャット:{name}への接続が行われたため")
                 await self.bot.cursor.execute("insert into gchat_cinfo(id,connected_to,wh_id) values(%s,%s,%s)", (ctx.channel.id,name,wh.id))
                 sendto = await self.bot.cursor.fetchall("select * from gchat_cinfo where connected_to = %s", (name,))
                 #sendto = await self.bot.cursor.fetchall()
-                await self.gchat_send(sendto, ctx.channel, f"> グローバルチャットに{ctx.channel.name}({ctx.channel.id})が接続しました！ようこそ！",
-                    "[🛠💠]思惟奈ちゃんグローバルチャット接続案内", ctx.guild.me.display_avatar.replace(static_format="png").url)
+                # await self.gchat_send(sendto, ctx.channel, f"> グローバルチャットに{ctx.channel.name}({ctx.channel.id})が接続しました！ようこそ！",
+                #     "[🛠💠]思惟奈ちゃんグローバルチャット接続案内", ctx.guild.me.display_avatar.replace(static_format="png").url)
 
                 await ctx.send("> 接続が完了しました。")
             else:
@@ -164,8 +164,8 @@ class m10s_re_gchat(commands.Cog):
                     
                     sendto = await self.bot.cursor.fetchall("select * from gchat_cinfo where connected_to = %s", (name,))
                     #sendto = await self.bot.cursor.fetchall()
-                    await self.gchat_send(sendto, ctx.channel, f"> グローバルチャットに{ctx.channel.name}({ctx.channel.id})が接続しました！",
-                        "[🛠💠]思惟奈ちゃんグローバルチャット接続案内", ctx.guild.me.display_avatar.replace(static_format="png").url)
+                    # await self.gchat_send(sendto, ctx.channel, f"> グローバルチャットに{ctx.channel.name}({ctx.channel.id})が接続しました！",
+                    #     "[🛠💠]思惟奈ちゃんグローバルチャット接続案内", ctx.guild.me.display_avatar.replace(static_format="png").url)
 
                     await ctx.send("> 接続が完了しました。")
 
@@ -187,8 +187,8 @@ class m10s_re_gchat(commands.Cog):
 
                 sendto = await self.bot.cursor.fetchall("select * from gchat_cinfo where connected_to = %s",(cgch["connected_to"],))
                 #sendto = await self.bot.cursor.fetchall()
-                await self.gchat_send(sendto, ctx.channel, f"> グローバルチャットから{ctx.channel.name}({ctx.channel.id})が切断しました。さようなら。",
-                    "[🛠💠]思惟奈ちゃんグローバルチャット接続案内", ctx.guild.me.display_avatar.replace(static_format="png").url)
+                # await self.gchat_send(sendto, ctx.channel, f"> グローバルチャットから{ctx.channel.name}({ctx.channel.id})が切断しました。さようなら。",
+                #     "[🛠💠]思惟奈ちゃんグローバルチャット接続案内", ctx.guild.me.display_avatar.replace(static_format="png").url)
 
                 await ctx.reply("> 切断が完了しました。\n　このチャンネルでの思惟奈ちゃんグローバルチャットのご利用ありがとうございました。")
         else:
@@ -198,8 +198,8 @@ class m10s_re_gchat(commands.Cog):
     @gchat.command(description="グローバルチャットに投稿されたメッセージについて確認します。")
     @app_commands.describe(globalchat_message_id="グローバルチャットに投稿されたメッセージのid")
     @ut.runnable_check()
-    async def check_post(self, ctx, globalchat_message_id: int):
-        gmid = globalchat_message_id
+    async def check_post(self, ctx, globalchat_message_id: str):
+        gmid = int(globalchat_message_id)
         post = None
         dats = await self.bot.cursor.fetchall("select * from gchat_pinfo")
         #dats = await self.bot.cursor.fetchall()
@@ -493,7 +493,8 @@ class m10s_re_gchat(commands.Cog):
                 #gpf = await self.bot.cursor.fetchone()
 
                 status_embed = discord.Embed(title="", description="", color=upf["gcolor"])
-                status_embed.set_author(
+                status_embed_has_content = False
+                """status_embed.set_author(
                     name=f"{ut.ondevicon(m.author)},({str(m.author.id)})")
                 if gpf["verified"]:
                     if m.guild.icon:
@@ -506,9 +507,10 @@ class m10s_re_gchat(commands.Cog):
                         status_embed.set_footer(text=f"{m.guild.name}(id:{m.guild.id})",
                                         icon_url=m.guild.icon.replace(static_format="png").url)
                     else:
-                        status_embed.set_footer(text=f"{m.guild.name}(id:{m.guild.id})")
+                        status_embed.set_footer(text=f"{m.guild.name}(id:{m.guild.id})")"""
 
                 if m.type == discord.MessageType.reply:
+                    status_embed_has_content = True
                     ref = m.reference
                     if ref.cached_message:
                         msg = ref.cached_message
@@ -522,7 +524,7 @@ class m10s_re_gchat(commands.Cog):
                     else:
                         status_embed.add_field(name="メッセージへの返信",value="(このメッセージは削除されている等で取得できません。)")
 
-                if gchat_info["connected_to"] in self.without_react:
+                if status_embed_has_content == False or gchat_info["connected_to"] in self.without_react:
                     embeds = []
                 else:
                     embeds = [status_embed]
@@ -530,7 +532,7 @@ class m10s_re_gchat(commands.Cog):
                 if m.stickers:
                     sticker = m.stickers[0]
                     sembed = discord.Embed(title=f"スタンプ:{sticker.name}",)
-                    if sticker.format == discord.StickerFormatType.png or sticker.format == discord.StickerFormatType.apng:
+                    if sticker.format == discord.StickerFormatType.png or sticker.format == discord.StickerFormatType.apng or discord.StickerFormatType.gif:
                         sembed.set_image(url=sticker.url)
                     elif sticker.format == discord.StickerFormatType.lottie:
                         # メモ: https://cdn.discordapp.com/stickers/{id}/{hash}.json?size=1024
