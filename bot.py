@@ -616,11 +616,14 @@ async def on_command(ctx:commands.Context):
                       description=f"実行文:`{ctx.message.clean_content}`", color=bot.ec)
     e.set_author(name=f"実行者:{str(ctx.author)}({ctx.author.id})",
                  icon_url=ctx.author.display_avatar.replace(static_format="png").url)
-    if ctx.guild.icon:
-        e.set_footer(text=f"実行サーバー:{ctx.guild.name}({ctx.guild.id})",
-                    icon_url=ctx.guild.icon.replace(static_format="png").url)
+    if ctx.guild:
+        if ctx.guild.icon:
+            e.set_footer(text=f"実行サーバー:{ctx.guild.name}({ctx.guild.id})",
+                        icon_url=ctx.guild.icon.replace(static_format="png").url)
+        else:
+            e.set_footer(text=f"実行サーバー:{ctx.guild.name}({ctx.guild.id})")
     else:
-        e.set_footer(text=f"実行サーバー:{ctx.guild.name}({ctx.guild.id})")
+        e.set_footer(text=f"DM/グループDMでの実行")
     e.add_field(name="実行チャンネル", value=ctx.channel.name)
     e.timestamp = ctx.message.created_at
     await ch.send(embed=e)
@@ -631,11 +634,14 @@ async def on_interaction(interaction:discord.Interaction):
     e = discord.Embed(title=f"スラッシュコマンド:{interaction.command.qualified_name}の実行",color=bot.ec)
     e.set_author(name=f"実行者:{str(interaction.user)}({interaction.user.id})",
                  icon_url=interaction.user.display_avatar.replace(static_format="png").url)
-    if interaction.guild.icon:
-        e.set_footer(text=f"実行サーバー:{interaction.guild.name}({interaction.guild.id})",
+    if interaction.guild:
+        if interaction.guild.icon:
+            e.set_footer(text=f"実行サーバー:{interaction.guild.name}({interaction.guild.id})",
                     icon_url=interaction.guild.icon.replace(static_format="png").url)
+        else:
+            e.set_footer(text=f"実行サーバー:{interaction.guild.name}({interaction.guild.id})")
     else:
-        e.set_footer(text=f"実行サーバー:{interaction.guild.name}({interaction.guild.id})")
+        e.set_footer(text=f"DM/グループDMでの実行")
     e.add_field(name="実行チャンネル", value=interaction.channel.name)
     e.timestamp = interaction.created_at
     await ch.send(embed=e)

@@ -102,9 +102,9 @@ class other(commands.Cog):
 
     @commands.hybrid_command(aliases=["ステータス", "あなたの情報を教えて"], description="思惟奈ちゃんについての色々を表示します。")
     @ut.runnable_check()
+    @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
+    @app_commands.allowed_installs(guilds=True, users=True)
     async def botinfo(self, ctx):
-        print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
-              ctx.message.content)
         mem = psutil.virtual_memory()
         allmem = str(mem.total/1000000000)[0:3]
         used = str(mem.used/1000000000)[0:3]
