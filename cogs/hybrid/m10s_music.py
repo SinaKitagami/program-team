@@ -149,7 +149,7 @@ class m10s_music(commands.Cog):
                     await ctx.send("接続のタイムアウト！")
                 else:
                     await ctx.send(f"{ctx.voice_client.channel.name}に接続しました。", ephemeral=True)
-                    e = discord.Embed(title="思惟奈ちゃんミュージックアクティビティビューアーをお試しください。", description="思惟奈ちゃんの音楽機能を、もっと使いやすく。\nキューの確認や音楽コントロール、RPCへの表示をこれ一つで。\nダウンロードは[こちら](https://mav.sina-chan-d.xyz/)から。\n※Ver 1.1.2がリリースされました。更新をお願いします。")
+                    e = discord.Embed(title="思惟奈ちゃんミュージックアクティビティビューアーをお試しください。", description="1年越しにこのアプリケーションが復活しました！\n思惟奈ちゃんの音楽機能を、もっと使いやすく。\nキューの確認や音楽コントロール、RPCへの表示をこれ一つで。\nダウンロードは[こちら](https://support.sina-chan.com/mav-download/ )から。\n※Ver 2.\*.\*のみ動作します。旧バージョン(～v1.\*.\*)をお使いの方は更新をお願いします。")
                     e.set_image(url="https://cdn.discordapp.com/attachments/667351221106901042/997827447858942042/unknown.png")
                     await ctx.channel.send(embed=e)
         else:
@@ -239,7 +239,9 @@ class m10s_music(commands.Cog):
                     return
                 else:
                     text = m.content
-            await self.add_music_queue(ctx.author, ctx.guild, ctx, ctx.voice_client, ctx.message, text, file)
+            if ctx.interaction:
+                await ctx.send("> 処理を開始します。", ephemeral=True)
+            await self.add_music_queue(ctx.author, ctx.guild, ctx.channel, ctx.voice_client, ctx.message, text, file)
     
     async def add_music_queue(self, requestor, guild, sender, voice_client, message=None, text="", file=None):
         # try:
@@ -345,9 +347,10 @@ class m10s_music(commands.Cog):
             for vurl in vurls:
                 vinfo = await self.gvinfo(vurl, getattr(message, "id", None), False)
                 if vinfo["extractor"] in ["youtube"]:
-                    await sender.send("この動画ソースは、Discordの規約変更の影響でサポートが終了しました。\n各個人でダウンロード→ファイルアップロードを経由して再生することは可能ですが、自己責任となります。")
-                    return
-                    # await sender.send("この動画ソースは、Discordの規約変更の影響で近日中にサポートが打ち切られます。")
+                    if not("unlock_ytmusic" in self.bot.features[0]):
+                        await sender.send("この動画ソースは、Discordの規約変更の影響でサポートが終了しました。\n各個人でダウンロード→ファイルアップロードを経由して再生することは可能ですが、自己責任となります。")
+                        return
+                        # await sender.send("この動画ソースは、Discordの規約変更の影響で近日中にサポートが打ち切られます。")
                 if vinfo.get("_type", "") == "playlist":
                     tks = []
                     for c in vinfo["entries"]:
@@ -440,6 +443,10 @@ class m10s_music(commands.Cog):
                 await sender.send("> ステージチャンネルのため、音楽を再生するためにはスピーカーに移動させる必要があります。")
         while self.bot.qu.get(str(guild.id), None):
             self.bot.qu[str(guild.id)][0]["now_position"] = 0
+            if not guild.voice_client.is_connected():
+                reconnect_ch = guild.voice_client.channel
+                await guild.voice_client.cleanup()
+                await reconnect_ch.connect()
             if self.bot.qu[str(guild.id)][0]["type"] == "download":
                 guild.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(
                 f'musicfile/{self.bot.qu[str(guild.id)][0]["video_id"]}'), volume=v or vl))
