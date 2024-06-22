@@ -150,7 +150,7 @@ class other(commands.Cog):
         if await ctx.user_lang() == "ja":
             if await ctx._(f"er-{it}") == "":
                 await ctx.send(await ctx._("er-?"))
-                await self.bot.fetch_channel(993565802030698627).send(f"> 思惟奈のわからない絵文字があったよ。`{str(emoji)}`")
+                await (await self.bot.fetch_channel(993565802030698627)).send(f"> 思惟奈のわからない絵文字があったよ。`{str(emoji)}`")
             else:
                 await ctx.send(await ctx._(f"er-{it}"))
         else:
