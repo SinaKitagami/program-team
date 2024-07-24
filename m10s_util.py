@@ -6,6 +6,7 @@ import pickle
 import discord
 
 from discord.ext import commands
+from discord import app_commands
 
 import aiohttp
 
@@ -111,6 +112,26 @@ def runnable_check():
         else:
             return True
     return commands.check(predicate)
+
+def runnable_check_for_appcmd():
+    async def predicate(ctx):
+        if isinstance(ctx, commands.Context) and hasattr(ctx.bot, "comlocks") and ctx.guild:
+            if ctx.bot.comlocks.get(str(ctx.guild.id), []):
+                if ctx.command.name in ctx.bot.comlocks[str(ctx.guild.id)] and not ctx.author.guild_permissions.administrator and ctx.author.id != 404243934210949120: # comlockされているかどうか
+                    return False
+        elif isinstance(ctx, discord.Interaction) and hasattr(ctx.client, "comlocks") and ctx.guild:
+            if ctx.client.comlocks.get(str(ctx.guild.id), []):
+                if ctx.command.name in ctx.bot.comlocks[str(ctx.guild.id)] and not ctx.author.guild_permissions.administrator and ctx.author.id != 404243934210949120: # comlockされているかどうか
+                    return False
+        if ctx.command.name in ctx.bot.features[0] and (not ctx.author.id in ctx.bot.team_sina): # グローバルfeatureでロックされているかどうか(メンテナンス)
+            return False
+        elif ctx.command.name in ctx.bot.features.get(ctx.author.id, []) or "cu:cmd" in ctx.bot.features.get(ctx.author.id, []): # featuresでのユーザーごとのコマンドロック
+            return False
+        elif ctx.guild and (ctx.command.name in ctx.bot.features.get(ctx.guild.id, []) or "cu:cmd" in ctx.bot.features.get(ctx.guild.id, [])): # featuresでのサーバーごとのコマンドロック
+            return False
+        else:
+            return True
+    return app_commands.check(predicate)
 
 async def get_badges(bot, user):
     headers = {
