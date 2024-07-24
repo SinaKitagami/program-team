@@ -10,6 +10,8 @@ import asyncio
 
 import m10s_util as ut
 
+from discord import app_commands
+
 # このプログラムはPoteto143氏によって作成され、yaakiyuによって改善されています。
 
 
@@ -65,7 +67,9 @@ class jyanken(commands.Cog):
 
     @commands.hybrid_command(name="jyanken", description="じゃんけんできます。")
     @commands.bot_has_permissions(manage_messages=True)
+    @app_commands.checks.bot_has_permissions(manage_messages=True)
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def command(self, ctx):
         embed = discord.Embed(
             title="ジャンケン", description="ジャンケンをするよ。\n最初はグー、ジャンケン…",

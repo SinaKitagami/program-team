@@ -326,7 +326,7 @@ async def on_ready():
 async def on_message(message):
     if "cu:on_msg" in bot.features.get(message.author.id, []):
         return
-    if "cu:on_msg" in bot.features.get(message.guild.id, []):
+    if "cu:on_msg" in bot.features.get(getattr(message.guild, "id", None), []):
         return
     if isinstance(message.channel, discord.DMChannel):
         return
@@ -425,16 +425,19 @@ async def domsg(message):
         tpf.insert(0,"s-")
     bot.command_prefix = tpf
     bot.comlocks[str(message.guild.id)] = json.loads(gs["lockcom"])
-    """for pf in tpf:
-        if message.content.startswith(pf):
-            if "disable_prefix_cmd" in bot.features[0]:
-                await message.channel.send("> お知らせ\n　メッセージコンテントインテントの特権化に伴い、ご利用の呼び出し方法はサポートされません。\n　スラッシュコマンドで利用していただくよう、お願いします。")
-                break
-            else:
-                await message.channel.send("> お知らせ\n　メッセージコンテントインテントの特権化に伴い、ご利用の呼び出し方法は近日サポートを終了します。\n　スラッシュコマンドで利用していただくよう、お願いします。")
-                break
-    if not "disable_prefix_cmd" in bot.features[0]:"""
-    await bot.process_commands(message)
+    if message.author.id in bot.team_sina:
+        await bot.process_commands(message)
+    else:
+        for pf in tpf:
+            if message.content.startswith(pf):
+                if ("disable_prefix_cmd" in bot.features[0]):
+                    await message.channel.send("> お知らせ\n　メッセージコンテントインテントの特権化に伴い、ご利用の呼び出し方法はサポートされません。\n　スラッシュコマンドで利用していただくよう、お願いします。")
+                    break
+                else:
+                    await message.channel.send("> お知らせ\n　メッセージコンテントインテントの特権化に伴い、ご利用の呼び出し方法は近日サポートを終了します。\n　スラッシュコマンドで利用していただくよう、お願いします。")
+                    break
+        if not "disable_prefix_cmd" in bot.features[0]:
+            await bot.process_commands(message)
 
 async def runsercmd(message, gs, pf):
     if "cu:cmd" in bot.features.get(message.author.id, []):
@@ -555,8 +558,6 @@ async def maintenance(ctx):
 @app_commands.describe(ch="受け取るチャンネル")
 @commands.bot_has_permissions(manage_webhooks=True)
 @commands.has_permissions(administrator=True)
-@app_commands.checks.bot_has_permissions(manage_webhooks=True)
-@app_commands.checks.has_permissions(administrator=True)
 @ut.runnable_check()
 async def rnotify(ctx, ch: discord.TextChannel=None):
     if ctx.author.guild_permissions.administrator or ctx.author.id == 404243934210949120:
@@ -572,9 +573,10 @@ async def rnotify(ctx, ch: discord.TextChannel=None):
 @app_commands.describe(ch="受け取るチャンネル")
 @commands.bot_has_permissions(manage_webhooks=True)
 @commands.has_permissions(administrator=True)
+@app_commands.default_permissions(administrator=True)
 @app_commands.checks.bot_has_permissions(manage_webhooks=True)
-@app_commands.checks.has_permissions(administrator=True)
 @ut.runnable_check()
+@ut.runnable_check_for_appcmd()
 async def rtopic(ctx, ch:discord.TextChannel=None):
     if ctx.author.guild_permissions.administrator or ctx.author.id == 404243934210949120:
         tch = ch or ctx.channel

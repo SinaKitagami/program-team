@@ -30,9 +30,13 @@ class m10s_role_panel(commands.Cog):
         self.e_check = self.bot.create_emoji_str('s_check',653161518103265291)
 
     @commands.hybrid_group(name="rolepanel",aliases=["paneledit"])
+    @app_commands.default_permissions(administrator=True)
     @commands.has_permissions(administrator=True)
     @commands.bot_has_permissions(manage_messages=True, manage_roles=True)
+    @app_commands.checks.has_permissions(administrator=True)
+    @app_commands.checks.bot_has_permissions(manage_messages=True, manage_roles=True)
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def role_panel(self, ctx:commands.Context):
         if ctx.invoked_subcommand is None:
             await ctx.send("""> 役職パネル機能
@@ -44,6 +48,7 @@ class m10s_role_panel(commands.Cog):
 
     @role_panel.command(name="create", description="新規役職パネルを発行します。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def p_create(self,ctx):
         m = await ctx.send("> パネル発行の確認\nこのチャンネルにパネルを発行してもよろしいですか？")
         await m.add_reaction(self.e_check)
@@ -62,6 +67,7 @@ class m10s_role_panel(commands.Cog):
         
     @role_panel.command(name="delete", description="役職パネルを削除します。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def p_delete(self, ctx, pid:str):
         try:
             pid = int(pid)
@@ -95,6 +101,7 @@ class m10s_role_panel(commands.Cog):
     @app_commands.describe(emoji="付与するときに使う絵文字")
     @app_commands.describe(role="付与する役職")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def p_add(self,ctx,pid:str,emoji:str,role:discord.Role):
         try:
             pid = int(pid)
@@ -139,6 +146,7 @@ class m10s_role_panel(commands.Cog):
     @app_commands.describe(pid="役職パネルのID")
     @app_commands.describe(emoji="取り除きたい役職に紐づいている絵文字")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def p_remove(self,ctx,pid:str,emoji:str):
         try:
             pid = int(pid)

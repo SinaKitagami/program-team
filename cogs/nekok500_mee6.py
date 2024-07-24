@@ -15,10 +15,13 @@ class MEE6(commands.Cog):
 
     @commands.hybrid_command(description="「mee6のレベルランキング」を一覧表示します。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     @commands.guild_only()
+    @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)
     @app_commands.describe(start="最高順位")
     @app_commands.describe(end="最低順位")
     @commands.cooldown(1, 5, commands.BucketType.guild)
+    @app_commands.checks.cooldown(1, 5, key=lambda i: i.guild_id)
     async def levels(self, ctx, start:Optional[int]=1, end:Optional[int]=10):
         start -= 1
         async with self.bot.session.get("https://mee6.xyz/api/plugins/levels/leaderboard/{0}".format(ctx.guild.id)) as resp:

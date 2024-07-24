@@ -17,11 +17,13 @@ class settings(commands.Cog):
         self.bot = bot
 
     @commands.hybrid_group(name="settings")
+    @ut.runnable_check_for_appcmd()
     @ut.runnable_check()
     async def setting_cmds(self, ctx):pass
 
     @setting_cmds.command(description="prefixのユーザー設定")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     @app_commands.describe(mode="どうするか")
     @app_commands.describe(ipf="カスタムprefixの文字列")
     @app_commands.choices(mode=[
@@ -54,6 +56,10 @@ class settings(commands.Cog):
 
     @setting_cmds.command(description="prefixのサーバー設定")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
+    @app_commands.default_permissions(administrator=True)
+    @commands.has_permissions(administrator=True)
+    @app_commands.checks.has_permissions(administrator=True)
     @app_commands.describe(mode="どうするか")
     @app_commands.describe(ipf="カスタムprefixの文字列")
     @app_commands.choices(mode=[
@@ -84,9 +90,12 @@ class settings(commands.Cog):
         else:
             await ctx.send(embed=ut.getEmbed("不適切なモード選択", "`0`(view)または`1`(set)または`2`(delete)を指定してください。"))
 
-    @commands.cooldown(1, 10, type=commands.BucketType.guild)
-    @ut.runnable_check()
     @setting_cmds.command(description="思惟奈ちゃんの一部場面でのサーバー言語設定")
+    @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
+    @app_commands.default_permissions(administrator=True)
+    @commands.has_permissions(administrator=True)
+    @app_commands.checks.has_permissions(administrator=True)
     @app_commands.describe(lang="設定言語")
     async def guildlang(self, ctx, lang:str):
         gs = await self.bot.cursor.fetchone(
@@ -104,6 +113,7 @@ class settings(commands.Cog):
 
     @setting_cmds.command(description="思惟奈ちゃんのサーバーログの送信設定を行います。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     @app_commands.describe(channel="送信先チャンネル")
     async def sendlogto(self, ctx, channel:Optional[discord.TextChannel]):
         to = channel
@@ -126,8 +136,8 @@ class settings(commands.Cog):
 
     @setting_cmds.command(aliases=["言語設定", "言語を次の言語に変えて"],description="思惟奈ちゃんの一部場面でのサーバー言語設定")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     @app_commands.describe(lang="設定言語")
-    @commands.cooldown(1, 10, type=commands.BucketType.user)
     async def userlang(self, ctx, lang:str):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
               ctx.message.content)
@@ -143,6 +153,7 @@ class settings(commands.Cog):
     @app_commands.describe(mode="使用するモード")
     @app_commands.describe(comname="(add/del)制限をかける/解除するコマンドの名前")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def comlock(self, ctx, mode: Literal['add', 'del', 'view'], comname:Optional[str]):
         gs = await self.bot.cursor.fetchone(
             "select * from guilds where id=%s", (ctx.guild.id,))
@@ -175,11 +186,10 @@ class settings(commands.Cog):
             await ctx.send(await ctx._("deleted-text"))
         elif mode == "view":
             await ctx.send(await ctx._("comlock-view", gs["lockcom"]))
-        else:
-            await ctx.send(await ctx._("comlock-unknown"))
 
     @setting_cmds.command(aliases=["setsysmsg"],description="メンバーの参加、退出時のメッセージ設定")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     @app_commands.describe(mode="どうするか")
     @app_commands.describe(when="送信を行うとき")
     @app_commands.describe(channel="送信先チャンネル")
@@ -232,6 +242,7 @@ class settings(commands.Cog):
 
     @setting_cmds.command(aliases=["サーバーコマンド", "次の条件でサーバーコマンドを開く"],description="サーバー独自の応答コマンドを作成できます。(prefixコマンドでのみ呼び出せます。)")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     @app_commands.describe(mode="どうするか")
     @app_commands.describe(name="コマンド名")
     @app_commands.choices(mode=[
@@ -357,6 +368,10 @@ class settings(commands.Cog):
 
     @commands.hybrid_command(description="ハッシュタグとしてチャンネルを使用する設定を切り替えます。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
+    @app_commands.default_permissions(administrator=True)
+    @commands.has_permissions(administrator=True)
+    @app_commands.checks.has_permissions(administrator=True)
     async def hashtag(self, ctx):
         d = await self.bot.cursor.fetchone(
             "select * from guilds where id=%s", (ctx.guild.id,))
@@ -379,6 +394,10 @@ class settings(commands.Cog):
 
     @setting_cmds.command(description="レベルアップ通知の送信先を変更できます。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
+    @app_commands.default_permissions(administrator=True)
+    @commands.has_permissions(administrator=True)
+    @app_commands.checks.has_permissions(administrator=True)
     @app_commands.describe(to="送信先チャンネル")
     async def levelupsendto(self, ctx, to:Optional[discord.TextChannel]):
         if to is None:
@@ -394,6 +413,9 @@ class settings(commands.Cog):
     @ut.runnable_check()
     @app_commands.describe(feature_name="設定する機能")
     @app_commands.describe(enable="有効にするかどうか")
+    @app_commands.default_permissions(administrator=True)
+    @commands.has_permissions(administrator=True)
+    @app_commands.checks.has_permissions(administrator=True)
     async def toggle_features(self, ctx, feature_name: Literal["level_count", "send_hashtag", "server_command", "default_prefix", "profile_reaction"], enable: bool = True):
         text_to_comlock = {
             "level_count":"clevel",

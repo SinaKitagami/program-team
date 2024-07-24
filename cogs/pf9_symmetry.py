@@ -16,6 +16,7 @@ class Symmetry(commands.Cog):
 
     @commands.hybrid_command(name="symmetry", description="シンメトリー画像を生成します。")
     @commands.bot_has_permissions(attach_files=True)
+    @app_commands.checks.bot_has_permissions(attach_files=True)
     @discord.app_commands.choices(side=[
             discord.app_commands.Choice(name="left", value=0),
             discord.app_commands.Choice(name="right", value=1),
@@ -25,6 +26,7 @@ class Symmetry(commands.Cog):
     @app_commands.describe(side="どの面をシンメトリーにするか")
     @app_commands.describe(image="シンメトリー加工する画像")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def symmetry(self, ctx: commands.Context, side: int, image: discord.Attachment):
         if ctx.interaction:
             await ctx.defer()

@@ -64,6 +64,7 @@ class OnlineNotif(commands.Cog):
 
     @commands.hybrid_group(invoke_without_command=True)
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def onlinenotif(self, ctx):
         """Returns the name of the users you are receiving online notifications of."""
         users = [
@@ -78,6 +79,7 @@ class OnlineNotif(commands.Cog):
 
     @onlinenotif.command(aliases=["add"])
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def subscribe(self, ctx, user: discord.User):
         """Subscribes to this user."""
         subscribing = await self.get_subscribing_of_user(ctx.author)
@@ -92,6 +94,7 @@ class OnlineNotif(commands.Cog):
 
     @onlinenotif.command(aliases=["remove", "del"])
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def unsubscribe(self, ctx, user: discord.User):
         """Un-subscribes to this user."""
         subscribing = await self.get_subscribing_of_user(ctx.author)
@@ -104,6 +107,7 @@ class OnlineNotif(commands.Cog):
 
     @onlinenotif.command()
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def settings(self, ctx, enabled: bool=False):
         """Choose whether someone can receive your online notification.
         Note that you have to share server with that user."""

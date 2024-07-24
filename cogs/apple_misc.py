@@ -61,6 +61,7 @@ class AppleMiscCog(commands.Cog):
 
     @commands.hybrid_command(description="Botの応答速度を返します。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     @app_commands.describe(is_debug="詳細情報を表示するかどうか(デバッグ用)")
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=True)

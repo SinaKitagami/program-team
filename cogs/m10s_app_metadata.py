@@ -57,6 +57,8 @@ class m10s_app_metadata(commands.Cog):
         await ctx.send("> 設定しました。")
 
     @commands.hybrid_command(description="あなたの接続されているアプリメタデータを更新します。")
+    @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def sync_metadata(self, ctx:commands.Context):
         await ctx.defer(ephemeral=True)
         upf = await self.bot.cursor.fetchone("select oauth_ref_token from users where id=%s", (ctx.author.id,))

@@ -114,20 +114,16 @@ def runnable_check():
     return commands.check(predicate)
 
 def runnable_check_for_appcmd():
-    async def predicate(ctx):
-        if isinstance(ctx, commands.Context) and hasattr(ctx.bot, "comlocks") and ctx.guild:
-            if ctx.bot.comlocks.get(str(ctx.guild.id), []):
-                if ctx.command.name in ctx.bot.comlocks[str(ctx.guild.id)] and not ctx.author.guild_permissions.administrator and ctx.author.id != 404243934210949120: # comlockされているかどうか
+    async def predicate(interaction: discord.Interaction):
+        if isinstance(interaction, commands.Context) and hasattr(interaction.client, "comlocks") and interaction.guild:
+            if interaction.client.comlocks.get(str(interaction.guild.id), []):
+                if interaction.command.name in interaction.client.comlocks[str(interaction.guild.id)] and not interaction.user.guild_permissions.administrator and interaction.user.id != 404243934210949120: # comlockされているかどうか
                     return False
-        elif isinstance(ctx, discord.Interaction) and hasattr(ctx.client, "comlocks") and ctx.guild:
-            if ctx.client.comlocks.get(str(ctx.guild.id), []):
-                if ctx.command.name in ctx.bot.comlocks[str(ctx.guild.id)] and not ctx.author.guild_permissions.administrator and ctx.author.id != 404243934210949120: # comlockされているかどうか
-                    return False
-        if ctx.command.name in ctx.bot.features[0] and (not ctx.author.id in ctx.bot.team_sina): # グローバルfeatureでロックされているかどうか(メンテナンス)
+        if interaction.command.name in interaction.client.features[0] and (not interaction.user.id in interaction.client.team_sina): # グローバルfeatureでロックされているかどうか(メンテナンス)
             return False
-        elif ctx.command.name in ctx.bot.features.get(ctx.author.id, []) or "cu:cmd" in ctx.bot.features.get(ctx.author.id, []): # featuresでのユーザーごとのコマンドロック
+        elif interaction.command.name in interaction.client.features.get(interaction.user.id, []) or "cu:cmd" in interaction.client.features.get(interaction.user.id, []): # featuresでのユーザーごとのコマンドロック
             return False
-        elif ctx.guild and (ctx.command.name in ctx.bot.features.get(ctx.guild.id, []) or "cu:cmd" in ctx.bot.features.get(ctx.guild.id, [])): # featuresでのサーバーごとのコマンドロック
+        elif interaction.guild and (interaction.command.name in interaction.client.features.get(interaction.guild.id, []) or "cu:cmd" in interaction.client.features.get(interaction.guild.id, [])): # featuresでのサーバーごとのコマンドロック
             return False
         else:
             return True
