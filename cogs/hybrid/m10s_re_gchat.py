@@ -494,6 +494,9 @@ class m10s_re_gchat(commands.Cog):
 
                 status_embed = discord.Embed(title="", description="", color=upf["gcolor"])
                 status_embed_has_content = False
+                if upf["gchat-sign"]:
+                    status_embed_has_content = True
+                    status_embed.set_footer(text=upf["gchat-sign"])
                 """status_embed.set_author(
                     name=f"{ut.ondevicon(m.author)},({str(m.author.id)})")
                 if gpf["verified"]:
