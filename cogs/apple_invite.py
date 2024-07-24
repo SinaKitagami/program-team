@@ -160,7 +160,7 @@ class AppleInviteCog(commands.Cog):
         log_ch = await self.get_log_channel(member.guild.id)
         e = discord.Embed(title=f"{str(member)}の招待の情報",
                           description=str(member.id))
-        e.set_thumbnail(url=str(member.avatar_url))
+        e.set_thumbnail(url=str(member.avatar))
         for i in invites:
             e.add_field(
                 name=f"招待はこれかも? {i['code']}", value=f"{str(i['inviter'])} - {i['inviter'].id}")

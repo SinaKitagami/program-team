@@ -52,7 +52,7 @@ class m10s_role_panel(commands.Cog):
         except asyncio.TimeoutError:
             await m.edit(content="> パネルは発行されていません！\n時間内に応答がなかったため、作成はキャンセルされました。")
         else:
-            if r.emoji == self.e_check:
+            if str(r.emoji) == self.e_check:
                 pd={}
                 pm = await ctx.send(embed=ut.getEmbed("思惟奈ちゃん役職パネル",f"このパネルは{ctx.author.mention}によって作成されました。",self.bot.ec,))
                 await self.bot.cursor.execute("INSERT INTO role_panels(id,roles) VALUES(%s,%s)", (pm.id,json.dumps(pd)))
@@ -78,7 +78,7 @@ class m10s_role_panel(commands.Cog):
             except asyncio.TimeoutError:
                 await m.edit(content="> パネルは削除されていません！\n時間内に応答がなかったため、削除はキャンセルされました。")
             else:
-                if r.emoji == self.e_check:
+                if str(r.emoji) == self.e_check:
                     await self.bot.cursor.execute("DELETE FROM role_panels WHERE id = %s", (pid,))
                     try:
                         msg = await ctx.channel.fetch_mesasge(pid)
