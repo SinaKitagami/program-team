@@ -80,14 +80,15 @@ class info_check(commands.Cog):
             if target.voice:
                 menu.add_option("ボイス情報", "voice", "ユーザーのボイス/ステージチャンネルでの状態を表示します。")
         
-        if ctx.interaction:
+        msg = await ctx.send("下から表示したい情報を選んでください。タイムアウトは30秒です。", view=menu)
+        """if ctx.interaction:
             ctp:dpyui.slash_command_callback = await dpyui.slash_command_callback.from_dpy_interaction(ctx.interaction)
             await ctp.send_response_with_ui("下から表示したい情報を選んでください。タイムアウトは30秒です。", ui=menu)
             ctx.interaction.response._response_type = discord.InteractionResponseType.channel_message
-            msg = await ctx.interaction.original_response()
-            
+            msg = await ctx.interaction.original_response()     
         else:
-            msg = await self.bot.dpyui.send_with_ui(ctx.channel, "下から表示したい情報を選んでください。タイムアウトは30秒です。",ui=menu)
+            msg = await self.bot.dpyui.send_with_ui(ctx.channel, "下から表示したい情報を選んでください。タイムアウトは30秒です。",ui=menu)"""
+        
         while True:
             try:
                 cb:dpyui.interaction_menu_callback = await self.bot.wait_for("menu_select", check=lambda icb:icb.custom_id==f"userinfo_{ctx.message.id}" and icb.message.id==msg.id and icb.user_id == ctx.author.id, timeout=30)
@@ -260,13 +261,16 @@ class info_check(commands.Cog):
         menu.add_option("思惟奈ちゃんプロファイル","profile","思惟奈ちゃん内での情報を表示します。")
         menu.add_option("その他","other","その他、サーバーに関する情報を表示します。")
 
-        if ctx.interaction:
+        msg = await ctx.send("下から表示したい情報を選んでください。タイムアウトは30秒です。", view=menu)
+
+        """if ctx.interaction:
             ctp:dpyui.slash_command_callback = await dpyui.slash_command_callback.from_dpy_interaction(ctx.interaction)
             await ctp.send_response_with_ui("下から表示したい情報を選んでください。タイムアウトは30秒です。", ui=menu)
             ctx.interaction.response._response_type = discord.InteractionResponseType.channel_message
             msg = await ctx.interaction.original_response()
         else:
-            msg = await self.bot.dpyui.send_with_ui(ctx.channel, "下から表示したい情報を選んでください。タイムアウトは30秒です。",ui=menu)
+            msg = await self.bot.dpyui.send_with_ui(ctx.channel, "下から表示したい情報を選んでください。タイムアウトは30秒です。",ui=menu)"""
+        
         while True:
             try:
                 cb:dpyui.interaction_menu_callback = await self.bot.wait_for("menu_select", check=lambda icb:icb.custom_id==f"serverinfo_{ctx.message.id}" and icb.message.id==msg.id and icb.user_id == ctx.author.id, timeout=30)
