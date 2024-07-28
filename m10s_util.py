@@ -6,6 +6,7 @@ import pickle
 import discord
 
 from discord.ext import commands
+from discord import app_commands
 
 import aiohttp
 
@@ -111,6 +112,22 @@ def runnable_check():
         else:
             return True
     return commands.check(predicate)
+
+def runnable_check_for_appcmd():
+    async def predicate(interaction: discord.Interaction):
+        if isinstance(interaction, commands.Context) and hasattr(interaction.client, "comlocks") and interaction.guild:
+            if interaction.client.comlocks.get(str(interaction.guild.id), []):
+                if interaction.command.name in interaction.client.comlocks[str(interaction.guild.id)] and not interaction.user.guild_permissions.administrator and interaction.user.id != 404243934210949120: # comlockされているかどうか
+                    return False
+        if interaction.command.name in interaction.client.features[0] and (not interaction.user.id in interaction.client.team_sina): # グローバルfeatureでロックされているかどうか(メンテナンス)
+            return False
+        elif interaction.command.name in interaction.client.features.get(interaction.user.id, []) or "cu:cmd" in interaction.client.features.get(interaction.user.id, []): # featuresでのユーザーごとのコマンドロック
+            return False
+        elif interaction.guild and (interaction.command.name in interaction.client.features.get(interaction.guild.id, []) or "cu:cmd" in interaction.client.features.get(interaction.guild.id, [])): # featuresでのサーバーごとのコマンドロック
+            return False
+        else:
+            return True
+    return app_commands.check(predicate)
 
 async def get_badges(bot, user):
     headers = {

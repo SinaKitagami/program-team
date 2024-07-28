@@ -23,6 +23,7 @@ class m10s_quick_cmd(commands.Cog):
     @app_commands.describe(label="呼び出しボタンの表示名")
     @app_commands.describe(run_command="呼び出すコマンド")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def quick_command_create(self, ctx:commands.Context, label:str, *, run_command:str):
         if run_command == "":
             await ctx.send("> 実行コマンドの指定がありません！")

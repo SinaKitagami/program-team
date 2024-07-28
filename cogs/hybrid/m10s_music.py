@@ -130,10 +130,12 @@ class m10s_music(commands.Cog):
 
     @commands.hybrid_group(name="music", description="音楽機能です。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def music_group(self, ctx):pass
 
     @music_group.command(name="join", aliases=["invc"], description="あなたが参加しているVCに接続します。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def join_(self, ctx):
         if ctx.author.voice:
             if ctx.voice_client:
@@ -157,6 +159,7 @@ class m10s_music(commands.Cog):
 
     @music_group.command(name="stop", aliases=["leave"], description="再生をやめ、VCから切断します。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def stop_(self, ctx):
         minfo = ut.get_vmusic(self.bot, ctx.author)
         if ctx.voice_client and ctx.author.voice:
@@ -196,6 +199,7 @@ class m10s_music(commands.Cog):
 
     @music_group.command(name="pause", description="再生中の曲を一時停止します。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def pause_(self, ctx):
         minfo = ut.get_vmusic(self.bot, ctx.author)
         if ctx.voice_client and ctx.author.voice:
@@ -218,6 +222,7 @@ class m10s_music(commands.Cog):
 
     @music_group.command(name="play", aliases=["p"], description="楽曲を再生します。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     @app_commands.describe(text = "楽曲を特定するためのもの(検索ワード/URL/memo:[メモ名]/list:[リスト名]/activity:[ユーザーID] ([]は省略))")
     async def play_(self, ctx:commands.Context, *, text: Optional[str]="", file:Optional[discord.Attachment]=None):
         async with ctx.typing():
@@ -490,6 +495,7 @@ class m10s_music(commands.Cog):
 
     @music_group.command(description="曲をスキップします。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def skip(self, ctx:commands.Context, index:Optional[int]=1):
         minfo = ut.get_vmusic(self.bot, ctx.author)
         if ctx.author.voice and ctx.voice_client and ctx.voice_client.is_playing():
@@ -509,6 +515,7 @@ class m10s_music(commands.Cog):
 
     @music_group.command(name="volume",aliases=["chvol","vol"], description="ボリュームを変更します。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     @app_commands.describe(vol="調整する音量(%)")
     async def chvol(self, ctx, vol: float):
         minfo = ut.get_vmusic(self.bot, ctx.author)
@@ -529,6 +536,7 @@ class m10s_music(commands.Cog):
 
     @music_group.command(aliases=["np"], description="再生中楽曲について表示します。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def playingmusic(self, ctx):
         minfo = ut.get_vmusic(self.bot, ctx.author)
         if ctx.author.voice and ctx.voice_client and ctx.voice_client.is_playing():
@@ -551,6 +559,7 @@ class m10s_music(commands.Cog):
 
     @music_group.command(aliases=["plist", "view_q"], description="楽曲キューを表示します。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     @app_commands.describe(pg="始めに表示するページ(1ページ当たり5項目)")
     async def queue(self, ctx, pg:Optional[int]=1):
         if ctx.voice_client is None:
@@ -602,6 +611,7 @@ class m10s_music(commands.Cog):
 
     @music_group.command(aliases=["loop", "repeat"], description="ループ状況の確認や変更ができます。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     @app_commands.describe(is_enable="ループを有効にするかどうか")
     async def loop_q(self, ctx, is_enable:Optional[bool]=None):
         minfo = ut.get_vmusic(self.bot, ctx.author)
@@ -630,6 +640,7 @@ class m10s_music(commands.Cog):
 
     @music_group.command(name="panel_update", aliases=["pupdate"], description="楽曲パネルの更新/再生成を行います。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def pupdate(self, ctx):
         await self.panel_update(ctx.guild.id, ctx.voice_client, True)
         await ctx.send("パネルを強制的に更新しました。", )
@@ -671,6 +682,7 @@ class m10s_music(commands.Cog):
 
     @music_group.command(name="shuffle", description="キューの中身をシャッフルします。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def shuffle_(self, ctx):
         minfo = ut.get_vmusic(self.bot, ctx.author)
         if ctx.voice_client and ctx.author.voice:
@@ -701,6 +713,7 @@ class m10s_music(commands.Cog):
 
     @music_group.command(name="move_panel", description="音楽パネルをほかのチャンネルに移動させます。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     @app_commands.describe(move_to="移動先チャンネル")
     async def move_panel(self, ctx, move_to:discord.TextChannel):
         ebd = discord.Embed(title="思惟奈ちゃん-ミュージック操作パネル", color=self.bot.ec)
@@ -729,6 +742,7 @@ class m10s_music(commands.Cog):
     
     @music_group.command(name="remove", description="キューの特定番目から項目を取り除きます。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     @app_commands.describe(index="取り除く番目")
     async def _remove(self, ctx, index:int):
         minfo = ut.get_vmusic(self.bot, ctx.author)
@@ -768,11 +782,13 @@ class m10s_music(commands.Cog):
 
     @music_group.group(name="playlist_manager", description="音楽再生リストを管理できます。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def plist(self, ctx:commands.Context):
         pass
 
     @plist.command(name="check", description="すべてのプレイリストや、その中身を確認できます。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     @app_commands.describe(name="プレイリスト名")
     async def check_list(self, ctx:commands.Context, name:Optional[str]):
         pf = await self.bot.cursor.fetchone(
@@ -789,6 +805,7 @@ class m10s_music(commands.Cog):
 
     @plist.command(name="add", description="指定されたプレイリスト(存在しない場合は作成されます。)に、URLを追加できます。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     @app_commands.describe(name="プレイリスト名")
     @app_commands.describe(url="追加するURL")
     async def add_list(self, ctx:commands.Context, name:str, url:str):
@@ -807,6 +824,7 @@ class m10s_music(commands.Cog):
 
     @plist.command(name="remove", description="指定されたプレイリストから、項目を取り除きます。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     @app_commands.describe(name="プレイリスト名")
     @app_commands.describe(index="削除する項目の番目")
     async def remove_list(self, ctx:commands.Context, name:str, index:int):
@@ -823,6 +841,7 @@ class m10s_music(commands.Cog):
 
     @plist.command(name="delete", description="指定されたプレイリストを削除します。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     @app_commands.describe(name="プレイリスト名")
     async def delete_list(self, ctx:commands.Context, name:str):
         pf = await self.bot.cursor.fetchone(
@@ -837,6 +856,7 @@ class m10s_music(commands.Cog):
 
     @plist.command(name="get_queue", description="現在の再生キューを、そのまま新しいプレイリストにできます。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     @app_commands.describe(name="プレイリスト名")
     async def add_queue_to_list(self, ctx:commands.Context, name:str):
         if ctx.author.voice and self.bot.qu.get(str(ctx.guild.id),None):

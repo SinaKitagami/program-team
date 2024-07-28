@@ -16,6 +16,7 @@ class m10s_bmail(commands.Cog):
 
     @commands.hybrid_command(name="bottle-mail", aliases=["b-mail","bm"], description="ボトルメールをどこかのサーバーに送ることができます。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def b_mail(self, ctx:commands.Context):
         await ctx.send("DMをご確認ください。", ephemeral=True)
         dch = await ut.opendm(ctx.author)

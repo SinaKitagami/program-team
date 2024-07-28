@@ -18,10 +18,12 @@ class games(commands.Cog):
 
     @commands.hybrid_group(description="ゲーム関連コマンド")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def game(self, ctx):pass
 
     @game.command(name="hit_target", description="1から100までの数当てゲームです。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def game2(self, ctx):
         answer = random.randint(1, 100)
         await ctx.send(await ctx._("game2-ready"))
@@ -48,8 +50,10 @@ class games(commands.Cog):
 
     @game.command(name="near21", description="ブラックジャック風ゲームです。21に近づけた方の勝ちです。1or2人プレイ")
     @commands.bot_has_permissions(manage_messages=True, embed_links=True)
+    @app_commands.checks.bot_has_permissions(manage_messages=True, embed_links=True)
     @app_commands.describe(user2="2player-gameを遊ぶ相手(自分自身を選ぶことで誰でも参加可能な形で募集)")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def game1(self, ctx, user2: Optional[discord.Member]):
 
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
@@ -185,7 +189,9 @@ class games(commands.Cog):
 
     @game.command(name="fish",description="魚釣りです。")
     @commands.cooldown(1, 5, type=commands.BucketType.user)
+    @app_commands.checks.cooldown(1, 5)
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def fishany(self, ctx: commands.Context):
         lt = ["🦑", "🦐", "🐙", "🦀", "🐡", "🐠", "🐟"] + \
             [i.id for i in ctx.guild.emojis]

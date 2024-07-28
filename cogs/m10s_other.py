@@ -23,11 +23,13 @@ class other(commands.Cog):
 
     @commands.hybrid_command(name="support_server", description="思惟奈ちゃんサポートサーバーのURLを表示します。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def sinaguild(self, ctx):
         await ctx.send("サポートサーバー → https://discord.gg/vtn2V3v")
 
     @commands.command(aliases=["r", "返信", "引用"])
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def reply(self, ctx, id: int, *, text):
 
         m = await ctx.channel.fetch_message(id)
@@ -79,6 +81,7 @@ class other(commands.Cog):
 
     @commands.command(aliases=["クレジット", "クレジットを見せて"])
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def credit(self, ctx):
         await ctx.send(await ctx._("credit"))
 
@@ -102,6 +105,7 @@ class other(commands.Cog):
 
     @commands.hybrid_command(aliases=["ステータス", "あなたの情報を教えて"], description="思惟奈ちゃんについての色々を表示します。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=True)
     async def botinfo(self, ctx):
@@ -131,7 +135,9 @@ class other(commands.Cog):
     @commands.hybrid_command(name="return_text",aliases=["rt"], description="オウム返しします。")
     @app_commands.describe(te="オウム返しするテキスト")
     @commands.cooldown(1, 5, type=commands.BucketType.user)
+    @app_commands.checks.cooldown(1, 5)
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def rettext(self, ctx:commands.Context, *, te):
         e=discord.Embed(color=self.bot.ec)
         e.set_footer(text=f"requested by {ctx.author.nick or ctx.author}({ctx.author.id})",icon_url=ctx.author.display_avatar.replace(static_format="png").url)
@@ -144,7 +150,9 @@ class other(commands.Cog):
     @commands.hybrid_command(name="emoji_reaction",description="絵文字に応じたリアクションをとります。(一部絵文字のみ対応。存在しないものは運営に自動送信されて、いつか増えます。)")
     @app_commands.describe(emoji="絵文字")
     @commands.cooldown(1, 5, type=commands.BucketType.user)
+    @app_commands.checks.cooldown(1, 5)
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def eatit(self, ctx, emoji:str):
         it = emoji.replace(" ","")
         if await ctx.user_lang() == "ja":
@@ -197,6 +205,7 @@ class other(commands.Cog):
 
     @commands.hybrid_command(name="fortune", aliases=["おみくじ", "今日のおみくじをひく"], description="おみくじです。一日に何度でも引けます。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def fortune(self, ctx):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
               ctx.message.content)
@@ -205,6 +214,7 @@ class other(commands.Cog):
 
     @commands.hybrid_command(description="簡易メモ機能。音楽機能のプレイリストも兼ねています。(各行に1URLでプレイリスト扱い)")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     @discord.app_commands.choices(mode=[
             discord.app_commands.Choice(name="read_a_memo", value=0),
             discord.app_commands.Choice(name="write", value=1),
@@ -247,6 +257,7 @@ class other(commands.Cog):
 
     @commands.hybrid_command(name="textlocker", description="簡易テキスト暗号化/復号ツール")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def textlocker(self, ctx):
         if not await ctx.user_lang() == "ja":
             await ctx.send(await ctx._("cannot-run"))
@@ -327,6 +338,7 @@ class other(commands.Cog):
     @app_commands.describe(cou="1グループあたりの人数")
     @app_commands.describe(role="グループ分けするロール")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def rg(self, ctx, cou: int, role: Optional[discord.Role]):
 
         if role is None:

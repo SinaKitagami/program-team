@@ -29,6 +29,7 @@ class bot_help(commands.Cog):
     @commands.bot_has_permissions(embed_links=True, external_emojis=True, add_reactions=True)
     @app_commands.checks.bot_has_permissions(embed_links=True, external_emojis=True, add_reactions=True)
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def help(self, ctx, rcmd:str=None):
         e = discord.Embed(title="思惟奈ちゃんの使い方", description="基本的に、`/`を入力すると出てくる候補にあるコマンドのうち、思惟奈ちゃんのアイコンが表示されている物がすべてです。", color=self.bot.ec)
         e.add_field(name="グローバルチャットのバッジ", value="🌠:チーム☆思惟奈ちゃんメンバー\n💠:認証済みアカウント\n🔗パートナーサーバーオーナー\n🔧:グローバルチャットモデレーター\n🌟:スターユーザー(アカウント作成日制限を受けないユーザー)\n🔔:アルファテスター(一部機能の先行体験)\n🎫:有料支援者バッジ")
@@ -120,6 +121,7 @@ class bot_help(commands.Cog):
 
     @commands.command()
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def help_generate(self, ctx):
         self.bot.tmp_helps = {}
 

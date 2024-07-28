@@ -27,6 +27,7 @@ class m10s_remainder(commands.Cog):
     @app_commands.describe(send_text="リマインダーの文面")
     @app_commands.describe(mention_at="メンションする役職")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def set(self,ctx,send_text:str, mention_at:Optional[discord.Role]):
         rid = int(time.time())
         if mention_at:
@@ -44,6 +45,7 @@ class m10s_remainder(commands.Cog):
     @remainder.command(description="リマインダーの確認をします。")
     @app_commands.describe(rid="リマインダーのID")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def check(self,ctx,rid:Optional[int]):
         if rid:
             i = await self.bot.cursor.fetchone("select * from remaind where id = %s",(int(rid),))
@@ -111,6 +113,7 @@ class m10s_remainder(commands.Cog):
     @remainder.command(description="リマインダーを削除します。")
     @app_commands.describe(rid="リマインダーのID")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def delete(self,ctx,rid:int):
         await self.bot.cursor.execute("delete from remaind where id = %s",(rid,))
         await ctx.send("> リマインダー\n　該当IDを持ったリマインドがある場合、それを削除しました。")

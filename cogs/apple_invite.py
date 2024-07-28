@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands, tasks
+from discord import app_commands
 
 import m10s_util as ut
 
@@ -168,8 +169,12 @@ class AppleInviteCog(commands.Cog):
 
     @commands.command(hidden=True)
     @commands.guild_only()
+    @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
+    @app_commands.default_permissions(manage_guild=True, create_instant_invite=True)
     @commands.has_permissions(manage_guild=True, create_instant_invite=True)
+    @app_commands.checks.has_permissions(manage_guild=True, create_instant_invite=True)
     async def checkoffline(self, ctx):
         self._lock = True
         i = await ctx.channel.create_invite(max_uses=1, max_age=0, reason="temporary invite")

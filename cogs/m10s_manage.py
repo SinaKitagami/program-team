@@ -142,7 +142,9 @@ class manage(commands.Cog):
     @commands.hybrid_command(aliases=["メッセージ一括削除", "次の件数分、メッセージを消して"], description="メッセージ一括削除を行います。")
     @app_commands.describe(msgcount="削除する件数")
     @commands.cooldown(1, 15, type=commands.BucketType.guild)
+    @app_commands.checks.cooldown(1, 15, key=lambda i: (i.guild_id))
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def delmsgs(self, ctx:commands.Context, msgcount:int):
         if ctx.channel.permissions_for(ctx.guild.me).manage_messages and (ctx.channel.permissions_for(ctx.author).manage_messages or ctx.author.id == 404243934210949120):
             await ctx.defer(ephemeral=True)

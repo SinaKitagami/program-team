@@ -111,11 +111,13 @@ class levels(commands.Cog):
 
     @commands.hybrid_group(name="level", description="レベル関連の機能を表示します。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def level_group(self, ctx):
         pass
 
     @level_group.command(name="ranking", description="レベルランキングを表示します。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     @app_commands.describe(start_rank="開始順位")
     @app_commands.describe(end_rank="終了順位")
     async def level_ranking(self, ctx, start_rank:Optional[int]=1, end_rank:Optional[int]=10):
@@ -150,6 +152,7 @@ class levels(commands.Cog):
 
     @level_group.command(name="card_edit", description="レベルカードを変更します。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     @app_commands.choices(number=[
         app_commands.Choice(name="kazuta123_1",value=0),
         app_commands.Choice(name="kazuta123_2",value=1),
@@ -178,6 +181,7 @@ class levels(commands.Cog):
     
     @level_group.command(name="toggle_level_count", aliases=["switchlevelup","switchLevelup"], description="レベルカウントを切り替えます")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def switchlevelup(self, ctx):
         lvl = await self.bot.cursor.fetchone("select * from levels where guild_id=%s and user_id=%s", (ctx.guild.id, ctx.author.id))
 
@@ -192,8 +196,11 @@ class levels(commands.Cog):
 
     @level_group.command(name="card", description="レベルカードを表示します。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     @commands.cooldown(1, 20, type=commands.BucketType.user)
+    @app_commands.checks.cooldown(1, 20)
     @commands.bot_has_permissions(attach_files=True)
+    @app_commands.checks.bot_has_permissions(attach_files=True)
     async def level(self, ctx: commands.Context, tu: Optional[discord.Member]):
         if ctx.interaction:
             await ctx.defer()
@@ -297,12 +304,16 @@ class levels(commands.Cog):
 
     @commands.hybrid_group(name="level_reward", description="レベルに応じた役職付与の設定です。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
+    @app_commands.default_permissions(administrator=True)
     @commands.has_permissions(administrator=True)
+    @app_commands.checks.has_permissions(administrator=True)
     async def reward_cmds(self, ctx):
         pass
     
     @reward_cmds.command(name="sync", description="レベル役職を同期します。設定後に実行してください。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def lrewardupd(self, ctx):
         async with ctx.channel.typing():
             gs = await self.bot.cursor.fetchone(
@@ -329,6 +340,7 @@ class levels(commands.Cog):
 
     @reward_cmds.command(name="set", description="レベルに応じた役職を設定できます。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def levelreward(self, ctx, lv: int, rl:Optional[discord.Role]):
         if not(ctx.channel.permissions_for(ctx.author).manage_guild is True and ctx.channel.permissions_for(ctx.author).manage_roles is True or ctx.author.id == 404243934210949120):
             await ctx.send(await ctx._("need-admin"))
@@ -350,8 +362,11 @@ class levels(commands.Cog):
         await ctx.send(await ctx._("changed"))
 
     @commands.hybrid_group(name="level_edit", description="サーバーレベルを変更できます。")
+    @app_commands.default_permissions(administrator=True)
     @commands.has_permissions(administrator=True)
+    @app_commands.checks.has_permissions(administrator=True)
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def edit_level(self, ctx):
         if not ctx.invoked_subcommand:
             await ctx.reply("> サーバーレベル編集\n　`[user/role] add [メンバーor役職を特定できるもの] [追加するレベル] [オプション:追加する経験値]`:追加/減少\n　`[user/role] set [メンバーor役職を特定できるもの] [設定するレベル] [オプション:設定する経験値]`:設定")

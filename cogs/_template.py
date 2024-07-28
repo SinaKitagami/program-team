@@ -27,7 +27,9 @@ class ClassName(commands.Cog):
     async def cog_load(self):
         pass
 
-    @commands.command(name="pass")
+    @commands.hybrid_command(name="pass", description="")
+    @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def command(self, ctx, args):
         pass
 

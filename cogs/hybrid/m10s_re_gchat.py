@@ -79,9 +79,14 @@ class m10s_re_gchat(commands.Cog):
 
     @commands.hybrid_group(name="global_chat",short_doc="グローバルチャットの接続を切り替えます。")
     @commands.cooldown(1, 20, type=commands.BucketType.guild)
+    @app_commands.checks.cooldown(1, 20, key=lambda i:i.guild_id)
+    @app_commands.default_permissions(administrator=True)
     @commands.has_permissions(administrator=True)
     @commands.bot_has_permissions(manage_webhooks=True)
+    @app_commands.checks.has_permissions(administrator=True)
+    @app_commands.checks.bot_has_permissions(manage_webhooks=True)
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def gchat(self, ctx):
         if ctx.invoked_subcommand is None:
             await ctx.send("""> re_global_chat　
@@ -92,6 +97,7 @@ class m10s_re_gchat(commands.Cog):
     @gchat.command(description="グローバルチャットに接続します。")
     @app_commands.describe(name="グローバルチャット名。同じものを指定して接続したチャンネル同士がつながります。(デフォルト:main)")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def connect(self, ctx: commands.Context, *, name:str="main"):
         await ctx.defer(ephemeral=False)
         upf = await self.bot.cursor.fetchone(
@@ -172,6 +178,7 @@ class m10s_re_gchat(commands.Cog):
 
     @gchat.command(description="グローバルチャットから切断します。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def dconnect(self, ctx:commands.Context):
         await ctx.defer(ephemeral=True)
         cgch = await self.bot.cursor.fetchone("select * from gchat_cinfo where id = %s",(ctx.channel.id,))
@@ -198,6 +205,7 @@ class m10s_re_gchat(commands.Cog):
     @gchat.command(description="グローバルチャットに投稿されたメッセージについて確認します。")
     @app_commands.describe(globalchat_message_id="グローバルチャットに投稿されたメッセージのid")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def check_post(self, ctx, globalchat_message_id: str):
         gmid = int(globalchat_message_id)
         post = None
@@ -252,6 +260,7 @@ class m10s_re_gchat(commands.Cog):
     @gchat.command(description="グローバルチャットに接続しているチャンネル一覧を返します。")
     @app_commands.describe(name="接続先名(デフォルト:main)")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def gchinfo(self, ctx, name:Optional[str]="main"):
         gch = await self.bot.cursor.fetchone(
             "select * from gchat_clist where name = %s", (name,))
@@ -273,6 +282,7 @@ class m10s_re_gchat(commands.Cog):
     @gchat.command(aliases=["グローバルチャットの色を変える"],description="グローバルチャットの埋め込みカラーを変更できます。")
     @app_commands.describe(color="16進数の色コード")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def edit_color(self, ctx, color:str='0x000000'):
         await self.bot.cursor.execute(
             "UPDATE users SET gcolor = %s WHERE id = %s", (int(color, 16), ctx.author.id))
@@ -281,6 +291,7 @@ class m10s_re_gchat(commands.Cog):
     @gchat.command(aliases=["グローバルチャットのニックネームを変える"], description="グローバルチャットでの表示名を変更できます。")
     @app_commands.describe(nick="変更するニックネーム")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def edit_nick(self, ctx, nick:str):
         if 1 < len(nick) < 29:
             await self.bot.cursor.execute(
@@ -365,6 +376,7 @@ class m10s_re_gchat(commands.Cog):
 
     @gchat.command(description="グローバルチャットの利用ガイドを表示します。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def guide(self, ctx):
         embed = discord.Embed(description=self.bot.gguide, color=self.bot.ec)
         await ctx.send(embed=embed)

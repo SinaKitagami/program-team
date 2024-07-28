@@ -26,6 +26,7 @@ class info_check(commands.Cog):
 
     @commands.hybrid_group(name="information")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def info_group(self, ctx):
         pass
 
@@ -33,6 +34,7 @@ class info_check(commands.Cog):
     @app_commands.describe(target="表示するメンバー")
     @app_commands.describe(uid="表示する外部ユーザーのID")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def _info_of_user(self, ctx:commands.Context, target:Optional[discord.Member], uid:Optional[str]):
         if uid:
             uid = int(uid)
@@ -235,6 +237,7 @@ class info_check(commands.Cog):
 
     @info_group.command(name="server",aliases=["si"], description="サーバーについての情報を表示します。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def ginfo(self, ctx: commands.Context):
         u = ctx.author
         # b = ctx.guild.me
@@ -399,6 +402,7 @@ class info_check(commands.Cog):
     @info_group.command(name="role", aliases=["役職情報", "次の役職について教えて"], description="特定役職について表示します。")
     @app_commands.describe(role="表示する役職")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def roleinfo(self, ctx, *, role: discord.Role):
         if role.guild == ctx.guild:
             embed = discord.Embed(
@@ -465,6 +469,7 @@ class info_check(commands.Cog):
     @info_group.command(name="activity",description="アクティビティについて表示します。")
     @app_commands.describe(user="表示するユーザー")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def infoactivity(self, ctx, user: Optional[discord.Member]):
         mus = user
         if mus is None:
@@ -676,6 +681,7 @@ class info_check(commands.Cog):
     @info_group.command(name="channel", description="特定チャンネルについて表示する")
     @app_commands.describe(channel="表示するチャンネル")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def chinfo(self, ctx:commands.Context, channel:commands.GuildChannelConverter):
         try:
             if channel:
@@ -781,6 +787,7 @@ class info_check(commands.Cog):
     @info_group.command(name="emoji",description="絵文字に関して表示します。")
     @app_commands.describe(emj="詳細表示する絵文字")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def emojiinfo(self, ctx, *, emj: discord.Emoji):
         embed = discord.Embed(
             title=emj.name, description=f"id:{emj.id}", color=self.bot.ec)
@@ -800,6 +807,7 @@ class info_check(commands.Cog):
     @commands.hybrid_command(description="思惟奈ちゃんや他のBotの招待URLを作成できます。")
     @app_commands.describe(target="招待を作るBot")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def invite(self,ctx,*,target:Optional[discord.Member]):
         if target is None:
             target = ctx.guild.me
@@ -822,6 +830,7 @@ class info_check(commands.Cog):
 
     @commands.hybrid_command(description="このBotでの特権を表示します。")
     @ut.runnable_check()
+    @ut.runnable_check_for_appcmd()
     async def features(self, ctx:commands.Context):
         if ctx.interaction:
             await ctx.send(embed=ut.getEmbed("あなたのfeatures", "```{}```".format(",".join(self.bot.features.get(ctx.author.id, ["(なし)"])))), ephemeral=True)
