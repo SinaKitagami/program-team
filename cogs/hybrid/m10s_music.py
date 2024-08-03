@@ -32,7 +32,7 @@ m10s_music.py
 """
 
 ytdlopts = {
-    'proxy': 'http://proxy1.d1.rspsrv.jp:26020/',
+    # 'proxy': 'http://proxy1.d1.rspsrv.jp:26020/',
     'format': 'bestaudio/best',
     'outtmpl': 'musicfile/%(id)s',
     'restrictfilenames': True,
