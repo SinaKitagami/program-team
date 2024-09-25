@@ -475,7 +475,7 @@ class m10s_re_gchat(commands.Cog):
 
 
     @commands.Cog.listener()
-    async def on_message(self, m):
+    async def on_message(self, m: discord.Message):
         if m.channel.id in self.ignore_ch: #グローバルチャットの外部との相互連携作成時用
             return
         
@@ -510,6 +510,18 @@ class m10s_re_gchat(commands.Cog):
         #gchat_cinfo = await self.bot.cursor.fetchone()
 
         if gchat_info:
+
+            if upf["agree_to_gchat_tos"] == 0:
+                check_msg = await m.reply("グローバルチャットを利用するには[グローバルチャット利用規約](<https://home.sina-chan.com/legal/gchat-tos>)への同意が必要です。\n利用規約をご確認いただき、同意いただける場合は、✅を押してください。")
+                await check_msg.add_reaction("✅")
+                try:
+                    await self.bot.wait_for("reaction_add", check = lambda r,u: m.author.id == u.id and r.message.id == check_msg.id and str(r.emoji) == "✅", timeout=600)
+                except asyncio.TimeoutError:
+                    return await check_msg.edit("> タイムアウトしました。再度グローバルチャットを利用しようとした際に、再度、同意メッセージが表示されます。")
+                else:
+                    await self.bot.cursor.execute(
+                        "UPDATE users SET agree_to_gchat_tos = %s WHERE id = %s", (1, m.author.id))
+                    return await check_msg.edit("同意処理が完了しました。\n次のメッセージよりグローバルチャットに送信されます。")
 
             if upf["gban"] == 1:
                 if not gchat_info["connected_to"] in self.without_react:
