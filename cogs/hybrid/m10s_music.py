@@ -32,7 +32,7 @@ m10s_music.py
 """
 
 ytdlopts = {
-    'proxy': 'http://proxy1.d1.rspsrv.jp:26020/',
+    # 'proxy': 'http://proxy1.d1.rspsrv.jp:26020/',
     'format': 'bestaudio/best',
     'outtmpl': 'musicfile/%(id)s',
     'restrictfilenames': True,
@@ -352,7 +352,7 @@ class m10s_music(commands.Cog):
             for vurl in vurls:
                 vinfo = await self.gvinfo(vurl, getattr(message, "id", None), False)
                 if vinfo["extractor"] in ["youtube"]:
-                    if not("unlock_ytmusic" in self.bot.features[0]) and not("unlock_ytmusic" in self.bot.features[guild.id]):
+                    if not("unlock_ytmusic" in self.bot.features[0]) and not("unlock_ytmusic" in self.bot.features.get(guild.id, [])):
                         await sender.send("この動画ソースは、Discordの規約変更の影響でサポートが終了しました。\n各個人でダウンロード→ファイルアップロードを経由して再生することは可能ですが、自己責任となります。")
                         return
                         # await sender.send("この動画ソースは、Discordの規約変更の影響で近日中にサポートが打ち切られます。")
