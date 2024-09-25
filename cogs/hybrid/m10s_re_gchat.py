@@ -409,10 +409,47 @@ class m10s_re_gchat(commands.Cog):
                                 wh.delete_message(t[1])
                             )
                         )
-                await asyncio.gather(*tasks)
+                await asyncio.gather(*tasks, return_exceptions=True)
                 await ctx.send("削除が完了しました。")
             else:
                 await ctx.send("削除するコンテンツが見つかりませんでした。")
+        else:
+            await ctx.send("このコマンドは運営のみ実行できます。")
+
+    @commands.command()
+    @commands.cooldown(1, 60, type=commands.BucketType.user)
+    @ut.runnable_check()
+    async def bulk_globaldel(self, ctx, *gmids: list[int]):
+        upf = await self.bot.cursor.fetchone(
+            "select * from users where id=%s", (ctx.author.id,))
+        #upf = await self.bot.cursor.fetchone()
+        post = None
+        dats = await self.bot.cursor.fetchall("select * from gchat_pinfo")
+        #dats = await self.bot.cursor.fetchall()
+        if upf["gmod"]:
+            deleted_count = 0
+            for gmid in gmids:
+                for i in dats:
+                    if gmid in [j[1] for j in json.loads(i["allids"])] or gmid  == i["id"]:
+                        post = i
+                        break
+                if post:
+                    tasks = []
+                    for t in json.loads(post["allids"]):
+                        try:
+                            wh = await self.bot.fetch_webhook(t[0])
+                        except:
+                            continue
+                        else:
+                            tasks.append(
+                                asyncio.ensure_future(
+                                    wh.delete_message(t[1])
+                                )
+                            )
+                    await asyncio.gather(*tasks, return_exceptions=True)
+                    deleted_count+=1
+                    await asyncio.sleep(5)
+            await ctx.send(f"> 削除が完了しました。\n　{deleted_count}件")
         else:
             await ctx.send("このコマンドは運営のみ実行できます。")
 
