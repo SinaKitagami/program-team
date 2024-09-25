@@ -419,7 +419,7 @@ class m10s_re_gchat(commands.Cog):
     @commands.command()
     @commands.cooldown(1, 60, type=commands.BucketType.user)
     @ut.runnable_check()
-    async def bulk_globaldel(self, ctx, *gmids: list[int]):
+    async def bulk_globaldel(self, ctx, *gmids: int):
         upf = await self.bot.cursor.fetchone(
             "select * from users where id=%s", (ctx.author.id,))
         #upf = await self.bot.cursor.fetchone()
@@ -517,11 +517,11 @@ class m10s_re_gchat(commands.Cog):
                 try:
                     await self.bot.wait_for("reaction_add", check = lambda r,u: m.author.id == u.id and r.message.id == check_msg.id and str(r.emoji) == "✅", timeout=600)
                 except asyncio.TimeoutError:
-                    return await check_msg.edit("> タイムアウトしました。再度グローバルチャットを利用しようとした際に、再度、同意メッセージが表示されます。")
+                    return await check_msg.edit(content="> タイムアウトしました。再度グローバルチャットを利用しようとした際に、再度、同意メッセージが表示されます。")
                 else:
                     await self.bot.cursor.execute(
                         "UPDATE users SET agree_to_gchat_tos = %s WHERE id = %s", (1, m.author.id))
-                    return await check_msg.edit("同意処理が完了しました。\n次のメッセージよりグローバルチャットに送信されます。")
+                    return await check_msg.edit(content="同意処理が完了しました。\n次のメッセージよりグローバルチャットに送信されます。")
 
             if upf["gban"] == 1:
                 if not gchat_info["connected_to"] in self.without_react:
