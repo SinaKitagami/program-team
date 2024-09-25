@@ -387,8 +387,8 @@ async def domsg(message):
             return
         
         try:
-            await bot.cursor.execute("INSERT INTO users(id,prefix,gpoint,memo,levcard,onnotif,lang,sinapartner,gban,gnick,gcolor,gmod,gstar,galpha,gbanhist,online_agreed) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
-                        (message.author.id, "[]", 0, "{}", "m@ji☆", "[]", "ja", 0, 0, message.author.name, 0, 0, 0, 0, "なし",0))
+            await bot.cursor.execute("INSERT INTO users(id,prefix,gpoint,memo,levcard,onnotif,lang,sinapartner,gban,gnick,gcolor,gmod,gstar,galpha,gbanhist,online_agreed, agree_to_gchat_tos) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                        (message.author.id, "[]", 0, "{}", "m@ji☆", "[]", "ja", 0, 0, message.author.name, 0, 0, 0, 0, "なし", 0, 0))
         except Exception as exc:
             print(exc)
             

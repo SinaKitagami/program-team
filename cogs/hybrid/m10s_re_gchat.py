@@ -409,10 +409,47 @@ class m10s_re_gchat(commands.Cog):
                                 wh.delete_message(t[1])
                             )
                         )
-                await asyncio.gather(*tasks)
+                await asyncio.gather(*tasks, return_exceptions=True)
                 await ctx.send("削除が完了しました。")
             else:
                 await ctx.send("削除するコンテンツが見つかりませんでした。")
+        else:
+            await ctx.send("このコマンドは運営のみ実行できます。")
+
+    @commands.command()
+    @commands.cooldown(1, 60, type=commands.BucketType.user)
+    @ut.runnable_check()
+    async def bulk_globaldel(self, ctx, *gmids: int):
+        upf = await self.bot.cursor.fetchone(
+            "select * from users where id=%s", (ctx.author.id,))
+        #upf = await self.bot.cursor.fetchone()
+        post = None
+        dats = await self.bot.cursor.fetchall("select * from gchat_pinfo")
+        #dats = await self.bot.cursor.fetchall()
+        if upf["gmod"]:
+            deleted_count = 0
+            for gmid in gmids:
+                for i in dats:
+                    if gmid in [j[1] for j in json.loads(i["allids"])] or gmid  == i["id"]:
+                        post = i
+                        break
+                if post:
+                    tasks = []
+                    for t in json.loads(post["allids"]):
+                        try:
+                            wh = await self.bot.fetch_webhook(t[0])
+                        except:
+                            continue
+                        else:
+                            tasks.append(
+                                asyncio.ensure_future(
+                                    wh.delete_message(t[1])
+                                )
+                            )
+                    await asyncio.gather(*tasks, return_exceptions=True)
+                    deleted_count+=1
+                    await asyncio.sleep(5)
+            await ctx.send(f"> 削除が完了しました。\n　{deleted_count}件")
         else:
             await ctx.send("このコマンドは運営のみ実行できます。")
 
@@ -438,7 +475,7 @@ class m10s_re_gchat(commands.Cog):
 
 
     @commands.Cog.listener()
-    async def on_message(self, m):
+    async def on_message(self, m: discord.Message):
         if m.channel.id in self.ignore_ch: #グローバルチャットの外部との相互連携作成時用
             return
         
@@ -473,6 +510,18 @@ class m10s_re_gchat(commands.Cog):
         #gchat_cinfo = await self.bot.cursor.fetchone()
 
         if gchat_info:
+
+            if upf["agree_to_gchat_tos"] == 0:
+                check_msg = await m.reply("グローバルチャットを利用するには[グローバルチャット利用規約](<https://home.sina-chan.com/legal/gchat-tos>)への同意が必要です。\n利用規約をご確認いただき、同意いただける場合は、✅を押してください。")
+                await check_msg.add_reaction("✅")
+                try:
+                    await self.bot.wait_for("reaction_add", check = lambda r,u: m.author.id == u.id and r.message.id == check_msg.id and str(r.emoji) == "✅", timeout=600)
+                except asyncio.TimeoutError:
+                    return await check_msg.edit(content="> タイムアウトしました。再度グローバルチャットを利用しようとした際に、再度、同意メッセージが表示されます。")
+                else:
+                    await self.bot.cursor.execute(
+                        "UPDATE users SET agree_to_gchat_tos = %s WHERE id = %s", (1, m.author.id))
+                    return await check_msg.edit(content="同意処理が完了しました。\n次のメッセージよりグローバルチャットに送信されます。")
 
             if upf["gban"] == 1:
                 if not gchat_info["connected_to"] in self.without_react:
