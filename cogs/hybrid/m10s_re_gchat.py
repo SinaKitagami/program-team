@@ -512,7 +512,7 @@ class m10s_re_gchat(commands.Cog):
         if gchat_info:
 
             gch = await self.bot.cursor.fetchone(
-            "select * from gchat_clist where name = %s", (name,))
+            "select * from gchat_clist where name = %s", (gchat_info["connected_to"],))
 
             bypass_reacts = False
             if gchat_info["connected_to"] in self.without_react:
