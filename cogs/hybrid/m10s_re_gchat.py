@@ -520,10 +520,6 @@ class m10s_re_gchat(commands.Cog):
             elif gch["bypass"] == 1:
                 bypass_reacts = True
 
-        
-
-        
-
             if upf["agree_to_gchat_tos"] == 0:
                 if not bypass_reacts:
                     check_msg = await m.reply("グローバルチャットを利用するには[グローバルチャット利用規約](<https://home.sina-chan.com/legal/gchat-tos>)への同意が必要です。\n利用規約をご確認いただき、同意いただける場合は、✅を押してください。")

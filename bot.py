@@ -420,7 +420,10 @@ async def domsg(message):
     ]
     await asyncio.gather(*tks)
 
-    tpf = json.loads(pf["prefix"]) + json.loads(gs["prefix"])
+    try:
+        tpf = json.loads(pf["prefix"]) + json.loads(gs["prefix"])
+    except:
+        tpf = []
     if not ("disable_defprefix" in json.loads(gs["lockcom"])):
         tpf.insert(0,"s-")
     bot.command_prefix = tpf
