@@ -19,7 +19,7 @@ from checker import MaliciousInput, content_checker
 """
 
 bot.cursor.execute(
-    "CREATE TABLE IF NOT EXISTS gchat_clist(name text PRIMARY KEY NOT NULL,pass text)")
+    "CREATE TABLE IF NOT EXISTS gchat_clist(name text PRIMARY KEY NOT NULL,pass text, bypass integer not null)")
 bot.cursor.execute(
     "CREATE TABLE IF NOT EXISTS gchat_cinfo(id integer PRIMARY KEY NOT NULL,connected_to text NOT NULL, wh_id integer NOT NULL)")
 bot.cursor.execute(
@@ -511,8 +511,21 @@ class m10s_re_gchat(commands.Cog):
 
         if gchat_info:
 
+            gch = await self.bot.cursor.fetchone(
+            "select * from gchat_clist where name = %s", (gchat_info["connected_to"],))
+
+            bypass_reacts = False
+            if gchat_info["connected_to"] in self.without_react:
+                bypass_reacts = True
+            elif gch["bypass"] == 1:
+                bypass_reacts = True
+
+        
+
+        
+
             if upf["agree_to_gchat_tos"] == 0:
-                if not gchat_info["connected_to"] in self.without_react:
+                if not bypass_reacts:
                     check_msg = await m.reply("グローバルチャットを利用するには[グローバルチャット利用規約](<https://home.sina-chan.com/legal/gchat-tos>)への同意が必要です。\n利用規約をご確認いただき、同意いただける場合は、✅を押してください。")
                     await check_msg.add_reaction("✅")
                     try:
@@ -525,7 +538,7 @@ class m10s_re_gchat(commands.Cog):
                         return await check_msg.edit(content="同意処理が完了しました。\n次のメッセージよりグローバルチャットに送信されます。")
 
             if upf["gban"] == 1:
-                if not gchat_info["connected_to"] in self.without_react:
+                if not bypass_reacts:
 
                     dc = await ut.opendm(m.author)
                     await dc.send(await self.bot._(m.author, "global-banned", m.author.mention))
@@ -537,7 +550,7 @@ class m10s_re_gchat(commands.Cog):
 
             if (datetime.datetime.now(datetime.timezone.utc) - rdelta(days=7) >= m.author.created_at) or upf["gmod"] or upf["gstar"]:
                 
-                if not gchat_info["connected_to"] in self.without_react:
+                if not bypass_reacts:
                     try:
                         content_checker(self.bot, m)
                     except MaliciousInput as err:
@@ -545,7 +558,7 @@ class m10s_re_gchat(commands.Cog):
                         return
 
                 try:
-                    if not gchat_info["connected_to"] in self.without_react:
+                    if not bypass_reacts:
                         await m.add_reaction(self.bot.create_emoji_str('s_gch_sending',653161518346534912,True))
                 except:
                     pass
@@ -589,7 +602,7 @@ class m10s_re_gchat(commands.Cog):
                     else:
                         status_embed.add_field(name="メッセージへの返信",value="(このメッセージは削除されている等で取得できません。)")
 
-                if status_embed_has_content == False or gchat_info["connected_to"] in self.without_react:
+                if status_embed_has_content == False or bypass_reacts:
                     embeds = []
                 else:
                     embeds = [status_embed]
@@ -649,7 +662,7 @@ class m10s_re_gchat(commands.Cog):
                             json.dumps(rtn), m.author.id, m.guild.id))
 
                 try:
-                    if not gchat_info["connected_to"] in self.without_react:
+                    if not bypass_reacts:
                         await m.remove_reaction(self.bot.create_emoji_str('s_gch_sending',653161518346534912,True),self.bot.user)
                         await m.add_reaction(self.bot.create_emoji_str('s_gch_sended',653161518195539975))
                         await asyncio.sleep(5)
