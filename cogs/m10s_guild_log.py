@@ -42,19 +42,23 @@ class m10s_guild_log(commands.Cog):
                 gpf = await self.bot.cursor.fetchone(
                     "select * from guilds where id=%s", (a.guild.id,))
                 #gpf = await self.bot.cursor.fetchone()
-                if gpf["sendlog"]:
-                    ch = self.bot.get_channel(gpf["sendlog"])
-                    if ch.guild.id == a.guild.id:
-                        await ch.send(embed=e)
+                try:
+                    if gpf and gpf["sendlog"]:
+                        ch = self.bot.get_channel(gpf["sendlog"])
+                        if ch.guild.id == a.guild.id:
+                            await ch.send(embed=e)
+                except:pass
             elif not b.pending == a.pending:
                 e.add_field(name="メンバースクリーニングの状態変更",value=f"メンバースクリーニング{'が再度要求されます。' if a.pending else 'を完了しました。'}")
                 gpf = await self.bot.cursor.fetchone(
                     "select * from guilds where id=%s", (a.guild.id,))
                 #gpf = await self.bot.cursor.fetchone()
-                if gpf["sendlog"]:
-                    ch = self.bot.get_channel(gpf["sendlog"])
-                    if ch.guild.id == a.guild.id:
-                        await ch.send(embed=e)
+                try:
+                    if gpf and gpf["sendlog"]:
+                        ch = self.bot.get_channel(gpf["sendlog"])
+                        if ch.guild.id == a.guild.id:
+                            await ch.send(embed=e)
+                except:pass
             elif not b.roles == a.roles:
                 if len(b.roles) > len(a.roles):
                     e.add_field(name="変更内容", value="役職除去")
@@ -67,10 +71,12 @@ class m10s_guild_log(commands.Cog):
                 gpf = await self.bot.cursor.fetchone(
                     "select * from guilds where id=%s", (a.guild.id,))
                 #gpf = await self.bot.cursor.fetchone()
-                if gpf["sendlog"]:
-                    ch = self.bot.get_channel(gpf["sendlog"])
-                    if ch.guild.id == a.guild.id:
-                        await ch.send(embed=e)
+                try:
+                    if gpf and gpf["sendlog"]:
+                        ch = self.bot.get_channel(gpf["sendlog"])
+                        if ch.guild.id == a.guild.id:
+                            await ch.send(embed=e)
+                except:pass
         except:
             pass
         # online notif are now handled in apple_onlinenotif
@@ -102,7 +108,7 @@ class m10s_guild_log(commands.Cog):
         gpf = await self.bot.cursor.fetchone("select * from guilds where id=%s", (member.guild.id,))
         #gpf = await self.bot.cursor.fetchone()
         try:
-            if gpf["sendlog"]:
+            if gpf and gpf["sendlog"]:
                 ch = self.bot.get_channel(gpf["sendlog"])
                 if ch.guild.id == member.guild.id:
                     await ch.send(embed=e)
@@ -133,13 +139,15 @@ class m10s_guild_log(commands.Cog):
         e.timestamp = datetime.datetime.now(datetime.timezone.utc)
         gpf = await self.bot.cursor.fetchone("select * from guilds where id=%s", (member.guild.id,))
         #gpf = await self.bot.cursor.fetchone()
-        if gpf["sendlog"]:
-            ch = self.bot.get_channel(gpf["sendlog"])
-            if ch.guild.id == member.guild.id:
-                await ch.send(embed=e)
-        """if member.guild.id == 611445741902364672:
-            c = self.bot.get_channel(613629308166209549)
-            await c.send(embed=e)"""
+        try:
+            if gpf and gpf["sendlog"]:
+                ch = self.bot.get_channel(gpf["sendlog"])
+                if ch.guild.id == member.guild.id:
+                    await ch.send(embed=e)
+            """if member.guild.id == 611445741902364672:
+                c = self.bot.get_channel(613629308166209549)
+                await c.send(embed=e)"""
+        except:pass
 
 
     @commands.Cog.listener()
@@ -151,10 +159,12 @@ class m10s_guild_log(commands.Cog):
         e.timestamp = datetime.datetime.now(datetime.timezone.utc)
         gpf = await self.bot.cursor.fetchone("select * from guilds where id=%s", (channel.guild.id,))
         #gpf = await self.bot.cursor.fetchone()
-        if gpf["sendlog"]:
-            ch = self.bot.get_channel(gpf["sendlog"])
-            if ch.guild.id == channel.guild.id:
-                await ch.send(embed=e)
+        try:
+            if gpf and gpf["sendlog"]:
+                ch = self.bot.get_channel(gpf["sendlog"])
+                if ch.guild.id == channel.guild.id:
+                    await ch.send(embed=e)
+        except:pass
 
 
     @commands.Cog.listener()
@@ -166,10 +176,12 @@ class m10s_guild_log(commands.Cog):
         e.timestamp = datetime.datetime.now(datetime.timezone.utc)
         gpf = await self.bot.cursor.fetchone("select * from guilds where id=%s", (role.guild.id,))
         #gpf = await self.bot.cursor.fetchone()
-        if gpf["sendlog"]:
-            ch = self.bot.get_channel(gpf["sendlog"])
-            if ch.guild.id == role.guild.id:
-                await ch.send(embed=e)
+        try:
+            if gpf and gpf["sendlog"]:
+                ch = self.bot.get_channel(gpf["sendlog"])
+                if ch.guild.id == role.guild.id:
+                    await ch.send(embed=e)
+        except:pass
 
 
     @commands.Cog.listener()
@@ -181,10 +193,12 @@ class m10s_guild_log(commands.Cog):
         e.timestamp = datetime.datetime.now(datetime.timezone.utc)
         gpf = await self.bot.cursor.fetchone("select * from guilds where id=%s", (role.guild.id,))
         #gpf = await self.bot.cursor.fetchone()
-        if gpf["sendlog"]:
-            ch = self.bot.get_channel(gpf["sendlog"])
-            if ch.guild.id == role.guild.id:
-                await ch.send(embed=e)
+        try:
+            if gpf and gpf["sendlog"]:
+                ch = self.bot.get_channel(gpf["sendlog"])
+                if ch.guild.id == role.guild.id:
+                    await ch.send(embed=e)
+        except:pass
 
 
     @commands.Cog.listener()
@@ -203,10 +217,12 @@ class m10s_guild_log(commands.Cog):
             gpf = await self.bot.cursor.fetchone(
                 "select * from guilds where id=%s", (after.guild.id,))
             #gpf = await self.bot.cursor.fetchone()
-            if gpf["sendlog"]:
-                ch = self.bot.get_channel(gpf["sendlog"])
-                if ch.guild.id == after.guild.id:
-                    await ch.send(embed=e)
+            try:
+                if gpf and gpf["sendlog"]:
+                    ch = self.bot.get_channel(gpf["sendlog"])
+                    if ch.guild.id == after.guild.id:
+                        await ch.send(embed=e)
+            except:pass
 
 
     @commands.Cog.listener()
@@ -219,10 +235,12 @@ class m10s_guild_log(commands.Cog):
         e.timestamp = datetime.datetime.now(datetime.timezone.utc)
         gpf = await self.bot.cursor.fetchone("select * from guilds where id=%s", (channel.guild.id,))
         #gpf = await self.bot.cursor.fetchone()
-        if gpf["sendlog"]:
-            ch = self.bot.get_channel(gpf["sendlog"])
-            if ch.guild.id == channel.guild.id:
-                await ch.send(embed=e)
+        try:
+            if gpf and gpf["sendlog"]:
+                ch = self.bot.get_channel(gpf["sendlog"])
+                if ch.guild.id == channel.guild.id:
+                    await ch.send(embed=e)
+        except:pass
 
 
     @commands.Cog.listener()
@@ -235,10 +253,12 @@ class m10s_guild_log(commands.Cog):
         e.timestamp = datetime.datetime.now(datetime.timezone.utc)
         gpf = await self.bot.cursor.fetchone("select * from guilds where id=%s", (message.guild.id,))
         #gpf = await self.bot.cursor.fetchone()
-        if gpf["sendlog"]:
-            ch = self.bot.get_channel(gpf["sendlog"])
-            if ch.guild.id == message.guild.id:
-                await ch.send(embed=e)
+        try:
+            if gpf and gpf["sendlog"]:
+                ch = self.bot.get_channel(gpf["sendlog"])
+                if ch.guild.id == message.guild.id:
+                    await ch.send(embed=e)
+        except:pass
 
 
     @commands.Cog.listener()
@@ -255,10 +275,12 @@ class m10s_guild_log(commands.Cog):
             gpf = await self.bot.cursor.fetchone("select * from guilds where id=%s",
                             (message.guild.id,))
             #gpf = await self.bot.cursor.fetchone()
-            if gpf["sendlog"]:
-                ch = self.bot.get_channel(gpf["sendlog"])
-                if ch.guild.id == message.guild.id:
-                    await ch.send(embed=e)
+            try:
+                if gpf and gpf["sendlog"]:
+                    ch = self.bot.get_channel(gpf["sendlog"])
+                    if ch.guild.id == message.guild.id:
+                        await ch.send(embed=e)
+            except:pass
 
 
     @commands.Cog.listener()
@@ -293,10 +315,12 @@ class m10s_guild_log(commands.Cog):
         gpf = await self.bot.cursor.fetchone("select * from guilds where id=%s",
                         (messages[0].guild.id,))
         #gpf = await self.bot.cursor.fetchone()
-        if gpf["sendlog"]:
-            ch = self.bot.get_channel(gpf["sendlog"])
-            if ch.guild.id == messages[0].guild.id:
-                await ch.send(embed=e,file=discord.File(fp="bulk_message_delete.txt"))
+        try:
+            if gpf and gpf["sendlog"]:
+                ch = self.bot.get_channel(gpf["sendlog"])
+                if ch.guild.id == messages[0].guild.id:
+                    await ch.send(embed=e,file=discord.File(fp="bulk_message_delete.txt"))
+        except:pass
 
 
     @commands.Cog.listener()
@@ -308,10 +332,12 @@ class m10s_guild_log(commands.Cog):
         e.timestamp = datetime.datetime.now(datetime.timezone.utc)
         gpf = await self.bot.cursor.fetchone("select * from guilds where id=%s", (channel.guild.id,))
         #gpf = await self.bot.cursor.fetchone()
-        if gpf["sendlog"]:
-            ch = self.bot.get_channel(gpf["sendlog"])
-            if ch.guild.id == channel.guild.id:
-                await ch.send(embed=e)
+        try:
+            if gpf and gpf["sendlog"]:
+                ch = self.bot.get_channel(gpf["sendlog"])
+                if ch.guild.id == channel.guild.id:
+                    await ch.send(embed=e)
+        except:pass
 
 
     @commands.Cog.listener()
@@ -328,10 +354,12 @@ class m10s_guild_log(commands.Cog):
                 gpf = await self.bot.cursor.fetchone(
                     "select %s", (a.guild.id,))
                 #gpf = await self.bot.cursor.fetchone()
-                if gpf["sendlog"]:
-                    ch = self.bot.get_channel(gpf["sendlog"])
-                    if ch.guild.id == a.guild.id:
-                        await ch.send(embed=e)
+                try:
+                    if gpf and gpf["sendlog"]:
+                        ch = self.bot.get_channel(gpf["sendlog"])
+                        if ch.guild.id == a.guild.id:
+                            await ch.send(embed=e)
+                except:pass
         elif a.position != b.position:
             pass
         elif not b.changed_roles == a.changed_roles:
@@ -339,10 +367,12 @@ class m10s_guild_log(commands.Cog):
             e.add_field(name="確認:", value="チャンネル設定を見てください。")
             gpf = await self.bot.cursor.fetchone("select * from guilds where id=%s", (a.guild.id,))
             #gpf = await self.bot.cursor.fetchone()
-            if gpf["sendlog"]:
-                ch = self.bot.get_channel(gpf["sendlog"])
-                if ch.guild.id == a.guild.id:
-                    await ch.send(embed=e)
+            try:
+                if gpf and gpf["sendlog"]:
+                    ch = self.bot.get_channel(gpf["sendlog"])
+                    if ch.guild.id == a.guild.id:
+                        await ch.send(embed=e)
+            except:pass
         elif isinstance(b, discord.TextChannel):
             if not b.topic == a.topic:
                 e.add_field(name="変更内容", value="チャンネルトピック")
@@ -351,10 +381,12 @@ class m10s_guild_log(commands.Cog):
                 gpf = await self.bot.cursor.fetchone(
                     "select * from guilds where id=%s", (a.guild.id,))
                 #gpf = await self.bot.cursor.fetchone()
-                if gpf["sendlog"]:
-                    ch = self.bot.get_channel(gpf["sendlog"])
-                    if ch.guild.id == a.guild.id:
-                        await ch.send(embed=e)
+                try:
+                    if gpf and gpf["sendlog"]:
+                        ch = self.bot.get_channel(gpf["sendlog"])
+                        if ch.guild.id == a.guild.id:
+                            await ch.send(embed=e)
+                except:pass
 
 
     @commands.Cog.listener()
@@ -369,15 +401,17 @@ class m10s_guild_log(commands.Cog):
             e.add_field(name="変更後", value=a.name)
             gpf = await self.bot.cursor.fetchone("select * from guilds where id=%s", (a.id,))
             #gpf = await self.bot.cursor.fetchone()
-            if gpf["sendlog"]:
-                ch = self.bot.get_channel(gpf["sendlog"])
-                if ch.guild.id == a.id:
-                    await ch.send(embed=e)
+            try:
+                if gpf and gpf["sendlog"]:
+                    ch = self.bot.get_channel(gpf["sendlog"])
+                    if ch.guild.id == a.id:
+                        await ch.send(embed=e)
+            except:pass
         elif b.icon != a.icon:
             e.add_field(name="変更内容", value="サーバーアイコン")
             gpf = await self.bot.cursor.fetchone("select * from guilds where id=%s", (a.id,))
             #gpf = await self.bot.cursor.fetchone()
-            if gpf["sendlog"]:
+            if gpf and gpf["sendlog"]:
                 ch = self.bot.get_channel(gpf["sendlog"])
                 if ch.guild.id == a.id:
                     await ch.send(embed=e)
@@ -387,10 +421,12 @@ class m10s_guild_log(commands.Cog):
             e.add_field(name="変更後", value=a.owner)
             gpf = await self.bot.cursor.fetchone("select * from guilds where id=%s", (a.id,))
             #gpf = await self.bot.cursor.fetchone()
-            if gpf["sendlog"]:
-                ch = self.bot.get_channel(gpf["sendlog"])
-                if ch.guild.id == a.id:
-                    await ch.send(embed=e)
+            try:
+                if gpf and gpf["sendlog"]:
+                    ch = self.bot.get_channel(gpf["sendlog"])
+                    if ch.guild.id == a.id:
+                        await ch.send(embed=e)
+            except:pass
 
 
     @commands.Cog.listener()
@@ -406,10 +442,12 @@ class m10s_guild_log(commands.Cog):
         e.timestamp = datetime.datetime.now(datetime.timezone.utc)
         gpf = await self.bot.cursor.fetchone("select * from guilds where id=%s", (g.id,))
         #gpf = await self.bot.cursor.fetchone()
-        if gpf["sendlog"]:
-            ch = self.bot.get_channel(gpf["sendlog"])
-            if ch.guild.id == g.id:
-                await ch.send(embed=e)
+        try:
+            if gpf and gpf["sendlog"]:
+                ch = self.bot.get_channel(gpf["sendlog"])
+                if ch.guild.id == g.id:
+                    await ch.send(embed=e)
+        except:pass
 
 
     @commands.Cog.listener()
@@ -421,10 +459,12 @@ class m10s_guild_log(commands.Cog):
         e.timestamp = datetime.datetime.now(datetime.timezone.utc)
         gpf = await self.bot.cursor.fetchone("select * from guilds where id=%s", (guild.id,))
         #gpf = await self.bot.cursor.fetchone()
-        if gpf["sendlog"]:
-            ch = self.bot.get_channel(gpf["sendlog"])
-            if ch.guild.id == guild.id:
-                await ch.send(embed=e)
+        try:
+            if gpf and gpf["sendlog"]:
+                ch = self.bot.get_channel(gpf["sendlog"])
+                if ch.guild.id == guild.id:
+                    await ch.send(embed=e)
+        except:pass
 
 
     @commands.Cog.listener()
@@ -496,10 +536,12 @@ class m10s_guild_log(commands.Cog):
         e.timestamp = datetime.datetime.now(datetime.timezone.utc)
         gpf = await self.bot.cursor.fetchone("select * from guilds where id=%s", (invite.guild.id,))
         #gpf = await self.bot.cursor.fetchone()
-        if gpf["sendlog"]:
-            ch = self.bot.get_channel(gpf["sendlog"])
-            if ch.guild.id == invite.guild.id:
-                await ch.send(embed=e)
+        try:
+            if gpf and gpf["sendlog"]:
+                ch = self.bot.get_channel(gpf["sendlog"])
+                if ch.guild.id == invite.guild.id:
+                    await ch.send(embed=e)
+        except:pass
 
 
     @commands.Cog.listener()
@@ -513,10 +555,12 @@ class m10s_guild_log(commands.Cog):
         e.timestamp = datetime.datetime.now(datetime.timezone.utc)
         gpf = await self.bot.cursor.fetchone("select * from guilds where id=%s", (invite.guild.id,))
         #gpf = await self.bot.cursor.fetchone()
-        if gpf["sendlog"]:
-            ch = self.bot.get_channel(gpf["sendlog"])
-            if ch.guild.id == invite.guild.id:
-                await ch.send(embed=e)
+        try:
+            if gpf and gpf["sendlog"]:
+                ch = self.bot.get_channel(gpf["sendlog"])
+                if ch.guild.id == invite.guild.id:
+                    await ch.send(embed=e)
+        except:pass
 
 
 async def setup(bot):
