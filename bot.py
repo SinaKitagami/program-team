@@ -450,7 +450,10 @@ async def runsercmd(message, gs, pf):
     # servercmd
     if "scom" not in json.loads(gs["lockcom"]):
         if not message.author.id == bot.user.id and message.webhook_id is None:
-            tpf = json.loads(pf["prefix"]) + json.loads(gs["prefix"])
+            try:
+                tpf = json.loads(pf["prefix"]) + json.loads(gs["prefix"])
+            except:
+                tpf = []
             tpf.append("s-")
             try:
                 if not json.loads(gs["commands"]) is None:
