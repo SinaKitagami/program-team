@@ -49,13 +49,13 @@ class m10s_act_role(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.cvtdict = {
-            "unknown":-1,
-            "playing":0,
-            "streaming":1,
-            "listening":2,
-            "watching":3,
-            "custom":4,
-            "competing":5
+            -1:"unknown",
+            0:"playing",
+            1:"streaming",
+            2:"listening",
+            3:"watching",
+            4:"custom",
+            5:"competing"
         }
 
     @commands.hybrid_command(name="activity_role_setting", description="プレイ中ステータスに応じた役職付与を受け付けるかどうか")
