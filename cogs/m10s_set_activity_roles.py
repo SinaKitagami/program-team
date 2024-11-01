@@ -92,16 +92,16 @@ class m10s_act_role(commands.Cog):
                 except:
                     await ctx.send("> エラー\n　アクティビティタイプが不明です。`s-help prole`を参考にしてください。")
             else:
-                rtn = await self.bot.cursor.fetchone("select * from activity_roles where guild_id = %s AND activity_type = %s", (ctx.guild.id,act_id))
+                rtn = await self.bot.cursor.fetchone("select * from activity_roles where guild_id = %s AND activity_type = %s", (ctx.guild.id,activity_type))
                 # await self.bot.cursor.execute()
                 if rtn:
                     if role:
-                        await self.bot.cursor.execute("UPDATE activity_roles SET role_id = %s WHERE guild_id = %s AND activity_type = %s",(role.id,ctx.guild.id,act_id))
+                        await self.bot.cursor.execute("UPDATE activity_roles SET role_id = %s WHERE guild_id = %s AND activity_type = %s",(role.id,ctx.guild.id,activity_type))
                     else:
-                        await self.bot.cursor.execute("DELETE FROM activity_roles WHERE guild_id = %s AND activity_type = %s",(ctx.guild.id,act_id))
+                        await self.bot.cursor.execute("DELETE FROM activity_roles WHERE guild_id = %s AND activity_type = %s",(ctx.guild.id,activity_type))
                 else:
                     if role:
-                        await self.bot.cursor.execute("INSERT INTO activity_roles(guild_id,activity_type,role_id) VALUES(%s,%s,%s)",(ctx.guild.id,act_id,role.id))
+                        await self.bot.cursor.execute("INSERT INTO activity_roles(guild_id,activity_type,role_id) VALUES(%s,%s,%s)",(ctx.guild.id,activity_type,role.id))
                 try:
                     await ctx.reply("> アクティビティロール\n　正常に登録/更新/削除が完了しました。")
                 except:
