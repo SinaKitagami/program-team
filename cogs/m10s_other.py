@@ -223,7 +223,7 @@ class other(commands.Cog):
     @app_commands.describe(mode="メモのモード")
     @app_commands.describe(memo_name="メモの名前")
     @app_commands.describe(memo_content="メモに書き込む内容")
-    async def memo(self, ctx, mode:int, memo_name:Optional[str]="default", *, memo_content:Optional[str]):
+    async def memo(self, ctx:commands.Context, mode:int, memo_name:Optional[str]="default", *, memo_content:Optional[str]):
         mn = memo_name
         ctt = memo_content
         mmj = await self.bot.cursor.fetchone(
@@ -233,11 +233,11 @@ class other(commands.Cog):
         if mode == 0:
             if not memos is None:
                 if memos.get(mn) is None:
-                    await ctx.send(await ctx._("memo-r-notfound1"))
+                    await ctx.send(await ctx._("memo-r-notfound1"), ephemeral=True)
                 else:
-                    await ctx.send(memos[mn].replace("@everyone", "everyone").replace("@here", "here"))
+                    await ctx.send(memos[mn].replace("@everyone", "everyone").replace("@here", "here"), ephemeral=True)
             else:
-                await ctx.send(await ctx._("memo-r-notfound2"))
+                await ctx.send(await ctx._("memo-r-notfound2"), ephemeral=True)
         elif mode == 1:
             if ctt is None:
                 memos[mn] = None
@@ -246,14 +246,14 @@ class other(commands.Cog):
             await self.bot.cursor.execute(
                 "UPDATE users SET memo = %s WHERE id = %s", (json.dumps(memos), ctx.author.id))
 
-            await ctx.send(await ctx._("memo-w-write", str(mn).replace("@everyone", "everyone").replace("@here", "here")))
+            await ctx.send(await ctx._("memo-w-write", str(mn).replace("@everyone", "everyone").replace("@here", "here")), ephemeral=True)
         elif mode == 2:
             if memos == {}:
-                await ctx.send(await ctx._("memo-a-notfound"))
+                await ctx.send(await ctx._("memo-a-notfound"), ephemeral=True)
             else:
-                await ctx.send(str(memos.keys()).replace("dict_keys(", await ctx._("memo-a-list")).replace(")", ""))
+                await ctx.send(str(memos.keys()).replace("dict_keys(", await ctx._("memo-a-list")).replace(")", ""), ephemeral=True)
         else:
-            await ctx.send(await ctx._("memo-except"))
+            await ctx.send(await ctx._("memo-except"), ephemeral=True)
 
     @commands.hybrid_command(name="textlocker", description="簡易テキスト暗号化/復号ツール")
     @ut.runnable_check()
