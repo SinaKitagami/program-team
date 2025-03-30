@@ -643,7 +643,9 @@ async def on_command_error(ctx, error):
             DoServercmd = False
             await ctx.send(embed=embed)
     el"""
-    if isinstance(error, commands.CommandOnCooldown):
+    if isinstance(error, commands.HybridCommandError):
+        error = error.original
+    if isinstance(error, (commands.CommandOnCooldown, app_commands.CommandOnCooldown)):
         # クールダウン
         embed = discord.Embed(title=await ctx._("cmd-error-t"), description=await ctx._(
             "cmd-cooldown-d", str(error.retry_after)[:4]), color=bot.ec)
@@ -660,14 +662,14 @@ async def on_command_error(ctx, error):
         embed = discord.Embed(title=await ctx._("cmd-error-t"),
                               description=await ctx._("pls-arg"), color=bot.ec)
         await ctx.send(embed=embed)
-    elif isinstance(error, commands.MissingPermissions):
+    elif isinstance(error, (commands.MissingPermissions, app_commands.MissingPermissions)):
         embed = discord.Embed(title=await ctx._("cmd-error-t"),
                               description=f"このコマンドの実行には、あなたに次の権限が必要です。\n```py\n{error.missing_perms}```", color=bot.ec)
         try:
             await ctx.send(embed=embed)
         except:
             await ctx.send(f'> {await ctx._("cmd-error-t")}\n　このコマンドの実行には、あなたに次の権限が必要です。\n```py\n{error.missing_perms}```')
-    elif isinstance(error, commands.BotMissingPermissions):
+    elif isinstance(error, (commands.BotMissingPermissions, app_commands.BotMissingPermissions)):
         embed = discord.Embed(title=await ctx._("cmd-error-t"),
                               description=f"このコマンドの実行には、Botに次の権限が必要です。\n```py\n{error.missing_perms}```", color=bot.ec)
         try:
