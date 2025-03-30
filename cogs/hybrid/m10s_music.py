@@ -716,6 +716,8 @@ class m10s_music(commands.Cog):
     @ut.runnable_check_for_appcmd()
     @app_commands.describe(move_to="移動先チャンネル")
     async def move_panel(self, ctx, move_to:discord.TextChannel):
+        if str(ctx.guild.id) not in self.bot.mp:
+            return await ctx.send(embed=discord.Embed(title="エラー", description="設置済みの音楽パネルが見つかりませんでした。", color=self.bot.ec), ephemeral=True)
         ebd = discord.Embed(title="思惟奈ちゃん-ミュージック操作パネル", color=self.bot.ec)
         ebd.add_field(name="再生中の曲:", value="未読み込み")
         ebd.add_field(name="次の曲:", value="未読み込み")
