@@ -51,7 +51,7 @@ class levels(commands.Cog):
             return"""
         if not m.guild:
             return
-        if message.is_system():
+        if m.is_system():
             return
         try:
             gs = await self.bot.cursor.fetchone("select * from guilds where id=%s", (m.guild.id,))
