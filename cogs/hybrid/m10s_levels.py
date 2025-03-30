@@ -43,13 +43,15 @@ class levels(commands.Cog):
                         pass
         await ctx.send("完了しました")
 
-        
+
 
     @commands.Cog.listener()
     async def on_message(self, m):
         """if not m.guild.id == 560434525277126656:
             return"""
         if not m.guild:
+            return
+        if message.is_system():
             return
         try:
             gs = await self.bot.cursor.fetchone("select * from guilds where id=%s", (m.guild.id,))
@@ -59,9 +61,9 @@ class levels(commands.Cog):
                 return
         except:
             pass
-            
+
         lvl = await self.bot.cursor.fetchone("select * from levels where guild_id=%s and user_id=%s", (m.guild.id, m.author.id))
-        
+
         if lvl:
             if lvl["is_level_count_enable"]:
                 if (int(time.time())-lvl["last_level_count"]) >= 60:
