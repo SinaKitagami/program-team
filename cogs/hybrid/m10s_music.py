@@ -642,6 +642,8 @@ class m10s_music(commands.Cog):
     @ut.runnable_check()
     @ut.runnable_check_for_appcmd()
     async def pupdate(self, ctx):
+        if str(ctx.guild.id) not in self.bot.mp:
+            return await ctx.send(embed=discord.Embed(title="エラー", description="設置済みの音楽パネルが見つかりませんでした。", color=self.bot.ec), ephemeral=True)
         await self.panel_update(ctx.guild.id, ctx.voice_client, True)
         await ctx.send("パネルを強制的に更新しました。", )
 
