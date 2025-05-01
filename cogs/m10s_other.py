@@ -132,76 +132,72 @@ class other(commands.Cog):
         embed.add_field(name="シャードステータス", value=f"このサーバーのシャード番号:{self.bot.shard_id}(全{self.bot.shard_count}個)")
         await ctx.send(embed=embed)
 
-    @commands.hybrid_command(name="return_text",aliases=["rt"], description="オウム返しします。")
+    @commands.hybrid_command(name="return_text", aliases=["rt"], description="オウム返しします。")
     @app_commands.describe(te="オウム返しするテキスト")
     @commands.cooldown(1, 5, type=commands.BucketType.user)
     @app_commands.checks.cooldown(1, 5)
     @ut.runnable_check()
     @ut.runnable_check_for_appcmd()
-    async def rettext(self, ctx:commands.Context, *, te):
-        e=discord.Embed(color=self.bot.ec)
-        e.set_footer(text=f"requested by {ctx.author.nick or ctx.author}({ctx.author.id})",icon_url=ctx.author.display_avatar.replace(static_format="png").url)
+    async def rettext(self, ctx: commands.Context, *, te):
+        e = discord.Embed(color=self.bot.ec)
+        e.set_footer(text=f"requested by {ctx.author.nick or ctx.author}({ctx.author.id})", icon_url=ctx.author.display_avatar.replace(static_format="png").url)
+        sanitized_text = discord.utils.escape_mentions(te)
         if ctx.interaction:
-            await ctx.send(te, allowed_mentions=discord.AllowedMentions.none())
+            await ctx.send(sanitized_text, allowed_mentions=discord.AllowedMentions.none())
         else:
-            await ctx.send(te, embed=e, allowed_mentions=discord.AllowedMentions.none())
+            await ctx.send(sanitized_text, embed=e, allowed_mentions=discord.AllowedMentions.none())
             await ctx.message.delete()
 
-    @commands.hybrid_command(name="emoji_reaction",description="絵文字に応じたリアクションをとります。(一部絵文字のみ対応。存在しないものは運営に自動送信されて、いつか増えます。)")
+    @commands.hybrid_command(name="emoji_reaction", description="絵文字に応じたリアクションをとります。(一部絵文字のみ対応。存在しないものは運営に自動送信されて、いつか増えます。)")
     @app_commands.describe(emoji="絵文字")
     @commands.cooldown(1, 5, type=commands.BucketType.user)
     @app_commands.checks.cooldown(1, 5)
     @ut.runnable_check()
     @ut.runnable_check_for_appcmd()
-    async def eatit(self, ctx, emoji:str):
-        it = emoji.replace(" ","")
+    async def eatit(self, ctx, emoji: str):
+        it = emoji.strip()
         if await ctx.user_lang() == "ja":
-            if await ctx._(f"er-{it}") == "":
+            response = await ctx._(f"er-{it}")
+            if not response:
                 await ctx.send(await ctx._("er-?"))
-                await (await self.bot.fetch_channel(993565802030698627)).send(f"> 思惟奈のわからない絵文字があったよ。`{str(emoji)}`")
+                log_channel = await self.bot.fetch_channel(993565802030698627)
+                await log_channel.send(f"> 思惟奈のわからない絵文字があったよ。`{discord.utils.escape_markdown(emoji)}`")
             else:
-                await ctx.send(await ctx._(f"er-{it}"))
+                await ctx.send(response)
         else:
             await ctx.send(await ctx._("cannot-run"))
-
 
     @commands.command(name="randomint", aliases=["randint", "乱数", "次の条件で乱数を作って"])
     @ut.runnable_check()
     async def randomint(self, ctx, *args):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
               ctx.message.content)
-        if len(args) == 1:
-            s = 1
-            e = 6
-            c = int(args[0])
-        elif len(args) == 2:
-            s = int(args[0])
-            e = int(args[1])
-            c = 1
-        elif len(args) == 3:
-            s = int(args[0])
-            e = int(args[1])
-            c = int(args[2])
-        else:
-            await ctx.send(await ctx._("randomint-arg-error"))
-            return
-        # try:
-        intcount = []
-        rnd = 0
-        if c >= 256:
-            c = 255
-        for i in range(c):
-            if s <= e:
-                tmp = random.randint(s, e)
-                intcount = intcount + [tmp]
-                rnd = rnd + tmp
+        try:
+            if len(args) == 1:
+                s, e, c = 1, 6, int(args[0])
+            elif len(args) == 2:
+                s, e, c = int(args[0]), int(args[1]), 1
+            elif len(args) == 3:
+                s, e, c = int(args[0]), int(args[1]), int(args[2])
             else:
-                tmp = random.randint(e, s)
-                intcount = intcount + [tmp]
-                rnd = rnd + tmp
-        await ctx.send(await ctx._("randomint-return1", str(s), str(e), str(c), str(rnd), str(intcount)))
-        # except:
-        # await ctx.send(await ctx._("randomint-return2"))
+                await ctx.send(await ctx._("randomint-arg-error"))
+                return
+
+            if c >= 256:
+                c = 255  # 制限を設定
+            intcount = []
+            rnd = 0
+            for _ in range(c):
+                tmp = random.randint(min(s, e), max(s, e))
+                intcount.append(tmp)
+                rnd += tmp
+
+            await ctx.send(await ctx._("randomint-return1", str(s), str(e), str(c), str(rnd), str(intcount)))
+        except ValueError:
+            await ctx.send(await ctx._("randomint-arg-error"))
+        except Exception as e:
+            print(f"Error in randomint: {e}")
+            await ctx.send(await ctx._("randomint-return2"))
 
     @commands.hybrid_command(name="fortune", aliases=["おみくじ", "今日のおみくじをひく"], description="おみくじです。一日に何度でも引けます。")
     @ut.runnable_check()
