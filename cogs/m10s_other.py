@@ -183,8 +183,8 @@ class other(commands.Cog):
                 await ctx.send(await ctx._("randomint-arg-error"))
                 return
 
-            if c >= 256:
-                c = 255  # 制限を設定
+            if c >= MAX_RANDOM_COUNT:
+                c = MAX_RANDOM_COUNT - 1  # 制限を設定
             intcount = []
             rnd = 0
             for _ in range(c):
