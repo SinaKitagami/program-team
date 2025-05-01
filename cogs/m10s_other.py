@@ -165,7 +165,7 @@ class other(commands.Cog):
             await ctx.send(await ctx._("cannot-run"))
 
 
-    @commands.command(name="randomint", liases=["randint", "乱数", "次の条件で乱数を作って"])
+    @commands.command(name="randomint", aliases=["randint", "乱数", "次の条件で乱数を作って"])
     @ut.runnable_check()
     async def randomint(self, ctx, *args):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
