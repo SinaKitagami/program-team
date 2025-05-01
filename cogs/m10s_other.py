@@ -165,7 +165,7 @@ class other(commands.Cog):
             await ctx.send(await ctx._("cannot-run"))
 
 
-    @commands.command(name="randomint", liases=["randint", "乱数", "次の条件で乱数を作って"])
+    @commands.command(name="randomint", aliases=["randint", "乱数", "次の条件で乱数を作って"])
     @ut.runnable_check()
     async def randomint(self, ctx, *args):
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
@@ -223,7 +223,7 @@ class other(commands.Cog):
     @app_commands.describe(mode="メモのモード")
     @app_commands.describe(memo_name="メモの名前")
     @app_commands.describe(memo_content="メモに書き込む内容")
-    async def memo(self, ctx, mode:int, memo_name:Optional[str]="default", *, memo_content:Optional[str]):
+    async def memo(self, ctx:commands.Context, mode:int, memo_name:Optional[str]="default", *, memo_content:Optional[str]):
         mn = memo_name
         ctt = memo_content
         mmj = await self.bot.cursor.fetchone(
@@ -233,11 +233,11 @@ class other(commands.Cog):
         if mode == 0:
             if not memos is None:
                 if memos.get(mn) is None:
-                    await ctx.send(await ctx._("memo-r-notfound1"))
+                    await ctx.send(await ctx._("memo-r-notfound1"), ephemeral=True)
                 else:
-                    await ctx.send(memos[mn].replace("@everyone", "everyone").replace("@here", "here"))
+                    await ctx.send(memos[mn].replace("@everyone", "everyone").replace("@here", "here"), ephemeral=True)
             else:
-                await ctx.send(await ctx._("memo-r-notfound2"))
+                await ctx.send(await ctx._("memo-r-notfound2"), ephemeral=True)
         elif mode == 1:
             if ctt is None:
                 memos[mn] = None
@@ -246,93 +246,14 @@ class other(commands.Cog):
             await self.bot.cursor.execute(
                 "UPDATE users SET memo = %s WHERE id = %s", (json.dumps(memos), ctx.author.id))
 
-            await ctx.send(await ctx._("memo-w-write", str(mn).replace("@everyone", "everyone").replace("@here", "here")))
+            await ctx.send(await ctx._("memo-w-write", str(mn).replace("@everyone", "everyone").replace("@here", "here")), ephemeral=True)
         elif mode == 2:
             if memos == {}:
-                await ctx.send(await ctx._("memo-a-notfound"))
+                await ctx.send(await ctx._("memo-a-notfound"), ephemeral=True)
             else:
-                await ctx.send(str(memos.keys()).replace("dict_keys(", await ctx._("memo-a-list")).replace(")", ""))
+                await ctx.send(str(memos.keys()).replace("dict_keys(", await ctx._("memo-a-list")).replace(")", ""), ephemeral=True)
         else:
-            await ctx.send(await ctx._("memo-except"))
-
-    @commands.hybrid_command(name="textlocker", description="簡易テキスト暗号化/復号ツール")
-    @ut.runnable_check()
-    @ut.runnable_check_for_appcmd()
-    async def textlocker(self, ctx):
-        if not await ctx.user_lang() == "ja":
-            await ctx.send(await ctx._("cannot-run"))
-            return
-
-        tl = self.bot.tl
-        dc = await ut.opendm(ctx.author)
-        askmd = await dc.send(embed=ut.getEmbed("テキスト暗号・複合", "暗号化する場合は🔒を、復号する場合は🔓を押してください。"))
-        await askmd.add_reaction('🔒')
-        await askmd.add_reaction('🔓')
-        try:
-            r, u = await self.bot.wait_for("reaction_add", check=lambda r, u: str(r.emoji) in ["🔒", "🔓"] and r.message.id == askmd.id and u.bot is False, timeout=60)
-        except asyncio.TimeoutError:
-            await ctx.send("タイムアウトしました。初めからやり直してください。")
-            return
-        if str(r.emoji) == "🔒":
-            setting = {}
-            rtxt = await ut.wait_message_return(ctx, "暗号化する文を送ってください。", dc)
-            setting["text"] = rtxt.content.lower()
-            rtxt = await ut.wait_message_return(ctx, "始めのずらしを送ってください。", dc)
-            setting["zs"] = int(rtxt.content)
-            rtxt = await ut.wait_message_return(ctx, "パターンを変えるまでの数を送ってください。", dc)
-            setting["cp"] = int(rtxt.content)
-            rtxt = await ut.wait_message_return(ctx, "変えるときのずらす数を送ってください。", dc)
-            setting["cpt"] = int(rtxt.content)
-            rtext = ""
-            tcount = 0
-            zcount = 0
-            uzs = setting["zs"]
-            while tcount <= len(setting["text"])-1:
-                zcount = zcount + 1
-                ztmp = tl.find(setting["text"][tcount])
-                if not ztmp == -1:
-                    if ztmp+uzs >= len(tl):
-                        rtext = f"{rtext}{tl[ztmp+uzs-len(tl)]}"
-                    else:
-                        rtext = f"{rtext}{tl[ztmp+uzs]}"
-                    if zcount == setting["cp"]:
-                        uzs = uzs + setting["cpt"]
-                        zcount = 0
-                else:
-                    rtext = f"{rtext}☒"
-                tcount = tcount + 1
-            await dc.send(f"`{rtext}`になりました。")
-        elif str(r.emoji) == "🔓":
-            setting = {}
-            rtxt = await ut.wait_message_return(ctx, "復号する文を送ってください。", dc)
-            setting["text"] = rtxt.content
-            rtxt = await ut.wait_message_return(ctx, "始めのずらしを送ってください。", dc)
-            setting["zs"] = int(rtxt.content)
-            rtxt = await ut.wait_message_return(ctx, "パターンを変えるまでの数を送ってください。", dc)
-            setting["cp"] = int(rtxt.content)
-            rtxt = await ut.wait_message_return(ctx, "変えるときのずらす数を送ってください。", dc)
-            setting["cpt"] = int(rtxt.content)
-            rtext = ""
-            tcount = 0
-            zcount = 0
-            uzs = setting["zs"]
-            while tcount <= len(setting["text"])-1:
-                zcount = zcount + 1
-                ztmp = tl.find(setting["text"][tcount])
-                if not ztmp == -1:
-                    if ztmp+uzs < 0:
-                        rtext = f"{rtext}{tl[ztmp-uzs+len(tl)]}"
-                    else:
-                        rtext = f"{rtext}{tl[ztmp-uzs]}"
-                    if zcount == setting["cp"]:
-                        uzs = uzs + setting["cpt"]
-                        zcount = 0
-                else:
-                    rtext = f"{rtext}☒"
-                tcount = tcount + 1
-            await dc.send(f"`{rtext}`になりました。")
-        else:
-            await ctx.send("絵文字が違います。")
+            await ctx.send(await ctx._("memo-except"), ephemeral=True)
 
     @commands.hybrid_command(name="create_random_group", description="ランダムなグループ分けを行えます。")
     @app_commands.describe(cou="1グループあたりの人数")
