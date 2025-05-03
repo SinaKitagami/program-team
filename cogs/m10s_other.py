@@ -264,7 +264,6 @@ class other(commands.Cog):
             ml = [m.mention for m in role.members if not m.bot]
             ogl = []
             gl = []
-            tmp = "hoge"
             while len(ml) >= cou:
                 for i in range(cou):
                     tmp = random.choice(ml)
