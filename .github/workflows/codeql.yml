@@ -24,6 +24,8 @@ jobs:
         include:
           - language: python
             build-mode: none
+          - language: actions
+            build-mode: none
           # "actions" は不要であれば削除可
           # - language: actions
           #   build-mode: none
