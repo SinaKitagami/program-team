@@ -24,7 +24,7 @@ body:
       description: 手順を番号付きで記載してください
       placeholder: |
         1. サーバに参加
-        2. !example を実行
+        2. /botinfo を実行
         3. エラーが発生する
     validations:
       required: true
@@ -49,8 +49,4 @@ body:
     attributes:
       label: エラーログ／スクリーンショット（任意）
       description: 可能であれば貼り付けてください
-      placeholder: |
-        ```py
-        Traceback (most recent call last):
-          ...
-        ```
+      placeholder: エラーIDなどを記載してください
