@@ -2,6 +2,7 @@ name: 質問・使い方相談
 description: Appの使い方やコードについて質問する
 title: "[質問] "
 labels: ["question"]
+assignees: mii-10, takumi0213
 body:
   - type: markdown
     attributes:

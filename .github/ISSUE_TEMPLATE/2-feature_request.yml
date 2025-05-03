@@ -2,6 +2,7 @@ name: 機能追加・改善の提案
 description: 新しい機能の提案や改善要望
 title: "[提案] "
 labels: ["enhancement"]
+assignees: mii-10, takumi0213
 body:
   - type: markdown
     attributes:
