@@ -35,6 +35,7 @@ body:
       label: 優先度
       description: この問題の緊急度・優先度を選択してください
       options:
+        - ''
         - 緊急
         - 高
         - 中
