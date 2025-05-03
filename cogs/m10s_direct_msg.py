@@ -35,7 +35,8 @@ class m10s_direct_msg(commands.Cog):
             try:
                 r,u = await self.bot.wait_for("reaction_add", timeout=30, check=lambda r,u:u.id == ctx.author.id and str(r.emoji) in ["⭕","❌"])
             except asyncio.TimeoutError:
-                await m.edit("タイムアウトしました。再度操作を行ってください。")
+                await m.edit(content="タイムアウトしました。再度操作を行ってください。")
+                return
             if str(r.emoji) == "⭕":
                 try:
                     await user.send(content)
