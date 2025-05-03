@@ -490,6 +490,7 @@ class info_check(commands.Cog):
                 "playinginfo-doing"), description=f"{lmsc['guild'].name}で、思惟奈ちゃんを使って[{lmsc['name']}]({lmsc['url']} )を聞いています", color=info.color)
             activs.append("思惟奈ちゃんでの音楽鑑賞")
             embeds.append(embed)
+        embed = discord.Embed(title=await ctx._("playinginfo-doing"), description=await ctx._("playinginfo-noActivity"), color=discord.Color.default())
         if info.activity is None:
             if str(info.status) == "offline":
                 embed = discord.Embed(title=await ctx._(
