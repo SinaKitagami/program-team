@@ -1,5 +1,5 @@
 name: バグ報告
-about: 動作不具合やエラーを報告します
+description: 動作不具合やエラーを報告します
 title: "[Bug Report]: "
 labels: [bug]
 body:
