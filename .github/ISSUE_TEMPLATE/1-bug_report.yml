@@ -1,0 +1,53 @@
+name: バグ報告
+description: 動作不具合やエラーを報告します
+title: "[バグ]: "
+labels: ["bug"]
+assignees: mii-10, takumi0213
+body:
+  - type: markdown
+    attributes:
+      value: |
+        🐞 **不具合の内容と再現手順をできるだけ詳しく記載してください。**
+  
+  - type: textarea
+    id: overview
+    attributes:
+      label: 不具合の概要
+      description: どのような問題が発生しましたか？
+      placeholder: 例）〇〇コマンドを実行するとエラーになります
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 再現手順
+      description: 手順を番号付きで記載してください
+      placeholder: |
+        1. サーバに参加
+        2. /botinfo を実行
+        3. エラーが発生する
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 優先度
+      description: この問題の緊急度・優先度を選択してください
+      options:
+        - ''
+        - 緊急
+        - 高
+        - 中
+        - 低
+        - 超低
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: エラーログ／スクリーンショット（任意）
+      description: 可能であれば貼り付けてください
+      placeholder: エラーIDなどを記載してください
