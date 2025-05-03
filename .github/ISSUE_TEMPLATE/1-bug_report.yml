@@ -2,6 +2,7 @@ name: バグ報告
 description: 動作不具合やエラーを報告します
 title: "[Bug Report]: "
 labels: [bug]
+assignees: mii-10, takumi0213
 body:
   - type: markdown
     attributes:

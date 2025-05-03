@@ -1,5 +1,5 @@
 name: 質問・使い方相談
-description: Botの使い方やコードについて質問する
+description: Appの使い方やコードについて質問する
 title: "[質問] "
 labels: ["question"]
 body:
