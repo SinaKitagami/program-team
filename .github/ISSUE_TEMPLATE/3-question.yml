@@ -1,0 +1,24 @@
+name: 質問・使い方相談
+description: Botの使い方やコードについて質問する
+title: "[質問] "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ❓ **困っていること、知りたいことを具体的に記載してください。**
+
+  - type: textarea
+    id: question
+    attributes:
+      label: 質問内容
+      description: どの機能／部分についての質問か、詳しく書いてください
+      placeholder: 例）〇〇コマンドの使い方がわかりません
+    validations:
+      required: true
+
+  - type: input
+    id: context
+    attributes:
+      label: 関連するファイルやコマンド（任意）
+      placeholder: 例）/game コマンド

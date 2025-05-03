@@ -1,0 +1,26 @@
+name: 機能追加・改善の提案
+description: 新しい機能の提案や改善要望
+title: "[提案] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: 機能の概要
+      description: どんな機能を追加／改善したいですか？
+      placeholder: 例）〇〇コマンドにフィルター機能を追加したい
+    validations:
+      required: true
+
+  - type: textarea
+    id: reason
+    attributes:
+      label: 背景や目的
+      description: なぜこの機能が必要ですか？具体的な理由があれば記載してください
+      placeholder: 例）結果が多すぎて探しにくいため
+
+  - type: textarea
+    id: other
+    attributes:
+      label: その他の情報（任意）
+      placeholder: 参考資料、画面例、似た機能など
