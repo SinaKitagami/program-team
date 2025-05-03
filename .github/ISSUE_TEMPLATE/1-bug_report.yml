@@ -2,8 +2,12 @@ name: バグ報告
 about: 動作不具合やエラーを報告します
 title: "[Bug Report]: "
 labels: [bug]
-assignees: mii-10, takumi0213
 body:
+  - type: markdown
+    attributes:
+      value: |
+        🐞 **不具合の内容と再現手順をできるだけ詳しく記載してください。**
+  
   - type: textarea
     id: overview
     attributes:

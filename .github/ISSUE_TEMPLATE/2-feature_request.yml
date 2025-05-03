@@ -3,6 +3,11 @@ description: 新しい機能の提案や改善要望
 title: "[提案] "
 labels: ["enhancement"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        ✨ **追加・改善してほしい機能について教えてください。**
+  
   - type: textarea
     id: summary
     attributes:
