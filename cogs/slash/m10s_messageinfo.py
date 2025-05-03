@@ -73,6 +73,8 @@ class m10s_messageinfo(commands.Cog):
                 chtype = f"{msg.channel.name}({msg.channel.id}):ボイスチャンネル内テキストチャット"
             elif isinstance(msg.channel, discord.Thread):
                 chtype = f"{msg.channel.name}({msg.channel.id}):テキストチャンネル内スレッド"
+            else:
+                chtype = "Unknown channel type"
             e.add_field(name="メッセージの送信先チャンネル", value=chtype, inline=False)
 
             if msg.type == discord.MessageType.reply:
