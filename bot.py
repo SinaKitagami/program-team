@@ -498,7 +498,7 @@ async def gahash(message, gs):
         pass
     if "shash" not in json.loads(gs["lockcom"]):
         ch = json.loads(gs["hash"])
-        if ch is not []:
+        if ch != []:
             menchan = message.channel_mentions
             for sch in menchan:
                 if sch.id in ch:
