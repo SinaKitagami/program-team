@@ -62,6 +62,7 @@ async def wait_message_return(ctx, stext, sto, tout=60):
 def get_vmusic(bot, member):
     mg = None
     mn = None
+    ml = False # Default value for ml
     mvc = None  # Initialize mvc to None
     for v in bot.voice_clients:
         vm_m = [i for i in v.channel.members if i.id == member.id]
