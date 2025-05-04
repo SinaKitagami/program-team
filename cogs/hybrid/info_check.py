@@ -530,8 +530,6 @@ class info_check(commands.Cog):
                             "playinginfo-doing"), description=await ctx._("playinginfo-onlyPhone"), color=info.color)
                         activs.append("スマートフォンクライアント")
                     else:
-                        embed = discord.Embed(title=await ctx._(
-                            "playinginfo-doing"), description=await ctx._("playinginfo-noActivity"), color=info.color)
                         activs.append("なにもしてない…のかな？")
             activ = info.activity
             embed.set_author(name=info.display_name,
