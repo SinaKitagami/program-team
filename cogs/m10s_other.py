@@ -272,7 +272,6 @@ class other(commands.Cog):
                     ml.remove(tmp)
                 gl.append(ogl)
                 ogl = []
-                tmp = "hoge"
             gtxt = "\n".join([f"{'、'.join(m)}" for m in gl])
             ng = ",".join(ml)
             await ctx.send(embed=discord.Embed(title=await ctx._("rg-title"), description=await ctx._("rg-desc", gtxt, ng), color=self.bot.ec))
