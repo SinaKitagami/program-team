@@ -75,7 +75,7 @@ def get_vmusic(bot, member):
                 break
             except:
                 pass
-    if mg and mn and mvc:  # Ensure mvc is not None
+    if mg and mn and mvc is not None:  # Ensure mvc is not None
         rtn = {
             "name": mn[0]["video_title"],
             "url": mn[0]["video_url"],
