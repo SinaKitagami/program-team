@@ -43,6 +43,8 @@ class Symmetry(commands.Cog):
             elif side == 3:
                 tmp1 = img.crop(
                     (0, img.size[0] // 2, img.size[0], img.size[1]))
+            else:
+                raise ValueError(f"Invalid value for 'side': {side}. Expected 0, 1, 2, or 3.")
             if side == 0 or side == 1:
                 tmp2 = ImageOps.mirror(tmp1)
                 dst = Image.new(
