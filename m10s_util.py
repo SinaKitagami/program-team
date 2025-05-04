@@ -62,7 +62,8 @@ async def wait_message_return(ctx, stext, sto, tout=60):
 def get_vmusic(bot, member):
     mg = None
     mn = None
-    ml = False  # Default value for ml
+    ml = False # Default value for ml
+    mvc = None  # Initialize mvc to None
     for v in bot.voice_clients:
         vm_m = [i for i in v.channel.members if i.id == member.id]
         if not vm_m == []:
@@ -74,7 +75,7 @@ def get_vmusic(bot, member):
                 break
             except:
                 pass
-    if mg and mn:
+    if mg and mn and mvc is not None:  # Ensure mvc is not None
         rtn = {
             "name": mn[0]["video_title"],
             "url": mn[0]["video_url"],
