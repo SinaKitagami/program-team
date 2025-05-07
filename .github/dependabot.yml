@@ -1,15 +1,10 @@
-# Basic `dependabot.yml` file with
-
 version: 2
 updates:
-  # Enable version updates for npm
   - package-ecosystem: "pip"
-    # Look for `package.json` and `lock` files in the `root` directory
     directory: "/"
-    # Check the npm registry for updates every day (weekdays)
     schedule:
       interval: "daily"
     labels:
       - "dependencies"
     rebase-strategy: "auto"
-    insecure-external-code-execution: allow
+    insecure-external-code-execution: deny
