@@ -11,14 +11,12 @@ beautifulsoup4
 braceexpand
 certifi
 chardet
-click
+click==8.1.7
 colorama
 Django
 dropbox
-google-api-python-client-py3
 gTTS
 idna
-idna-ssl
 import-expression
 isort
 jishaku
@@ -50,4 +48,3 @@ psutil
 google-api-python-client
 mutagen
 discord.py[voice]
-
