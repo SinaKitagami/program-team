@@ -29,7 +29,7 @@ google-auth==2.40.3
 google-auth-httplib2==0.2.0
 googleapis-common-protos==1.70.0
 gTTS==2.5.4
-httplib2==0.30.2
+httplib2==0.31.0
 idna==3.10
 import_expression==2.2.1.post1
 isort==6.0.1
