@@ -48,7 +48,7 @@ ply==3.11
 propcache==0.3.2
 proto-plus==1.26.1
 protobuf==6.32.1
-psutil==7.0.0
+psutil==7.1.0
 pyasn1==0.6.1
 pyasn1_modules==0.4.2
 pycparser==2.23
