@@ -3,8 +3,24 @@ updates:
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
-      interval: "daily"
-    labels:
-      - "dependencies"
+      interval: "cron"
+      cronjob: "0 */2 * * *"   # 2時間ごとにチェック
+      timezone: "Asia/Tokyo"
     rebase-strategy: "auto"
     insecure-external-code-execution: deny
+    labels: ["dependencies"]
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:15"
+      timezone: "Asia/Tokyo"
+    labels: ["ci", "dependencies"]
+    commit-message:
+      prefix: "ci-deps"
+      include: "scope"
