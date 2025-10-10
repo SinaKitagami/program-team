@@ -3,8 +3,8 @@ updates:
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
-      interval: "cron"
-      cronjob: "0 */2 * * *"   # 2時間ごとにチェック
+      interval: "daily"
+      time: "09:00"
       timezone: "Asia/Tokyo"
     rebase-strategy: "auto"
     insecure-external-code-execution: deny
