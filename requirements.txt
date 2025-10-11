@@ -19,7 +19,7 @@ charset-normalizer==3.4.3
 click==8.1.8
 colorama==0.4.6
 dill==0.4.0
-discord.py[voice]==2.6.3
+discord.py[voice]==2.6.4
 Django==5.2.7
 dropbox==12.0.2
 frozenlist==1.8.0
