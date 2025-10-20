@@ -12,6 +12,9 @@ updates:
     commit-message:
       prefix: "deps"
       include: "scope"
+    assignees:
+      - "takumi0213"
+    open-pull-requests-limit: 10
 
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -24,3 +27,6 @@ updates:
     commit-message:
       prefix: "ci-deps"
       include: "scope"
+    assignees:
+      - "takumi0213"
+    open-pull-requests-limit: 10
