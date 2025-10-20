@@ -12,6 +12,7 @@ updates:
     commit-message:
       prefix: "deps"
       include: "scope"
+    assignees: @takumi0213
 
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -24,3 +25,4 @@ updates:
     commit-message:
       prefix: "ci-deps"
       include: "scope"
+    assignees: @takumi0213
