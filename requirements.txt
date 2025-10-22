@@ -1,6 +1,6 @@
 aiohappyeyeballs==2.6.1
 aiohttp==3.13.1
-aiomysql==0.2.0
+aiomysql==0.3.2
 aiosignal==1.4.0
 aiosqlite==0.21.0
 asgiref==3.10.0
