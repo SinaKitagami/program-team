@@ -30,10 +30,18 @@ from checker import MaliciousInput, content_checker
 # tokens
 import config
 
-
 import logging
+import sys
 
 logging.basicConfig(filename = config.LOG_FILE, encoding='utf-8', format='%(asctime)s %(levelname)s:%(message)s', level=logging.INFO)
+
+syslogger = logging.getLogger()
+
+stdout_handler = logging.StreamHandler(sys.stdout)
+stdout_handler.setLevel(logging.INFO)
+stdout_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s:%(message)s'))
+
+syslogger.addHandler(stdout_handler)
 
 # logging.basicConfig(level=logging.DEBUG)
 
