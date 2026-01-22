@@ -4,8 +4,6 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-      time: "09:00"
-      timezone: "Asia/Tokyo"
     rebase-strategy: "auto"
     insecure-external-code-execution: deny
     labels: ["dependencies"]
@@ -20,9 +18,6 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "monday"
-      time: "09:15"
-      timezone: "Asia/Tokyo"
     labels: ["ci", "dependencies"]
     commit-message:
       prefix: "ci-deps"
