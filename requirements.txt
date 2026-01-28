@@ -11,7 +11,7 @@ attrs==25.4.0
 babel==2.17.0
 beautifulsoup4==4.14.3
 braceexpand==0.1.7
-cachetools==6.2.5
+cachetools==6.2.6
 certifi==2026.1.4
 cffi==2.0.0
 chardet==5.2.0
