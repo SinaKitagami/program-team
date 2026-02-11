@@ -40,9 +40,9 @@ MarkupSafe==3.0.3
 mccabe==0.7.0
 multidict==6.7.1
 mutagen==1.47.0
-mysql-connector-python==9.5.0
+mysql-connector-python==9.6.0
 packaging==26.0
-pillow==12.1.0
+pillow==12.1.1
 pip-review==1.3.0
 platformdirs==4.5.1
 ply==3.11
