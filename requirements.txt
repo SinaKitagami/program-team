@@ -4,7 +4,7 @@ aiomysql==0.3.2
 aiosignal==1.4.0
 aiosqlite==0.22.1
 asgiref==3.11.1
-astroid==4.0.3
+astroid==4.0.4
 astunparse==1.6.3
 async-timeout==5.0.1
 attrs==25.4.0
