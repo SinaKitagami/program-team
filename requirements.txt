@@ -14,7 +14,7 @@ braceexpand==0.1.7
 cachetools==7.0.1
 certifi==2026.1.4
 cffi==2.0.0
-chardet==5.2.0
+chardet==6.0.0.post1
 charset-normalizer==3.4.4
 click==8.1.8
 colorama==0.4.6
