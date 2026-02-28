@@ -12,7 +12,7 @@ babel==2.18.0
 beautifulsoup4==4.14.3
 braceexpand==0.1.7
 cachetools==7.0.1
-certifi==2026.1.4
+certifi==2026.2.25
 cffi==2.0.0
 chardet==6.0.0.post1
 charset-normalizer==3.4.4
