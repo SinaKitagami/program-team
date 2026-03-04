@@ -22,7 +22,7 @@ cryptography==46.0.5
 davey==0.1.4
 dill==0.4.1
 discord.py[voice]==2.7.0
-Django==6.0.2
+Django==6.0.3
 dropbox==12.0.2
 frozenlist==1.8.0
 google-api-core==2.30.0
