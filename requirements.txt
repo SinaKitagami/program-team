@@ -7,7 +7,7 @@ asgiref==3.11.1
 astroid==4.0.4
 astunparse==1.6.3
 async-timeout==5.0.1
-attrs==25.4.0
+attrs==26.1.0
 babel==2.18.0
 beautifulsoup4==4.14.3
 braceexpand==0.1.7
