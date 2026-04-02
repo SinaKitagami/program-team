@@ -141,12 +141,18 @@ async def main():
             logger.info("Starting bot in TEST mode")
             token = bot.BOT_TEST_TOKEN
         else:
-            raise ValueError(f"Invalid BOT_MODE: {mode}")
+         raise ValueError(f"Invalid BOT_MODE: {mode}")
+
+        if not token:
+            logger.error(
+                f"Discordボットのトークンが未設定です。（mode={mode}）"
+            )
+            raise SystemExit(1)
 
         await bot.start(token)
 
         # 通常トークン
-        # await bot.start(bot.BOT_TOKEN)
+        #await bot.start(bot.BOT_TOKEN)
 
         # テストトークン
         # await bot.start(bot.BOT_TEST_TOKEN)
