@@ -32,6 +32,7 @@ import config
 
 import logging
 import sys
+import os
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -86,6 +87,8 @@ bot.team_sina = config.team_sina
 
 bot.comlocks = {}
 
+mode = os.getenv("BOT_MODE", "test").lower()
+
 # トークンたち
 bot.BOT_TEST_TOKEN = config.BOT_TEST_TOKEN
 bot.BOT_TOKEN = config.BOT_TOKEN
@@ -131,12 +134,28 @@ async def main():
 
         bot.session = aiohttp.ClientSession(loop=bot.loop)
 
+        if mode == "prod":
+            logger.info("Starting bot in PROD mode")
+            token = bot.BOT_TOKEN
+        elif mode == "test":
+            logger.info("Starting bot in TEST mode")
+            token = bot.BOT_TEST_TOKEN
+        else:
+         raise ValueError(f"Invalid BOT_MODE: {mode}")
+
+        if not token:
+            logger.error(
+                f"Discordボットのトークンが未設定です。（mode={mode}）"
+            )
+            raise SystemExit(1)
+
+        await bot.start(token)
+
         # 通常トークン
-        await bot.start(bot.BOT_TOKEN)
+        #await bot.start(bot.BOT_TOKEN)
 
         # テストトークン
         # await bot.start(bot.BOT_TEST_TOKEN)
-
 
 bot._default_close = bot.close
 
