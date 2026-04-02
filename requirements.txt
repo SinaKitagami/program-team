@@ -15,7 +15,7 @@ cachetools==7.0.5
 certifi==2026.2.25
 cffi==2.0.0
 chardet==7.4.0.post2
-charset-normalizer==3.4.6
+charset-normalizer==3.4.7
 click==8.1.8
 colorama==0.4.6
 cryptography==46.0.6
