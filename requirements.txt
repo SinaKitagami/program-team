@@ -18,7 +18,7 @@ chardet==7.4.1
 charset-normalizer==3.4.7
 click==8.1.8
 colorama==0.4.6
-cryptography==46.0.7
+cryptography==47.0.0
 davey==0.1.5
 dill==0.4.1
 discord.py[voice]==2.7.1
