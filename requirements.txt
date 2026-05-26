@@ -16,7 +16,7 @@ certifi==2026.5.20
 cffi==2.0.0
 chardet==7.4.3
 charset-normalizer==3.4.7
-click==8.1.8
+click==8.4.1
 colorama==0.4.6
 cryptography==48.0.0
 davey==0.1.5
