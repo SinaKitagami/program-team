@@ -51,7 +51,7 @@ platformdirs==4.10.0
 ply==3.11
 propcache==0.5.2
 proto-plus==1.28.0
-protobuf==7.35.0
+protobuf==7.35.1
 psutil==7.2.2
 pyasn1==0.6.3
 pyasn1_modules==0.4.2
