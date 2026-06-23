@@ -19,7 +19,7 @@ charset-normalizer==3.4.7
 click==8.1.8
 colorama==0.4.6
 cryptography==49.0.0
-davey==0.1.5
+davey==0.1.6
 dill==0.4.1
 discord.py[voice]==2.7.1
 Django==6.0.6
