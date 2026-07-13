@@ -17,6 +17,8 @@ import aiohttp
 import aiosqlite
 import database
 
+from metrics import start_metrics_server, BOT_READY, BOT_GUILD_COUNT, BOT_LATENCY_SECONDS, BOT_SHARD_COUNT
+
 from twitter import *
 from dateutil.relativedelta import relativedelta as rdelta
 
@@ -133,6 +135,9 @@ async def main():
         await apple_foc.setup(bot)
 
         bot.session = aiohttp.ClientSession(loop=bot.loop)
+
+        # Prometheusメトリクスサーバー起動【今回追加・E-5】
+        start_metrics_server()
 
         if mode == "prod":
             logger.info("Starting bot in PROD mode")
@@ -279,6 +284,15 @@ async def cRPC():
     await bot.change_presence(status=discord.Status.online, activity=discord.Game(name=rpcs[rpcct].format(len(bot.guilds), len(bot.users), bot.shard_id)))
 
 
+# メトリクス定期更新タスク【今回追加・E-5】
+@tasks.loop(seconds=15)
+async def update_metrics():
+    BOT_READY.set(1 if bot.is_ready() else 0)
+    BOT_GUILD_COUNT.set(len(bot.guilds))
+    BOT_LATENCY_SECONDS.set(bot.latency)
+    BOT_SHARD_COUNT.set(bot.shard_count or 1)
+
+
 
 @bot.event
 async def on_ready():
@@ -290,6 +304,9 @@ async def on_ready():
     # aglch = await bot.fetch_channel(659706303521751072)
     # pmsgc = await bot.fetch_channel(676371380111015946)
     cRPC.start()
+    # メトリクス定期更新タスクの起動(二重起動防止)【今回追加・E-5】
+    if not update_metrics.is_running():
+        update_metrics.start()
     """invite_tweet.start()
     now_sina_tweet.start()"""
     await bot.load_extension("jishaku")
