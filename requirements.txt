@@ -23,7 +23,7 @@ davey==0.1.6
 dill==0.4.1
 discord.py[voice]==2.7.1
 Django==6.0.7
-dropbox==12.1.0
+dropbox==12.2.0
 frozenlist==1.8.0
 google-api-core==2.31.0
 google-api-python-client==2.198.0
