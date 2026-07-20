@@ -3,7 +3,7 @@ aiohttp==3.14.1
 aiomysql==0.3.2
 aiosignal==1.4.0
 aiosqlite==0.22.1
-asgiref==3.11.1
+asgiref==3.12.1
 astroid==4.0.4
 astunparse==1.6.3
 async-timeout==5.0.1
