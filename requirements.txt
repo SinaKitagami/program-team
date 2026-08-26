@@ -70,7 +70,7 @@ pytz==2026.3.post1
 requests==2.34.2
 rsa==4.9.1
 scratchapi2==1.5
-setuptools==83.0.0
+setuptools==84.0.0
 six==1.17.0
 soupsieve==2.9.1
 sqlparse==0.5.5
