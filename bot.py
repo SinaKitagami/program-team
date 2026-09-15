@@ -11,13 +11,23 @@ import wikipedia
 import wikidata.client
 import asyncio
 import datetime
+import time
 import traceback
 
 import aiohttp
 import aiosqlite
 import database
 
-from metrics import start_metrics_server, BOT_READY, BOT_GUILD_COUNT, BOT_LATENCY_SECONDS, BOT_SHARD_COUNT
+from metrics import (
+    start_metrics_server,
+    BOT_READY,
+    BOT_GUILD_COUNT,
+    BOT_LATENCY_SECONDS,
+    BOT_SHARD_COUNT,
+    BOT_COMMANDS_TOTAL,
+    BOT_COMMAND_ERRORS_TOTAL,
+    BOT_COMMAND_LATENCY_SECONDS,
+)
 
 from twitter import *
 from dateutil.relativedelta import relativedelta as rdelta
@@ -649,6 +659,7 @@ async def rtopic(ctx, ch:discord.TextChannel=None):
 
 @bot.event
 async def on_command(ctx:commands.Context):
+    ctx._t2_start = time.monotonic()
     if ctx.interaction:return
     ch = await bot.fetch_channel(693048961107230811)
     e = discord.Embed(title=f"prefixコマンド:{ctx.command.full_parent_name}の実行",
@@ -666,6 +677,15 @@ async def on_command(ctx:commands.Context):
     e.add_field(name="実行チャンネル", value=getattr(ctx.channel,"name", "DMでの実行"))
     e.timestamp = ctx.message.created_at
     await ch.send(embed=e)
+
+@bot.event
+async def on_command_completion(ctx:commands.Context):
+    command_name = ctx.command.qualified_name
+    cmd_type = "slash" if ctx.interaction else "prefix"
+    BOT_COMMANDS_TOTAL.labels(command=command_name, type=cmd_type).inc()
+    start = getattr(ctx, "_t2_start", None)
+    if start is not None:
+        BOT_COMMAND_LATENCY_SECONDS.labels(command=command_name, type=cmd_type).observe(time.monotonic() - start)
 
 @bot.event
 async def on_interaction(interaction:discord.Interaction):
@@ -698,6 +718,9 @@ async def on_command_error(ctx, error):
     el"""
     if isinstance(error, commands.HybridCommandError):
         error = error.original
+    command_name = ctx.command.qualified_name if ctx.command else "(unknown)"
+    cmd_type = "slash" if ctx.interaction else "prefix"
+    BOT_COMMAND_ERRORS_TOTAL.labels(command=command_name, type=cmd_type, error_type=type(error).__name__).inc()
     if isinstance(error, (commands.CommandOnCooldown, app_commands.CommandOnCooldown)):
         # クールダウン
         embed = discord.Embed(title=await ctx._("cmd-error-t"), description=await ctx._(
