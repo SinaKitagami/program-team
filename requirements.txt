@@ -41,7 +41,7 @@ Jinja2==3.1.6
 jishaku==2.7.5
 MarkupSafe==3.0.4
 mccabe==0.7.0
-multidict==7.2.0
+multidict==7.2.1
 mutagen==1.48.1
 mypy-extensions==1.1.0
 mysql-connector-python==26.10.0
