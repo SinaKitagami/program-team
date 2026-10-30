@@ -89,4 +89,4 @@ wheel==0.48.0
 Wikidata==0.9.0
 wikipedia==1.4.0
 yarl==1.25.1
-yt-dlp==2026.10.21
+yt-dlp==2026.10.26
