@@ -38,7 +38,7 @@ idna-ssl==1.1.0
 import_expression==2.2.1.post1
 isort==9.0.2
 Jinja2==3.1.6
-jishaku==2.7.5
+jishaku==2.8.0
 MarkupSafe==3.0.4
 mccabe==0.7.0
 multidict==7.2.0
