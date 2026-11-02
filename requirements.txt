@@ -68,7 +68,7 @@ PyQt5-Qt5==5.15.19
 PyQt5_sip==12.20.0
 PyScreeze==1.0.1
 python-dateutil==3.0.0
-pytz==2026.5
+pytz==2026.6
 requests==2.34.2
 rsa==4.9.1
 scratchapi2==1.5
