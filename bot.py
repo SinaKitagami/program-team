@@ -112,9 +112,6 @@ bot.T_Acs_Token = config.T_Acs_Token
 bot.T_Acs_SToken = config.T_Acs_SToken
 
 
-# test
-postcount = {}
-
 db = None
 
 async def db_setup():
@@ -399,17 +396,6 @@ async def on_message(message):
         return
     if message.author.id == bot.user.id:
         return
-    if postcount.get(str(message.guild.id), None) is None:
-        postcount[str(message.guild.id)] = 1
-    else:
-        postcount[str(message.guild.id)] += 1
-    # if message.content == "check_msgs":
-        # on_messageを呼ぶだけの処理がすぐに終わるかの確認
-        # with open("post_count.json", mode="w", encoding="utf-8") as f:
-            # json.dump(postcount, f, indent=4)
-        # await message.channel.send(file=discord.File("post_count.json"))
-    # db.files_download_to_file( "guildsetting.json" , "/guildsetting.json" )
-    # db.files_download_to_file( "profiles.json" , "/profiles.json" )
     tks = [
         domsg(message)
         # globalSend(message), グローバルチャットは進化した！ -> cogs.m10s_re_gchat
