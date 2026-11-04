@@ -17,6 +17,8 @@ import m10s_util as ut
 
 import time
 
+import os
+
 import random
 
 MAX_EXP = 2147483647
@@ -223,81 +225,95 @@ class levels(commands.Cog):
         if ctx.channel.permissions_for(ctx.guild.me).attach_files is True:
             lvl = await self.bot.cursor.fetchone("select * from levels where guild_id=%s and user_id=%s", (u.guild.id, u.id))
             if lvl:
-                async with ctx.message.channel.typing():
-                    nowl = lvl['level']
-                    exp = lvl['exp']
-                    nextl = min(nowl ** 3 + 20, MAX_EXP)
-                    tonextexp = nextl - exp
-                    nextl = str(nextl)
-                    tonextexp = str(tonextexp)
+                try:
+                    async with ctx.message.channel.typing():
+                        nowl = lvl['level']
+                        exp = lvl['exp']
+                        nextl = min(nowl ** 3 + 20, MAX_EXP)
+                        tonextexp = nextl - exp
+                        nextl = str(nextl)
+                        tonextexp = str(tonextexp)
+                        try:
+                            await u.display_avatar.replace(static_format="png").save("imgs/usericon.png")
+                            dlicon = Image.open('imgs/usericon.png', 'r')
+                        except:
+                            dlicon = Image.open('imgs/noimg.png', 'r')
+                        dlicon = dlicon.resize((100, 100))
+                        cv = None
+                        if ucb["banner"]:
+                            cb = "banner"
+                            banner_url = f'https://cdn.discordapp.com/banners/{u.id}/{ucb["banner"]}.png?size=640'
+                            async with self.bot.session.get(banner_url, headers=headers) as resp:
+                                resp.raise_for_status()
+                                bt = await resp.read()
+                                with open(f"imgs/custom_banner_{u.id}.png", mode="wb")as f:
+                                    f.write(bt)
+                            cv = Image.open(f"imgs/custom_banner_{u.id}.png", 'r')
+                            cv = cv.resize((640, 235))
+                        else:
+                            c = await self.bot.cursor.fetchone(
+                                "select * from users where id=%s", (u.id,))
+                            #c = await self.bot.cursor.fetchone()
+                            cb = c["levcard"] or "m@ji☆"
+                            cv = Image.open('imgs/'+cb+'.png', 'r') 
+                        cv.paste(dlicon, (200, 10))
+                        dt = ImageDraw.Draw(cv)
+                        fonta = ImageFont.truetype(LEVEL_FONT, 30)
+                        fontb = ImageFont.truetype(LEVEL_FONT, 42)
+                        fontc = ImageFont.truetype(LEVEL_FONT, 20)
+                        if len(u.display_name) > 11:
+                            etc = "…"
+                        else:
+                            etc = ""
+                        if cb == "kazuta123-a" or cb == "kazuta123-b" or cb == "kazuta123-c" or cb == "tomohiro0405":
+                            dt.text(
+                                (300, 60), u.display_name[0:10] + etc, font=fonta, fill='#ffffff')
+
+                            dt.text((50, 110), await ctx.l10n(
+                                u, "lc-level")+str(nowl), font=fontb, fill='#ffffff')
+
+                            dt.text((50, 170), await ctx.l10n(
+                                u, "lc-exp") + str(exp)+"/"+nextl, font=fonta, fill='#ffffff')
+
+                            dt.text((50, 210), await ctx.l10n(u, "lc-next") +
+                                    tonextexp, font=fontc, fill='#ffffff')
+                            
+                            if cb != "banner":
+                                dt.text((50, 300), await ctx.l10n(u, "lc-createdby", cb.replace("m@ji☆", "おあず").replace("kazuta123", "kazuta246").replace("-a", "").replace("-b", "").replace("-c", "")), font=fontc, fill='#ffffff')
+                        else:
+                            dt.text(
+                                (300, 60), u.display_name[0:10] + etc, font=fonta, fill='#000000')
+
+                            dt.text((50, 110), await ctx.l10n(
+                                u, "lc-level")+str(nowl), font=fontb, fill='#000000')
+
+                            dt.text((50, 170), await ctx.l10n(
+                                u, "lc-exp") + str(exp)+"/"+nextl, font=fonta, fill='#000000')
+
+                            dt.text((50, 210), await ctx.l10n(u, "lc-next") +
+                                    tonextexp, font=fontc, fill='#000000')
+
+                            if cb != "banner":
+                                dt.text((50, 300), await ctx.l10n(u, "lc-createdby", cb.replace("m@ji☆", "おあず").replace("kazuta123", "kazuta246").replace("-a", "").replace("-b", "").replace("-c", "")), font=fontc, fill='#000000')
+
+                        cv.save("imgs/sina'slevelcard.png", 'PNG')
+                    await ctx.send(file=discord.File("imgs/sina'slevelcard.png"))
+                finally:
                     try:
-                        await u.display_avatar.replace(static_format="png").save("imgs/usericon.png")
-                        dlicon = Image.open('imgs/usericon.png', 'r')
+                        os.remove("imgs/sina'slevelcard.png")
                     except:
-                        dlicon = Image.open('imgs/noimg.png', 'r')
-                    dlicon = dlicon.resize((100, 100))
-                    cv = None
-                    if ucb["banner"]:
-                        cb = "banner"
-                        banner_url = f'https://cdn.discordapp.com/banners/{u.id}/{ucb["banner"]}.png?size=640'
-                        async with self.bot.session.get(banner_url, headers=headers) as resp:
-                            resp.raise_for_status()
-                            bt = await resp.read()
-                            with open(f"imgs/custom_banner_{u.id}.png", mode="wb")as f:
-                                f.write(bt)
-                        cv = Image.open(f"imgs/custom_banner_{u.id}.png", 'r')
-                        cv = cv.resize((640, 235))
-                    else:
-                        c = await self.bot.cursor.fetchone(
-                            "select * from users where id=%s", (u.id,))
-                        #c = await self.bot.cursor.fetchone()
-                        cb = c["levcard"] or "m@ji☆"
-                        cv = Image.open('imgs/'+cb+'.png', 'r') 
-                    cv.paste(dlicon, (200, 10))
-                    dt = ImageDraw.Draw(cv)
-                    fonta = ImageFont.truetype(LEVEL_FONT, 30)
-                    fontb = ImageFont.truetype(LEVEL_FONT, 42)
-                    fontc = ImageFont.truetype(LEVEL_FONT, 20)
-                    if len(u.display_name) > 11:
-                        etc = "…"
-                    else:
-                        etc = ""
-                    if cb == "kazuta123-a" or cb == "kazuta123-b" or cb == "kazuta123-c" or cb == "tomohiro0405":
-                        dt.text(
-                            (300, 60), u.display_name[0:10] + etc, font=fonta, fill='#ffffff')
-
-                        dt.text((50, 110), await ctx.l10n(
-                            u, "lc-level")+str(nowl), font=fontb, fill='#ffffff')
-
-                        dt.text((50, 170), await ctx.l10n(
-                            u, "lc-exp") + str(exp)+"/"+nextl, font=fonta, fill='#ffffff')
-
-                        dt.text((50, 210), await ctx.l10n(u, "lc-next") +
-                                tonextexp, font=fontc, fill='#ffffff')
-                        
-                        if cb != "banner":
-                            dt.text((50, 300), await ctx.l10n(u, "lc-createdby", cb.replace("m@ji☆", "おあず").replace("kazuta123", "kazuta246").replace("-a", "").replace("-b", "").replace("-c", "")), font=fontc, fill='#ffffff')
-                    else:
-                        dt.text(
-                            (300, 60), u.display_name[0:10] + etc, font=fonta, fill='#000000')
-
-                        dt.text((50, 110), await ctx.l10n(
-                            u, "lc-level")+str(nowl), font=fontb, fill='#000000')
-
-                        dt.text((50, 170), await ctx.l10n(
-                            u, "lc-exp") + str(exp)+"/"+nextl, font=fonta, fill='#000000')
-
-                        dt.text((50, 210), await ctx.l10n(u, "lc-next") +
-                                tonextexp, font=fontc, fill='#000000')
-
-                        if cb != "banner":
-                            dt.text((50, 300), await ctx.l10n(u, "lc-createdby", cb.replace("m@ji☆", "おあず").replace("kazuta123", "kazuta246").replace("-a", "").replace("-b", "").replace("-c", "")), font=fontc, fill='#000000')
-
-                    cv.save("imgs/sina'slevelcard.png", 'PNG')
-                await ctx.send(file=discord.File("imgs/sina'slevelcard.png"))
+                        pass
+                    try:
+                        os.remove("imgs/usericon.png")
+                    except:
+                        pass
+                    if cb == "banner":
+                        try:
+                            os.remove(f"imgs/custom_banner_{u.id}.png")
+                        except:
+                            pass
             else:
                 await ctx.send(await ctx._("level-notcount"))
-                
         else:
             try:
                 await ctx.send(embed=discord.Embed(title=await ctx._("dhaveper"), description=await ctx._("per-sendfile")))
