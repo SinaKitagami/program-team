@@ -11,6 +11,7 @@ from dateutil.relativedelta import relativedelta as rdelta
 
 import m10s_util as ut
 
+import os
 
 class m10s_guild_log(commands.Cog):
     def __init__(self, bot):
@@ -321,6 +322,11 @@ class m10s_guild_log(commands.Cog):
                 if ch.guild.id == messages[0].guild.id:
                     await ch.send(embed=e,file=discord.File(fp="bulk_message_delete.txt"))
         except:pass
+        finally:
+            try:
+                os.remove("bulk_message_delete.txt")
+            except:
+                pass
 
 
     @commands.Cog.listener()
