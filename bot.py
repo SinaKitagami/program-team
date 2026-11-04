@@ -329,6 +329,8 @@ async def on_ready():
             "m10s_role_panel", "m10s_partners", "m10s_remainder", "m10s_set_activity_roles",
 
             "m10s_api", "m10s_app_metadata",
+
+            "cogs.m10s_tos_guide"
             
             # "__part_pjsekai_music_select"
             "slash.pjsekai_music_select", # 思惟奈ちゃんパートナー向け機能-ぱすこみゅ

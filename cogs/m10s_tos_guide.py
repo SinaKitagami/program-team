@@ -19,7 +19,7 @@ class m10s_tos_guide(commands.Cog):
     @ut.runnable_check()
     @ut.runnable_check_for_appcmd()
     async def tos_guide(self, ctx, args):
-        tos_url = ""
+        tos_url = "https://home.sina-chan.com/legal/tos"
         show_message = f"""
         **Botの利用規約/Guide on the bot's terms of service**
         本Botの利用規約は、次のURLからご覧いただけます。 : {tos_url}
@@ -31,8 +31,8 @@ class m10s_tos_guide(commands.Cog):
     @ut.runnable_check()
     @ut.runnable_check_for_appcmd()
     async def how_to_remove_my_data(self, ctx, args):
-        policy_url = ""
-        request_form_url = ""
+        policy_url = "https://home.sina-chan.com/legal/app-privacy-policy"
+        request_form_url = "https://forms.gle/4oaNGqFAMog2iuEL9"
         show_message = f"""
         **Botの保持しているデータを削除する方法/Guide on how to remove your data from the bot**
         本Botは、サービスの提供のために必要なデータを保持しています。
