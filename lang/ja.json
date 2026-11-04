@@ -266,7 +266,7 @@
     "help-3-t": "グローバルチャット",
     "help-3-d": "`globalguide`,`gchat`,`globalcolor`,`globalnick`,`gprofile`,`globalpost`,`gchinfo`",
     "help-4-t": "思惟奈について",
-    "help-4-d": "`sina-guild`,`cprofile`,`features`,`mutual_guilds`,`check_gban`,`credit`,`feedback`,`report`,`botinfo`,`team_sina-chan`,`vusers`,`ping`,`userprefix`,`rnotify`,`rtopic`,`userlang`,`Wecall`,`help`",
+    "help-4-d": "`sina-guild`,`cprofile`,`features`,`check_gban`,`credit`,`feedback`,`report`,`botinfo`,`team_sina-chan`,`vusers`,`ping`,`userprefix`,`rnotify`,`rtopic`,`userlang`,`Wecall`,`help`",
     "help-5-t": "検索",
     "help-5-d": "`twisearch`,`jwp`,`jpwt`,`gwd`,`youtube`,`jscrawiki`",
     "help-6-t": "Discord",
@@ -1377,14 +1377,6 @@
         "`s-features`",
         "詳しく",
         "あなたが特別に使える機能が一覧で表示されます。"
-    ],
-    "nh-mutual_guilds": [
-        "mutual_guildsについて",
-        "あ、あなたとこんなに同じサーバーにいるんだー。",
-        "使い方",
-        "`s-mutual_guilds`,`s-mutual_guilds [ユーザーID]`",
-        "詳しく",
-        "そのユーザーIDを持つユーザーと思惟奈ちゃんが、共通しているサーバーを表示します。"
     ],
     "nh-Authsetting": [
         "Authsettingについて",

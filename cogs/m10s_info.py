@@ -100,30 +100,6 @@ class info(commands.Cog):
     async def view_teammember(self, ctx):
         await ctx.send(embed=ut.getEmbed(await ctx._("team_sina-chan"), "\n".join([(await self.bot.fetch_user(i)).name for i in self.bot.team_sina])))
 
-    @commands.command()
-    @ut.runnable_check()
-    async def mutual_guilds(self, ctx, uid=None):
-        if ctx.author.id in self.bot.team_sina:
-            try:
-                user = await self.bot.fetch_user(int(uid))
-            except:
-                user = ctx.author
-            mg = []
-            for g in self.bot.guilds:
-                if g.get_member(user.id):
-                    mg += [f"{g.name}({g.id})"]
-            if mg != []:
-                t = "\n".join(mg)
-                e = discord.Embed(description=f"```{t}```", color=self.bot.ec)
-                e.set_author(name=f"思惟奈ちゃんと{user}の共通サーバー")
-                await ctx.send(embed=e)
-            else:
-                e = discord.Embed(description="なし", color=self.bot.ec)
-                e.set_author(name=f"思惟奈ちゃんと{user}の共通サーバー")
-                await ctx.send(embed=e)
-        else:
-            await ctx.reply("> 共通サーバーチェッカー\n　Discord公式の機能でチェックできるようになったため、このコマンドは運営専用になりました。プロフィールから確認してください。")
-
 
 async def setup(bot):
     await bot.add_cog(info(bot))
