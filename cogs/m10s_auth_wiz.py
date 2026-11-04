@@ -57,7 +57,10 @@ class m10s_auth_wiz(commands.Cog):
                             await m.add_roles(grl)
                     await msg.clear_reactions()
                 await m.add_roles(m.guild.get_role(auths["give_role"]))
-                await ch.send("> サーバーユーザー認証\n あなたの認証が完了しました！")
+                await ch.send("> サーバーユーザー認証\n あなたの認証が完了しました！\n10秒後にこのチャンネルは削除されます。")
+                if ch.permissions_for(m.guild.me).manage_messages:
+                    await asyncio.sleep(10)
+                    await ch.delete()
 
     @commands.hybrid_command(name="authsetting", aliases=["Auth","Authsettings"], description="簡易メンバー認証を作成できます。")
     @commands.has_permissions(administrator=True)
