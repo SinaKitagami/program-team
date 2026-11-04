@@ -3,7 +3,7 @@
 import datetime
 from typing import Optional
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 import asyncio
 from dateutil.relativedelta import relativedelta as rdelta
 
@@ -15,6 +15,9 @@ import m10s_util as ut
 import config
 
 from checker import MaliciousInput, content_checker
+
+# この日数を過ぎたデータについては、グローバルチャットの投稿情報を削除する。
+CLEANUP_CUTOFF = 30
 
 """
 
@@ -36,6 +39,12 @@ class m10s_re_gchat(commands.Cog):
         self.manage_category_id = 809280196192108564
         self.without_react = ["rsp_main-chat"]
         self.ignore_ch = []
+
+    async def cog_load(self):
+        await self.gchat_pinfo_cleaner.start()
+
+    async def cog_unload(self):
+        await self.gchat_pinfo_cleaner.cancel()
 
     async def gchat_send(self, to, fch, content, name, avatar, embeds=[], attachments=[]):
         tasks = []
@@ -724,6 +733,17 @@ class m10s_re_gchat(commands.Cog):
         if cgch:
             if not (cgch["wh_id"] in [i.id for i in await ch.webhooks()]):
                 await self.bot.cursor.execute("delete from gchat_cinfo where id = %s",(ch.id,))
+
+    @tasks.loop(time=datetime.time(hour=0, minute=0, tzinfo=datetime.timezone.utc))
+    async def gchat_pinfo_cleaner(self):
+        try:
+            cutoff = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=CLEANUP_CUTOFF)
+            cutoff_id = discord.utils.time_snowflake(cutoff)
+            await self.bot.cursor.execute(
+                "DELETE FROM gchat_pinfo WHERE id < %s", (cutoff_id,)
+            )
+        except Exception:
+            logging.exception("Error occurred while cleaning gchat_pinfo table.")
 
 
 async def setup(bot):
