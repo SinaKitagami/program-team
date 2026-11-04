@@ -386,10 +386,12 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
+    # 規約違反やデータ削除等の理由で、特定idのユーザー/サーバーのメッセージを早期リターンする
     if "cu:on_msg" in bot.features.get(message.author.id, []):
         return
     if "cu:on_msg" in bot.features.get(getattr(message.guild, "id", None), []):
         return
+    
     if isinstance(message.channel, discord.DMChannel):
         return
     if message.webhook_id:
@@ -401,8 +403,6 @@ async def on_message(message):
         # globalSend(message), グローバルチャットは進化した！ -> cogs.m10s_re_gchat
     ]
     await asyncio.gather(*tks)
-    # await domsg(message)
-    # await globalSend(message)
 
 
 async def domsg(message):
@@ -454,15 +454,6 @@ async def domsg(message):
 
     """await bot.cursor.execute(
     "CREATE TABLE IF NOT EXISTS actrole_optin(id integer PRIMARY KEY NOT NULL, is_enable integer NOT NULL default 0);")"""
-
-    data = await bot.cursor.fetchone("select * from actrole_optin where id=%s", (message.author.id,))
-    if not data:
-        if message.is_system():
-            return
-        await bot.cursor.execute("INSERT INTO actrole_optin(id,is_enable) VALUES(%s,%s)",
-                        (message.author.id, 0))
-        data = await bot.cursor.execute("select * from actrole_optin where id=%s",
-                        (message.author.id,))
 
 
     tks = [

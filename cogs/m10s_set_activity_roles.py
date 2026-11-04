@@ -63,7 +63,12 @@ class m10s_act_role(commands.Cog):
     @ut.runnable_check()
     @ut.runnable_check_for_appcmd()
     async def actrole_set(self, ctx, is_enable:bool):
-        await self.bot.cursor.execute("UPDATE actrole_optin SET is_enable = %s WHERE id = %s",(int(is_enable),ctx.author.id))
+        data = await self.bot.cursor.fetchone("select * from actrole_optin where id=%s", (ctx.author.id,))
+        if not data:
+            await self.bot.cursor.execute("INSERT INTO actrole_optin(id,is_enable) VALUES(%s,%s)",
+                            (ctx.author.id, int(is_enable)))
+        else:
+            await self.bot.cursor.execute("UPDATE actrole_optin SET is_enable = %s WHERE id = %s",(int(is_enable),ctx.author.id))
         await ctx.reply(f"プレイ中に応じた役職設定を、{is_enable}に設定したよ！")
 
     @commands.hybrid_command(aliases=["prole"], description="特定アクティビティタイプで付与する役職設定")
