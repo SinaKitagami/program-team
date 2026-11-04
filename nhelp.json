@@ -2127,19 +2127,6 @@
 		"group": "",
 		"only_prefix": true
 	},
-	"backup": {
-		"title": "backupについて",
-		"description": "",
-		"call": {
-			"main": "backup",
-			"aliases": "`なし`",
-			"args": [
-				"引数:gid: int"
-			]
-		},
-		"group": "",
-		"only_prefix": true
-	},
 	"authsetting": {
 		"title": "authsettingについて",
 		"description": "簡易メンバー認証を作成できます。",
