@@ -228,13 +228,6 @@ class owner(commands.Cog):
                     "userinfo-joinserver"), value=info.joined_at)
                 embed.set_footer(
                     text=f"サーバー:{info.guild.name}({info.guild.id})")
-                if info.activity is not None:
-                    try:
-                        embed.add_field(name=await ctx._(
-                            "userinfo-nowplaying"), value=f'{info.activity.name}')
-                    except:
-                        embed.add_field(name=await ctx._(
-                            "userinfo-nowplaying"), value=info.activity)
                 hasroles = ""
                 for r in info.roles:
                     hasroles = hasroles + f"{r.mention},"

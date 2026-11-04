@@ -290,8 +290,8 @@ class m10s_music(commands.Cog):
             else:
                 await sender.send("> 音楽再生\n　該当名称のメモが見つかりません。")
                 return
-        elif text.startswith("activity:"):
-            tar = guild.get_member(int(text[9:])) or guild.get_member(requestor.id)
+        elif text == "activity:":
+            tar = guild.get_member(requestor.id)
             spac = [i for i in tar.activities if i.name == "Spotify"]
 
             if spac:
