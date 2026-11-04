@@ -9,6 +9,8 @@ from discord import app_commands
 
 import m10s_util as ut
 
+import os
+
 class Symmetry(commands.Cog):
 
     def __init__(self, bot):
@@ -67,6 +69,14 @@ class Symmetry(commands.Cog):
                 dst.paste(tmp2, (0, 0))
             dst.save('ts2.png')
         await ctx.send(file=discord.File('ts2.png'))
+        try:
+            os.remove("image.png")
+        except:
+            pass
+        try:
+            os.remove("ts2.png")
+        except:
+            pass
 
 
 async def setup(bot):
