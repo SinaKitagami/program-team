@@ -13,6 +13,9 @@ from discord import app_commands
 
 import m10s_util as ut
 
+# randomint で一度に生成する乱数の個数の上限
+MAX_RANDOM_COUNT = 100
+
 
 class other(commands.Cog):
 
@@ -181,8 +184,8 @@ class other(commands.Cog):
                 await ctx.send(await ctx._("randomint-arg-error"))
                 return
 
-            if c >= MAX_RANDOM_COUNT:
-                c = MAX_RANDOM_COUNT - 1  # 制限を設定
+            if c > MAX_RANDOM_COUNT:
+                c = MAX_RANDOM_COUNT  # 制限を設定
             intcount = []
             rnd = 0
             for _ in range(c):
