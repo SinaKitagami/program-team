@@ -17,19 +17,20 @@ class m10s_tos_guide(commands.Cog):
     async def cog_load(self):
         pass
 
-    @commands.hybrid_command(name="tos_guide", description="Botの利用規約/Guide on the bot's terms of service")
+    @commands.hybrid_command(name="tos_guide", description="アプリの利用規約/Guide on the bot's terms of service")
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=True)
     async def tos_guide(self, ctx):
-        tos_url = "https://home.sina-chan.com/legal/tos"
+        app_tos_url = "https://home.sina-chan.com/legal/app-tos"
+        grobal_tos_url = "https://home.sina-chan.com/legal/tos"
         show_message = f"""
-        **Botの利用規約/Guide on the bot's terms of service**
-        本Botの利用規約は、次のURLからご覧いただけます。 : {tos_url}
-        The bot's terms of service can be found at the following URL: {tos_url}
+        **アプリの利用規約/Guide on the app's terms of service**
+        本アプリの利用規約は、次のURLからご覧いただけます。 : 共通利用規約 {grobal_tos_url} / アプリ利用規約 {app_tos_url}
+        The app's terms of service can be found at the following URL: Common Terms of Service {grobal_tos_url} / App Terms of Service {app_tos_url}
         """
         await ctx.send(show_message, ephemeral=True)
 
-    @commands.hybrid_command(name="how_to_remove_my_data", description="Botの保持しているデータを削除する方法/Guide on how to remove your data from the bot")
+    @commands.hybrid_command(name="how_to_remove_my_data", description="アプリの保持しているデータを削除する方法/Guide on how to remove your data from the bot")
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=True)
     async def how_to_remove_my_data(self, ctx):
@@ -37,8 +38,8 @@ class m10s_tos_guide(commands.Cog):
         delete_request_form_url = "https://forms.gle/4oaNGqFAMog2iuEL9"
         modify_request_form_url = "https://support.center.sina-chan.com/servicedesk/customer/portal/1/group/15/create/17"
         show_message = f"""
-        **Botの保持しているデータを削除する方法/Guide on how to remove your data from the bot**
-        本Botは、サービスの提供のために必要なデータを保持しています。
+        **アプリの保持しているデータを削除する方法/Guide on how to remove your data from the app**
+        本アプリは、サービスの提供のために必要なデータを保持しています。
         保持している内容は、プライバシーポリシーをご覧ください。 : {policy_url}
 
         **データの削除申請**
@@ -49,7 +50,7 @@ class m10s_tos_guide(commands.Cog):
 
         各種申請に必要なあなたのユーザーID : ```{ctx.author.id}```
         -----------------
-        The bot retains data necessary for providing its services.
+        The app retains data necessary for providing its services.
         Please refer to the privacy policy (Japanese) for details on what data is retained: {policy_url}
 
         **Data Deletion Request**
