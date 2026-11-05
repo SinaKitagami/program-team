@@ -219,6 +219,8 @@ class m10s_guild_log(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_edit(self, before, after):
+        if not after.guild:
+            return
         if "cu:auto_sends" in self.bot.features.get(after.guild.id,[]):
             return
         # サーバーログ
@@ -265,6 +267,8 @@ class m10s_guild_log(commands.Cog):
 
     @commands.Cog.listener()
     async def on_reaction_clear(self, message, reactions):
+        if not message.guild:
+            return
         if "cu:auto_sends" in self.bot.features.get(message.guild.id,[]):
             return
         e = discord.Embed(title="リアクションの一斉除去", color=self.bot.ec)
@@ -285,6 +289,8 @@ class m10s_guild_log(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
+        if not message.guild:
+            return
         if "cu:auto_sends" in self.bot.features.get(message.guild.id,[]):
             return
         if not message.author.bot:
