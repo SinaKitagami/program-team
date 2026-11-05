@@ -584,6 +584,7 @@ async def ldb(ctx, name):
     sddb = await bot.cursor.fetchall(f"select * from `{name}`")
     #sddb = await bot.cursor.fetchall()
     await ctx.send(f"{len(sddb)}")
+    return None
 
 
 @commands.is_owner()

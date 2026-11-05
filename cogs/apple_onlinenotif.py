@@ -74,6 +74,7 @@ class OnlineNotif(commands.Cog):
         if not users:
             return await ctx.author.send(await ctx._("onlinenotif-nousers"))
         await ctx.author.send(await ctx._("onlinenotif-subscribing", " ".join(map(str, users))))
+        return None
 
     @onlinenotif.command(aliases=["add"])
     @ut.runnable_check()
@@ -89,6 +90,7 @@ class OnlineNotif(commands.Cog):
         await self.bot.cursor.execute(
             "UPDATE users SET onnotif = %s WHERE id = %s", (json.dumps(subscribing), ctx.author.id))
         await ctx.say("onlinenotif-success")
+        return None
 
     @onlinenotif.command(aliases=["remove", "del"])
     @ut.runnable_check()
@@ -102,6 +104,7 @@ class OnlineNotif(commands.Cog):
         await self.bot.cursor.execute(
             "UPDATE users SET onnotif = %s WHERE id = %s", (json.dumps(subscribing), ctx.author.id))
         await ctx.say("onlinenotif-removeSuccess")
+        return None
 
     @onlinenotif.command()
     @ut.runnable_check()

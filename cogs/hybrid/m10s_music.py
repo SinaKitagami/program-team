@@ -152,6 +152,7 @@ class m10s_music(commands.Cog):
                     await ctx.send(f"{ctx.voice_client.channel.name}に接続しました。", ephemeral=True)
         else:
             await ctx.send("あなたがこのサーバーでボイスチャンネルに接続していません！",ephemeral=True)
+        return None
 
     @music_group.command(name="stop", aliases=["leave"], description="再生をやめ、VCから切断します。")
     @ut.runnable_check()
@@ -397,25 +398,18 @@ class m10s_music(commands.Cog):
                         await asyncio.sleep(0.3)
                         self.bot.loop.create_task(self.mplay(guild, sender))
         else:
-            sended = False
             self.bot.am.append(vinfo["video_id"])
             if self.bot.qu.get(str(guild.id), None):
-                if not sended:
-                    await sender.send(f"`{vinfo['video_title']}`をキューに追加します。")
-                    sended = True
+                await sender.send(f"`{vinfo['video_title']}`をキューに追加します。")
                 self.bot.qu[str(guild.id)] = self.bot.qu[str(
                     guild.id)] + [vinfo]
                 await self.panel_update(guild.id, voice_client)
             else:
-                if not sended:
-                    await sender.send(f"`{vinfo['video_title']}`の再生を開始します。")
-                    sended = True
+                await sender.send(f"`{vinfo['video_title']}`の再生を開始します。")
                 self.bot.qu[str(guild.id)] = [vinfo]
                 await asyncio.sleep(0.3)
                 self.bot.loop.create_task(self.mplay(guild,sender))
-        #except:
-            #import traceback
-            #await sender.send(f"> traceback\n```{traceback.format_exc(2)}```")
+        return None
 
     async def mplay(self, guild, sender, vl=0.5):
         v = None
@@ -618,6 +612,7 @@ class m10s_music(commands.Cog):
                 await ctx.send("現在再生中のVCは、あなたが参加しているVCではありません！",ephemeral=True)
         else:
             await ctx.send("現在キューには何もありません。")
+        return None
 
     @music_group.command(aliases=["loop", "repeat"], description="ループ状況の確認や変更ができます。")
     @ut.runnable_check()
@@ -657,6 +652,7 @@ class m10s_music(commands.Cog):
             return await ctx.send(embed=discord.Embed(title="エラー", description="設置済みの音楽パネルが見つかりませんでした。", color=self.bot.ec), ephemeral=True)
         await self.panel_update(ctx.guild.id, ctx.voice_client, True)
         await ctx.send("パネルを強制的に更新しました。", )
+        return None
 
     async def panel_update(self, guild_id, voice_client, regene=False):
         ebd = discord.Embed(title="思惟奈ちゃん-ミュージック操作パネル",
@@ -756,6 +752,7 @@ class m10s_music(commands.Cog):
             pass
         await self.panel_update(ctx.guild.id, ctx.voice_client)
         await ctx.send(f"> 音楽再生パネルの移動\n　{move_to.mention}に移動しました。")
+        return None
     
     @music_group.command(name="remove", description="キューの特定番目から項目を取り除きます。")
     @ut.runnable_check()

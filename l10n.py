@@ -52,9 +52,9 @@ class TranslateHandler:
     async def update_language_cache(self, target, to=None):
         if to is None:
             if isinstance(target, discord.Guild):
-                to = await self.get_lang_by_guild(target, cache=False)
+                await self.get_lang_by_guild(target, cache=False)
             else:
-                to = await self.get_lang_by_user(target, cache=False)
+                await self.get_lang_by_user(target, cache=False)
             return  # get function caches
         if to not in self.supported_locales:
             return

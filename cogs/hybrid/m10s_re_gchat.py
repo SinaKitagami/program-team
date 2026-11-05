@@ -180,6 +180,7 @@ class m10s_re_gchat(commands.Cog):
                     #     "[🛠💠]思惟奈ちゃんグローバルチャット接続案内", ctx.guild.me.display_avatar.replace(static_format="png").url)
 
                     await ctx.send("> 接続が完了しました。")
+        return None
 
 
     @gchat.command(description="グローバルチャットから切断します。")
@@ -236,7 +237,6 @@ class m10s_re_gchat(commands.Cog):
             apf = await self.bot.cursor.fetchone(
                 "select * from users where id=%s", (post["author_id"],))
             #apf = await self.bot.cursor.fetchone()
-            g = await self.bot.fetch_guild(post["guild_id"])
             await ctx.send(embed=ut.getEmbed("グローバルチャンネル投稿情報", "", self.bot.ec, "送信者id:", str(post['author_id']), "送信者のプロファイルニックネーム", apf['gnick']))
 
     @commands.command(aliases=["オンライン状況", "次の人のオンライン状況を教えて"])
@@ -261,6 +261,7 @@ class m10s_re_gchat(commands.Cog):
             await ctx.send(await ctx._("ison-now", u.name, str(u.status)))
         else:
             await ctx.send(await ctx._("ison-notfound"))
+        return None
 
     @gchat.command(description="グローバルチャットに接続しているチャンネル一覧を返します。")
     @app_commands.describe(name="接続先名(デフォルト:main)")
@@ -680,6 +681,7 @@ class m10s_re_gchat(commands.Cog):
                     pass
             else:
                 await self.repomsg(m, "作成後7日に満たないアカウント")
+        return None
 
 
     @commands.Cog.listener()

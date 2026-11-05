@@ -393,6 +393,7 @@ class levels(commands.Cog):
         await self.bot.cursor.execute(
             "UPDATE guilds SET reward = %s WHERE id = %s", (json.dumps(rewards), ctx.guild.id))
         await ctx.send(await ctx._("changed"))
+        return None
 
     @commands.hybrid_group(name="level_edit", description="サーバーレベルを変更できます。")
     @app_commands.default_permissions(administrator=True)
@@ -451,6 +452,7 @@ async def level_add(self, ctx, target:Union[commands.MemberConverter,commands.Us
         else:
             await self.bot.cursor.execute("INSERT INTO levels(user_id, guild_id, level, exp, last_level_count, is_level_count_enable) VALUE (%s, %s, %s, %s, %s, %s)", (m.id, ctx.guild.id, max(min(lev, MAX_LEVEL),0), max(min(exp,MAX_EXP),0), int(time.time()), 1))
     await ctx.reply(f"> サーバーレベル編集\n　{len(targets)}人のレベルを編集しました。(レベルがないメンバー等、一部ユーザーには干渉していません。)")
+    return None
 
 async def level_set(self, ctx, target:Union[commands.MemberConverter,commands.UserConverter,commands.RoleConverter], lev:int, exp:Optional[int]=0):
     if isinstance(target,discord.Member) or isinstance(target,discord.User):
@@ -469,6 +471,7 @@ async def level_set(self, ctx, target:Union[commands.MemberConverter,commands.Us
             await self.bot.cursor.execute("INSERT INTO levels(user_id, guild_id, level, exp, last_level_count, is_level_count_enable) VALUE (%s, %s, %s, %s, %s, %s)", (m.id, ctx.guild.id, max(min(lev, MAX_LEVEL),0), max(min(exp,MAX_EXP),0), int(time.time()), 1))
 
     await ctx.reply(f"> サーバーレベル編集\n　{len(targets)}人のレベルを設定しました。(レベルがないメンバー等、一部ユーザーには干渉していません。)")
+    return None
 
 
 async def setup(bot):

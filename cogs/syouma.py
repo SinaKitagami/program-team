@@ -69,6 +69,7 @@ class syouma(commands.Cog):
         temp_minni = tempni[2].span.string  # 最低気温
         temp_min_diffni = tempni[3].string  # 最低気温の前日比
         await ctx.send(embed=discord.Embed(title=f"{address}の今日の天気:{weather}\n明日の天気:{weatherni}", description=f"今日の最高気温:{temp_max} {temp_max_diff}\n今日の最低気温:{temp_min} {temp_min_diff}\n明日の最高気温:{temp_maxni} {temp_max_diffni}\n明日の最低気温:{temp_minni} {temp_min_diffni}", color=color))
+        return None
 
 async def setup(bot):
     await bot.add_cog(syouma(bot))
