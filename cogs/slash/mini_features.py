@@ -32,7 +32,7 @@ class mini_features(commands.Cog):
     async def mark_as_spoiler_each_char(self, ctx, *, text:str):
         st = ""
         for i in text:
-            st = st+f"\|\|{i}\|\|"
+            st = st+f"\\|\\|{i}\\|\\|"
         await ctx.send(embed=discord.Embed(title="スポイラー化テキスト",description=f"{st}", color=self.bot.ec), ephemeral=True)
 
 async def setup(bot):

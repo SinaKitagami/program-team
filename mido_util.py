@@ -17,8 +17,8 @@ def get_status(member):
 
 #resolve_url
 def resolve_url(url):
-    HTTP_URL_REGEX = "https?://[\w/:%#\$&\?\(\)~\.=\+\-]+"
-    URL_REGEX = "[\w/:%#\$&\?\(\)~\.=\+\-]+"
+    HTTP_URL_REGEX = r"https?://[\w/:%#\$&\?\(\)~\.=\+\-]+"
+    URL_REGEX = r"[\w/:%#\$&\?\(\)~\.=\+\-]+"
     
     if re.match(HTTP_URL_REGEX, str(url)):
         return str(url)

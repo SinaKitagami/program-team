@@ -35,10 +35,8 @@ class m10s_guild_log(commands.Cog):
                     anick = a.nick
                 else:
                     anick = a.name
-                e.add_field(name="変更前", value=bnick.replace("\\", "\\\\").replace("*", "\*").replace(
-                    "_", "\_").replace("|", "\|").replace("~", "\~").replace("`", "\`").replace(">", "\>"))
-                e.add_field(name="変更後", value=anick.replace("\\", "\\\\").replace("*", "\*").replace(
-                    "_", "\_").replace("|", "\|").replace("~", "\~").replace("`", "\`").replace(">", "\>"))
+                e.add_field(name="変更前", value=discord.utils.escape_markdown(bnick))
+                e.add_field(name="変更後", value=discord.utils.escape_markdown(anick))
                 gpf = await self.bot.cursor.fetchone(
                     "select * from guilds where id=%s", (a.guild.id,))
                 #gpf = await self.bot.cursor.fetchone()
