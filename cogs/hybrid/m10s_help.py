@@ -1,20 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from threading import Thread
-from typing import Union, Optional
 import discord
 from discord.ext import commands
-import asyncio
 
 import json
 
 from discord import app_commands
 
-import traceback
 
 import m10s_util as ut
 
-from my_module import dpy_interaction as dpyui
 
 
 
@@ -53,11 +48,11 @@ class bot_help(commands.Cog):
             while True:
                 try:
                     r, u = await self.bot.wait_for("reaction_add", check=lambda r, u: r.message.id == msg.id and u.id == ctx.message.author.id, timeout=30)
-                except:
+                except Exception:
                     break
                 try:
                     await msg.remove_reaction(r, u)
-                except:
+                except Exception:
                     pass
                 if str(r) == str(self.bot.create_emoji_str('s_move_right',653161518170505216)):
                     if page == 17:
@@ -91,7 +86,7 @@ class bot_help(commands.Cog):
                         try:
                             await msg.delete()
                             await qm.delete()
-                        except:
+                        except Exception:
                             pass
                         async with ctx.message.channel.typing():
                             lang = await ctx.user_lang() or "ja"
@@ -109,7 +104,7 @@ class bot_help(commands.Cog):
                 await msg.remove_reaction(self.bot.create_emoji_str("s_move_left",653161518195671041), self.bot.user)
                 await msg.remove_reaction("🔍", self.bot.user)
                 await msg.remove_reaction(self.bot.create_emoji_str('s_move_right',653161518170505216), self.bot.user)
-            except:
+            except Exception:
                 pass
         else:
             dcmd = await ctx._(f"nh-{str(rcmd)}")

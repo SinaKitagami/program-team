@@ -117,14 +117,14 @@ async def get_guild_or_user(ctx, id):
     if ctx.bot.get_guild(id) is None:
         try:
             return await FetchUserConverter().convert(ctx, str(id))
-        except:
+        except Exception:
             raise commands.BadArgument(f"ID {id} not guild or user.")
     
 #choice
 def choice(l, c=1):
     r = []
     
-    for c in range(c):
+    for _ in range(c):
         d = random.choice(l)
     
         r.append(d)
@@ -137,7 +137,7 @@ class VoiceChannelConverter(commands.Converter):
     async def convert(self, ctx, argument):
         try:
             return await commands.VoiceChannelConverter().convert(ctx, argument)
-        except:
+        except Exception:
             try:
                 channel_id = int(argument, base=10)
             except ValueError:
@@ -169,13 +169,13 @@ class ChannelConverter(commands.Converter):
     async def convert(self, ctx, argument):
         try:
             return await TextChannelConverter().convert(ctx, argument)
-        except:
+        except Exception:
             try:
                 return await VoiceChannelConverter().convert(ctx, argument)
-            except:
+            except Exception:
                 try:
                     return await commands.CategoryChannelConverter().convert(ctx, argument)
-                except:
+                except Exception:
                     raise commands.ChannelNotFound(argument)
 
 #GuildConverter
@@ -247,19 +247,19 @@ class MemberConverter(commands.Converter):
         if not argument.isdigit():
             try:
                 return await commands.MemberConverter().convert(ctx, argument)
-            except:
+            except Exception:
                 try:
                     return await commands.UserConverter().convert(ctx, argument)
-                except:
+                except Exception:
                     raise commands.MemberNotFound(argument)
         else:
             try:
                 return await commands.MemberConverter().convert(ctx, argument)
-            except:
+            except Exception:
                 try:
                     return await commands.UserConverter().convert(ctx, argument)
-                except:
+                except Exception:
                     try:
                         return await FetchUserConverter().convert(ctx, argument)
-                    except:
+                    except Exception:
                         raise commands.MemberNotFound(argument)

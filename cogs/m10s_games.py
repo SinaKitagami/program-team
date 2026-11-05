@@ -3,10 +3,8 @@
 import discord
 from discord.ext import commands
 import random
-import time
 from typing import Optional
 from discord import app_commands
-import asyncio
 
 import m10s_util as ut
 
@@ -31,13 +29,13 @@ class games(commands.Cog):
         while True:
             try:
                 msg = await self.bot.wait_for('message', check=lambda m: m.author == ctx.author and m.channel == ctx.channel, timeout=60)
-            except:
+            except Exception:
                 await ctx.send(await ctx._("game2-timeout", answer))
                 return
             try:
                 i = i + 1
                 ur = int(msg.content)
-            except:
+            except Exception:
                 await ctx.send(f"{ctx.author.mention}\n{await ctx._('game2-notint')}")
                 continue
             if ur > answer:
@@ -66,8 +64,8 @@ class games(commands.Cog):
                                 value=await ctx._("game1-guide2"))
                 embed.add_field(name=await ctx._("game1-now"), value="0")
                 guide = await ctx.send(embed=embed)
-                g1 = await guide.add_reaction(self.bot.create_emoji_str("s_card_d",653161517927366658))
-                g2 = await guide.add_reaction(self.bot.create_emoji_str('s_card_pass',653161518334214144))
+                await guide.add_reaction(self.bot.create_emoji_str("s_card_d",653161517927366658))
+                await guide.add_reaction(self.bot.create_emoji_str('s_card_pass',653161518334214144))
                 uint = 0
                 tmint = 0
                 while(True):
@@ -120,7 +118,7 @@ class games(commands.Cog):
                     await join.add_reaction(self.bot.create_emoji_str('s_gp_not',653161518833074178))
                     try:
                         r, u = await self.bot.wait_for("reaction_add", check=lambda r, u: str(r.emoji) in [str(self.bot.create_emoji_str("s_gp_join",653161519206629386)), str(self.bot.create_emoji_str('s_gp_not',653161518833074178))] and r.message.id == join.id and u.bot is False, timeout=60)
-                    except:
+                    except Exception:
                         await ctx.send(await ctx._("game1-timeouted"))
                         return
                 else:
@@ -129,7 +127,7 @@ class games(commands.Cog):
                     await join.add_reaction(self.bot.create_emoji_str('s_gp_not',653161518833074178))
                     try:
                         r, u = await self.bot.wait_for("reaction_add", check=lambda r, u: str(r.emoji) in [str(self.bot.create_emoji_str("s_gp_join",653161519206629386)), str(self.bot.create_emoji_str('s_gp_not',653161518833074178))] and r.message.id == join.id and u == user2, timeout=60)
-                    except:
+                    except Exception:
                         await ctx.send(await ctx._("game1-timeouted"))
                         return
                 if str(r.emoji) == str(self.bot.create_emoji_str("s_gp_join",653161519206629386)):
@@ -184,7 +182,7 @@ class games(commands.Cog):
         else:
             try:
                 await ctx.send(embed=discord.Embed(title=await ctx._("dhaveper"), description=await ctx._("per-manamsg")))
-            except:
+            except Exception:
                 await ctx.send(f'{await ctx._("dhaveper")}\n{await ctx._("per-manamsg")}')
 
     @game.command(name="fish",description="魚釣りです。")

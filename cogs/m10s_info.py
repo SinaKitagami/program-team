@@ -2,19 +2,12 @@
 
 import discord
 from discord.ext import commands
-import asyncio
-import datetime
 from dateutil.relativedelta import relativedelta as rdelta
-import traceback
-from typing import Union
 
-import config as cf
 
 import m10s_util as ut
 
-from my_module import dpy_interaction as dpyui
 
-from discord import app_commands
 
 
 class info(commands.Cog):
@@ -68,7 +61,8 @@ class info(commands.Cog):
                                 value=await ctx._("serverinfo-nitroboost-val", sevinfo.premium_tier))
                 embed.add_field(name=await ctx._("serverinfo-nitroboost-can-title"), value=await ctx._(
                     f"serverinfo-nitroboost-can-{sevinfo.premium_tier}", sevinfo.premium_tier, sevinfo.premium_subscription_count))
-            except:
+            except Exception:
+                # 失敗しても処理を継続するため、例外は意図的に無視する
                 pass
 
             if sevinfo.system_channel:
@@ -79,7 +73,8 @@ class info(commands.Cog):
                                     value=sevinfo.system_channel_flags.join_notifications)
                     embed.add_field(name=await ctx._("serverinfo-sysch-boost"),
                                     value=sevinfo.system_channel_flags.premium_subscriptions)
-                except:
+                except Exception:
+                    # 失敗しても処理を継続するため、例外は意図的に無視する
                     pass
             if sevinfo.afk_channel:
                 embed.add_field(name=await ctx._("serverinfo-afkch"),

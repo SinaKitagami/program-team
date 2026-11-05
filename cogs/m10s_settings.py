@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import discord
-from discord import TextChannel, app_commands
+from discord import app_commands
 from discord.ext import commands
 import asyncio
 import m10s_util as ut
@@ -98,9 +98,6 @@ class settings(commands.Cog):
     @app_commands.checks.has_permissions(administrator=True)
     @app_commands.describe(lang="設定言語")
     async def guildlang(self, ctx, lang:str):
-        gs = await self.bot.cursor.fetchone(
-            "select * from guilds where id=%s", (ctx.guild.id,))
-        #gs = await self.bot.cursor.fetchone()
         print(f'{ctx.message.author.name}({ctx.message.guild.name})_' +
               ctx.message.content)
         if lang not in self.bot.translate_handler.supported_locales:
@@ -218,12 +215,14 @@ class settings(commands.Cog):
             try:
                 embed.add_field(name=await ctx._(
                     "ssm-welcome"), value=f'{sm["welcome"].get("content")}({await ctx._("ssm-sendto")}):{sm["welcome"].get("sendto")})')
-            except:
+            except Exception:
+                # 失敗しても処理を継続するため、例外は意図的に無視する
                 pass
             try:
                 embed.add_field(name=await ctx._(
                     "ssm-seeyou"), value=f'{sm["cu"].get("content")}({await ctx._("ssm-sendto")}:{sm["cu"].get("sendto")})')
-            except:
+            except Exception:
+                # 失敗しても処理を継続するため、例外は意図的に無視する
                 pass
             await ctx.send(embed=embed)
         elif mode == 1:
@@ -235,7 +234,7 @@ class settings(commands.Cog):
                     await self.bot.cursor.execute(
                         "UPDATE guilds SET jltasks = %s WHERE id = %s", (json.dumps(sm), ctx.guild.id))
                     await ctx.send(await ctx._("ssm-set"))
-                except:
+                except Exception:
                     await ctx.send(await ctx._("ssm-not"))
             else:
                 await ctx.send(await ctx._("need-admin"))
@@ -284,7 +283,7 @@ class settings(commands.Cog):
                 guide = mes.content
                 try:
                     await dc.send(await ctx._("scmd-add-guide3-a", await ctx._("scmd-guide-emoji"), str(se)))
-                except:
+                except Exception:
                     await dc.send(await ctx._("scmd-add-guide3-a", await ctx._("scmd-guide-emoji"), "(絵文字が多すぎて表示できません！)"))
                 mg = await self.bot.wait_for('message', check=check)
                 rep = mg.clean_content.format(se)
@@ -299,7 +298,7 @@ class settings(commands.Cog):
                 guide = mes.content
                 try:
                     await dc.send(await ctx._("scmd-add-guide3-a", await ctx._("scmd-guide-emoji"), str(se)))
-                except:
+                except Exception:
                     await dc.send(await ctx._("scmd-add-guide3-a", await ctx._("scmd-guide-emoji"), "(絵文字が多すぎて表示できません！)"))
                 rep = []
                 while True:
@@ -310,7 +309,7 @@ class settings(commands.Cog):
                         rep = rep + [mg.clean_content.format(se)]
                         try:
                             await dc.send(await ctx._("scmd-add-guide3-b", await ctx._("scmd-guide-emoji"), str(se)))
-                        except:
+                        except Exception:
                             await dc.send(await ctx._("scmd-add-guide3-b", await ctx._("scmd-guide-emoji"), "(絵文字が多すぎて表示できません！)"))
                 cmds[name] = {}
                 cmds[name]["mode"] = "random"
@@ -377,7 +376,7 @@ class settings(commands.Cog):
             "select * from guilds where id=%s", (ctx.guild.id,))
         #d = await self.bot.cursor.fetchone()
         hc = json.loads(d["hash"])
-        if hc == None:
+        if hc is None:
             hc = [ctx.channel.id]
             await ctx.send(await ctx._("hash-connect"))
         elif ctx.channel.id in hc:

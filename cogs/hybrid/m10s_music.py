@@ -17,7 +17,6 @@ from discord import app_commands
 
 import os
 import shutil
-import re
 import random
 
 import m10s_util as ut
@@ -166,13 +165,15 @@ class m10s_music(commands.Cog):
             if ctx.voice_client.channel == ctx.author.voice.channel:
                 try:
                     await self.bot.mp[str(ctx.guild.id)].delete()
-                except:
+                except Exception:
+                    # 失敗しても処理を継続するため、例外は意図的に無視する
                     pass
                 try:
                     del self.bot.qu[str(ctx.guild.id)]
                     del self.bot.mp[str(ctx.guild.id)]
                     del self.bot.lp[str(ctx.guild.id)]
-                except:
+                except Exception:
+                    # 失敗しても処理を継続するため、例外は意図的に無視する
                     pass
                 await ctx.voice_client.disconnect()
                 await ctx.send("切断しました。", ephemeral=True)
@@ -182,18 +183,21 @@ class m10s_music(commands.Cog):
             ch = self.bot.mp[str(minfo["guild"].id)].channel
             try:
                 await self.bot.mp[str(minfo["guild"].id)].delete()
-            except:
+            except Exception:
+                # 失敗しても処理を継続するため、例外は意図的に無視する
                 pass
             try:
                 del self.bot.qu[str(minfo["guild"].id)]
                 del self.bot.mp[str(minfo["guild"].id)]
                 del self.bot.lp[str(minfo["guild"].id)]
-            except:
+            except Exception:
+                # 失敗しても処理を継続するため、例外は意図的に無視する
                 pass
             await minfo["guild"].voice_client.disconnect()
             try:
                 await ch.send(f"> リモート切断\n　{ctx.author}が、他のサーバーから切断しました。", delete_after=5)
-            except:
+            except Exception:
+                # 失敗しても処理を継続するため、例外は意図的に無視する
                 pass
             await ctx.send(f"> リモート切断\n　{minfo['guild']}のVCから、切断しました。",ephemeral=True)
 
@@ -213,7 +217,8 @@ class m10s_music(commands.Cog):
             minfo["guild"].voice_client.pause()
             try:
                 await self.bot.mp[str(minfo["guild"].id)].channel.send(f"> リモート一時停止\n　{ctx.author}が、他のサーバーから一時停止しました。", delete_after=5)
-            except:
+            except Exception:
+                # 失敗しても処理を継続するため、例外は意図的に無視する
                 pass
             await ctx.send(f"> リモート一時停止\n　{minfo['guild'].name}で再生中の音楽を一時停止しました。",ephemeral=True)
             await self.panel_update(minfo['guild'].id, minfo['guild'].voice_client)
@@ -342,7 +347,7 @@ class m10s_music(commands.Cog):
                     vurls = [f"https://www.youtube.com/watch?v={vid}"]
                 else:
                     return await sender.send("動画が見つかりませんでした。")
-            except:
+            except Exception:
                 return await sender.send("> 検索エラー\n　現在検索ワードを用いた検索ができません。URLをお試しください。")
         if not c_info:
             if vurls == []:
@@ -438,13 +443,14 @@ class m10s_music(commands.Cog):
             await m.add_reaction("⬇")
             try:
                 await m.pin()
-            except:
+            except Exception:
+                # 失敗しても処理を継続するため、例外は意図的に無視する
                 pass
         if isinstance(guild.me.voice.channel, discord.StageChannel):
             try:
                 await guild.me.edit(suppress=False)
                 await sender.send("> ステージチャンネルのため、自動的にスピーカーに移動しました。")
-            except:
+            except Exception:
                 await sender.send("> ステージチャンネルのため、音楽を再生するためにはスピーカーに移動させる必要があります。")
         while self.bot.qu.get(str(guild.id), None):
             self.bot.qu[str(guild.id)][0]["now_position"] = 0
@@ -465,10 +471,12 @@ class m10s_music(commands.Cog):
                     if guild.voice_client.is_playing():
                         try:
                             self.bot.qu[str(guild.id)][0]["now_position"] += 1
-                        except:
+                        except Exception:
+                            # 失敗しても処理を継続するため、例外は意図的に無視する
                             pass
                     v = guild.voice_client.source.volume
             except AttributeError:
+                # 失敗しても処理を継続するため、例外は意図的に無視する
                 pass
             can_delete = True
             if self.bot.lp.get(str(guild.id),None):
@@ -482,13 +490,15 @@ class m10s_music(commands.Cog):
                 await loop.run_in_executor(None, lambda: os.remove(f'musicfile/{poped_item["video_id"]}'))
         try:
             await self.bot.mp[str(guild.id)].delete()
-        except:
+        except Exception:
+            # 失敗しても処理を継続するため、例外は意図的に無視する
             pass
         try:
             del self.bot.qu[str(guild.id)]
             del self.bot.mp[str(guild.id)]
             del self.bot.lp[str(guild.id)]
-        except:
+        except Exception:
+            # 失敗しても処理を継続するため、例外は意図的に無視する
             pass
         await guild.voice_client.disconnect()
         await sender.send("キューが空になったため、退出しました。")
@@ -509,7 +519,8 @@ class m10s_music(commands.Cog):
             await self.jump_music(index, str(minfo["guild"].id), minfo["guild"].voice_client)
             try:
                 await self.bot.mp[str(minfo["guild"].id)].channel.send(f"> リモートスキップ\n　{ctx.author}が、他のサーバーからスキップしました。", delete_after=5)
-            except:
+            except Exception:
+                # 失敗しても処理を継続するため、例外は意図的に無視する
                 pass
             await ctx.send(f"> リモートスキップ\n　{minfo['guild']}のVCの曲をスキップしました。", ephemeral=True)
 
@@ -530,7 +541,8 @@ class m10s_music(commands.Cog):
             minfo["guild"].voice_client.source.volume = vol/100.0
             try:
                 await self.bot.mp[str(minfo["guild"].id)].channel.send(f"> リモート音量調整\n　{ctx.author}が、他のサーバーから音量調整しました。", delete_after=5)
-            except:
+            except Exception:
+                # 失敗しても処理を継続するため、例外は意図的に無視する
                 pass
             await ctx.send(f"> リモート音量調整\n　{minfo['guild']}のVCの音量を変更しました。", ephemeral=True)
 
@@ -581,11 +593,12 @@ class m10s_music(commands.Cog):
                 while True:
                     try:
                         r, u = await self.bot.wait_for("reaction_add", check=lambda r, u: r.message.id == msg.id and u.id == ctx.message.author.id, timeout=30)
-                    except:
+                    except Exception:
                         break
                     try:
                         await msg.remove_reaction(r, u)
-                    except:
+                    except Exception:
+                        # 失敗しても処理を継続するため、例外は意図的に無視する
                         pass
                     if str(r) == str(self.bot.create_emoji_str('s_move_right',653161518170505216)):  # →
                         if page == len(pls)-1:
@@ -634,7 +647,8 @@ class m10s_music(commands.Cog):
                 await self.panel_update(minfo["guild"].id, minfo["guild"].voice_client)
                 try:
                     await self.bot.mp[str(minfo["guild"].id)].channel.send(f"> リモートループ切替\n　{ctx.author}が、他のサーバーからループ状況を切替しました。", delete_after=5)
-                except:
+                except Exception:
+                    # 失敗しても処理を継続するため、例外は意図的に無視する
                     pass
                 await ctx.send(f"> リモートループ切替\n　{minfo['guild'].name}でループ状況を切替しました。",ephemeral=True)
 
@@ -668,7 +682,7 @@ class m10s_music(commands.Cog):
         try:
             ebd.add_field(name="ボリューム:", value=int(
                voice_client.source.volume*100))
-        except:
+        except Exception:
             ebd.add_field(name="ボリューム:", value="現在アクセス不可")
         ebd.set_thumbnail(
             url=self.bot.qu[str(guild_id)][0]["video_thumbnail"])
@@ -707,7 +721,8 @@ class m10s_music(commands.Cog):
                 await self.panel_update(minfo["guild"].id, minfo["guild"].voice_client)
                 try:
                     await self.bot.mp[str(minfo["guild"].id)].channel.send(f"> リモートシャッフル\n　{ctx.author}が、他のサーバーからキューをシャッフルしました。", delete_after=5)
-                except:
+                except Exception:
+                    # 失敗しても処理を継続するため、例外は意図的に無視する
                     pass
                 await ctx.send(f"> リモートシャッフル\n　{minfo['guild'].name}でキューをシャッフルしました。", ephemeral=True)
             else:
@@ -739,7 +754,8 @@ class m10s_music(commands.Cog):
         await m.add_reaction("⬇")
         try:
             await m.pin()
-        except:
+        except Exception:
+            # 失敗しても処理を継続するため、例外は意図的に無視する
             pass
         await self.panel_update(ctx.guild.id, ctx.voice_client)
         await ctx.send(f"> 音楽再生パネルの移動\n　{move_to.mention}に移動しました。")
@@ -766,7 +782,8 @@ class m10s_music(commands.Cog):
                 await self.panel_update(minfo["guild"].id, minfo["guild"].voice_client)
                 try:
                     await self.bot.mp[str(minfo["guild"].id)].channel.send(f"> リモートremove\n　{ctx.author}が、他のサーバーから項目を取り除きました。", delete_after=5)
-                except:
+                except Exception:
+                    # 失敗しても処理を継続するため、例外は意図的に無視する
                     pass
                 await ctx.send(f">リモートremove\n　キューの{index}番目の項目を取り除きました！", ephemeral=True)
             else:
@@ -881,7 +898,8 @@ class m10s_music(commands.Cog):
             msg = await ch.fetch_message(pr.message_id)
             try:
                 await msg.remove_reaction(pr.emoji, pr.member)
-            except:
+            except Exception:
+                # 失敗しても処理を継続するため、例外は意図的に無視する
                 pass
             if not pr.member.voice:
                 return
@@ -924,7 +942,8 @@ class m10s_music(commands.Cog):
                 await m.add_reaction("⬇")
                 try:
                     await m.pin()
-                except:
+                except Exception:
+                    # 失敗しても処理を継続するため、例外は意図的に無視する
                     pass
                 await self.panel_update(u.guild.id, u.guild.voice_client)
 
@@ -934,25 +953,28 @@ class m10s_music(commands.Cog):
             try:
                 if member.guild.voice_client.is_paused():
                     return
-            except:
+            except Exception:
+                # 失敗しても処理を継続するため、例外は意図的に無視する
                 pass
             await member.guild.voice_client.disconnect()
             try:
                 await self.bot.mp[str(member.guild.id)].channel.send("参加者がいなくなったため、自動退出を行いました。")
                 try:
                     await self.bot.mp[str(member.guild.id)].delete()
-                except:
+                except Exception:
                     await self.bot.mp[str(member.guild.id)].channel.send("操作パネルを削除できませんでした。")
                 del self.bot.qu[str(member.guild.id)]
                 del self.bot.mp[str(member.guild.id)]
                 del self.bot.lp[str(member.guild.id)]
-            except:
+            except Exception:
+                # 失敗しても処理を継続するため、例外は意図的に無視する
                 pass
         try:
             if self.bot.voice_clients == []:
                 shutil.rmtree("musicfile/")
                 os.makedirs('musicfile/', exist_ok=True)
-        except:
+        except Exception:
+            # 失敗しても処理を継続するため、例外は意図的に無視する
             pass
 
 

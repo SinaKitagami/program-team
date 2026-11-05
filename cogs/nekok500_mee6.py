@@ -1,5 +1,4 @@
 import discord
-import aiohttp
 from discord.ext import commands
 
 from typing import Optional

@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import discord
 from discord.ext import commands
-import asyncio
-import traceback
-import json
 
 from discord import app_commands
 

@@ -1,17 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from threading import Thread
-from typing import Union, Optional
+from typing import Optional
 import discord
 from discord.ext import commands
-import asyncio
-import datetime
 
 from discord import app_commands
 
 from dateutil.relativedelta import relativedelta as rdelta
 
-import traceback
 
 import m10s_util as ut
 
@@ -46,7 +42,7 @@ class info_check(commands.Cog):
             try:
                 target = await self.bot.fetch_user(uid)
                 in_guild = False
-            except:
+            except Exception:
                 return await ctx.send("> 存在しないIDの指定です。")
         else:
             if ctx.interaction:
@@ -93,7 +89,7 @@ class info_check(commands.Cog):
         while True:
             try:
                 cb:dpyui.interaction_menu_callback = await self.bot.wait_for("menu_select", check=lambda icb:icb.custom_id==f"userinfo_{ctx.message.id}" and icb.message.id==msg.id and icb.user_id == ctx.author.id, timeout=30)
-            except:
+            except Exception:
                 return
             e = discord.Embed(title="ユーザー情報", color=self.bot.ec)
             e.set_author(name=target.name, icon_url=target.display_avatar.url)
@@ -110,7 +106,8 @@ class info_check(commands.Cog):
                 e.add_field(name="ユーザーID", value=str(target.id))
                 try:
                     e.add_field(name="思惟奈との共通サーバー数",value=f"{len(target.mutual_guilds)}個".replace("0個","(なし)"))
-                except:
+                except Exception:
+                    # 失敗しても処理を継続するため、例外は意図的に無視する
                     pass
 
             elif cb.selected_value[0] == "avatar":
@@ -249,7 +246,7 @@ class info_check(commands.Cog):
         while True:
             try:
                 cb:dpyui.interaction_menu_callback = await self.bot.wait_for("menu_select", check=lambda icb:icb.custom_id==f"serverinfo_{ctx.message.id}" and icb.message.id==msg.id and icb.user_id == ctx.author.id, timeout=30)
-            except:
+            except Exception:
                 return
             e = discord.Embed(title="サーバー情報", color=self.bot.ec)
             e.set_author(name=ctx.guild.name, icon_url=getattr(ctx.guild.icon,"id", None))
@@ -301,7 +298,7 @@ class info_check(commands.Cog):
                 try:
                     vi = await ctx.guild.vanity_invite()
                     vi = vi.code
-                except:
+                except Exception:
                     vi = "このサーバーには、カスタム招待リンクがありません"
                 e.description = vi
             elif cb.selected_value[0] == "safety_setting":
@@ -446,7 +443,9 @@ class info_check(commands.Cog):
         try:
             if channel:
                 channel = await channel.fetch()
-        except:pass
+        except Exception:
+            # 失敗しても処理を継続するため、例外は意図的に無視する
+            pass
         ch = channel or ctx.channel
         e = discord.Embed(title="チャンネル情報", color=self.bot.ec)
         e.timestamp=ch.created_at

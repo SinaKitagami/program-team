@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from os import cpu_count
 import discord
 from discord.ext import commands,tasks
 
@@ -36,7 +35,8 @@ class twinotif(commands.Cog):
                 try:
                     embed.set_image(
                         url=tweet["entities"]["media"][0]["media_url_https"])
-                except:
+                except Exception:
+                    # 失敗しても処理を継続するため、例外は意図的に無視する
                     pass
                 embed.add_field(name="Twitterで見る", value=f'https://twitter.com/{tweet["user"]["screen_name"]}/status/{tweet["id"]}')
                 await self.ch.send(f"{self.mention}",embed=embed)

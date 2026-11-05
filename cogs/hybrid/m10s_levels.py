@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from pydoc import describe
 import discord
 from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont
@@ -41,7 +40,8 @@ class levels(commands.Cog):
                     try:
                         await self.bot.cursor.execute("INSERT INTO levels(user_id,guild_id,level,exp,last_level_count,is_level_count_enable) VALUES(%s,%s,%s,%s,%s,%s)",
                                 (int(k), s["id"], v["level"], v["exp"], v["lltime"], v["dlu"]))
-                    except:
+                    except Exception:
+                        # 失敗しても処理を継続するため、例外は意図的に無視する
                         pass
         await ctx.send("完了しました")
 
@@ -68,7 +68,8 @@ class levels(commands.Cog):
                 return
             if m.author.bot:
                 return
-        except:
+        except Exception:
+            # 失敗しても処理を継続するため、例外は意図的に無視する
             pass
 
         lvl = await self.bot.cursor.fetchone("select * from levels where guild_id=%s and user_id=%s", (m.guild.id, m.author.id))
@@ -96,7 +97,8 @@ class levels(commands.Cog):
                                     str(self.bot.create_emoji_str('s_levelup',653161518212448266)) + await self.bot._(m.author, "levelup-notify", m.author.mention, w_lvl),
                                     allowed_mentions=discord.AllowedMentions(users=False)
                                 )
-                            except:
+                            except Exception:
+                                # 失敗しても処理を継続するため、例外は意図的に無視する
                                 pass
                         else:
                             try:
@@ -104,14 +106,16 @@ class levels(commands.Cog):
                                     str(self.bot.create_emoji_str('s_levelup',653161518212448266)) + await self.bot._(m.author, "levelup-notify", m.author.mention, w_lvl),
                                     allowed_mentions=discord.AllowedMentions(users=False)
                                 )
-                            except:
+                            except Exception:
+                                # 失敗しても処理を継続するため、例外は意図的に無視する
                                 pass
                         try:
                             rwds = json.loads(gs["reward"])
                             if rwds.get(str(w_lvl), None):
                                 rl = m.guild.get_role(rwds[str(w_lvl)])
                                 await m.author.add_roles(rl)
-                        except:
+                        except Exception:
+                            # 失敗しても処理を継続するため、例外は意図的に無視する
                             pass
 
             
@@ -327,7 +331,7 @@ class levels(commands.Cog):
         else:
             try:
                 await ctx.send(embed=discord.Embed(title=await ctx._("dhaveper"), description=await ctx._("per-sendfile")))
-            except:
+            except Exception:
                 await ctx.send(f"{await ctx._('dhaveper')}\n{await ctx._('per-sendfile')}")
 
     @commands.hybrid_group(name="level_reward", description="レベルに応じた役職付与の設定です。")
@@ -362,7 +366,8 @@ class levels(commands.Cog):
                             else:
                                 rslt[k] = [u.display_name]
                             await asyncio.sleep(0.2)
-                        except:
+                        except Exception:
+                            # 失敗しても処理を継続するため、例外は意図的に無視する
                             pass
         await ctx.send("完了しました。", embed=ut.getEmbed("追加者一覧", f"```{','.join([f'レベル{k}:{v}'] for k,v in rslt.items())}```"))
 

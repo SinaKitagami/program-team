@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import logging
+
 import discord
 from discord.ext import commands
 from discord import app_commands
-import asyncio
-from dateutil.relativedelta import relativedelta as rdelta
-from typing import Union
-import traceback
 
 import m10s_util as ut
 """↑様々な便利コマンド詰め合わせ

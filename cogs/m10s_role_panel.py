@@ -71,7 +71,7 @@ class m10s_role_panel(commands.Cog):
     async def p_delete(self, ctx, pid:str):
         try:
             pid = int(pid)
-        except:
+        except Exception:
             await ctx.send("> パネルIDが数字ではありません！")
             return
         p = await self.bot.cursor.fetchone("select * from role_panels where id = %s",(pid,))
@@ -89,7 +89,8 @@ class m10s_role_panel(commands.Cog):
                     try:
                         msg = await ctx.channel.fetch_mesasge(pid)
                         await msg.delete()
-                    except:
+                    except Exception:
+                        # 失敗しても処理を継続するため、例外は意図的に無視する
                         pass
                     await m.edit(content="> 役職パネル\n　削除が完了しました。")
                 else:
@@ -106,7 +107,7 @@ class m10s_role_panel(commands.Cog):
         try:
             pid = int(pid)
             pmsg = await ctx.channel.fetch_message(pid)
-        except:
+        except Exception:
             await ctx.send("> パネルIDが数字ではない、またはパネルがこのチャンネルに見つかりません。")
             return
         pd = await self.bot.cursor.fetchone("select * from role_panels where id = %s",(pid,))
@@ -117,7 +118,7 @@ class m10s_role_panel(commands.Cog):
                 pj[str(emoji)] = role.id
                 try:
                     await self.bot.cursor.execute("UPDATE role_panels SET roles = %s WHERE id = %s", (json.dumps(pj), pid))
-                except:await ctx.send("DB!")
+                except Exception:await ctx.send("DB!")
                 e:discord.Embed =  pmsg.embeds[0]
                 e.add_field(name=str(emoji), value=role.mention)
                 e.set_footer(text=f"最終更新者:{ctx.author}")
@@ -134,7 +135,7 @@ class m10s_role_panel(commands.Cog):
                                 "<:[a-zA-Z0-9_-]+:([0-9]+)>", i).group(1)
                             ej = self.bot.get_emoji(int(eid))
                             await pmsg.add_reaction(ej)
-                        except:
+                        except Exception:
                             await ctx.send("付与できていないリアクションがあります。該当の役職はリアクションでの付与ができません。")
 
             else:
@@ -151,7 +152,7 @@ class m10s_role_panel(commands.Cog):
         try:
             pid = int(pid)
             pmsg = await ctx.channel.fetch_message(pid)
-        except:
+        except Exception:
             await ctx.send("> パネルIDが数字ではない、またはパネルがこのチャンネルに見つかりません。")
             return
         pd = await self.bot.cursor.fetchone("select * from role_panels where id = %s",(pid,))
@@ -181,7 +182,7 @@ class m10s_role_panel(commands.Cog):
                                 "<:[a-zA-Z0-9_-]+:([0-9]+)>", i).group(1)
                             ej = self.bot.get_emoji(int(eid))
                             await pmsg.add_reaction(ej)
-                        except:
+                        except Exception:
                             await ctx.send("付与できていないリアクションがあります。該当の役職はリアクションでの付与ができません。")
 
             else:
@@ -214,7 +215,7 @@ class m10s_role_panel(commands.Cog):
                     else:
                         await member.add_roles(rl)
                         await ch.send(f"> {member.mention}！役職を付与しました！",delete_after=5)
-                except:
+                except Exception:
                     await ch.send(f"> {str(pr.emoji)}での役職の付与に失敗しました。原因を見つけてパネルを修正してください。",)
         
 

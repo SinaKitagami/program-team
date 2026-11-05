@@ -2,12 +2,10 @@
 
 import discord
 from discord.ext import commands
-import asyncio
 import config as cf
 
 import m10s_util as ut
 
-from discord import app_commands
 
 
 class m10s_partner(commands.Cog):
@@ -36,11 +34,12 @@ class m10s_partner(commands.Cog):
         while True:
             try:
                 r, u = await self.bot.wait_for("reaction_add", check=lambda r, u: r.message.id == msg.id and u.id == ctx.message.author.id, timeout=30)
-            except:
+            except Exception:
                 break
             try:
                 await msg.remove_reaction(r, u)
-            except:
+            except Exception:
+                # 失敗しても処理を継続するため、例外は意図的に無視する
                 pass
             if str(r) == str(self.bot.create_emoji_str('s_move_right',653161518170505216)):
                 if page == pmax:

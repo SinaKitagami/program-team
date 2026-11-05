@@ -4,8 +4,6 @@ from typing import Optional
 import discord
 from discord.ext import commands
 import random
-import time
-import asyncio
 import platform
 import re
 import psutil
@@ -69,13 +67,13 @@ class other(commands.Cog):
             for k in ctt[::2]:
                 try:
                     await qes.add_reaction(k)
-                except Exception as e:
+                except Exception:
                     try:
                         eid = re.match(
                             "<:[a-zA-Z0-9_-]+:([0-9]+)>", k).group(1)
                         ej = self.bot.get_emoji(int(eid))
                         await qes.add_reaction(ej)
-                    except:
+                    except Exception:
                         await qes.delete()
                         await ctx.send(await ctx._("q-error"))
 

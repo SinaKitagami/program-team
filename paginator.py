@@ -53,12 +53,13 @@ class EmbedPaginator:
         while True:
             try:
                 reaction, user = await self.bot.wait_for("reaction_add", check=check, timeout=self.timeout)
-            except:
+            except Exception:
                 break
             
             try:
                 await msg.remove_reaction(reaction, user)
-            except:
+            except Exception:
+                # 失敗しても処理を継続するため、例外は意図的に無視する
                 pass
             
             if str(reaction) == "⏮":
@@ -79,7 +80,8 @@ class EmbedPaginator:
          
                 try:
                     await asyncio.gather(*cl)
-                except:
+                except Exception:
+                    # 失敗しても処理を継続するため、例外は意図的に無視する
                     pass
                 
                 break
@@ -95,12 +97,13 @@ class EmbedPaginator:
                 
                 try:
                     m = await self.bot.wait_for("message", check=lambda message: message.channel.id == self.ctx.channel.id and message.author.id == self.ctx.message.author.id and str(message.content).isdigit(), timeout=self.timeout)
-                except:
+                except Exception:
                     embed = self.get_page(0)
                 else:
                     try:
                         await a.delete()
-                    except:
+                    except Exception:
+                        # 失敗しても処理を継続するため、例外は意図的に無視する
                         pass
                     
                     p = int(m.content) - 1

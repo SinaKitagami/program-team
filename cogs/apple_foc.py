@@ -1,4 +1,3 @@
-import datetime
 
 import discord
 from discord.ext import commands
@@ -34,8 +33,6 @@ class AppleFOCCog(commands.Cog):
         return member.status is discord.Status.offline and await self.bot.can_use_online(member)
 
     async def send(self, member, logc):
-        e = discord.Embed(title="オンライン隠し", description=member.mention,
-                          timestamp=datetime.datetime.now(datetime.timezone.utc))
         return
 
     async def run(self, member):

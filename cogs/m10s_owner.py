@@ -26,7 +26,7 @@ class owner(commands.Cog):
         c.args = list(ags)
         try:
             await c.invoke(self.bot.get_command(cname))
-        except:
+        except Exception:
             await ctx.send(embed=discord.Embed(title="dcomrunエラー", description=traceback.format_exc(0)))
 
     @commands.command()
@@ -70,7 +70,7 @@ class owner(commands.Cog):
         try:
             await eval(cmd)
             await ctx.message.add_reaction(self.bot.create_emoji_str('s_check',653161518103265291))
-        except:
+        except Exception:
             await ctx.send(embed=discord.Embed(title="awaitEvalエラー", description=traceback.format_exc(0)))
 
     @commands.command(name="eval")
@@ -96,7 +96,7 @@ class owner(commands.Cog):
                     await ctx.send(embed=rtn)
                 else:
                     await ctx.send(f"```{rtn}```")
-        except:
+        except Exception:
             await ctx.message.remove_reaction(self.bot.create_emoji_str('s_gch_sending',653161518346534912,True), self.bot.user)
             await ctx.message.add_reaction("❌")
             await ctx.author.send(embed=discord.Embed(title="eval's Error", description=f"```{traceback.format_exc(3)}```", color=self.bot.ec))
@@ -114,7 +114,8 @@ class owner(commands.Cog):
                     await asyncio.sleep(0.5)
                     try:
                         await self.bot.cursor.execute("delete from gchat_cinfo where id = %s", (cid,))
-                    except:
+                    except Exception:
+                        # 失敗しても処理を継続するため、例外は意図的に無視する
                         pass
             await ctx.send("強制切断できてるか確認してねー")
 
@@ -168,7 +169,6 @@ class owner(commands.Cog):
     @ut.runnable_check()
     async def reload_(self,ctx):
         import importlib
-        import config
         importlib.reload(config)
         self.bot.features = config.sp_features
         await ctx.message.add_reaction(self.bot.create_emoji_str('s_check',653161518103265291))
