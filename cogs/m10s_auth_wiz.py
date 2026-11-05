@@ -58,7 +58,7 @@ class m10s_auth_wiz(commands.Cog):
                     await msg.clear_reactions()
                 await m.add_roles(m.guild.get_role(auths["give_role"]))
                 await ch.send("> サーバーユーザー認証\n あなたの認証が完了しました！\n10秒後にこのチャンネルは削除されます。")
-                if ch.permissions_for(m.guild.me).manage_messages:
+                if ch.permissions_for(m.guild.me).manage_channels:
                     await asyncio.sleep(10)
                     await ch.delete()
 
