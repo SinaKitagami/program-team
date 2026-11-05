@@ -643,7 +643,7 @@ async def on_command(ctx:commands.Context):
     if ctx.command.qualified_name == "tos_guide" or ctx.command.qualified_name == "how_to_remove_my_data":
         return
     ch = await bot.fetch_channel(693048961107230811)
-    e = discord.Embed(title=f"prefixコマンド:{ctx.command.full_parent_name}の実行", color=bot.ec)
+    e = discord.Embed(title=f"prefixコマンド:{ctx.command.qualified_name}の実行", color=bot.ec)
     e.set_author(name=f"実行者:{str(ctx.author)}({ctx.author.id})",
                  icon_url=ctx.author.display_avatar.replace(static_format="png").url)
     if ctx.guild:
@@ -716,7 +716,7 @@ async def on_command_error(ctx, error):
                               description=await ctx._("only-mii-10"), color=bot.ec)
         await ctx.send(embed=embed)
         ch = await bot.fetch_channel(652127085598474242)
-        await ch.send(embed=ut.getEmbed("エラーログ", f"コマンド:`{ctx.command.full_parent_name}`\n```{str(error)}```", bot.ec, "サーバー", f"{getattr(ctx.guild,"name","DM or GDM実行")}({getattr(ctx.guild,"id","-")})", "実行メンバー", f"{ctx.author.name}({ctx.author.id})"))
+        await ch.send(embed=ut.getEmbed("エラーログ", f"コマンド:`{ctx.command.qualified_name}`\n```{str(error)}```", bot.ec, "サーバー", f"{getattr(ctx.guild,"name","DM or GDM実行")}({getattr(ctx.guild,"id","-")})", "実行メンバー", f"{ctx.author.name}({ctx.author.id})"))
     elif isinstance(error, commands.MissingRequiredArgument):
         # 引数がないよっ☆
         embed = discord.Embed(title=await ctx._("cmd-error-t"),
@@ -747,7 +747,7 @@ async def on_command_error(ctx, error):
         # その他例外
         from traceback import format_exception as f_exc
         ch = await bot.fetch_channel(652127085598474242)
-        msg = await ch.send(embed=ut.getEmbed("エラーログ", f"コマンド:`{ctx.command.full_parent_name}`\n```py\n{''.join(f_exc(error))}```", bot.ec, "サーバー", f"{getattr(ctx.guild,"name","DM or GDM実行")}({getattr(ctx.guild,"id","-")})", "実行メンバー", f"{ctx.author.name}({ctx.author.id})"))
+        msg = await ch.send(embed=ut.getEmbed("エラーログ", f"コマンド:`{ctx.command.qualified_name}`\n```py\n{''.join(f_exc(error))}```", bot.ec, "サーバー", f"{getattr(ctx.guild,"name","DM or GDM実行")}({getattr(ctx.guild,"id","-")})", "実行メンバー", f"{ctx.author.name}({ctx.author.id})"))
         await ctx.send(embed=ut.getEmbed(await ctx._("com-error-t"), await ctx._("cmd-other-d", "詳細は無効化されています…。"), bot.ec, "error id", msg.id, "サポートが必要ですか？", "[サポートサーバー](https://discord.gg/vtn2V3v)に参加して、「view-思惟奈ちゃんch」役職をつけて質問してみましょう！"))
 
 
