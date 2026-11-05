@@ -82,7 +82,7 @@ tomlkit==0.15.2
 twitter==1.19.6
 typed_ast==1.5.5
 typing_extensions==4.16.0
-tzdata==2026.5
+tzdata==2026.6
 uritemplate==4.2.0
 urllib3==2.8.0
 wheel==0.48.0
