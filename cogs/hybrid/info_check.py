@@ -73,7 +73,7 @@ class info_check(commands.Cog):
         menu.add_option("ユーザーバッジ","badges","ユーザーのバッジ情報を表示します。")
         if ucb["banner"]:
             menu.add_option("ユーザーバナー","banner","ユーザーの設定しているバナー画像を表示します。")
-        if upf:
+        if upf and target.id == ctx.author.id:
             menu.add_option("思惟奈ちゃんユーザープロファイル情報","sina_info","思惟奈ちゃん上での扱いなどを表示します。")
         if in_guild:
             menu.add_option("サーバー内基本情報","server_basic","サーバー内での基本的な情報を表示します。")
