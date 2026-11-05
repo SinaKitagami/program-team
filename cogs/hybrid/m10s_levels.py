@@ -243,7 +243,7 @@ class levels(commands.Cog):
                         try:
                             await u.display_avatar.replace(static_format="png").save("imgs/usericon.png")
                             dlicon = Image.open('imgs/usericon.png', 'r')
-                        except:
+                        except Exception:
                             dlicon = Image.open('imgs/noimg.png', 'r')
                         dlicon = dlicon.resize((100, 100))
                         cv = None
@@ -308,16 +308,19 @@ class levels(commands.Cog):
                 finally:
                     try:
                         os.remove("imgs/sina'slevelcard.png")
-                    except:
+                    except OSError:
+                        # 一時ファイルが存在しない等で削除できなくても処理は継続する
                         pass
                     try:
                         os.remove("imgs/usericon.png")
-                    except:
+                    except OSError:
+                        # 一時ファイルが存在しない等で削除できなくても処理は継続する
                         pass
                     if cb == "banner":
                         try:
                             os.remove(f"imgs/custom_banner_{u.id}.png")
-                        except:
+                        except OSError:
+                            # 一時ファイルが存在しない等で削除できなくても処理は継続する
                             pass
             else:
                 await ctx.send(await ctx._("level-notcount"))

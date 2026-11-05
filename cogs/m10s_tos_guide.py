@@ -1,12 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import discord
 from discord.ext import commands
-import asyncio
 
 from discord import app_commands
-
-import m10s_util as ut
 
 
 class m10s_tos_guide(commands.Cog):

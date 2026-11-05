@@ -71,11 +71,13 @@ class Symmetry(commands.Cog):
         await ctx.send(file=discord.File('ts2.png'))
         try:
             os.remove("image.png")
-        except:
+        except OSError:
+            # 一時ファイルが存在しない等で削除できなくても処理は継続する
             pass
         try:
             os.remove("ts2.png")
-        except:
+        except OSError:
+            # 一時ファイルが存在しない等で削除できなくても処理は継続する
             pass
 
 

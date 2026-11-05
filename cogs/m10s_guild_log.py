@@ -321,11 +321,14 @@ class m10s_guild_log(commands.Cog):
                 ch = self.bot.get_channel(gpf["sendlog"])
                 if ch.guild.id == messages[0].guild.id:
                     await ch.send(embed=e,file=discord.File(fp="bulk_message_delete.txt"))
-        except:pass
+        except Exception:
+            # ログチャンネルが見つからない/送信権限がない等の場合はログ送信をスキップする
+            pass
         finally:
             try:
                 os.remove("bulk_message_delete.txt")
-            except:
+            except OSError:
+                # 一時ファイルが存在しない等で削除できなくても処理は継続する
                 pass
 
 
