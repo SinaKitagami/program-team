@@ -487,6 +487,9 @@ class m10s_re_gchat(commands.Cog):
     async def on_message(self, m: discord.Message):
         if m.channel.id in self.ignore_ch: #グローバルチャットの外部との相互連携作成時用
             return
+
+        if m.guild is None:
+            return
         
         if m.content.startswith("s-"):
             return

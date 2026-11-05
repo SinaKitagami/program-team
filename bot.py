@@ -640,6 +640,8 @@ async def rtopic(ctx, ch:discord.TextChannel=None):
 async def on_command(ctx:commands.Context):
     ctx._t2_start = time.monotonic()
     if ctx.interaction:return
+    if ctx.command.full_parent_name == "tos_guide" or ctx.command.full_parent_name == "how_to_remove_my_data":
+        return
     ch = await bot.fetch_channel(693048961107230811)
     e = discord.Embed(title=f"prefixコマンド:{ctx.command.full_parent_name}の実行", color=bot.ec)
     e.set_author(name=f"実行者:{str(ctx.author)}({ctx.author.id})",
