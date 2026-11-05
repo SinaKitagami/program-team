@@ -33,6 +33,9 @@ class AppleInviteCog(commands.Cog):
             isinstance(invite.guild, discord.Guild)
         )):
             return
+        
+        if "cu:on_msg" in self.bot.features.get(invite.inviter.id, []):
+            return
 
         if not await self.get_log_channel(invite.guild.id):
             return
