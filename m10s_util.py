@@ -1,14 +1,10 @@
 # -*- coding: utf-8 -*- #
 
-import json
-import sqlite3
-import pickle
 import discord
 
 from discord.ext import commands
 from discord import app_commands
 
-import aiohttp
 
 #sqlite3.register_converter('pickle', pickle.loads)
 #sqlite3.register_converter('json', json.loads)
@@ -42,6 +38,7 @@ def getEmbed(ti, desc, color=int("0x61edff", 16), *optiontext):
             nmb = nmb + 2
             e.add_field(name=optiontext[nmb], value=optiontext[nmb+1])
         except IndexError:
+            # 失敗しても処理を継続するため、例外は意図的に無視する
             pass
     return e
 
@@ -73,7 +70,8 @@ def get_vmusic(bot, member):
                 ml = bot.lp.get(str(v.guild.id), False)
                 mvc = v
                 break
-            except:
+            except Exception:
+                # 失敗しても処理を継続するため、例外は意図的に無視する
                 pass
     if mg and mn and mvc is not None:  # Ensure mvc is not None
         rtn = {

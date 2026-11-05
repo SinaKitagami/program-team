@@ -2,19 +2,12 @@
 
 import discord
 from discord.ext import commands
-import asyncio
-import datetime
 from dateutil.relativedelta import relativedelta as rdelta
-import traceback
-from typing import Union
 
-import config as cf
 
 import m10s_util as ut
 
-from my_module import dpy_interaction as dpyui
 
-from discord import app_commands
 
 
 class info(commands.Cog):
@@ -68,7 +61,8 @@ class info(commands.Cog):
                                 value=await ctx._("serverinfo-nitroboost-val", sevinfo.premium_tier))
                 embed.add_field(name=await ctx._("serverinfo-nitroboost-can-title"), value=await ctx._(
                     f"serverinfo-nitroboost-can-{sevinfo.premium_tier}", sevinfo.premium_tier, sevinfo.premium_subscription_count))
-            except:
+            except Exception:
+                # 失敗しても処理を継続するため、例外は意図的に無視する
                 pass
 
             if sevinfo.system_channel:
@@ -79,7 +73,8 @@ class info(commands.Cog):
                                     value=sevinfo.system_channel_flags.join_notifications)
                     embed.add_field(name=await ctx._("serverinfo-sysch-boost"),
                                     value=sevinfo.system_channel_flags.premium_subscriptions)
-                except:
+                except Exception:
+                    # 失敗しても処理を継続するため、例外は意図的に無視する
                     pass
             if sevinfo.afk_channel:
                 embed.add_field(name=await ctx._("serverinfo-afkch"),
@@ -99,30 +94,6 @@ class info(commands.Cog):
     @ut.runnable_check_for_appcmd()
     async def view_teammember(self, ctx):
         await ctx.send(embed=ut.getEmbed(await ctx._("team_sina-chan"), "\n".join([(await self.bot.fetch_user(i)).name for i in self.bot.team_sina])))
-
-    @commands.command()
-    @ut.runnable_check()
-    async def mutual_guilds(self, ctx, uid=None):
-        if ctx.author.id in self.bot.team_sina:
-            try:
-                user = await self.bot.fetch_user(int(uid))
-            except:
-                user = ctx.author
-            mg = []
-            for g in self.bot.guilds:
-                if g.get_member(user.id):
-                    mg += [f"{g.name}({g.id})"]
-            if mg != []:
-                t = "\n".join(mg)
-                e = discord.Embed(description=f"```{t}```", color=self.bot.ec)
-                e.set_author(name=f"思惟奈ちゃんと{user}の共通サーバー")
-                await ctx.send(embed=e)
-            else:
-                e = discord.Embed(description="なし", color=self.bot.ec)
-                e.set_author(name=f"思惟奈ちゃんと{user}の共通サーバー")
-                await ctx.send(embed=e)
-        else:
-            await ctx.reply("> 共通サーバーチェッカー\n　Discord公式の機能でチェックできるようになったため、このコマンドは運営専用になりました。プロフィールから確認してください。")
 
 
 async def setup(bot):

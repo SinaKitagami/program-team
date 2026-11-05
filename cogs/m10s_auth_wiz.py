@@ -57,7 +57,10 @@ class m10s_auth_wiz(commands.Cog):
                             await m.add_roles(grl)
                     await msg.clear_reactions()
                 await m.add_roles(m.guild.get_role(auths["give_role"]))
-                await ch.send("> サーバーユーザー認証\n あなたの認証が完了しました！")
+                await ch.send("> サーバーユーザー認証\n あなたの認証が完了しました！\n10秒後にこのチャンネルは削除されます。")
+                if ch.permissions_for(m.guild.me).manage_channels:
+                    await asyncio.sleep(10)
+                    await ch.delete()
 
     @commands.hybrid_command(name="authsetting", aliases=["Auth","Authsettings"], description="簡易メンバー認証を作成できます。")
     @commands.has_permissions(administrator=True)
@@ -88,7 +91,6 @@ class m10s_auth_wiz(commands.Cog):
                 e.add_field(
                     name="作成されるカテゴリー", value=f"{category.name}({category.id})", inline=False)
             else:
-                catagory = None
                 e.add_field(name="作成されるカテゴリー",
                             value=f"カテゴリーに所属しない", inline=False)
             if isinstance(auths["next_reaction"], str):
@@ -140,7 +142,7 @@ class m10s_auth_wiz(commands.Cog):
                     m = await ut.wait_message_return(ctx, "作成するウィザードの進行絵文字を送ってください。\nサーバー絵文字の場合は、IDを送信してください。", udm, 60)
                     try:
                         nr = int(m.content)
-                    except:
+                    except Exception:
                         nr = m.content
                     await self.bot.cursor.execute(
                         "UPDATE welcome_auth SET next_reaction = %s WHERE id = %s", (nr, ctx.guild.id))
@@ -149,7 +151,7 @@ class m10s_auth_wiz(commands.Cog):
                     m = await ut.wait_message_return(ctx, "チャンネルを作成するカテゴリーのIDを送信してください。\nカテゴリーを作らない場合は、任意のテキストを送信してください。", udm, 60)
                     try:
                         category = int(m.content)
-                    except:
+                    except Exception:
                         category = None
                     await self.bot.cursor.execute(
                         "UPDATE welcome_auth SET category = %s WHERE id = %s", (category, ctx.guild.id))
@@ -189,7 +191,7 @@ class m10s_auth_wiz(commands.Cog):
                                 ridm = await ut.wait_message_return(ctx, f"> 編集ウィザード\n{r}で役職を付与する場合は役職のIDを、しない場合は数字ではない任意のテキストを送信してください。", udm, 60)
                                 try:
                                     rid = int(ridm.content)
-                                except:
+                                except Exception:
                                     rid = None
                                 tmp["give_role"].append(rid)
                             tmsg = await ut.wait_message_return(ctx, f"> 編集ウィザード\n最後に、そのページのテキストを送信してください。", udm, 60)
@@ -210,7 +212,7 @@ class m10s_auth_wiz(commands.Cog):
                     m = await ut.wait_message_return(ctx, "作成するウィザードの進行絵文字を送ってください。\nサーバー絵文字の場合は、IDを送信してください。", udm, 60)
                     try:
                         nr = int(m.content)
-                    except:
+                    except Exception:
                         nr = m.content
 
                     # カテゴリ→ウィザードの内容で設定を作る
@@ -221,7 +223,7 @@ class m10s_auth_wiz(commands.Cog):
                     m = await ut.wait_message_return(ctx, "チャンネルを作成するカテゴリーのIDを送信してください。\nカテゴリーを作らない場合は、任意のテキストを送信してください。", udm, 60)
                     try:
                         category = int(m.content)
-                    except:
+                    except Exception:
                         category = None
 
                     m = await ut.wait_message_return(ctx, "認証後、与える役職のIDを送信してください。", udm, 60)
@@ -250,7 +252,7 @@ class m10s_auth_wiz(commands.Cog):
                                 ridm = await ut.wait_message_return(ctx, f"> 作成ウィザード\n{r}で役職を付与する場合は役職のIDを、しない場合は数字ではない任意のテキストを送信してください。", udm, 60)
                                 try:
                                     rid = int(ridm.content)
-                                except:
+                                except Exception:
                                     rid = None
                                 tmp["give_role"].append(rid)
                             tmsg = await ut.wait_message_return(ctx, f"> 作成ウィザード\n最後に、そのページのテキストを送信してください。", udm, 60)

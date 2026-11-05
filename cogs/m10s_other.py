@@ -4,8 +4,6 @@ from typing import Optional
 import discord
 from discord.ext import commands
 import random
-import time
-import asyncio
 import platform
 import re
 import psutil
@@ -14,6 +12,9 @@ import json
 from discord import app_commands
 
 import m10s_util as ut
+
+# randomint で一度に生成する乱数の個数の上限
+MAX_RANDOM_COUNT = 100
 
 
 class other(commands.Cog):
@@ -69,13 +70,13 @@ class other(commands.Cog):
             for k in ctt[::2]:
                 try:
                     await qes.add_reaction(k)
-                except Exception as e:
+                except Exception:
                     try:
                         eid = re.match(
                             "<:[a-zA-Z0-9_-]+:([0-9]+)>", k).group(1)
                         ej = self.bot.get_emoji(int(eid))
                         await qes.add_reaction(ej)
-                    except:
+                    except Exception:
                         await qes.delete()
                         await ctx.send(await ctx._("q-error"))
 
@@ -183,8 +184,8 @@ class other(commands.Cog):
                 await ctx.send(await ctx._("randomint-arg-error"))
                 return
 
-            if c >= MAX_RANDOM_COUNT:
-                c = MAX_RANDOM_COUNT - 1  # 制限を設定
+            if c > MAX_RANDOM_COUNT:
+                c = MAX_RANDOM_COUNT  # 制限を設定
             intcount = []
             rnd = 0
             for _ in range(c):

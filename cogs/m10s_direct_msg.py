@@ -1,17 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import discord
-from discord.ext import commands, tasks
+from discord.ext import commands
 import asyncio
-from dateutil.relativedelta import relativedelta as rdelta
-import traceback
 import m10s_util as ut
-import textwrap
 
-import config
-import aiohttp
 
-from discord import app_commands
 
 class m10s_direct_msg(commands.Cog):
 
@@ -40,7 +34,7 @@ class m10s_direct_msg(commands.Cog):
             if str(r.emoji) == "⭕":
                 try:
                     await user.send(content)
-                except:
+                except Exception:
                     await ctx.author.send("送信に失敗しました。")
                 else:
                     await ctx.author.send("送信しました。")

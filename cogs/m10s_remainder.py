@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*- #
 
-from typing import Optional, Union
+from typing import Optional
 import discord
 from discord.ext import commands, tasks
 import datetime
@@ -10,7 +10,6 @@ from discord import app_commands
 
 import m10s_util as ut
 
-import asyncio
 
 class m10s_remainder(commands.Cog):
 
@@ -36,7 +35,7 @@ class m10s_remainder(commands.Cog):
         m = await self.bot.wait_for("message",check=lambda m:m.author.id == ctx.message.author.id)
         try:
             ts = datetime.datetime.strptime(m.content, "%Y/%m/%d %H:%M")
-        except:
+        except Exception:
             await ctx.send("> リマインダー\n　日時の指定が誤っています。もう一度やり直してください。")
             return
         await self.bot.cursor.execute("insert into remaind (id,stext,mention_role,time,chid) values (%s,%s,%s,%s,%s)", (rid, send_text, mention_at, ts.timestamp(), ctx.channel.id))
@@ -54,7 +53,8 @@ class m10s_remainder(commands.Cog):
                 e=discord.Embed(title="リマインド情報",color=self.bot.ec)
                 try:
                     e.add_field(name="メンションする役職のID",value=f"{i['mention_role'] or '(役職なし)'}")
-                except:
+                except Exception:
+                    # 失敗しても処理を継続するため、例外は意図的に無視する
                     pass
                 e.add_field(name="time",value=f"{datetime.datetime.fromtimestamp(i['time']).strftime('%Y/%m/%d %H:%M')}")
                 e.add_field(name="テキスト",value=f"{i['stext']}")
@@ -73,7 +73,8 @@ class m10s_remainder(commands.Cog):
                     e=discord.Embed(title="リマインド情報",color=self.bot.ec)
                     try:
                         e.add_field(name="メンションする役職のID",value=f"{i[page]['mention_role'] or '(役職なし)'}")
-                    except:
+                    except Exception:
+                        # 失敗しても処理を継続するため、例外は意図的に無視する
                         pass
                     e.add_field(name="time",value=f"{datetime.datetime.fromtimestamp(i[page]['time']).strftime('%Y/%m/%d %H:%M')}")
                     e.add_field(name="テキスト",value=f"{i[page]['stext']}")
@@ -89,11 +90,12 @@ class m10s_remainder(commands.Cog):
                 while True:
                     try:
                         r, u = await self.bot.wait_for("reaction_add", check=lambda r, u: r.message.id == msg.id and u.id == ctx.message.author.id, timeout=30)
-                    except:
+                    except Exception:
                         break
                     try:
                         await msg.remove_reaction(r, u)
-                    except:
+                    except Exception:
+                        # 失敗しても処理を継続するため、例外は意図的に無視する
                         pass
                     if str(r) == str(self.bot.create_emoji_str('s_move_right',653161518170505216)):
                         if page == pmax:
@@ -130,14 +132,14 @@ class m10s_remainder(commands.Cog):
             ch = self.bot.get_channel(i["chid"])
             try:
                 role = ch.guild.get_role(i["mention_role"])
-            except:
+            except Exception:
                 role = None
             try:
                 if ch.guild.id == 574170788165582849:
                     await ch.send(f"> リマインド {role.mention if role else ''}\n　{i['stext']}",allowed_mentions=discord.AllowedMentions(everyone=True, users=True, roles=True))
                 else:
                     await ch.send(f"> リマインド {role.mention if role else ''}\n　{i['stext']}")
-            except:
+            except Exception:
                 print("失敗したリマインダー")
             finally:
                 await self.bot.cursor.execute("delete from remaind where id = %s",(i["id"],))

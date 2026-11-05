@@ -7,6 +7,7 @@ from discord import app_commands
 from discord.ext import commands, tasks
 import json
 import random
+import re
 import wikipedia
 import wikidata.client
 import asyncio
@@ -29,8 +30,7 @@ from metrics import (
     BOT_COMMAND_LATENCY_SECONDS,
 )
 
-from twitter import *
-from dateutil.relativedelta import relativedelta as rdelta
+from twitter import Twitter, OAuth
 
 from my_module import dpy_interaction as dpyui
 
@@ -38,7 +38,6 @@ from my_module import dpy_interaction as dpyui
 import m10s_util as ut
 from apple_util import AppleUtil
 from l10n import TranslateHandler, LocalizedContext
-from checker import MaliciousInput, content_checker
 # tokens
 import config
 
@@ -112,9 +111,6 @@ bot.T_Acs_Token = config.T_Acs_Token
 bot.T_Acs_SToken = config.T_Acs_SToken
 
 
-# test
-postcount = {}
-
 db = None
 
 async def db_setup():
@@ -131,7 +127,7 @@ async def db_setup():
         bot.cursor = database.Database(host=config.DB_HOST, port=3306, user=config.DB_USER, password=config.DB_PW, db=config.DB_NAME)
         #bot.cursor = await db.cursor(aiomysql.DictCursor)
 
-    except:
+    except Exception:
         traceback.print_exc()
 
 async def main():
@@ -181,6 +177,7 @@ async def close_handler():
     try:
         await db.commit()
     except aiosqlite.ProgrammingError:
+        # 失敗しても処理を継続するため、例外は意図的に無視する
         pass
     else:
         await db.close()
@@ -329,6 +326,8 @@ async def on_ready():
             "m10s_role_panel", "m10s_partners", "m10s_remainder", "m10s_set_activity_roles",
 
             "m10s_api", "m10s_app_metadata",
+
+            "m10s_tos_guide",
             
             # "__part_pjsekai_music_select"
             "slash.pjsekai_music_select", # 思惟奈ちゃんパートナー向け機能-ぱすこみゅ
@@ -350,7 +349,7 @@ async def on_ready():
     for file in files:
         try:
             await bot.load_extension(f"cogs.{file}")
-        except:
+        except Exception:
 
             traceback.print_exc()
             print(f"Extension {file} Load Failed.")
@@ -372,49 +371,39 @@ async def on_ready():
 
     try:
         ch = bot.get_channel(boot_info_channel_id)
-        if ch == None:
+        if ch is None:
             try:
                 await bot.fetch_channel(boot_info_channel_id)
-            except:
+            except Exception:
                 return
         e=discord.Embed(title="起動時インフォメーション", description=f"シャードID:{bot.shard_id}\nシャード内認識ユーザー数:{len(bot.users)}\nシャード内認識サーバー数:{len(bot.guilds)}\nシャード内認識チャンネル数:{len([c for c in bot.get_all_channels()])}\ndiscord.py ver_{discord.__version__}", color=bot.ec)
         await ch.send(f"{bot.create_emoji_str('s_online',653161518531215390)}on_ready!", embed=e)
         if txt:
             await ch.send(embed=embed)
-    except:
+    except Exception:
+        # 失敗しても処理を継続するため、例外は意図的に無視する
         pass
 
 
 @bot.event
 async def on_message(message):
+    # 規約違反やデータ削除等の理由で、特定idのユーザー/サーバーのメッセージを早期リターンする
     if "cu:on_msg" in bot.features.get(message.author.id, []):
         return
     if "cu:on_msg" in bot.features.get(getattr(message.guild, "id", None), []):
         return
+    
     if isinstance(message.channel, discord.DMChannel):
         return
     if message.webhook_id:
         return
     if message.author.id == bot.user.id:
         return
-    if postcount.get(str(message.guild.id), None) is None:
-        postcount[str(message.guild.id)] = 1
-    else:
-        postcount[str(message.guild.id)] += 1
-    # if message.content == "check_msgs":
-        # on_messageを呼ぶだけの処理がすぐに終わるかの確認
-        # with open("post_count.json", mode="w", encoding="utf-8") as f:
-            # json.dump(postcount, f, indent=4)
-        # await message.channel.send(file=discord.File("post_count.json"))
-    # db.files_download_to_file( "guildsetting.json" , "/guildsetting.json" )
-    # db.files_download_to_file( "profiles.json" , "/profiles.json" )
     tks = [
         domsg(message)
         # globalSend(message), グローバルチャットは進化した！ -> cogs.m10s_re_gchat
     ]
     await asyncio.gather(*tks)
-    # await domsg(message)
-    # await globalSend(message)
 
 
 async def domsg(message):
@@ -437,7 +426,8 @@ async def domsg(message):
                            (message.guild.id, "{}", "{}", "[]", None, "{}", "{}", "[]", None, "[]", guild_lang, 0))
         try:
             await message.channel.send(f"{bot.create_emoji_str('s_profile_created', 653161518153596950)}このサーバーの思惟奈ちゃんサーバープロファイルを作成しました！いくつかの項目はコマンドを使って書き換えることができます。詳しくはヘルプ(`s-help`)をご覧ください。\nまた、不具合や疑問点などがありましたら`mii-10#3110`にお願いします。\n思惟奈ちゃんのお知らせは`/rnotify [チャンネル(省略可能)]`で、コマンド等の豆知識は`/rtopic [チャンネル(省略可能)]`で受信する設定にできます。(Webhook管理権限が必要です。)")
-        except:
+        except Exception:
+            # 失敗しても処理を継続するため、例外は意図的に無視する
             pass
         gs = await bot.cursor.fetchone("select * from guilds where id=%s",
                            (message.guild.id,))
@@ -458,7 +448,8 @@ async def domsg(message):
         try:
             if not "disable_profile_msg" in json.loads(gs["lockcom"]):
                 await message.add_reaction(bot.create_emoji_str("s_profile_created",653161518153596950))
-        except:
+        except Exception:
+            # 失敗しても処理を継続するため、例外は意図的に無視する
             pass
         pf = await bot.cursor.fetchone("select * from users where id=%s",
                         (message.author.id,))
@@ -466,15 +457,6 @@ async def domsg(message):
 
     """await bot.cursor.execute(
     "CREATE TABLE IF NOT EXISTS actrole_optin(id integer PRIMARY KEY NOT NULL, is_enable integer NOT NULL default 0);")"""
-
-    data = await bot.cursor.fetchone("select * from actrole_optin where id=%s", (message.author.id,))
-    if not data:
-        if message.is_system():
-            return
-        await bot.cursor.execute("INSERT INTO actrole_optin(id,is_enable) VALUES(%s,%s)",
-                        (message.author.id, 0))
-        data = await bot.cursor.execute("select * from actrole_optin where id=%s",
-                        (message.author.id,))
 
 
     tks = [
@@ -485,7 +467,7 @@ async def domsg(message):
 
     try:
         tpf = json.loads(pf["prefix"]) + json.loads(gs["prefix"])
-    except:
+    except Exception:
         tpf = []
     if not ("disable_defprefix" in json.loads(gs["lockcom"])):
         tpf.insert(0,"s-")
@@ -515,7 +497,7 @@ async def runsercmd(message, gs, pf):
         if not message.author.id == bot.user.id and message.webhook_id is None:
             try:
                 tpf = json.loads(pf["prefix"]) + json.loads(gs["prefix"])
-            except:
+            except Exception:
                 tpf = []
             tpf.append("s-")
             try:
@@ -525,7 +507,6 @@ async def runsercmd(message, gs, pf):
                     for k, v in cmds.items():
                         for px in tpf:
                             if px+k == ctts[0]:
-                                DoServercmd = True
                                 if v["mode"] == "random":
                                     await message.channel.send(random.choice(v["rep"]))
                                 elif v["mode"] == "one":
@@ -533,7 +514,7 @@ async def runsercmd(message, gs, pf):
                                 elif v["mode"] == "role":
                                     try:
                                         role = message.guild.get_role(v["rep"])
-                                    except:
+                                    except Exception:
                                         await message.channel.send(await bot._(message.author, "scmd-notfound-role"))
                                         return
                                     if role < message.author.top_role:
@@ -546,7 +527,8 @@ async def runsercmd(message, gs, pf):
                                     else:
                                         await message.channel.send(await bot._(message.author, "scmd-notrole"))
                                 break
-            except:
+            except Exception:
+                # 失敗しても処理を継続するため、例外は意図的に無視する
                 pass
 
 
@@ -559,7 +541,8 @@ async def gahash(message, gs):
     try:
         if "s-noHashSend" in (message.channel.topic or ""):
             return
-    except:
+    except Exception:
+        # 失敗しても処理を継続するため、例外は意図的に無視する
         pass
     if "shash" not in json.loads(gs["lockcom"]):
         ch = json.loads(gs["hash"])
@@ -595,7 +578,10 @@ async def gahash(message, gs):
 @ut.runnable_check()
 @bot.command()
 async def ldb(ctx, name):
-    sddb = await bot.cursor.fetchall(f"select * from {name}")
+    # テーブル名はプレースホルダにできないため、英数字とアンダースコアのみ許可する
+    if not re.fullmatch(r"[A-Za-z0-9_]+", name):
+        return await ctx.send("テーブル名が不正です。")
+    sddb = await bot.cursor.fetchall(f"select * from `{name}`")
     #sddb = await bot.cursor.fetchall()
     await ctx.send(f"{len(sddb)}")
 
@@ -604,12 +590,12 @@ async def ldb(ctx, name):
 @ut.runnable_check()
 @bot.command()
 async def mentdb(ctx):
-    sddb = await bot.cursor.fetchall(f"select * from users")
+    sddb = await bot.cursor.fetchall("select * from users")
     #sddb = await bot.cursor.fetchall()
     async with ctx.channel.typing():
         for ctt in sddb:
             if not (ctt["id"] in [i.id for i in bot.users]):
-                await bot.cursor.execute(f"delete from users where id = {ctt['id']}")
+                await bot.cursor.execute("delete from users where id = %s", (ctt['id'],))
     await ctx.send("完了しました☆")
 
 @commands.is_owner()
@@ -661,9 +647,10 @@ async def rtopic(ctx, ch:discord.TextChannel=None):
 async def on_command(ctx:commands.Context):
     ctx._t2_start = time.monotonic()
     if ctx.interaction:return
+    if ctx.command.qualified_name == "tos_guide" or ctx.command.qualified_name == "how_to_remove_my_data":
+        return
     ch = await bot.fetch_channel(693048961107230811)
-    e = discord.Embed(title=f"prefixコマンド:{ctx.command.full_parent_name}の実行",
-                      description=f"実行文:`{ctx.message.clean_content}`", color=bot.ec)
+    e = discord.Embed(title=f"prefixコマンド:{ctx.command.qualified_name}の実行", color=bot.ec)
     e.set_author(name=f"実行者:{str(ctx.author)}({ctx.author.id})",
                  icon_url=ctx.author.display_avatar.replace(static_format="png").url)
     if ctx.guild:
@@ -689,6 +676,10 @@ async def on_command_completion(ctx:commands.Context):
 
 @bot.event
 async def on_interaction(interaction:discord.Interaction):
+    if interaction.type != discord.InteractionType.application_command:
+        return
+    if interaction.command.qualified_name == "tos_guide" or interaction.command.qualified_name == "how_to_remove_my_data":
+        return
     ch = await bot.fetch_channel(693048961107230811)
     e = discord.Embed(title=f"スラッシュコマンド:{interaction.command.qualified_name}の実行",color=bot.ec)
     e.set_author(name=f"実行者:{str(interaction.user)}({interaction.user.id})",
@@ -732,7 +723,7 @@ async def on_command_error(ctx, error):
                               description=await ctx._("only-mii-10"), color=bot.ec)
         await ctx.send(embed=embed)
         ch = await bot.fetch_channel(652127085598474242)
-        await ch.send(embed=ut.getEmbed("エラーログ", f"コマンド:`{ctx.command.full_parent_name}`\n```{str(error)}```", bot.ec, f"サーバー", getattr(ctx.guild,"name","DM or GDM実行"), "実行メンバー", ctx.author.name, "メッセージ内容", ctx.message.content or "(本文なし)"))
+        await ch.send(embed=ut.getEmbed("エラーログ", f"コマンド:`{ctx.command.qualified_name}`\n```{str(error)}```", bot.ec, "サーバー", f"{getattr(ctx.guild,"name","DM or GDM実行")}({getattr(ctx.guild,"id","-")})", "実行メンバー", f"{ctx.author.name}({ctx.author.id})"))
     elif isinstance(error, commands.MissingRequiredArgument):
         # 引数がないよっ☆
         embed = discord.Embed(title=await ctx._("cmd-error-t"),
@@ -743,27 +734,27 @@ async def on_command_error(ctx, error):
                               description=f"このコマンドの実行には、あなたに次の権限が必要です。\n```py\n{error.missing_perms}```", color=bot.ec)
         try:
             await ctx.send(embed=embed)
-        except:
+        except Exception:
             await ctx.send(f'> {await ctx._("cmd-error-t")}\n　このコマンドの実行には、あなたに次の権限が必要です。\n```py\n{error.missing_perms}```')
     elif isinstance(error, (commands.BotMissingPermissions, app_commands.BotMissingPermissions)):
         embed = discord.Embed(title=await ctx._("cmd-error-t"),
                               description=f"このコマンドの実行には、Botに次の権限が必要です。\n```py\n{error.missing_perms}```", color=bot.ec)
         try:
             await ctx.send(embed=embed)
-        except:
+        except Exception:
             await ctx.send(f'> {await ctx._("cmd-error-t")}\n　このコマンドの実行には、Botに次の権限が必要です。\n```py\n{error.missing_perms}```')
     elif isinstance(error, commands.CheckFailure):
         embed = discord.Embed(title=await ctx._("cmd-error-t"), description="comlock、メンテナンス、使用制限等、実行時チェックを通過できなかったため、コマンド実行が失敗しました。", color=bot.ec)
         try:
             await ctx.send(embed=embed)
-        except:
+        except Exception:
             await ctx.send(f'> {await ctx._("cmd-error-t")}\n　comlock、メンテナンス、使用制限等、実行時チェックを通過できなかったため、コマンド実行が失敗しました。')
 
     else:
         # その他例外
         from traceback import format_exception as f_exc
         ch = await bot.fetch_channel(652127085598474242)
-        msg = await ch.send(embed=ut.getEmbed("エラーログ", f"コマンド:`{ctx.command.full_parent_name}`\n```py\n{''.join(f_exc(error))}```", bot.ec, "サーバー", getattr(ctx.guild,"name","DM or GDM実行"), "実行メンバー", ctx.author.name, "メッセージ内容", ctx.message.content or "(本文なし)"))
+        msg = await ch.send(embed=ut.getEmbed("エラーログ", f"コマンド:`{ctx.command.qualified_name}`\n```py\n{''.join(f_exc(error))}```", bot.ec, "サーバー", f"{getattr(ctx.guild,"name","DM or GDM実行")}({getattr(ctx.guild,"id","-")})", "実行メンバー", f"{ctx.author.name}({ctx.author.id})"))
         await ctx.send(embed=ut.getEmbed(await ctx._("com-error-t"), await ctx._("cmd-other-d", "詳細は無効化されています…。"), bot.ec, "error id", msg.id, "サポートが必要ですか？", "[サポートサーバー](https://discord.gg/vtn2V3v)に参加して、「view-思惟奈ちゃんch」役職をつけて質問してみましょう！"))
 
 
@@ -772,14 +763,14 @@ async def on_command_error(ctx, error):
 async def invite_tweet():
     try:
         bot.twi.statuses.update(status=f"[定期投稿]\nみぃてん☆の公開Discordサーバー:https://discord.gg/GbHq7fz\nみぃてん☆制作、多機能Discordbot思惟奈ちゃん:https://discordapp.com/oauth2/authorize?client_id=462885760043843584&permissions=8&scope=bot\n<この投稿は思惟奈ちゃんより行われました。>")
-    except:
+    except Exception:
         dc=bot.get_user(404243934210949120)
         await dc.send(f"have error:```{traceback.format_exc(1)}```")
 @tasks.loop(time=datetime.time(hour=8,minute=0,second=0))
 async def now_sina_tweet():
     try:
         bot.twi.statuses.update(status=f"[定期投稿]\n思惟奈ちゃんのいるサーバー数:{len(bot.guilds)}\n思惟奈ちゃんの公式サーバー:https://discord.gg/udA3qgZ\n<この投稿は思惟奈ちゃんより行われました。>")
-    except:
+    except Exception:
         dc=bot.get_user(404243934210949120)
         await dc.send(f"have error:```{traceback.format_exc(1)}```")
 """

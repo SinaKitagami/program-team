@@ -1,11 +1,8 @@
-import asyncio
-from typing import Optional
 import discord
 from discord.ext import commands
 
 from discord import app_commands
 
-import json
 
 import m10s_util as ut
 
@@ -35,7 +32,7 @@ class mini_features(commands.Cog):
     async def mark_as_spoiler_each_char(self, ctx, *, text:str):
         st = ""
         for i in text:
-            st = st+f"\|\|{i}\|\|"
+            st = st+f"\\|\\|{i}\\|\\|"
         await ctx.send(embed=discord.Embed(title="スポイラー化テキスト",description=f"{st}", color=self.bot.ec), ephemeral=True)
 
 async def setup(bot):

@@ -3,7 +3,6 @@
 import json
 import discord
 from discord.ext import commands
-import asyncio
 
 import traceback
 import datetime
@@ -11,6 +10,7 @@ from dateutil.relativedelta import relativedelta as rdelta
 
 import m10s_util as ut
 
+import os
 
 class m10s_guild_log(commands.Cog):
     def __init__(self, bot):
@@ -35,10 +35,8 @@ class m10s_guild_log(commands.Cog):
                     anick = a.nick
                 else:
                     anick = a.name
-                e.add_field(name="変更前", value=bnick.replace("\\", "\\\\").replace("*", "\*").replace(
-                    "_", "\_").replace("|", "\|").replace("~", "\~").replace("`", "\`").replace(">", "\>"))
-                e.add_field(name="変更後", value=anick.replace("\\", "\\\\").replace("*", "\*").replace(
-                    "_", "\_").replace("|", "\|").replace("~", "\~").replace("`", "\`").replace(">", "\>"))
+                e.add_field(name="変更前", value=discord.utils.escape_markdown(bnick))
+                e.add_field(name="変更後", value=discord.utils.escape_markdown(anick))
                 gpf = await self.bot.cursor.fetchone(
                     "select * from guilds where id=%s", (a.guild.id,))
                 #gpf = await self.bot.cursor.fetchone()
@@ -47,7 +45,9 @@ class m10s_guild_log(commands.Cog):
                         ch = self.bot.get_channel(gpf["sendlog"])
                         if ch.guild.id == a.guild.id:
                             await ch.send(embed=e)
-                except:pass
+                except Exception:
+                    # 失敗しても処理を継続するため、例外は意図的に無視する
+                    pass
             elif not b.pending == a.pending:
                 e.add_field(name="メンバースクリーニングの状態変更",value=f"メンバースクリーニング{'が再度要求されます。' if a.pending else 'を完了しました。'}")
                 gpf = await self.bot.cursor.fetchone(
@@ -58,7 +58,9 @@ class m10s_guild_log(commands.Cog):
                         ch = self.bot.get_channel(gpf["sendlog"])
                         if ch.guild.id == a.guild.id:
                             await ch.send(embed=e)
-                except:pass
+                except Exception:
+                    # 失敗しても処理を継続するため、例外は意図的に無視する
+                    pass
             elif not b.roles == a.roles:
                 if len(b.roles) > len(a.roles):
                     e.add_field(name="変更内容", value="役職除去")
@@ -76,8 +78,11 @@ class m10s_guild_log(commands.Cog):
                         ch = self.bot.get_channel(gpf["sendlog"])
                         if ch.guild.id == a.guild.id:
                             await ch.send(embed=e)
-                except:pass
-        except:
+                except Exception:
+                    # 失敗しても処理を継続するため、例外は意図的に無視する
+                    pass
+        except Exception:
+            # 失敗しても処理を継続するため、例外は意図的に無視する
             pass
         # online notif are now handled in apple_onlinenotif
 
@@ -96,7 +101,8 @@ class m10s_guild_log(commands.Cog):
                 else:
                     dc = await ut.opendm(member)
                     await dc.send(ctt["welcome"]["content"].format(member.mention))
-        except:
+        except Exception:
+            # 失敗しても処理を継続するため、例外は意図的に無視する
             pass
         e = discord.Embed(
             title="メンバーの参加", description=f"{len(member.guild.members)}人目のメンバー", color=self.bot.ec)
@@ -112,7 +118,8 @@ class m10s_guild_log(commands.Cog):
                 ch = self.bot.get_channel(gpf["sendlog"])
                 if ch.guild.id == member.guild.id:
                     await ch.send(embed=e)
-        except:
+        except Exception:
+            # 失敗しても処理を継続するため、例外は意図的に無視する
             pass
 
     @commands.Cog.listener()
@@ -130,7 +137,8 @@ class m10s_guild_log(commands.Cog):
                 else:
                     dc = await ut.opendm(member)
                     await dc.send(ctt["cu"]["content"].format(str(member)))
-        except:
+        except Exception:
+            # 失敗しても処理を継続するため、例外は意図的に無視する
             pass
         e = discord.Embed(title="メンバーの退出", color=self.bot.ec)
         e.add_field(name="退出メンバー", value=str(member))
@@ -147,7 +155,9 @@ class m10s_guild_log(commands.Cog):
             """if member.guild.id == 611445741902364672:
                 c = self.bot.get_channel(613629308166209549)
                 await c.send(embed=e)"""
-        except:pass
+        except Exception:
+            # 失敗しても処理を継続するため、例外は意図的に無視する
+            pass
 
 
     @commands.Cog.listener()
@@ -164,7 +174,9 @@ class m10s_guild_log(commands.Cog):
                 ch = self.bot.get_channel(gpf["sendlog"])
                 if ch.guild.id == channel.guild.id:
                     await ch.send(embed=e)
-        except:pass
+        except Exception:
+            # 失敗しても処理を継続するため、例外は意図的に無視する
+            pass
 
 
     @commands.Cog.listener()
@@ -181,7 +193,9 @@ class m10s_guild_log(commands.Cog):
                 ch = self.bot.get_channel(gpf["sendlog"])
                 if ch.guild.id == role.guild.id:
                     await ch.send(embed=e)
-        except:pass
+        except Exception:
+            # 失敗しても処理を継続するため、例外は意図的に無視する
+            pass
 
 
     @commands.Cog.listener()
@@ -198,11 +212,15 @@ class m10s_guild_log(commands.Cog):
                 ch = self.bot.get_channel(gpf["sendlog"])
                 if ch.guild.id == role.guild.id:
                     await ch.send(embed=e)
-        except:pass
+        except Exception:
+            # 失敗しても処理を継続するため、例外は意図的に無視する
+            pass
 
 
     @commands.Cog.listener()
     async def on_message_edit(self, before, after):
+        if not after.guild:
+            return
         if "cu:auto_sends" in self.bot.features.get(after.guild.id,[]):
             return
         # サーバーログ
@@ -222,7 +240,9 @@ class m10s_guild_log(commands.Cog):
                     ch = self.bot.get_channel(gpf["sendlog"])
                     if ch.guild.id == after.guild.id:
                         await ch.send(embed=e)
-            except:pass
+            except Exception:
+                # 失敗しても処理を継続するため、例外は意図的に無視する
+                pass
 
 
     @commands.Cog.listener()
@@ -240,11 +260,15 @@ class m10s_guild_log(commands.Cog):
                 ch = self.bot.get_channel(gpf["sendlog"])
                 if ch.guild.id == channel.guild.id:
                     await ch.send(embed=e)
-        except:pass
+        except Exception:
+            # 失敗しても処理を継続するため、例外は意図的に無視する
+            pass
 
 
     @commands.Cog.listener()
     async def on_reaction_clear(self, message, reactions):
+        if not message.guild:
+            return
         if "cu:auto_sends" in self.bot.features.get(message.guild.id,[]):
             return
         e = discord.Embed(title="リアクションの一斉除去", color=self.bot.ec)
@@ -258,11 +282,15 @@ class m10s_guild_log(commands.Cog):
                 ch = self.bot.get_channel(gpf["sendlog"])
                 if ch.guild.id == message.guild.id:
                     await ch.send(embed=e)
-        except:pass
+        except Exception:
+            # 失敗しても処理を継続するため、例外は意図的に無視する
+            pass
 
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
+        if not message.guild:
+            return
         if "cu:auto_sends" in self.bot.features.get(message.guild.id,[]):
             return
         if not message.author.bot:
@@ -280,7 +308,9 @@ class m10s_guild_log(commands.Cog):
                     ch = self.bot.get_channel(gpf["sendlog"])
                     if ch.guild.id == message.guild.id:
                         await ch.send(embed=e)
-            except:pass
+            except Exception:
+                # 失敗しても処理を継続するため、例外は意図的に無視する
+                pass
 
 
     @commands.Cog.listener()
@@ -320,7 +350,15 @@ class m10s_guild_log(commands.Cog):
                 ch = self.bot.get_channel(gpf["sendlog"])
                 if ch.guild.id == messages[0].guild.id:
                     await ch.send(embed=e,file=discord.File(fp="bulk_message_delete.txt"))
-        except:pass
+        except Exception:
+            # ログチャンネルが見つからない/送信権限がない等の場合はログ送信をスキップする
+            pass
+        finally:
+            try:
+                os.remove("bulk_message_delete.txt")
+            except OSError:
+                # 一時ファイルが存在しない等で削除できなくても処理は継続する
+                pass
 
 
     @commands.Cog.listener()
@@ -337,7 +375,9 @@ class m10s_guild_log(commands.Cog):
                 ch = self.bot.get_channel(gpf["sendlog"])
                 if ch.guild.id == channel.guild.id:
                     await ch.send(embed=e)
-        except:pass
+        except Exception:
+            # 失敗しても処理を継続するため、例外は意図的に無視する
+            pass
 
 
     @commands.Cog.listener()
@@ -359,7 +399,9 @@ class m10s_guild_log(commands.Cog):
                         ch = self.bot.get_channel(gpf["sendlog"])
                         if ch.guild.id == a.guild.id:
                             await ch.send(embed=e)
-                except:pass
+                except Exception:
+                    # 失敗しても処理を継続するため、例外は意図的に無視する
+                    pass
         elif a.position != b.position:
             pass
         elif not b.changed_roles == a.changed_roles:
@@ -372,7 +414,9 @@ class m10s_guild_log(commands.Cog):
                     ch = self.bot.get_channel(gpf["sendlog"])
                     if ch.guild.id == a.guild.id:
                         await ch.send(embed=e)
-            except:pass
+            except Exception:
+                # 失敗しても処理を継続するため、例外は意図的に無視する
+                pass
         elif isinstance(b, discord.TextChannel):
             if not b.topic == a.topic:
                 e.add_field(name="変更内容", value="チャンネルトピック")
@@ -386,7 +430,9 @@ class m10s_guild_log(commands.Cog):
                         ch = self.bot.get_channel(gpf["sendlog"])
                         if ch.guild.id == a.guild.id:
                             await ch.send(embed=e)
-                except:pass
+                except Exception:
+                    # 失敗しても処理を継続するため、例外は意図的に無視する
+                    pass
 
 
     @commands.Cog.listener()
@@ -406,7 +452,9 @@ class m10s_guild_log(commands.Cog):
                     ch = self.bot.get_channel(gpf["sendlog"])
                     if ch.guild.id == a.id:
                         await ch.send(embed=e)
-            except:pass
+            except Exception:
+                # 失敗しても処理を継続するため、例外は意図的に無視する
+                pass
         elif b.icon != a.icon:
             e.add_field(name="変更内容", value="サーバーアイコン")
             gpf = await self.bot.cursor.fetchone("select * from guilds where id=%s", (a.id,))
@@ -426,14 +474,15 @@ class m10s_guild_log(commands.Cog):
                     ch = self.bot.get_channel(gpf["sendlog"])
                     if ch.guild.id == a.id:
                         await ch.send(embed=e)
-            except:pass
+            except Exception:
+                # 失敗しても処理を継続するため、例外は意図的に無視する
+                pass
 
 
     @commands.Cog.listener()
     async def on_member_ban(self, g, user):
         if "cu:auto_sends" in self.bot.features.get(g.id,[]):
             return
-        guild = self.bot.get_guild(g.id)
         # bl = await guild.audit_logs(limit=1, action=discord.AuditLogAction.ban).flatten()
         e = discord.Embed(title="ユーザーのban", color=self.bot.ec)
         e.add_field(name="ユーザー名", value=str(user))
@@ -447,7 +496,9 @@ class m10s_guild_log(commands.Cog):
                 ch = self.bot.get_channel(gpf["sendlog"])
                 if ch.guild.id == g.id:
                     await ch.send(embed=e)
-        except:pass
+        except Exception:
+            # 失敗しても処理を継続するため、例外は意図的に無視する
+            pass
 
 
     @commands.Cog.listener()
@@ -464,7 +515,9 @@ class m10s_guild_log(commands.Cog):
                 ch = self.bot.get_channel(gpf["sendlog"])
                 if ch.guild.id == guild.id:
                     await ch.send(embed=e)
-        except:pass
+        except Exception:
+            # 失敗しても処理を継続するため、例外は意図的に無視する
+            pass
 
 
     @commands.Cog.listener()
@@ -490,12 +543,12 @@ class m10s_guild_log(commands.Cog):
         e=discord.Embed(title="思惟奈ちゃんの導入ありがとうございます！", description="思惟奈ちゃんのコマンドは、原則スラッシュコマンドで使用できます。(`s-`から始まる呼び出しも可)\nまずは`/`と入力して、使ってみましょう！", color=self.bot.ec)
         try:
             await guild.system_channel.send(embed=e)
-        except:
+        except Exception:
             for ch in guild.text_channels:
                 try:
                     await ch.send(embed=e)
                     return
-                except:
+                except Exception:
                     continue
 
 
@@ -509,14 +562,15 @@ class m10s_guild_log(commands.Cog):
             try:
                 e.add_field(name="サーバー参加日時",
                             value=f"{(guild.me.joined_at+ rdelta(hours=9)).strftime('%Y{0}%m{1}%d{2} %H{3}%M{4}%S{5}').format(*'年月日時分秒')}")
-            except:
+            except Exception:
+                # 失敗しても処理を継続するため、例外は意図的に無視する
                 pass
             e.add_field(
                 name="メンバー数", value=f"{len([i for i in guild.members if not i.bot])}ユーザー、{len([i for i in guild.members if i.bot])}bot")
             e.add_field(
                 name="チャンネル数", value=f"テキスト:{len(guild.text_channels)}\nボイス:{len(guild.voice_channels)}\nカテゴリー{len(guild.categories)}")
             e.add_field(name="サーバーオーナー",value=f"{guild.owner.mention}({guild.owner}({guild.owner.id}))")
-        except:
+        except Exception:
             e=discord.Embed(title="退出通知",description=f"以下のエラーにより正常に生成できていないため、一部情報が断片的な情報を送ります。\n```py\n{traceback.format_exc(3)}```")
             e.add_field(name="サーバー名/id",value=f"{guild.name}({guild.id})")
         ch = self.bot.get_channel(693048937304555529)
@@ -541,7 +595,9 @@ class m10s_guild_log(commands.Cog):
                 ch = self.bot.get_channel(gpf["sendlog"])
                 if ch.guild.id == invite.guild.id:
                     await ch.send(embed=e)
-        except:pass
+        except Exception:
+            # 失敗しても処理を継続するため、例外は意図的に無視する
+            pass
 
 
     @commands.Cog.listener()
@@ -560,7 +616,9 @@ class m10s_guild_log(commands.Cog):
                 ch = self.bot.get_channel(gpf["sendlog"])
                 if ch.guild.id == invite.guild.id:
                     await ch.send(embed=e)
-        except:pass
+        except Exception:
+            # 失敗しても処理を継続するため、例外は意図的に無視する
+            pass
 
 
 async def setup(bot):

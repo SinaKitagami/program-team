@@ -810,19 +810,6 @@
 		"group": "",
 		"only_prefix": true
 	},
-	"mutual_guilds": {
-		"title": "mutual_guildsについて",
-		"description": "",
-		"call": {
-			"main": "mutual_guilds",
-			"aliases": "`なし`",
-			"args": [
-				"引数:uid=None"
-			]
-		},
-		"group": "",
-		"only_prefix": true
-	},
 	"features": {
 		"title": "featuresについて",
 		"description": "このBotでの特権を表示します。",
@@ -2122,19 +2109,6 @@
 			"aliases": "`なし`",
 			"args": [
 				"引数:cnm: str"
-			]
-		},
-		"group": "",
-		"only_prefix": true
-	},
-	"backup": {
-		"title": "backupについて",
-		"description": "",
-		"call": {
-			"main": "backup",
-			"aliases": "`なし`",
-			"args": [
-				"引数:gid: int"
 			]
 		},
 		"group": "",

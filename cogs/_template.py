@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import discord
 from discord.ext import commands
-import asyncio
 
 import m10s_util as ut
 """↑様々な便利コマンド詰め合わせ

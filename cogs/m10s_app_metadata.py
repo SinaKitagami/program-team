@@ -1,17 +1,11 @@
 # -*- coding: utf-8 -*-
 
-import discord
-from discord.ext import commands, tasks
-import asyncio
-from dateutil.relativedelta import relativedelta as rdelta
-import traceback
+from discord.ext import commands
 import m10s_util as ut
-import textwrap
 
 import config
 import aiohttp
 
-from discord import app_commands
 
 class m10s_app_metadata(commands.Cog):
 
@@ -65,7 +59,7 @@ class m10s_app_metadata(commands.Cog):
         if upf["oauth_ref_token"]:
             try:
                 await self.bot.update_connect_metadata(ctx.author.id, upf["oauth_ref_token"], True)
-            except:
+            except Exception:
                 await ctx.send("失敗しました。\n一度連携を外し、再度連携させてください。", ephemeral=True)
             else:
                 await ctx.send("完了しました。", ephemeral=True)

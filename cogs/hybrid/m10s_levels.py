@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from pydoc import describe
 import discord
 from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont
@@ -16,6 +15,8 @@ import json
 import m10s_util as ut
 
 import time
+
+import os
 
 import random
 
@@ -39,7 +40,8 @@ class levels(commands.Cog):
                     try:
                         await self.bot.cursor.execute("INSERT INTO levels(user_id,guild_id,level,exp,last_level_count,is_level_count_enable) VALUES(%s,%s,%s,%s,%s,%s)",
                                 (int(k), s["id"], v["level"], v["exp"], v["lltime"], v["dlu"]))
-                    except:
+                    except Exception:
+                        # 失敗しても処理を継続するため、例外は意図的に無視する
                         pass
         await ctx.send("完了しました")
 
@@ -53,13 +55,21 @@ class levels(commands.Cog):
             return
         if m.is_system():
             return
+        
+        # id指定での早期リターン
+        if "cu:on_msg" in self.bot.features.get(m.author.id,[]):
+            return
+        if "cu:on_msg" in self.bot.features.get(m.guild.id,[]):
+            return
+        
         try:
             gs = await self.bot.cursor.fetchone("select * from guilds where id=%s", (m.guild.id,))
             if "clevel" in json.loads(gs["lockcom"]):
                 return
             if m.author.bot:
                 return
-        except:
+        except Exception:
+            # 失敗しても処理を継続するため、例外は意図的に無視する
             pass
 
         lvl = await self.bot.cursor.fetchone("select * from levels where guild_id=%s and user_id=%s", (m.guild.id, m.author.id))
@@ -87,7 +97,8 @@ class levels(commands.Cog):
                                     str(self.bot.create_emoji_str('s_levelup',653161518212448266)) + await self.bot._(m.author, "levelup-notify", m.author.mention, w_lvl),
                                     allowed_mentions=discord.AllowedMentions(users=False)
                                 )
-                            except:
+                            except Exception:
+                                # 失敗しても処理を継続するため、例外は意図的に無視する
                                 pass
                         else:
                             try:
@@ -95,14 +106,16 @@ class levels(commands.Cog):
                                     str(self.bot.create_emoji_str('s_levelup',653161518212448266)) + await self.bot._(m.author, "levelup-notify", m.author.mention, w_lvl),
                                     allowed_mentions=discord.AllowedMentions(users=False)
                                 )
-                            except:
+                            except Exception:
+                                # 失敗しても処理を継続するため、例外は意図的に無視する
                                 pass
                         try:
                             rwds = json.loads(gs["reward"])
                             if rwds.get(str(w_lvl), None):
                                 rl = m.guild.get_role(rwds[str(w_lvl)])
                                 await m.author.add_roles(rl)
-                        except:
+                        except Exception:
+                            # 失敗しても処理を継続するため、例外は意図的に無視する
                             pass
 
             
@@ -223,85 +236,102 @@ class levels(commands.Cog):
         if ctx.channel.permissions_for(ctx.guild.me).attach_files is True:
             lvl = await self.bot.cursor.fetchone("select * from levels where guild_id=%s and user_id=%s", (u.guild.id, u.id))
             if lvl:
-                async with ctx.message.channel.typing():
-                    nowl = lvl['level']
-                    exp = lvl['exp']
-                    nextl = min(nowl ** 3 + 20, MAX_EXP)
-                    tonextexp = nextl - exp
-                    nextl = str(nextl)
-                    tonextexp = str(tonextexp)
+                try:
+                    async with ctx.message.channel.typing():
+                        nowl = lvl['level']
+                        exp = lvl['exp']
+                        nextl = min(nowl ** 3 + 20, MAX_EXP)
+                        tonextexp = nextl - exp
+                        nextl = str(nextl)
+                        tonextexp = str(tonextexp)
+                        try:
+                            await u.display_avatar.replace(static_format="png").save("imgs/usericon.png")
+                            dlicon = Image.open('imgs/usericon.png', 'r')
+                        except Exception:
+                            dlicon = Image.open('imgs/noimg.png', 'r')
+                        dlicon = dlicon.resize((100, 100))
+                        cv = None
+                        if ucb["banner"]:
+                            cb = "banner"
+                            banner_url = f'https://cdn.discordapp.com/banners/{u.id}/{ucb["banner"]}.png?size=640'
+                            async with self.bot.session.get(banner_url, headers=headers) as resp:
+                                resp.raise_for_status()
+                                bt = await resp.read()
+                                with open(f"imgs/custom_banner_{u.id}.png", mode="wb")as f:
+                                    f.write(bt)
+                            cv = Image.open(f"imgs/custom_banner_{u.id}.png", 'r')
+                            cv = cv.resize((640, 235))
+                        else:
+                            c = await self.bot.cursor.fetchone(
+                                "select * from users where id=%s", (u.id,))
+                            #c = await self.bot.cursor.fetchone()
+                            cb = c["levcard"] or "m@ji☆"
+                            cv = Image.open('imgs/'+cb+'.png', 'r') 
+                        cv.paste(dlicon, (200, 10))
+                        dt = ImageDraw.Draw(cv)
+                        fonta = ImageFont.truetype(LEVEL_FONT, 30)
+                        fontb = ImageFont.truetype(LEVEL_FONT, 42)
+                        fontc = ImageFont.truetype(LEVEL_FONT, 20)
+                        if len(u.display_name) > 11:
+                            etc = "…"
+                        else:
+                            etc = ""
+                        if cb == "kazuta123-a" or cb == "kazuta123-b" or cb == "kazuta123-c" or cb == "tomohiro0405":
+                            dt.text(
+                                (300, 60), u.display_name[0:10] + etc, font=fonta, fill='#ffffff')
+
+                            dt.text((50, 110), await ctx.l10n(
+                                u, "lc-level")+str(nowl), font=fontb, fill='#ffffff')
+
+                            dt.text((50, 170), await ctx.l10n(
+                                u, "lc-exp") + str(exp)+"/"+nextl, font=fonta, fill='#ffffff')
+
+                            dt.text((50, 210), await ctx.l10n(u, "lc-next") +
+                                    tonextexp, font=fontc, fill='#ffffff')
+                            
+                            if cb != "banner":
+                                dt.text((50, 300), await ctx.l10n(u, "lc-createdby", cb.replace("m@ji☆", "おあず").replace("kazuta123", "kazuta246").replace("-a", "").replace("-b", "").replace("-c", "")), font=fontc, fill='#ffffff')
+                        else:
+                            dt.text(
+                                (300, 60), u.display_name[0:10] + etc, font=fonta, fill='#000000')
+
+                            dt.text((50, 110), await ctx.l10n(
+                                u, "lc-level")+str(nowl), font=fontb, fill='#000000')
+
+                            dt.text((50, 170), await ctx.l10n(
+                                u, "lc-exp") + str(exp)+"/"+nextl, font=fonta, fill='#000000')
+
+                            dt.text((50, 210), await ctx.l10n(u, "lc-next") +
+                                    tonextexp, font=fontc, fill='#000000')
+
+                            if cb != "banner":
+                                dt.text((50, 300), await ctx.l10n(u, "lc-createdby", cb.replace("m@ji☆", "おあず").replace("kazuta123", "kazuta246").replace("-a", "").replace("-b", "").replace("-c", "")), font=fontc, fill='#000000')
+
+                        cv.save("imgs/sina'slevelcard.png", 'PNG')
+                    await ctx.send(file=discord.File("imgs/sina'slevelcard.png"))
+                finally:
                     try:
-                        await u.display_avatar.replace(static_format="png").save("imgs/usericon.png")
-                        dlicon = Image.open('imgs/usericon.png', 'r')
-                    except:
-                        dlicon = Image.open('imgs/noimg.png', 'r')
-                    dlicon = dlicon.resize((100, 100))
-                    cv = None
-                    if ucb["banner"]:
-                        cb = "banner"
-                        banner_url = f'https://cdn.discordapp.com/banners/{u.id}/{ucb["banner"]}.png?size=640'
-                        async with self.bot.session.get(banner_url, headers=headers) as resp:
-                            resp.raise_for_status()
-                            bt = await resp.read()
-                            with open(f"imgs/custom_banner_{u.id}.png", mode="wb")as f:
-                                f.write(bt)
-                        cv = Image.open(f"imgs/custom_banner_{u.id}.png", 'r')
-                        cv = cv.resize((640, 235))
-                    else:
-                        c = await self.bot.cursor.fetchone(
-                            "select * from users where id=%s", (u.id,))
-                        #c = await self.bot.cursor.fetchone()
-                        cb = c["levcard"] or "m@ji☆"
-                        cv = Image.open('imgs/'+cb+'.png', 'r') 
-                    cv.paste(dlicon, (200, 10))
-                    dt = ImageDraw.Draw(cv)
-                    fonta = ImageFont.truetype(LEVEL_FONT, 30)
-                    fontb = ImageFont.truetype(LEVEL_FONT, 42)
-                    fontc = ImageFont.truetype(LEVEL_FONT, 20)
-                    if len(u.display_name) > 11:
-                        etc = "…"
-                    else:
-                        etc = ""
-                    if cb == "kazuta123-a" or cb == "kazuta123-b" or cb == "kazuta123-c" or cb == "tomohiro0405":
-                        dt.text(
-                            (300, 60), u.display_name[0:10] + etc, font=fonta, fill='#ffffff')
-
-                        dt.text((50, 110), await ctx.l10n(
-                            u, "lc-level")+str(nowl), font=fontb, fill='#ffffff')
-
-                        dt.text((50, 170), await ctx.l10n(
-                            u, "lc-exp") + str(exp)+"/"+nextl, font=fonta, fill='#ffffff')
-
-                        dt.text((50, 210), await ctx.l10n(u, "lc-next") +
-                                tonextexp, font=fontc, fill='#ffffff')
-                        
-                        if cb != "banner":
-                            dt.text((50, 300), await ctx.l10n(u, "lc-createdby", cb.replace("m@ji☆", "おあず").replace("kazuta123", "kazuta246").replace("-a", "").replace("-b", "").replace("-c", "")), font=fontc, fill='#ffffff')
-                    else:
-                        dt.text(
-                            (300, 60), u.display_name[0:10] + etc, font=fonta, fill='#000000')
-
-                        dt.text((50, 110), await ctx.l10n(
-                            u, "lc-level")+str(nowl), font=fontb, fill='#000000')
-
-                        dt.text((50, 170), await ctx.l10n(
-                            u, "lc-exp") + str(exp)+"/"+nextl, font=fonta, fill='#000000')
-
-                        dt.text((50, 210), await ctx.l10n(u, "lc-next") +
-                                tonextexp, font=fontc, fill='#000000')
-
-                        if cb != "banner":
-                            dt.text((50, 300), await ctx.l10n(u, "lc-createdby", cb.replace("m@ji☆", "おあず").replace("kazuta123", "kazuta246").replace("-a", "").replace("-b", "").replace("-c", "")), font=fontc, fill='#000000')
-
-                    cv.save("imgs/sina'slevelcard.png", 'PNG')
-                await ctx.send(file=discord.File("imgs/sina'slevelcard.png"))
+                        os.remove("imgs/sina'slevelcard.png")
+                    except OSError:
+                        # 一時ファイルが存在しない等で削除できなくても処理は継続する
+                        pass
+                    try:
+                        os.remove("imgs/usericon.png")
+                    except OSError:
+                        # 一時ファイルが存在しない等で削除できなくても処理は継続する
+                        pass
+                    if cb == "banner":
+                        try:
+                            os.remove(f"imgs/custom_banner_{u.id}.png")
+                        except OSError:
+                            # 一時ファイルが存在しない等で削除できなくても処理は継続する
+                            pass
             else:
                 await ctx.send(await ctx._("level-notcount"))
-                
         else:
             try:
                 await ctx.send(embed=discord.Embed(title=await ctx._("dhaveper"), description=await ctx._("per-sendfile")))
-            except:
+            except Exception:
                 await ctx.send(f"{await ctx._('dhaveper')}\n{await ctx._('per-sendfile')}")
 
     @commands.hybrid_group(name="level_reward", description="レベルに応じた役職付与の設定です。")
@@ -336,7 +366,8 @@ class levels(commands.Cog):
                             else:
                                 rslt[k] = [u.display_name]
                             await asyncio.sleep(0.2)
-                        except:
+                        except Exception:
+                            # 失敗しても処理を継続するため、例外は意図的に無視する
                             pass
         await ctx.send("完了しました。", embed=ut.getEmbed("追加者一覧", f"```{','.join([f'レベル{k}:{v}'] for k,v in rslt.items())}```"))
 
@@ -412,12 +443,14 @@ async def level_add(self, ctx, target:Union[commands.MemberConverter,commands.Us
     else:
         return await ctx.reply("> サーバーレベル編集-追加\n　引数が正しくありません。\n　`[メンバーor役職を特定できるもの] [追加するレベル] [オプション:追加する経験値]`")
     for m in targets:
+        if "cu:on_msg" in self.bot.features.get(m.id,[]):
+            continue
         lvl = await self.bot.cursor.fetchone("select * from levels where guild_id=%s and user_id=%s", (ctx.guild.id, m.id))
         if lvl:
             await self.bot.cursor.execute("UPDATE levels SET level = %s, exp = %s WHERE guild_id = %s and user_id = %s", (max(min(lvl["level"] + lev, MAX_LEVEL),0), max(min(lvl["exp"] + exp,MAX_EXP),0), ctx.guild.id, m.id))
         else:
             await self.bot.cursor.execute("INSERT INTO levels(user_id, guild_id, level, exp, last_level_count, is_level_count_enable) VALUE (%s, %s, %s, %s, %s, %s)", (m.id, ctx.guild.id, max(min(lev, MAX_LEVEL),0), max(min(exp,MAX_EXP),0), int(time.time()), 1))
-    await ctx.reply(f"> サーバーレベル編集\n　{len(targets)}人のレベルを編集しました。(レベルがないメンバーには干渉していません。)")
+    await ctx.reply(f"> サーバーレベル編集\n　{len(targets)}人のレベルを編集しました。(レベルがないメンバー等、一部ユーザーには干渉していません。)")
 
 async def level_set(self, ctx, target:Union[commands.MemberConverter,commands.UserConverter,commands.RoleConverter], lev:int, exp:Optional[int]=0):
     if isinstance(target,discord.Member) or isinstance(target,discord.User):
@@ -427,13 +460,15 @@ async def level_set(self, ctx, target:Union[commands.MemberConverter,commands.Us
     else:
         return await ctx.reply("> サーバーレベル編集-設定\n　引数が正しくありません。\n　`[メンバーor役職を特定できるもの] [設定するレベル] [オプション:設定する経験値]`")
     for m in targets:
+        if "cu:on_msg" in self.bot.features.get(m.id,[]):
+            continue
         lvl = await self.bot.cursor.fetchone("select * from levels where guild_id=%s and user_id=%s", (ctx.guild.id, m.id))
         if lvl:
             await self.bot.cursor.execute("UPDATE levels SET level = %s, exp = %s WHERE guild_id = %s and user_id = %s", (max(min(lev, MAX_LEVEL),0), max(min(exp,MAX_EXP),0), ctx.guild.id, m.id))
         else:
             await self.bot.cursor.execute("INSERT INTO levels(user_id, guild_id, level, exp, last_level_count, is_level_count_enable) VALUE (%s, %s, %s, %s, %s, %s)", (m.id, ctx.guild.id, max(min(lev, MAX_LEVEL),0), max(min(exp,MAX_EXP),0), int(time.time()), 1))
 
-    await ctx.reply(f"> サーバーレベル編集\n　{len(targets)}人のレベルを設定しました。(レベルがないメンバーには干渉していません。)")
+    await ctx.reply(f"> サーバーレベル編集\n　{len(targets)}人のレベルを設定しました。(レベルがないメンバー等、一部ユーザーには干渉していません。)")
 
 
 async def setup(bot):

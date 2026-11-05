@@ -3,7 +3,7 @@
 import datetime
 from typing import Optional
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 import asyncio
 from dateutil.relativedelta import relativedelta as rdelta
 
@@ -15,6 +15,11 @@ import m10s_util as ut
 import config
 
 from checker import MaliciousInput, content_checker
+
+import logging
+
+# この日数を過ぎたデータについては、グローバルチャットの投稿情報を削除する。
+CLEANUP_CUTOFF = 30
 
 """
 
@@ -37,12 +42,20 @@ class m10s_re_gchat(commands.Cog):
         self.without_react = ["rsp_main-chat"]
         self.ignore_ch = []
 
-    async def gchat_send(self, to, fch, content, name, avatar, embeds=[], attachments=[]):
+    async def cog_load(self):
+        self.gchat_pinfo_cleaner.start()
+
+    async def cog_unload(self):
+        self.gchat_pinfo_cleaner.cancel()
+
+    async def gchat_send(self, to, fch, content, name, avatar, embeds=None, attachments=None):
+        embeds = embeds or []
+        attachments = attachments or []
         tasks = []
         for t in to:
             try:
                 wh = await self.bot.fetch_webhook(t["wh_id"])
-            except:
+            except Exception:
                 continue
             else:
                 try:
@@ -52,7 +65,8 @@ class m10s_re_gchat(commands.Cog):
                                 wh.send(content=content, wait=True, username=name, avatar_url=avatar, embeds=embeds, files=[await i.to_file(spoiler=i.is_spoiler()) for i in attachments], allowed_mentions=discord.AllowedMentions.none())
                             )
                         )
-                except:
+                except Exception:
+                    # 失敗しても処理を継続するため、例外は意図的に無視する
                     pass
         return [[m.webhook_id, m.id] for m in await asyncio.gather(*tasks) if not m is None]
 
@@ -132,22 +146,16 @@ class m10s_re_gchat(commands.Cog):
                         m = await ut.wait_message_return(ctx, f"{name}に接続するためのパスワードを送信してください。", ctx.author.dm_channel or await ctx.author.create_dm(),tout=30)
                         if m.content != gch["pass"]:
                             await ctx.author.send("> 接続エラー\n　パスワードが違います。もう一度最初からやり直してください。")
-                            sendto = await self.bot.cursor.fetchall("select * from gchat_cinfo where connected_to = %s",(name,))
-                            #sendto = await self.bot.cursor.fetchall()
                             # await self.gchat_send(sendto, ctx.channel, f"> {ctx.author}({ctx.author.id})が{ctx.channel.name}({ctx.channel.id})をこのチャンネルに接続しようとしました。(パスワードが違うことにより失敗)",
                             #     "[🛠💠]思惟奈ちゃんグローバルチャット接続案内", ctx.guild.me.display_avatar.replace(static_format="png").url)
                             return
-                    except:
+                    except Exception:
                         await ctx.author.send("> 接続エラー\n　パスワードが入力されませんでした。")
-                        sendto = await self.bot.cursor.fetchall("select * from gchat_cinfo where connected_to = %s",(name,))
-                        #sendto = await self.bot.cursor.fetchall()
                         # await self.gchat_send(sendto, ctx.channel, f"> {ctx.author}({ctx.author.id})が{ctx.channel.name}({ctx.channel.id})をこのチャンネルに接続しようとしました。(パスワード未入力により失敗)",
                         #     "[🛠💠]思惟奈ちゃんグローバルチャット接続案内", ctx.guild.me.display_avatar.replace(static_format="png").url)
                         return
                 wh = await ctx.channel.create_webhook(name="sina_gchat_webhook",reason=f"思惟奈ちゃんグローバルチャット:{name}への接続が行われたため")
                 await self.bot.cursor.execute("insert into gchat_cinfo(id,connected_to,wh_id) values(%s,%s,%s)", (ctx.channel.id,name,wh.id))
-                sendto = await self.bot.cursor.fetchall("select * from gchat_cinfo where connected_to = %s", (name,))
-                #sendto = await self.bot.cursor.fetchall()
                 # await self.gchat_send(sendto, ctx.channel, f"> グローバルチャットに{ctx.channel.name}({ctx.channel.id})が接続しました！ようこそ！",
                 #     "[🛠💠]思惟奈ちゃんグローバルチャット接続案内", ctx.guild.me.display_avatar.replace(static_format="png").url)
 
@@ -156,7 +164,7 @@ class m10s_re_gchat(commands.Cog):
                 try:
                     m = await ut.wait_message_return(ctx, "グローバルチャットにパスワードを設定する場合は送信してください。(パスワードを設定しない場合はしばらくお待ちください。)",
                         ctx.author.dm_channel or await ctx.author.create_dm(), tout=30)
-                except:
+                except Exception:
                     m = None
                 finally:    
                     await self.bot.cursor.execute("insert into gchat_clist(name,pass) values(%s,%s)", (name, m.content if not m is None else None))
@@ -168,8 +176,6 @@ class m10s_re_gchat(commands.Cog):
                     mwh = await mch.create_webhook(name="sina_gchat_webhook",reason=f"思惟奈ちゃんグローバルチャット:{name}の作成が行われたため")
                     await self.bot.cursor.execute("insert into gchat_cinfo(id,connected_to,wh_id) values(%s,%s,%s)", (mch.id,name,mwh.id))
                     
-                    sendto = await self.bot.cursor.fetchall("select * from gchat_cinfo where connected_to = %s", (name,))
-                    #sendto = await self.bot.cursor.fetchall()
                     # await self.gchat_send(sendto, ctx.channel, f"> グローバルチャットに{ctx.channel.name}({ctx.channel.id})が接続しました！",
                     #     "[🛠💠]思惟奈ちゃんグローバルチャット接続案内", ctx.guild.me.display_avatar.replace(static_format="png").url)
 
@@ -187,13 +193,12 @@ class m10s_re_gchat(commands.Cog):
             try:
                 wh = await self.bot.fetch_webhook(cgch["wh_id"])
                 await wh.delete(reason=f"思惟奈ちゃんグローバルチャット:{cgch['connected_to']}からの切断が行われたため")
-            except:
+            except Exception:
+                # 失敗しても処理を継続するため、例外は意図的に無視する
                 pass
             finally:
                 await self.bot.cursor.execute("delete from gchat_cinfo where id = %s",(ctx.channel.id,))
 
-                sendto = await self.bot.cursor.fetchall("select * from gchat_cinfo where connected_to = %s",(cgch["connected_to"],))
-                #sendto = await self.bot.cursor.fetchall()
                 # await self.gchat_send(sendto, ctx.channel, f"> グローバルチャットから{ctx.channel.name}({ctx.channel.id})が切断しました。さようなら。",
                 #     "[🛠💠]思惟奈ちゃんグローバルチャット接続案内", ctx.guild.me.display_avatar.replace(static_format="png").url)
 
@@ -249,7 +254,7 @@ class m10s_re_gchat(commands.Cog):
                 return await ctx.say("ison-notfound")
         async with ctx.message.channel.typing():
             for guild in self.bot.guilds:
-                u = guild.get_member(uid)
+                u = guild.get_member(cid)
                 if u is not None:
                     break
         if u is not None:
@@ -273,7 +278,7 @@ class m10s_re_gchat(commands.Cog):
             for ch in chs:
                 try:
                     retchs = f"{retchs}{await self.bot.fetch_channel(ch['id']).guild.name} -> {await self.bot.fetcht_channel(ch['id']).name}\n"
-                except:
+                except Exception:
                     retchs = f"{retchs}不明なサーバー -> チャンネルID:{ch['id']}\n"
             await ctx.send(embed=ut.getEmbed(f"グローバルチャンネル {name} の詳細", f"コネクトされたサーバーとチャンネル\n{retchs}", self.bot.ec))
         else:
@@ -308,10 +313,13 @@ class m10s_re_gchat(commands.Cog):
         #upf = await self.bot.cursor.fetchone()
         try:
             bui = await self.bot.fetch_user(uid)
-        except:
+        except Exception:
             await ctx.send("そのIDをもつユーザーがいません！")
         else:
             if upf["gmod"] == 1:
+                if "cu:on_msg" in self.bot.features.get(uid,[]):
+                    await ctx.send("このユーザーは、メッセージ早期リターンメンバーです。")
+                    return
                 bpf = await self.bot.cursor.fetchone(
                     "select * from users where id=%s", (uid,))
                 # bpf = await self.bot.cursor.fetchone()
@@ -401,7 +409,7 @@ class m10s_re_gchat(commands.Cog):
                 for t in json.loads(post["allids"]):
                     try:
                         wh = await self.bot.fetch_webhook(t[0])
-                    except:
+                    except Exception:
                         continue
                     else:
                         tasks.append(
@@ -438,7 +446,7 @@ class m10s_re_gchat(commands.Cog):
                     for t in json.loads(post["allids"]):
                         try:
                             wh = await self.bot.fetch_webhook(t[0])
-                        except:
+                        except Exception:
                             continue
                         else:
                             tasks.append(
@@ -477,6 +485,9 @@ class m10s_re_gchat(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, m: discord.Message):
         if m.channel.id in self.ignore_ch: #グローバルチャットの外部との相互連携作成時用
+            return
+
+        if m.guild is None:
             return
         
         if m.content.startswith("s-"):
@@ -556,12 +567,10 @@ class m10s_re_gchat(commands.Cog):
                 try:
                     if not bypass_reacts:
                         await m.add_reaction(self.bot.create_emoji_str('s_gch_sending',653161518346534912,True))
-                except:
+                except Exception:
+                    # 失敗しても処理を継続するため、例外は意図的に無視する
                     pass
 
-                gpf = await self.bot.cursor.fetchone("select * from guilds where id=%s",
-                    (m.guild.id,))
-                #gpf = await self.bot.cursor.fetchone()
 
                 status_embed = discord.Embed(title="", description="", color=upf["gcolor"])
                 status_embed_has_content = False
@@ -591,14 +600,17 @@ class m10s_re_gchat(commands.Cog):
                     else:
                         try:
                             msg = await (await self.bot.fetch_channel(ref.channel_id)).fetch_message(ref.message_id)
-                        except:
+                        except Exception:
                             msg = None
                     if msg:
-                        status_embed.add_field(name=f"{msg.author.display_name}のメッセージへの返信",value=f"{msg.clean_content}")
+                        if "cu:on_msg" in self.bot.features.get(msg.author.id,[]):
+                            status_embed.add_field(name="メッセージへの返信",value="(このメッセージは削除されている等で取得できません。)")
+                        else:
+                            status_embed.add_field(name=f"{msg.author.display_name}のメッセージへの返信",value=f"{msg.clean_content}")
                     else:
                         status_embed.add_field(name="メッセージへの返信",value="(このメッセージは削除されている等で取得できません。)")
 
-                if status_embed_has_content == False or bypass_reacts:
+                if not status_embed_has_content or bypass_reacts:
                     embeds = []
                 else:
                     embeds = [status_embed]
@@ -663,7 +675,8 @@ class m10s_re_gchat(commands.Cog):
                         await m.add_reaction(self.bot.create_emoji_str('s_gch_sended',653161518195539975))
                         await asyncio.sleep(5)
                         await m.remove_reaction(self.bot.create_emoji_str('s_gch_sended',653161518195539975), self.bot.user)
-                except:
+                except Exception:
+                    # 失敗しても処理を継続するため、例外は意図的に無視する
                     pass
             else:
                 await self.repomsg(m, "作成後7日に満たないアカウント")
@@ -680,7 +693,7 @@ class m10s_re_gchat(commands.Cog):
                 for t in json.loads(gpost["allids"]):
                     try:
                         wh = await self.bot.fetch_webhook(t[0])
-                    except:
+                    except Exception:
                         continue
                     else:
                         tasks.append(
@@ -699,7 +712,7 @@ class m10s_re_gchat(commands.Cog):
             for t in json.loads(gpost["allids"]):
                 try:
                     wh = await self.bot.fetch_webhook(t[0])
-                except:
+                except Exception:
                     continue
                 else:
                     if wh.guild.id != 560434525277126656:
@@ -724,6 +737,17 @@ class m10s_re_gchat(commands.Cog):
         if cgch:
             if not (cgch["wh_id"] in [i.id for i in await ch.webhooks()]):
                 await self.bot.cursor.execute("delete from gchat_cinfo where id = %s",(ch.id,))
+
+    @tasks.loop(time=datetime.time(hour=0, minute=0, tzinfo=datetime.timezone.utc))
+    async def gchat_pinfo_cleaner(self):
+        try:
+            cutoff = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=CLEANUP_CUTOFF)
+            cutoff_id = discord.utils.time_snowflake(cutoff)
+            await self.bot.cursor.execute(
+                "DELETE FROM gchat_pinfo WHERE id < %s", (cutoff_id,)
+            )
+        except Exception:
+            logging.exception("Error occurred while cleaning gchat_pinfo table.")
 
 
 async def setup(bot):

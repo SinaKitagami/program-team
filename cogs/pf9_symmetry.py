@@ -2,12 +2,13 @@
 
 import discord
 from discord.ext import commands
-import asyncio
 from PIL import Image, ImageOps
 
 from discord import app_commands
 
 import m10s_util as ut
+
+import os
 
 class Symmetry(commands.Cog):
 
@@ -67,6 +68,16 @@ class Symmetry(commands.Cog):
                 dst.paste(tmp2, (0, 0))
             dst.save('ts2.png')
         await ctx.send(file=discord.File('ts2.png'))
+        try:
+            os.remove("image.png")
+        except OSError:
+            # 一時ファイルが存在しない等で削除できなくても処理は継続する
+            pass
+        try:
+            os.remove("ts2.png")
+        except OSError:
+            # 一時ファイルが存在しない等で削除できなくても処理は継続する
+            pass
 
 
 async def setup(bot):

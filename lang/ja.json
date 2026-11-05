@@ -266,7 +266,7 @@
     "help-3-t": "グローバルチャット",
     "help-3-d": "`globalguide`,`gchat`,`globalcolor`,`globalnick`,`gprofile`,`globalpost`,`gchinfo`",
     "help-4-t": "思惟奈について",
-    "help-4-d": "`sina-guild`,`cprofile`,`features`,`mutual_guilds`,`check_gban`,`credit`,`feedback`,`report`,`botinfo`,`team_sina-chan`,`vusers`,`ping`,`userprefix`,`rnotify`,`rtopic`,`userlang`,`Wecall`,`help`,`chtrans`",
+    "help-4-d": "`sina-guild`,`cprofile`,`features`,`check_gban`,`credit`,`feedback`,`report`,`botinfo`,`team_sina-chan`,`vusers`,`ping`,`userprefix`,`rnotify`,`rtopic`,`userlang`,`Wecall`,`help`",
     "help-5-t": "検索",
     "help-5-d": "`twisearch`,`jwp`,`jpwt`,`gwd`,`youtube`,`jscrawiki`",
     "help-6-t": "Discord",
@@ -280,7 +280,7 @@
     "help-10-t": "ゲーム",
     "help-10-d": "`rq`,`af`,`eatit`,`qanda`,`fortune`,`game2`,`fish`,`near21`,`jyanken`",
     "help-11-t": "管理者",
-    "help-11-d": "`checkmember`,`changenick`,`guildprefix`,`guildlang`,`sendlogto`,`comlock`,`setsysmsg`,`servercmd`,`hash`,`levelreward`,`cemojiorole`,`backup`,`lrewardupd`,`delm`,`memban`,`memkick`,`pin`,`delmsgs`,`roletrans`,`gbanlogto`",
+    "help-11-d": "`checkmember`,`changenick`,`guildprefix`,`guildlang`,`sendlogto`,`comlock`,`setsysmsg`,`servercmd`,`hash`,`levelreward`,`cemojiorole`,`lrewardupd`,`delm`,`memban`,`memkick`,`pin`,`delmsgs`,`gbanlogto`",
     "help-12-t": "レベル",
     "help-12-d": "`switchLevelup`,`levels`,`levelupsendto`,`ranklev`,`level`,`switchlevelcard`",
     "help-13-t": "管理用",
@@ -1178,14 +1178,6 @@
         "詳しく",
         "キューに入っている曲一覧を返します。リアクションでページを切り替えられます。"
     ],
-    "nh-backup": [
-        "backupについて",
-        "サーバーバックアップ！",
-        "使い方",
-        "`s-backup [バックアップ元のサーバーID]`",
-        "詳しく",
-        "サーバーのバックアップをします。\n役職、チャンネル(名前、トピック、ビットレート、NSFW指定、役職の閲覧制限)、絵文字(50個)、サーバーのフィルターレベルやアイコン、名前がバックアップされます。\nAdmin権限が必須です。\n【必ずバックアップ先のサーバーで実行してください。バックアップ元のサーバーで実行するとサーバーが壊れます】"
-    ],
     "nh-stop": [
         "stopについて",
         "音楽もういいや！",
@@ -1290,22 +1282,6 @@
         "詳しく",
         "`s-level`の時のレベルカードの背景画像を変えます。"
     ],
-    "nh-chtrans": [
-        "chtransについて",
-        "チャンネルを別のサーバーから転送するよ",
-        "使い方",
-        "`s-chtrans [サーバーID]`",
-        "詳しく",
-        "このコマンドの上位互換である、`s-backup`コマンドの使用をお勧めします。"
-    ],
-    "nh-roletrans": [
-        "roletransについて",
-        "役職を別のサーバーから転送するよ",
-        "使い方",
-        "`s-roletrans [サーバーID]`",
-        "詳しく",
-        "このコマンドの上位互換である、`s-backup`コマンドの使用をお勧めします。"
-    ],
     "nh-globalpost": [
         "globalpostについて",
         "グローバルチャットの情報を教えるよ！",
@@ -1401,14 +1377,6 @@
         "`s-features`",
         "詳しく",
         "あなたが特別に使える機能が一覧で表示されます。"
-    ],
-    "nh-mutual_guilds": [
-        "mutual_guildsについて",
-        "あ、あなたとこんなに同じサーバーにいるんだー。",
-        "使い方",
-        "`s-mutual_guilds`,`s-mutual_guilds [ユーザーID]`",
-        "詳しく",
-        "そのユーザーIDを持つユーザーと思惟奈ちゃんが、共通しているサーバーを表示します。"
     ],
     "nh-Authsetting": [
         "Authsettingについて",

@@ -2,7 +2,6 @@
 
 import discord
 from discord.ext import commands
-import asyncio
 from typing import Optional
 
 from discord import app_commands
@@ -63,7 +62,12 @@ class m10s_act_role(commands.Cog):
     @ut.runnable_check()
     @ut.runnable_check_for_appcmd()
     async def actrole_set(self, ctx, is_enable:bool):
-        await self.bot.cursor.execute("UPDATE actrole_optin SET is_enable = %s WHERE id = %s",(int(is_enable),ctx.author.id))
+        data = await self.bot.cursor.fetchone("select * from actrole_optin where id=%s", (ctx.author.id,))
+        if not data:
+            await self.bot.cursor.execute("INSERT INTO actrole_optin(id,is_enable) VALUES(%s,%s)",
+                            (ctx.author.id, int(is_enable)))
+        else:
+            await self.bot.cursor.execute("UPDATE actrole_optin SET is_enable = %s WHERE id = %s",(int(is_enable),ctx.author.id))
         await ctx.reply(f"プレイ中に応じた役職設定を、{is_enable}に設定したよ！")
 
     @commands.hybrid_command(aliases=["prole"], description="特定アクティビティタイプで付与する役職設定")
@@ -89,7 +93,7 @@ class m10s_act_role(commands.Cog):
             if act_id is None:
                 try:
                     await ctx.reply("> エラー\n　アクティビティタイプが不明です。`s-help prole`を参考にしてください。")
-                except:
+                except Exception:
                     await ctx.send("> エラー\n　アクティビティタイプが不明です。`s-help prole`を参考にしてください。")
             else:
                 rtn = await self.bot.cursor.fetchone("select * from activity_roles where guild_id = %s AND activity_type = %s", (ctx.guild.id,activity_type))
@@ -104,7 +108,7 @@ class m10s_act_role(commands.Cog):
                         await self.bot.cursor.execute("INSERT INTO activity_roles(guild_id,activity_type,role_id) VALUES(%s,%s,%s)",(ctx.guild.id,activity_type,role.id))
                 try:
                     await ctx.reply("> アクティビティロール\n　正常に登録/更新/削除が完了しました。")
-                except:
+                except Exception:
                     await ctx.send("> アクティビティロール\n　正常に登録/更新/削除が完了しました。")
         except Exception as e:
             await ctx.send(f"```{e}```")
@@ -132,7 +136,8 @@ class m10s_act_role(commands.Cog):
                         aact = await self.bot.cursor.fetchone("select role_id from activity_roles where guild_id = %s AND activity_type = %s", (a.guild.id,int(a.activity.type)))
                         #aact = await self.bot.cursor.fetchone()
                         await a.add_roles(a.guild.get_role(aact["role_id"]))
-        except:
+        except Exception:
+            # 失敗しても処理を継続するため、例外は意図的に無視する
             pass
 
 async def setup(bot):
