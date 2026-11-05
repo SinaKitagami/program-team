@@ -41,10 +41,10 @@ class m10s_re_gchat(commands.Cog):
         self.ignore_ch = []
 
     async def cog_load(self):
-        await self.gchat_pinfo_cleaner.start()
+        self.gchat_pinfo_cleaner.start()
 
     async def cog_unload(self):
-        await self.gchat_pinfo_cleaner.cancel()
+        self.gchat_pinfo_cleaner.cancel()
 
     async def gchat_send(self, to, fch, content, name, avatar, embeds=[], attachments=[]):
         tasks = []
