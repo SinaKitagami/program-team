@@ -16,6 +16,8 @@ import config
 
 from checker import MaliciousInput, content_checker
 
+import logging
+
 # この日数を過ぎたデータについては、グローバルチャットの投稿情報を削除する。
 CLEANUP_CUTOFF = 30
 
