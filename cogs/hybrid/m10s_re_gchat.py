@@ -611,7 +611,10 @@ class m10s_re_gchat(commands.Cog):
                         except:
                             msg = None
                     if msg:
-                        status_embed.add_field(name=f"{msg.author.display_name}のメッセージへの返信",value=f"{msg.clean_content}")
+                        if "cu:on_msg" in self.bot.features.get(msg.author.id,[]):
+                            status_embed.add_field(name="メッセージへの返信",value="(このメッセージは削除されている等で取得できません。)")
+                        else:
+                            status_embed.add_field(name=f"{msg.author.display_name}のメッセージへの返信",value=f"{msg.clean_content}")
                     else:
                         status_embed.add_field(name="メッセージへの返信",value="(このメッセージは削除されている等で取得できません。)")
 
