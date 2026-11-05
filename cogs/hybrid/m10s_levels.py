@@ -55,6 +55,13 @@ class levels(commands.Cog):
             return
         if m.is_system():
             return
+        
+        # id指定での早期リターン
+        if "cu:on_msg" in self.bot.features.get(m.author.id,[]):
+            return
+        if "cu:on_msg" in self.bot.features.get(m.guild.id,[]):
+            return
+        
         try:
             gs = await self.bot.cursor.fetchone("select * from guilds where id=%s", (m.guild.id,))
             if "clevel" in json.loads(gs["lockcom"]):
@@ -428,12 +435,14 @@ async def level_add(self, ctx, target:Union[commands.MemberConverter,commands.Us
     else:
         return await ctx.reply("> サーバーレベル編集-追加\n　引数が正しくありません。\n　`[メンバーor役職を特定できるもの] [追加するレベル] [オプション:追加する経験値]`")
     for m in targets:
+        if "cu:on_msg" in self.bot.features.get(m.id,[]):
+            continue
         lvl = await self.bot.cursor.fetchone("select * from levels where guild_id=%s and user_id=%s", (ctx.guild.id, m.id))
         if lvl:
             await self.bot.cursor.execute("UPDATE levels SET level = %s, exp = %s WHERE guild_id = %s and user_id = %s", (max(min(lvl["level"] + lev, MAX_LEVEL),0), max(min(lvl["exp"] + exp,MAX_EXP),0), ctx.guild.id, m.id))
         else:
             await self.bot.cursor.execute("INSERT INTO levels(user_id, guild_id, level, exp, last_level_count, is_level_count_enable) VALUE (%s, %s, %s, %s, %s, %s)", (m.id, ctx.guild.id, max(min(lev, MAX_LEVEL),0), max(min(exp,MAX_EXP),0), int(time.time()), 1))
-    await ctx.reply(f"> サーバーレベル編集\n　{len(targets)}人のレベルを編集しました。(レベルがないメンバーには干渉していません。)")
+    await ctx.reply(f"> サーバーレベル編集\n　{len(targets)}人のレベルを編集しました。(レベルがないメンバー等、一部ユーザーには干渉していません。)")
 
 async def level_set(self, ctx, target:Union[commands.MemberConverter,commands.UserConverter,commands.RoleConverter], lev:int, exp:Optional[int]=0):
     if isinstance(target,discord.Member) or isinstance(target,discord.User):
@@ -443,13 +452,15 @@ async def level_set(self, ctx, target:Union[commands.MemberConverter,commands.Us
     else:
         return await ctx.reply("> サーバーレベル編集-設定\n　引数が正しくありません。\n　`[メンバーor役職を特定できるもの] [設定するレベル] [オプション:設定する経験値]`")
     for m in targets:
+        if "cu:on_msg" in self.bot.features.get(m.id,[]):
+            continue
         lvl = await self.bot.cursor.fetchone("select * from levels where guild_id=%s and user_id=%s", (ctx.guild.id, m.id))
         if lvl:
             await self.bot.cursor.execute("UPDATE levels SET level = %s, exp = %s WHERE guild_id = %s and user_id = %s", (max(min(lev, MAX_LEVEL),0), max(min(exp,MAX_EXP),0), ctx.guild.id, m.id))
         else:
             await self.bot.cursor.execute("INSERT INTO levels(user_id, guild_id, level, exp, last_level_count, is_level_count_enable) VALUE (%s, %s, %s, %s, %s, %s)", (m.id, ctx.guild.id, max(min(lev, MAX_LEVEL),0), max(min(exp,MAX_EXP),0), int(time.time()), 1))
 
-    await ctx.reply(f"> サーバーレベル編集\n　{len(targets)}人のレベルを設定しました。(レベルがないメンバーには干渉していません。)")
+    await ctx.reply(f"> サーバーレベル編集\n　{len(targets)}人のレベルを設定しました。(レベルがないメンバー等、一部ユーザーには干渉していません。)")
 
 
 async def setup(bot):

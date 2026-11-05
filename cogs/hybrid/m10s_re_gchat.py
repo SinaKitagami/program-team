@@ -321,6 +321,9 @@ class m10s_re_gchat(commands.Cog):
             await ctx.send("そのIDをもつユーザーがいません！")
         else:
             if upf["gmod"] == 1:
+                if "cu:on_msg" in self.bot.features.get(uid,[]):
+                    await ctx.send("このユーザーは、メッセージ早期リターンメンバーです。")
+                    return
                 bpf = await self.bot.cursor.fetchone(
                     "select * from users where id=%s", (uid,))
                 # bpf = await self.bot.cursor.fetchone()
