@@ -24,7 +24,8 @@ class info(commands.Cog):
             sevinfo: discord.Guild = ctx.message.guild
         
         if sevinfo is None:
-            return await ctx.send("そのサーバーに思惟奈ちゃんがいるかどうか確認してください。")
+            await ctx.send("そのサーバーに思惟奈ちゃんがいるかどうか確認してください。")
+            return
 
         try:
             embed = discord.Embed(title=await ctx._(

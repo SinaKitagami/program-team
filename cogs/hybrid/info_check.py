@@ -43,7 +43,8 @@ class info_check(commands.Cog):
                 target = await self.bot.fetch_user(uid)
                 in_guild = False
             except Exception:
-                return await ctx.send("> 存在しないIDの指定です。")
+                await ctx.send("> 存在しないIDの指定です。")
+                return
         else:
             if ctx.interaction:
                 target = ctx.guild.get_member(ctx.author.id)

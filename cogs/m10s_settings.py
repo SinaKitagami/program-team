@@ -173,16 +173,13 @@ class settings(commands.Cog):
             if not (ctx.author.guild_permissions.administrator or ctx.author.id == 404243934210949120):
                 await ctx.send(await ctx._("need-admin"))
                 return
-            # for i in comname:
-                # try:
             locks.remove(comname)
-                # except:
-                    # pass
             await self.bot.cursor.execute(
                 "UPDATE guilds SET lockcom = %s WHERE id = %s", (json.dumps(locks), ctx.guild.id))
             await ctx.send(await ctx._("deleted-text"))
         elif mode == "view":
             await ctx.send(await ctx._("comlock-view", gs["lockcom"]))
+        return None
 
     @setting_cmds.command(aliases=["setsysmsg"],description="メンバーの参加、退出時のメッセージ設定")
     @ut.runnable_check()

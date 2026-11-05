@@ -3,15 +3,17 @@
 import discord
 from discord.ext import commands
 import asyncio
-from dateutil.relativedelta import relativedelta as rdelta
 import traceback
 import m10s_util as ut
-import textwrap
 
 import config
-import aiohttp
 
 from discord import app_commands
+
+# check function
+async def is_evalable(ctx):
+    return "allow_eval" in ctx.bot.features.get(ctx.author.id, [])
+
 
 class owner(commands.Cog):
 
@@ -36,13 +38,6 @@ class owner(commands.Cog):
         await ctx.send("see you...")
         await self.bot.close()
     
-    #check function
-    async def is_evalable(ctx):
-        if "allow_eval" in ctx.bot.features.get(ctx.author.id, []):
-            return True
-        else:
-            return False
-    
     @commands.command()
     @commands.check(is_evalable)
     @ut.runnable_check()
@@ -53,7 +48,8 @@ class owner(commands.Cog):
         except Exception as exc:
             await ctx.message.remove_reaction(self.bot.create_emoji_str('s_gch_sending',653161518346534912,True), self.bot.user)
             await ctx.message.add_reaction("❌")
-            return await ctx.author.send(embed=discord.Embed(title="sql's Error", description=f"```py\n{exc}\n```", color=self.bot.ec))
+            await ctx.author.send(embed=discord.Embed(title="sql's Error", description=f"```py\n{exc}\n```", color=self.bot.ec))
+            return
         else:
             await ctx.message.remove_reaction(self.bot.create_emoji_str('s_gch_sending',653161518346534912,True), self.bot.user)
             await ctx.message.add_reaction(self.bot.create_emoji_str('s_check',653161518103265291))

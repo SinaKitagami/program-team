@@ -31,11 +31,8 @@ class m10s_bmail(commands.Cog):
                             icon_url=ctx.guild.icon.replace(static_format="png").url)
             check_msg:discord.Message = await self.bmaillog.send(embed=e)
             await check_msg.add_reaction("✅")
-            r,u = await self.bot.wait_for("reaction_add", check = lambda r,u: u.id in self.bot.chat_mod and r.message.id == check_msg.id and str(r.emoji) == "✅")
+            await self.bot.wait_for("reaction_add", check = lambda r,u: u.id in self.bot.chat_mod and r.message.id == check_msg.id and str(r.emoji) == "✅")
             await sch.send(embed=ut.getEmbed("誰かの手紙が流れ着いた…", msg.clean_content, self.bot.ec))
-
-            #except:
-                #pass
         except asyncio.TimeoutError:
             await dch.send("手紙とボトルはどこかへ消えてしまった…")
 

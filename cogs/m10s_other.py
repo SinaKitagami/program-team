@@ -103,6 +103,7 @@ class other(commands.Cog):
             if not self.bot.shares_guild(info.id, ctx.author.id):
                 return await ctx.say("cannot-send-online")
         await ctx.send(f"Status:{str(info.status)}(PC:{str(info.desktop_status)},Mobile:{str(info.mobile_status)},Web:{str(info.web_status)})")
+        return None
 
     @commands.hybrid_command(aliases=["ステータス", "あなたの情報を教えて"], description="思惟奈ちゃんについての色々を表示します。")
     @ut.runnable_check()

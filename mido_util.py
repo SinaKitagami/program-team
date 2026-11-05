@@ -14,6 +14,7 @@ def get_status(member):
         return "❤取り込み中"
     elif str(member.status) == "offline":
         return "🖤オフライン"
+    return None
 
 #resolve_url
 def resolve_url(url):
@@ -24,6 +25,7 @@ def resolve_url(url):
         return str(url)
     elif re.match(URL_REGEX, str(url)):
         return f"http://" + str(url)
+    return None
 
 #resolve_invite
 async def resolve_invite(ctx, code:str):
@@ -119,6 +121,7 @@ async def get_guild_or_user(ctx, id):
             return await FetchUserConverter().convert(ctx, str(id))
         except Exception:
             raise commands.BadArgument(f"ID {id} not guild or user.")
+    return None
     
 #choice
 def choice(l, c=1):
