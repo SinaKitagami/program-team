@@ -669,6 +669,8 @@ async def on_command_completion(ctx:commands.Context):
 
 @bot.event
 async def on_interaction(interaction:discord.Interaction):
+    if interaction.type != discord.InteractionType.application_command:
+        return
     if interaction.command.qualified_name == "tos_guide" or interaction.command.qualified_name == "how_to_remove_my_data":
         return
     ch = await bot.fetch_channel(693048961107230811)
