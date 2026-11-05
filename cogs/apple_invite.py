@@ -33,9 +33,6 @@ class AppleInviteCog(commands.Cog):
             isinstance(invite.guild, discord.Guild)
         )):
             return
-        
-        if "cu:on_msg" in self.bot.features.get(invite.inviter.id, []):
-            return
 
         if not await self.get_log_channel(invite.guild.id):
             return
@@ -57,6 +54,11 @@ class AppleInviteCog(commands.Cog):
         )):
             invites = await invite.guild.invites()
             invite = discord.utils.get(invites, code=invite.code)
+
+        if invite is None or invite.inviter is None:
+            return
+        if "cu:on_msg" in self.bot.features.get(invite.inviter.id, []):
+            return
 
         await self.db.execute("INSERT INTO invites values (%s, %s, 0, %s)", (
             invite.code,
