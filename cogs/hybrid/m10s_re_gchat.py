@@ -546,15 +546,15 @@ class m10s_re_gchat(commands.Cog):
                         return await check_msg.edit(content="同意処理が完了しました。\n次のメッセージよりグローバルチャットに送信されます。")
 
             if upf["gban"] == 1:
+                # 利用停止中の利用者は、軽減措置(bypass)のグローバルチャットでも送信しない
+                dc = await ut.opendm(m.author)
+                await dc.send(await self.bot._(m.author, "global-banned", m.author.mention))
                 if not bypass_reacts:
-
-                    dc = await ut.opendm(m.author)
-                    await dc.send(await self.bot._(m.author, "global-banned", m.author.mention))
                     await self.repomsg(m, "思惟奈ちゃんグローバルチャットの使用禁止")
                     await m.add_reaction("❌")
                     await asyncio.sleep(5)
                     await m.remove_reaction("❌", self.bot.user)
-                    return
+                return
 
             if (datetime.datetime.now(datetime.timezone.utc) - rdelta(days=7) >= m.author.created_at) or upf["gmod"] or upf["gstar"]:
                 
