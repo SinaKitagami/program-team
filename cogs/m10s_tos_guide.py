@@ -29,7 +29,7 @@ class m10s_tos_guide(commands.Cog):
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=True)
     async def how_to_remove_my_data(self, ctx):
-        policy_url = "https://home.sina-chan.com/legal/app-privacy-policy"
+        policy_url = "https://home.sina-chan.com/legal/bot-privacy-policy"
         delete_request_form_url = "https://forms.gle/4oaNGqFAMog2iuEL9"
         modify_request_form_url = "https://support.center.sina-chan.com/servicedesk/customer/portal/1/group/15/create/17"
         show_message = f"""
